@@ -24,13 +24,14 @@ meta_info_list = extract_meta_info(session_paths)
 otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_info in meta_info_list], dtype=np.float64)
 
 # Find unique doses and their indices
-unique_doses, dose_inds = get_unique_doses(otnal_doses)
+unique_doses, dose_inds, session_categories = get_unique_doses(otnal_doses)
 
 # Removing the nans
-unique_doses = unique_doses[:-1]
-dose_inds = dose_inds[:-1]
+# unique_doses = unique_doses[:-1]
+# dose_inds = dose_inds[:-1]
 
-labelled_gaze_positions = extract_labelled_gaze_positions(unique_doses, dose_inds, meta_info_list, session_paths)
+labelled_gaze_positions = extract_labelled_gaze_positions(unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
 
-
+# Have to write this function for nn training
+saccades_with_labels = extract_saccades_with_labels(labelled_gaze_positions)
 
