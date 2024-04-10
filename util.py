@@ -129,34 +129,59 @@ def get_unique_doses(otnal_doses):
     
     return unique_rows, indices_for_unique_rows
 
+############################################################################################
+def extract_labelled_gaze_positions(unique_doses, dose_inds, meta_info_list, session_paths):
+    """
+    Extracts labelled gaze positions from files associated with unique doses.
 
-def create_training_set(unique_doses, dose_inds, meta_info_list, session_paths):
-    training_set = []
+    Parameters:
+    - unique_doses (ndarray): Unique dose combinations.
+    - dose_inds (list): List of lists containing indices for each unique dose.
+    - meta_info_list (list): List of dictionaries containing meta-information for each session.
+    - session_paths (list): List of paths to sessions.
+
+    Returns:
+    - labelled_gaze_positions (list): List of tuples containing gaze positions and associated metadata.
+    """
+    labelled_gaze_positions = []
     
+    # Iterate over unique doses and associated indices
     for dose, indices_list in zip(unique_doses, dose_inds):
         for idx in indices_list:
             folder_path = session_paths[idx]
-            file_path = os.path.join(folder_path, '*.M1_gaze.mat')
             
             # Assuming there's only one file with extension .M1_gaze.mat in each folder
-            mat_files = [f for f in os.listdir(folder_path) if f.endswith('.M1_gaze.mat')]
+            mat_files = [f for f in os.listdir(folder_path) if 'M1_gaze.mat' in f]
             if len(mat_files) != 1:
-                print(f"Error: Multiple or no '.M1_gaze.mat' files found in folder: {folder_path}")
+                print(f"Error: Multiple or no '*_M1_gaze.mat' files found in folder: {folder_path}")
                 continue
             
             mat_file = mat_files[0]
             mat_file_path = os.path.join(folder_path, mat_file)
+            mat_file_name = os.path.basename(mat_file_path)
             
-            # Load .M1_gaze.mat file
+            # Load *_M1_gaze.mat file
             try:
                 mat_data = loadmat(mat_file_path)
+                sampling_rate = float(mat_data['M1FS'])
+                M1Xpx = mat_data['M1Xpx'].squeeze()  # Squeeze to remove singleton dimensions
+                M1Ypx = mat_data['M1Ypx'].squeeze()
                 
-                training_set.append((mat_data, meta_info_list[idx]))  # Assuming meta_info_list contains metadata for each session
+                # Convert x and y positions to a single array
+                gaze_positions = np.array(np.column_stack((M1Xpx, M1Ypx)))
+                
+                # Append gaze positions and associated metadata to the list
+                meta_info = meta_info_list[idx].copy()  # Copy to avoid modifying the original meta_info
+                meta_info.update({'sampling_rate': sampling_rate})  # Add sampling rate to metadata
+                labelled_gaze_positions.append((gaze_positions, meta_info))
+                print(f"Loaded file: {mat_file_name}")
             except Exception as e:
-                print(f"Error loading file '{mat_file_path}': {str(e)}")
+                print(f"Error loading file '{mat_file_name}': {str(e)}")
     
-    return training_set
+    return labelled_gaze_positions
 
+
+######################
 def find_islands(vec):
     """
     Find starting indices of all contiguous groups of non-zero elements.
@@ -177,3 +202,81 @@ def find_islands(vec):
     ends = [i - 1 for i in range(len(dsig)) if dsig[i] < 0]
     durs = [end - start + 1 for start, end in zip(starts, ends)]
     return starts, durs
+
+###########################################
+def peak_velocity(vel_norm, starts, stops):
+    """
+    Calculate peak velocity for each saccade.
+
+    Parameters:
+    - vel_norm: array-like, norm of velocity vector
+    - starts: array-like, start indices of saccades
+    - stops: array-like, stop indices of saccades
+
+    Returns:
+    - peak_vel: array-like, peak velocity for each saccade
+    """
+    peak_vel = np.zeros(len(starts))
+
+    for i, (start, stop) in enumerate(zip(starts, stops)):
+        peak_vel[i] = np.max(vel_norm[start:stop+1])
+
+    return peak_vel
+
+###########################################
+def find_vel_stops(vel_norm, above_thresh):
+    """
+    Find velocity stops for saccades.
+
+    Parameters:
+    - vel_norm: array-like, norm of velocity vector
+    - above_thresh: array-like, boolean array indicating where velocity is above threshold
+
+    Returns:
+    - starts: array-like, start indices of saccades
+    - stops: array-like, stop indices of saccades
+    """
+    starts = np.where(above_thresh)[0]
+    stops = np.full(starts.shape, np.nan)
+    to_remove = np.zeros(starts.shape, dtype=bool)
+
+    for i, start in enumerate(starts):
+        j = start
+
+        while j < len(above_thresh) and above_thresh[j]:
+            j += 1
+
+        if j > start:
+            stops[i] = j
+        else:
+            to_remove[i] = True
+
+    return starts[~to_remove], stops[~to_remove]
+
+###################################
+def merge_intervals(starts, stops):
+    """
+    Merge overlapping intervals.
+
+    Parameters:
+    - starts: array-like, start indices of intervals
+    - stops: array-like, stop indices of intervals
+
+    Returns:
+    - starts: array-like, merged start indices
+    - stops: array-like, merged stop indices
+    """
+    if not starts:
+        return starts, stops
+
+    merged_starts = [starts[0]]
+    merged_stops = [stops[0]]
+
+    for i in range(1, len(starts)):
+        if starts[i] <= merged_stops[-1]:
+            merged_stops[-1] = stops[i]
+        else:
+            merged_starts.append(starts[i])
+            merged_stops.append(stops[i])
+
+    return np.array(merged_starts), np.array(merged_stops)
