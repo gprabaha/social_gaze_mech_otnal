@@ -14,14 +14,11 @@ from math import degrees, atan2
 
 from defaults import *
 
-##################################
 def get_root_data_dir(is_cluster):
     """
     Returns the root data directory based on whether it's running on a cluster or not.
-    
     Parameters:
     - is_cluster (bool): Boolean flag indicating whether the program is running on a cluster.
-
     Returns:
     - root_data_dir (str): Root data directory path.
     """
@@ -31,28 +28,22 @@ def get_root_data_dir(is_cluster):
         root_data_dir = "/Volumes/Stash/changlab/sorted_neural_data/social_gaze_otnal/AllFVProcessed/"
     return root_data_dir
 
-#############################
 def get_subfolders(root_dir):
     """
     Retrieves subfolders within a given directory.
-
     Parameters:
     - root_dir (str): Root directory path.
-
     Returns:
     - subfolders (list): List of subfolder paths.
     """
     subfolders = [f.path for f in os.scandir(root_dir) if f.is_dir()]
     return subfolders
 
-#####################################
 def extract_meta_info(session_paths):
     """
     Extracts meta-information from files in session paths.
-
     Parameters:
     - session_paths (list): List of paths to sessions.
-
     Returns:
     - meta_info_list (list): List of dictionaries containing meta-information for each session.
     """
@@ -61,7 +52,6 @@ def extract_meta_info(session_paths):
         meta_info = {}
         file_list_info = glob.glob(f"{session_path}/*metaInfo.mat")
         file_list_runs = glob.glob(f"{session_path}/*runs.mat")
-
         if len(file_list_info) == 1:
             file_path_info = file_list_info[0]
             try:
@@ -83,7 +73,6 @@ def extract_meta_info(session_paths):
         else:
             print(f"Warning: No metaInfo found in folder: {session_path}.")
             meta_info.update({'monkey_1': None, 'monkey_2': None, 'OT_dose': None, 'NAL_dose': None})
-
         if len(file_list_runs) == 1:
             file_path_runs = file_list_runs[0]
             try:
@@ -102,19 +91,14 @@ def extract_meta_info(session_paths):
         else:
             print(f"Warning: No runs found in folder: {session_path}.")
             meta_info.update({'startS': None, 'stopS': None, 'num_runs': 0})
-
         meta_info_list.append(meta_info)
-
     return meta_info_list
 
-##################################
 def get_unique_doses(otnal_doses):
     """
     Finds unique rows and their indices in the given array.
-
     Parameters:
     - otnal_doses (ndarray): Input array.
-
     Returns:
     - unique_rows (ndarray): Unique rows in the input array.
     - indices_for_unique_rows (list): List of lists containing indices for each unique row.
@@ -132,8 +116,6 @@ def get_unique_doses(otnal_doses):
         session_category[indices_for_row] = category
         indices_for_unique_rows.append(indices_for_row.tolist())
     return unique_rows, indices_for_unique_rows, session_category
-
-
 
 def px2deg(px, monitor_info=None):
     if monitor_info is None:
@@ -164,5 +146,4 @@ def find_islands(above_thresh, min_samples):
     if island_started:
         if len(above_thresh) - island_start >= min_samples:
             islands.append([island_start, len(above_thresh) - 1])
-    print(np.array(islands))
     return np.array(islands)

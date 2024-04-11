@@ -16,4 +16,3 @@ def fetch_default_saccade_pars():
     window = gaussian(21, 5, True)
     smooth_func = lambda x: convolve(x, window, mode='same')
     return {'vel_thresh': [50, 1000], 'min_samples': 50, 'smooth_func': smooth_func}
-
