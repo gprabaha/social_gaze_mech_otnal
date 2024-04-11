@@ -60,7 +60,7 @@ def extract_labelled_gaze_positions(unique_doses, dose_inds, meta_info_list, ses
     
     return labelled_gaze_positions
 
-##################################################################
+
 def find_saccades(x, y, sr, vel_thresh, min_samples, smooth_func):
     """
     Find start and stop indices of saccades.
@@ -77,117 +77,61 @@ def find_saccades(x, y, sr, vel_thresh, min_samples, smooth_func):
     - start_stops: list of arrays, start and stop indices of saccades for each trial
     """
     assert x.shape == y.shape
-    num_trials = x.shape[0]
     
     start_stops = []
 
-    for i in range(num_trials):
-        x0 = smooth_func(x[i, :])
-        y0 = smooth_func(y[i, :])
-        
-        vx = np.gradient(x0) * sr
-        vy = np.gradient(y0) * sr
-        
-        vel_norm = np.sqrt(vx**2 + vy**2)  # Norm of velocity vector
-        
-        above_vel_thresh = vel_norm >= vel_thresh
-        
-        starts, durs = find_islands(above_vel_thresh)
-        stops = starts + durs
-        within_sample_thresh = durs >= min_samples
-        starts = starts[within_sample_thresh]
-        stops = stops[within_sample_thresh]
-        starts, stops = merge_intervals(starts, stops)
-        peak_velocities = peak_velocity(vel_norm, starts, stops)
-        
-        start_stops.append(np.column_stack((starts, stops, peak_velocities)))
+    x0 = smooth_func(x)
+    y0 = smooth_func(y)
+    
+    vx = np.gradient(x0) / sr
+    vy = np.gradient(y0) / sr
+    
+    vel_norm = np.sqrt(vx**2 + vy**2)  # Norm of velocity vector
+    
+    above_thresh = (vel_norm >= vel_thresh[0]) & (vel_norm <= vel_thresh[1])
+    #print(f"Min vel: {min(vel_norm)}, max_Vel: {max(vel_norm)}, thresholds: {vel_thresh}")
+    
+    starts_stops = find_islands(above_thresh, min_samples)
+    print(start_stops)
 
     return start_stops
 
-
-######################
-def find_islands(vec):
-    """
-    Find starting indices of all contiguous groups of non-zero elements.
-    
-    Parameters:
-    - vec: 1D array-like, input sequence
-    
-    Returns:
-    - starts: list of starting indices of contiguous groups of non-zero elements
-    - durs: list of durations (number of contiguous elements) for each group
-    
-    Example:
-    starts, durs = find_islands([True, True, False, True])  # Returns [0, 3], [2, 1]
-    """
-    tsig = vec
-    dsig = [0] + [1 if tsig[i+1] > tsig[i] else -1 for i in range(len(tsig) - 1)] + [0]
-    starts = [i for i in range(len(dsig)) if dsig[i] > 0]
-    ends = [i - 1 for i in range(len(dsig)) if dsig[i] < 0]
-    durs = [end - start + 1 for start, end in zip(starts, ends)]
-    return starts, durs
-
-###########################################
-def peak_velocity(vel_norm, starts, stops):
-    """
-    Calculate peak velocity for each saccade.
-
-    Parameters:
-    - vel_norm: array-like, norm of velocity vector
-    - starts: array-like, start indices of saccades
-    - stops: array-like, stop indices of saccades
-
-    Returns:
-    - peak_vel: array-like, peak velocity for each saccade
-    """
-    peak_vel = np.zeros(len(starts))
-
-    for i, (start, stop) in enumerate(zip(starts, stops)):
-        peak_vel[i] = np.max(vel_norm[start:stop+1])
-
-    return peak_vel
-
-###################################
-def merge_intervals(starts, stops):
-    """
-    Merge overlapping intervals.
-
-    Parameters:
-    - starts: array-like, start indices of intervals
-    - stops: array-like, stop indices of intervals
-
-    Returns:
-    - starts: array-like, merged start indices
-    - stops: array-like, merged stop indices
-    """
-    if not starts:
-        return starts, stops
-
-    merged_starts = [starts[0]]
-    merged_stops = [stops[0]]
-
-    for i in range(1, len(starts)):
-        if starts[i] <= merged_stops[-1]:
-            merged_stops[-1] = stops[i]
-        else:
-            merged_starts.append(starts[i])
-            merged_stops.append(stops[i])
-
-    return np.array(merged_starts), np.array(merged_stops)
+def extract_saccade_positions(run_positions, saccade_start_stops):
+    saccades = []
+    for start, stop in saccade_start_stops:
+        saccade = run_positions[start:stop+1, :]
+        saccades.extend(saccade)
+    return saccades
 
 
 def extract_saccades_with_labels(labelled_gaze_positions):
-    
+    saccade_params = fetch_default_saccade_pars()
+    vel_thresh = saccade_params['vel_thresh']
+    min_samples = saccade_params['min_samples']
+    smooth_func = saccade_params['smooth_func']
     saccades = []
     saccade_labels = []
     for i, session in enumerate(labelled_gaze_positions):
+        print(f"Extracting saccades for session: {i+1}/{len(labelled_gaze_positions)}")
         positions = session[0]
         info = session[1]
+        sampling_rate = info['sampling_rate']
+        n_samples = positions.shape[0]
+        time_vec = create_timevec(n_samples, sampling_rate)
         category = info['category']
-        if category == 0:
-            continue
-        else:
-            n_runs = info['num_runs']
-            
-            
+        n_runs = info['num_runs']
+        for run in range(n_runs):
+            run_start = info['startS'][run]
+            run_stop = info['stopS'][run]
+            run_time = (time_vec > run_start) & (time_vec <= run_stop)
+            run_positions = positions[run_time,:]
+            run_x = px2deg(run_positions[:,0].T)
+            run_y = px2deg(run_positions[:,1].T)
+            saccade_start_stops = find_saccades(run_x, run_y, sampling_rate, vel_thresh, min_samples, smooth_func)
+            saccades_in_run = extract_saccade_positions(run_positions, saccade_start_stops)
+            n_saccades = len(saccades_in_run)
+            print(f"n_Saccades: {n_saccades}")
+            saccades.extend(saccades_in_run)
+            saccade_labels.extend([[category, i, run]] * n_saccades)
+    assert len(saccades) == len(saccade_labels)
     return saccades, saccade_labels

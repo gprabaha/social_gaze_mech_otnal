@@ -10,6 +10,7 @@ import os
 import glob
 import numpy as np
 from scipy.io import loadmat
+from math import degrees, atan2
 
 from defaults import *
 
@@ -119,7 +120,6 @@ def get_unique_doses(otnal_doses):
     - indices_for_unique_rows (list): List of lists containing indices for each unique row.
     """
     unique_rows = np.unique(otnal_doses, axis=0)
-    
     # Initialize an empty list to store indices for each unique row
     indices_for_unique_rows = []
     session_category = np.empty(otnal_doses.shape[0])
@@ -131,7 +131,6 @@ def get_unique_doses(otnal_doses):
         indices_for_row = np.where( (otnal_doses == row).all(axis=1))[0]
         session_category[indices_for_row] = category
         indices_for_unique_rows.append(indices_for_row.tolist())
-    
     return unique_rows, indices_for_unique_rows, session_category
 
 
@@ -139,12 +138,31 @@ def get_unique_doses(otnal_doses):
 def px2deg(px, monitor_info=None):
     if monitor_info is None:
         monitor_info = fetch_monitor_info() # in defaults
-    
     h = monitor_info['height']
     d = monitor_info['distance']
     r = monitor_info['vertical_resolution']
-    
-    deg_per_px = math.degrees(math.atan2(0.5 * h, d)) / (0.5 * r)
+    deg_per_px = degrees(atan2(0.5 * h, d)) / (0.5 * r)
     deg = px * deg_per_px
-    
     return deg
+
+def create_timevec(n_samples, sampling_rate):
+    return [i * sampling_rate for i in range(n_samples)]
+
+def find_islands(above_thresh, min_samples):
+    islands = []
+    island_started = False
+    island_start = 0
+    for i, val in enumerate(above_thresh):
+        if val == 1 and not island_started:
+            island_started = True
+            island_start = i
+        elif val == 0 and island_started:
+            island_started = False
+            if i - island_start >= min_samples:
+                islands.append([island_start, i - 1])
+    # If the last island continues to the end of the array
+    if island_started:
+        if len(above_thresh) - island_start >= min_samples:
+            islands.append([island_start, len(above_thresh) - 1])
+    print(np.array(islands))
+    return np.array(islands)

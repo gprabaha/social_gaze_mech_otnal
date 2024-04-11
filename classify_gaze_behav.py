@@ -11,7 +11,7 @@ from util import *
 
 
 # Determine root data directory based on whether it's running on a cluster or not
-is_cluster = False
+is_cluster = True
 root_data_dir = get_root_data_dir(is_cluster)
 
 # Get subfolders within the root data directory
@@ -33,5 +33,5 @@ unique_doses, dose_inds, session_categories = get_unique_doses(otnal_doses)
 labelled_gaze_positions = extract_labelled_gaze_positions(unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
 
 # Have to write this function for nn training
-saccades_with_labels = extract_saccades_with_labels(labelled_gaze_positions)
+saccades, labels = extract_saccades_with_labels(labelled_gaze_positions)
 
