@@ -12,7 +12,7 @@ import numpy as np
 from scipy.io import loadmat
 from math import degrees, atan2
 
-from defaults import *
+import defaults
 
 def get_root_data_dir(is_cluster):
     """
@@ -119,7 +119,7 @@ def get_unique_doses(otnal_doses):
 
 def px2deg(px, monitor_info=None):
     if monitor_info is None:
-        monitor_info = fetch_monitor_info() # in defaults
+        monitor_info = defaults.fetch_monitor_info() # in defaults
     h = monitor_info['height']
     d = monitor_info['distance']
     r = monitor_info['vertical_resolution']

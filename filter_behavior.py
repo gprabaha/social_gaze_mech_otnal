@@ -8,10 +8,15 @@ Created on Wed Apr 10 12:36:36 2024
 
 import numpy as np
 from tqdm import tqdm
-from util import *
+import os
+import scipy.io
+
+import util
+import defaults
+import fix
 
 ###
-def extract_labelled_gaze_positions(unique_doses, dose_inds, meta_info_list, session_paths, session_categories):
+def extract_labelled_gaze_positions_m1(unique_doses, dose_inds, meta_info_list, session_paths, session_categories):
     """
     Extracts labelled gaze positions from files associated with unique doses.
     Parameters:
@@ -37,7 +42,7 @@ def extract_labelled_gaze_positions(unique_doses, dose_inds, meta_info_list, ses
             mat_file_name = os.path.basename(mat_file_path)
             # Load *_M1_gaze.mat file
             try:
-                mat_data = loadmat(mat_file_path)
+                mat_data = scipy.io.loadmat(mat_file_path)
                 sampling_rate = float(mat_data['M1FS'])
                 M1Xpx = mat_data['M1Xpx'].squeeze()  # Squeeze to remove singleton dimensions
                 M1Ypx = mat_data['M1Ypx'].squeeze()
@@ -72,7 +77,7 @@ def find_saccades(x, y, sr, vel_thresh, min_samples, smooth_func):
     vy = np.gradient(y0) / sr
     vel_norm = np.sqrt(vx**2 + vy**2)  # Norm of velocity vector
     above_thresh = (vel_norm >= vel_thresh[0]) & (vel_norm <= vel_thresh[1])
-    start_stops = find_islands(above_thresh, min_samples)
+    start_stops = util.find_islands(above_thresh, min_samples)
     return start_stops
 
 def extract_saccade_positions(run_positions, saccade_start_stops):
@@ -84,20 +89,20 @@ def extract_saccade_positions(run_positions, saccade_start_stops):
 
 ###
 def extract_saccades_with_labels(labelled_gaze_positions):
-    saccade_params = fetch_default_saccade_pars()
+    saccade_params = defaults.fetch_default_saccade_pars()
     vel_thresh = saccade_params['vel_thresh']
     min_samples = saccade_params['min_samples']
     smooth_func = saccade_params['smooth_func']
     saccades = []
     saccade_labels = []
     session_identifier = 0
-    for session in tqdm(labelled_gaze_positions, desc="Extracting saccades; sessions", unit="session"):
+    for session in tqdm(labelled_gaze_positions, desc="Extracting saccades for session", unit="session"):
         session_identifier += 1
         positions = session[0]
         info = session[1]
         sampling_rate = info['sampling_rate']
         n_samples = positions.shape[0]
-        time_vec = create_timevec(n_samples, sampling_rate)
+        time_vec = util.create_timevec(n_samples, sampling_rate)
         category = info['category']
         n_runs = info['num_runs']
         for run in range(n_runs):
@@ -105,8 +110,8 @@ def extract_saccades_with_labels(labelled_gaze_positions):
             run_stop = info['stopS'][run]
             run_time = (time_vec > run_start) & (time_vec <= run_stop)
             run_positions = positions[run_time,:]
-            run_x = px2deg(run_positions[:,0].T)
-            run_y = px2deg(run_positions[:,1].T)
+            run_x = util.px2deg(run_positions[:,0].T)
+            run_y = util.px2deg(run_positions[:,1].T)
             saccade_start_stops = find_saccades(run_x, run_y, sampling_rate, vel_thresh, min_samples, smooth_func)
             saccades_in_run = extract_saccade_positions(run_positions, saccade_start_stops)
             n_saccades = len(saccades_in_run)
@@ -115,3 +120,47 @@ def extract_saccades_with_labels(labelled_gaze_positions):
             saccade_labels.extend([[category, session_identifier, run]] * n_saccades)
     assert len(saccades) == len(saccade_labels)
     return saccades, saccade_labels
+
+
+def extract_fixations_with_labels(labelled_gaze_positions):
+    """
+    Has to be completed to contain array of start and stop times of fixations
+    and the labels of the fixation event including ROI interval, etc.
+
+    Parameters
+    ----------
+    labelled_gaze_positions : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    """
+    session_identifier = 0
+    for session in tqdm(labelled_gaze_positions, desc="Extracting fixations for session", unit="session"):
+        session_identifier += 1
+        positions = session[0]
+        info = session[1]
+        sampling_rate = info['sampling_rate']
+        n_samples = positions.shape[0]
+        time_vec = util.create_timevec(n_samples, sampling_rate)
+        category = info['category']
+        n_runs = info['num_runs']
+        n_intervals = n_runs - 1
+        fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, sampling_rate=sampling_rate)
+        for run in range(n_runs):
+            run_start = info['startS'][run]
+            run_stop = info['stopS'][run]
+            run_time = (time_vec > run_start) & (time_vec <= run_stop)
+            run_positions = positions[run_time,:]
+            run_fix = fix_vec_entire_session[run_time]
+            if run != n_runs-1:
+                int_start = run_stop
+                int_stop = info['startS'][run+1]
+                int_time = (time_vec > int_start) & (time_vec <= int_stop)
+                int_positions = positions[int_time,:]
+                int_fix = fix_vec_entire_session[int_time]
+            
+            
+            
