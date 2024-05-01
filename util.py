@@ -14,6 +14,7 @@ from math import degrees, atan2
 
 import defaults
 
+
 def get_root_data_dir(is_cluster):
     """
     Returns the root data directory based on whether it's running on a cluster or not.
@@ -28,6 +29,7 @@ def get_root_data_dir(is_cluster):
         root_data_dir = "/Volumes/Stash/changlab/sorted_neural_data/social_gaze_otnal/AllFVProcessed/"
     return root_data_dir
 
+
 def get_subfolders(root_dir):
     """
     Retrieves subfolders within a given directory.
@@ -38,6 +40,7 @@ def get_subfolders(root_dir):
     """
     subfolders = [f.path for f in os.scandir(root_dir) if f.is_dir()]
     return subfolders
+
 
 def extract_meta_info(session_paths):
     """
@@ -94,6 +97,7 @@ def extract_meta_info(session_paths):
         meta_info_list.append(meta_info)
     return meta_info_list
 
+
 def get_unique_doses(otnal_doses):
     """
     Finds unique rows and their indices in the given array.
@@ -117,6 +121,7 @@ def get_unique_doses(otnal_doses):
         indices_for_unique_rows.append(indices_for_row.tolist())
     return unique_rows, indices_for_unique_rows, session_category
 
+
 def px2deg(px, monitor_info=None):
     if monitor_info is None:
         monitor_info = defaults.fetch_monitor_info() # in defaults
@@ -127,8 +132,10 @@ def px2deg(px, monitor_info=None):
     deg = px * deg_per_px
     return deg
 
+
 def create_timevec(n_samples, sampling_rate):
     return [i * sampling_rate for i in range(n_samples)]
+
 
 def find_islands(binary_vec, min_samples=0):
     islands = []
