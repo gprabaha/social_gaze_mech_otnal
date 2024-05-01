@@ -28,6 +28,10 @@ labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
     unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
 # Have to write this function for nn training
 saccades_m1, saccade_labels_m1 = filter_behavior.extract_saccades_with_labels(labelled_gaze_positions_m1)
+# function needds to be fully written
+fixations_m1 = filter_behavior.extract_fixations_with_labels(labelled_gaze_positions_m1)
+
+
 
 saccade_lengths_m1 = [saccade.shape[0] for saccade in saccades_m1]
 # Plot the histogram

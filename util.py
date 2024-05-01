@@ -130,11 +130,11 @@ def px2deg(px, monitor_info=None):
 def create_timevec(n_samples, sampling_rate):
     return [i * sampling_rate for i in range(n_samples)]
 
-def find_islands(above_thresh, min_samples):
+def find_islands(binary_vec, min_samples=0):
     islands = []
     island_started = False
     island_start = 0
-    for i, val in enumerate(above_thresh):
+    for i, val in enumerate(binary_vec):
         if val == 1 and not island_started:
             island_started = True
             island_start = i
@@ -144,6 +144,6 @@ def find_islands(above_thresh, min_samples):
                 islands.append([island_start, i - 1])
     # If the last island continues to the end of the array
     if island_started:
-        if len(above_thresh) - island_start >= min_samples:
-            islands.append([island_start, len(above_thresh) - 1])
+        if len(binary_vec) - island_start >= min_samples:
+            islands.append([island_start, len(binary_vec) - 1])
     return np.array(islands)

@@ -149,6 +149,12 @@ def extract_fixations_with_labels(labelled_gaze_positions):
         n_runs = info['num_runs']
         n_intervals = n_runs - 1
         fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, sampling_rate=sampling_rate)
+        fixation_indices = util.find_islands(fix_vec_entire_session)
+        for start_stop in fixation_indices:
+            # for each fixation list: arbitrary index, session, run, duration, agent, roi, block
+            
+            
+        """
         for run in range(n_runs):
             run_start = info['startS'][run]
             run_stop = info['stopS'][run]
@@ -161,6 +167,7 @@ def extract_fixations_with_labels(labelled_gaze_positions):
                 int_time = (time_vec > int_start) & (time_vec <= int_stop)
                 int_positions = positions[int_time,:]
                 int_fix = fix_vec_entire_session[int_time]
+        """
             
             
             
