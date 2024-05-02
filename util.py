@@ -112,6 +112,7 @@ def extract_meta_info(session_paths):
                     lo_bottom_right = m1_landmarks[0]['leftObject'][0][0]['bottomRight'][0][0]
                     ro_bottom_left = m1_landmarks[0]['rightObject'][0][0]['bottomLeft'][0][0]
                     ro_bottom_right = m1_landmarks[0]['rightObject'][0][0]['bottomRight'][0][0]
+                    
                     # would need to use px2dva and then wrote and use a dva2px
                     print("Here")
                 else:
@@ -160,6 +161,17 @@ def px2deg(px, monitor_info=None):
     deg_per_px = degrees(atan2(0.5 * h, d)) / (0.5 * r)
     deg = px * deg_per_px
     return deg
+
+
+def deg2px(deg, monitor_info=None):
+    if monitor_info is None:
+        monitor_info = defaults.fetch_monitor_info()  # in defaults
+    h = monitor_info['height']
+    d = monitor_info['distance']
+    r = monitor_info['vertical_resolution']
+    deg_per_px = degrees(atan2(0.5 * h, d)) / (0.5 * r)
+    px = deg / deg_per_px
+    return px
 
 
 def create_timevec(n_samples, sampling_rate):
