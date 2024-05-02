@@ -44,112 +44,52 @@ def get_subfolders(root_dir):
     return subfolders
 
 
-def extract_meta_info(session_paths):
-    """
-    Extracts meta-information from files in session paths.
-    Parameters:
-    - session_paths (list): List of paths to sessions.
-    Returns:
-    - meta_info_list (list): List of dictionaries containing meta-information for each session.
-    """
-    meta_info_list = []
-    for session_path in session_paths:
-        meta_info = {}
-        file_list_info = glob.glob(f"{session_path}/*metaInfo.mat")
-        file_list_runs = glob.glob(f"{session_path}/*runs.mat")
-        file_list_m1_landmarks = glob.glob(f"{session_path}/*M1_farPlaneCal.mat")
-        if len(file_list_info) == 1:
-            file_path_info = file_list_info[0]
-            try:
-                data_info = loadmat(file_path_info)
-                info = data_info.get('info', None)
-                # Selecting just the first run
-                info = info[0][0]
-                if info is not None:
-                    monkey_1 = info['monkey_1'][0]
-                    monkey_2 = info['monkey_2'][0]
-                    OT_dose = float(info['OT_dose'][0])
-                    NAL_dose = float(info['NAL_dose'][0])
-                    meta_info.update({'monkey_1': monkey_1, 'monkey_2': monkey_2, 'OT_dose': OT_dose, 'NAL_dose': NAL_dose})
-                else:
-                    meta_info.update({'monkey_1': None, 'monkey_2': None, 'OT_dose': None, 'NAL_dose': None})
-            except Exception as e:
-                print(f"Error loading meta_info for folder: {session_path}: {e}")
-                meta_info.update({'monkey_1': None, 'monkey_2': None, 'OT_dose': None, 'NAL_dose': None})
-        else:
-            print(f"Warning: No metaInfo found in folder: {session_path}.")
-            meta_info.update({'monkey_1': None, 'monkey_2': None, 'OT_dose': None, 'NAL_dose': None})
-        if len(file_list_runs) == 1:
-            file_path_runs = file_list_runs[0]
-            try:
-                data_runs = loadmat(file_path_runs)
-                runs = data_runs.get('runs', None)
-                if runs is not None:
-                    startS = [run['startS'][0][0] for run in runs[0]]
-                    stopS = [run['stopS'][0][0] for run in runs[0]]
-                    num_runs = len(startS)
-                    meta_info.update({'startS': startS, 'stopS': stopS, 'num_runs': num_runs})
-                else:
-                    meta_info.update({'startS': None, 'stopS': None, 'num_runs': 0})
-            except Exception as e:
-                print(f"Error loading runs for folder: {session_path}: {e}")
-                meta_info.update({'startS': None, 'stopS': None, 'num_runs': 0})
-        else:
-            print(f"Warning: No runs found in folder: {session_path}.")
-            meta_info.update({'startS': None, 'stopS': None, 'num_runs': 0})
-        
-        if len(file_list_m1_landmarks) == 1:
-            file_list_m1_landmarks = file_list_m1_landmarks[0]
-            try:
-                data_m1_landmarks = loadmat(file_list_m1_landmarks)
-                m1_landmarks = data_m1_landmarks.get('farPlaneCal', None)
-                if m1_landmarks is not None:
-                    pdb.set_trace()
-                    left_eye = m1_landmarks['eyeOnLeft'][0][0][0]
-                    right_eye = m1_landmarks['eyeOnRight'][0][0][0]
-                    mouth = m1_landmarks['mouth'][0][0][0]
-                    lo_bottom_left = m1_landmarks[0]['leftObject'][0][0]['bottomLeft'][0][0]
-                    lo_bottom_right = m1_landmarks[0]['leftObject'][0][0]['bottomRight'][0][0]
-                    ro_bottom_left = m1_landmarks[0]['rightObject'][0][0]['bottomLeft'][0][0]
-                    ro_bottom_right = m1_landmarks[0]['rightObject'][0][0]['bottomRight'][0][0]
-                    
-                    # would need to use px2dva and then wrote and use a dva2px
-                    print("Here")
-                else:
-                    meta_info.update({'startS': None, 'stopS': None, 'num_runs': 0})
-            except Exception as e:
-                print(f"Error loading runs for folder: {session_path}: {e}")
-                meta_info.update({'startS': None, 'stopS': None, 'num_runs': 0})
-        else:
-            print(f"Warning: No runs found in folder: {session_path}.")
-            meta_info.update({'startS': None, 'stopS': None, 'num_runs': 0})
-        
-        meta_info_list.append(meta_info)
-    return meta_info_list
-
-
-def get_unique_doses(otnal_doses):
-    """
-    Finds unique rows and their indices in the given array.
-    Parameters:
-    - otnal_doses (ndarray): Input array.
-    Returns:
-    - unique_rows (ndarray): Unique rows in the input array.
-    - indices_for_unique_rows (list): List of lists containing indices for each unique row.
-    """
-    unique_rows = np.unique(otnal_doses, axis=0)
-    # Initialize an empty list to store indices for each unique row
-    indices_for_unique_rows = []
-    session_category = np.empty(otnal_doses.shape[0])
-    session_category[:] = np.nan
-    # Iterate over unique rows
-    for i, row in enumerate(unique_rows):
-        category = i
-        # Find indices where each unique row occurs in the original array
-        indices_for_row = np.where( (otnal_doses == row).all(axis=1))[0]
-        session_category[indices_for_row] = category
-        indices_for_unique_rows.append(indices_for_row.tolist())
-    return unique_rows, indices_for_unique_rows, session_category
+def calculate_roi_bounding_boxes(m1_landmarks, monitor_info=None):
+    if monitor_info is None:
+        monitor_info = defaults.fetch_monitor_info() if hasattr(defaults, 'fetch_monitor_info') else None
+    if monitor_info is None:
+        raise ValueError("Monitor info is required for conversion.")
+    # Fetching coordinates in pixels
+    left_eye = m1_landmarks['eyeOnLeft'][0][0][0]
+    right_eye = m1_landmarks['eyeOnRight'][0][0][0]
+    mouth = m1_landmarks['mouth'][0][0][0]
+    lo_bottom_left = m1_landmarks[0]['leftObject'][0][0]['bottomLeft'][0][0]
+    lo_top_right = m1_landmarks[0]['leftObject'][0][0]['topRight'][0][0]
+    ro_bottom_left = m1_landmarks[0]['rightObject'][0][0]['bottomLeft'][0][0]
+    ro_top_right = m1_landmarks[0]['rightObject'][0][0]['topRight'][0][0]
+    # Calculate average y-coordinate of the eyes in pixels
+    avg_eye_y_px = (left_eye[1] + right_eye[1]) / 2
+    # Convert average eye y-coordinate to degrees of visual angle (DVA)
+    avg_eye_y_deg = px2deg(avg_eye_y_px, monitor_info)
+    # Calculate y-coordinates for eye bounding box
+    eye_top_y_deg = avg_eye_y_deg - 1
+    eye_bottom_y_deg = avg_eye_y_deg + 1
+    # Calculate mean x-position of the eyes in pixels
+    avg_eye_x_px = (left_eye[0] + right_eye[0]) / 2
+    # Convert mean eye x-position to degrees of visual angle (DVA)
+    avg_eye_x_deg = px2deg(avg_eye_x_px, monitor_info)
+    # Calculate x-coordinates for eye bounding box
+    eye_left_x_deg = avg_eye_x_deg - 2.5
+    eye_right_x_deg = avg_eye_x_deg + 2.5
+    # Calculate y-coordinates for face bounding box based on mouth position
+    face_top_y_deg = avg_eye_y_deg + 4
+    face_bottom_y_deg = avg_eye_y_deg + 1
+    # Calculate x-coordinates for face bounding box
+    face_left_x_deg = avg_eye_x_deg - 2.5
+    face_right_x_deg = avg_eye_x_deg + 2.5
+    # Create bounding boxes for left and right objects
+    left_obj_bbox = {'bottomLeft': (lo_bottom_left[0], lo_bottom_left[1]), 'topRight': (lo_top_right[0], lo_top_right[1])}
+    right_obj_bbox = {'bottomLeft': (ro_bottom_left[0], ro_bottom_left[1]), 'topRight': (ro_top_right[0], ro_top_right[1])}
+    # Convert coordinates from degrees to pixels
+    eye_bbox = {
+        'bottomLeft': (deg2px(eye_left_x_deg, monitor_info), deg2px(eye_bottom_y_deg, monitor_info)),
+        'topRight': (deg2px(eye_right_x_deg, monitor_info), deg2px(eye_top_y_deg, monitor_info))
+    }
+    face_bbox = {
+        'bottomLeft': (deg2px(face_left_x_deg, monitor_info), deg2px(face_bottom_y_deg, monitor_info)),
+        'topRight': (deg2px(face_right_x_deg, monitor_info), deg2px(face_top_y_deg, monitor_info))
+    }
+    return eye_bbox, face_bbox, left_obj_bbox, right_obj_bbox
 
 
 def px2deg(px, monitor_info=None):

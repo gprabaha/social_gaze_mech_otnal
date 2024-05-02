@@ -21,20 +21,20 @@ session_paths = util.get_subfolders(root_data_dir)
 # Extract meta-information from session paths
 
 # edit this to include session in meta info
-meta_info_list = util.extract_meta_info(session_paths)
+meta_info_list = filter_behavior.extract_meta_info(session_paths)
 
 
 # Extract OT and NAL doses from meta-information and convert to numpy array
 otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_info in meta_info_list], dtype=np.float64)
 # Find unique doses and their indices
-unique_doses, dose_inds, session_categories = util.get_unique_doses(otnal_doses)
+unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
 labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
     unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
 
 # Have to write this function for nn training
 saccades_m1, saccade_labels_m1 = filter_behavior.extract_saccades_with_labels(labelled_gaze_positions_m1)
 # function needds to be fully written
-fixations_m1 = filter_behavior.extract_fixations_with_labels(labelled_gaze_positions_m1)
+# fixations_m1 = filter_behavior.extract_fixations_with_labels(labelled_gaze_positions_m1)
 
 # for each neuron see eye vs obj and also central fix (in interval) vs obj
 
