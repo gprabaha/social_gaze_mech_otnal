@@ -30,6 +30,7 @@ otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_i
 unique_doses, dose_inds, session_categories = util.get_unique_doses(otnal_doses)
 labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
     unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
+
 # Have to write this function for nn training
 saccades_m1, saccade_labels_m1 = filter_behavior.extract_saccades_with_labels(labelled_gaze_positions_m1)
 # function needds to be fully written

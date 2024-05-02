@@ -14,6 +14,8 @@ from math import degrees, atan2
 
 import defaults
 
+import pdb
+
 
 def get_root_data_dir(is_cluster):
     """
@@ -55,6 +57,7 @@ def extract_meta_info(session_paths):
         meta_info = {}
         file_list_info = glob.glob(f"{session_path}/*metaInfo.mat")
         file_list_runs = glob.glob(f"{session_path}/*runs.mat")
+        file_list_m1_landmarks = glob.glob(f"{session_path}/*M1_farPlaneCal.mat")
         if len(file_list_info) == 1:
             file_path_info = file_list_info[0]
             try:
@@ -94,6 +97,32 @@ def extract_meta_info(session_paths):
         else:
             print(f"Warning: No runs found in folder: {session_path}.")
             meta_info.update({'startS': None, 'stopS': None, 'num_runs': 0})
+        
+        if len(file_list_m1_landmarks) == 1:
+            file_list_m1_landmarks = file_list_m1_landmarks[0]
+            try:
+                data_m1_landmarks = loadmat(file_list_m1_landmarks)
+                m1_landmarks = data_m1_landmarks.get('farPlaneCal', None)
+                if m1_landmarks is not None:
+                    pdb.set_trace()
+                    left_eye = m1_landmarks['eyeOnLeft'][0][0][0]
+                    right_eye = m1_landmarks['eyeOnRight'][0][0][0]
+                    mouth = m1_landmarks['mouth'][0][0][0]
+                    lo_bottom_left = m1_landmarks[0]['leftObject'][0][0]['bottomLeft'][0][0]
+                    lo_bottom_right = m1_landmarks[0]['leftObject'][0][0]['bottomRight'][0][0]
+                    ro_bottom_left = m1_landmarks[0]['rightObject'][0][0]['bottomLeft'][0][0]
+                    ro_bottom_right = m1_landmarks[0]['rightObject'][0][0]['bottomRight'][0][0]
+                    # would need to use px2dva and then wrote and use a dva2px
+                    print("Here")
+                else:
+                    meta_info.update({'startS': None, 'stopS': None, 'num_runs': 0})
+            except Exception as e:
+                print(f"Error loading runs for folder: {session_path}: {e}")
+                meta_info.update({'startS': None, 'stopS': None, 'num_runs': 0})
+        else:
+            print(f"Warning: No runs found in folder: {session_path}.")
+            meta_info.update({'startS': None, 'stopS': None, 'num_runs': 0})
+        
         meta_info_list.append(meta_info)
     return meta_info_list
 

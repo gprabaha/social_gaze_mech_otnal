@@ -15,6 +15,7 @@ import util
 import defaults
 import fix
 
+
 ###
 def extract_labelled_gaze_positions_m1(unique_doses, dose_inds, meta_info_list, session_paths, session_categories):
     """
@@ -55,6 +56,8 @@ def extract_labelled_gaze_positions_m1(unique_doses, dose_inds, meta_info_list, 
             except Exception as e:
                 print(f"Error loading file '{mat_file_name}': {str(e)}")
     return labelled_gaze_positions
+
+
 
 def find_saccades(x, y, sr, vel_thresh, min_samples, smooth_func):
     """
