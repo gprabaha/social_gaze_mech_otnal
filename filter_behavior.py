@@ -229,6 +229,32 @@ def extract_saccades_with_labels(labelled_gaze_positions):
     return saccades, saccade_labels
 
 
+def detect_fixation_run_and_block(start_stop, info):
+    """
+    Detect the run and block based on start and stop indices and session info.
+    Parameters:
+    - start_stop (tuple): A tuple containing start and stop indices.
+    - info (dict): Dictionary containing session information.
+    Returns:
+    - run (int or None): Detected run number or None.
+    - block (str): Detected block identifier.
+    """
+    start, stop = start_stop
+    startS = info.get('startS', [])
+    stopS = info.get('stopS', [])
+    # Check if start and stop are within the time limits of a particular run
+    for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
+        if start >= run_start and stop <= run_stop:
+            return i, 'mon_down'  # Within the time limits of a run, set run number and block as 'mon_down'
+        elif i < len(startS) and stop <= startS[i]:  # If in time gap between two runs
+            return None, 'mon_up'  # No run, block is 'mon_up'
+    # Check if start_stop is before the first run's start or after the last run's stop
+    if start < startS[0] or stop > stopS[-1]:
+        return None, 'discard'  # No run, block is 'discard'
+    # If start and stop are not within the same time period (run or inter-run interval)
+    return None, 'discard'  # No run, block is 'discard'
+
+
 def extract_fixations_with_labels(labelled_gaze_positions):
     """
     Has to be completed to contain array of start and stop times of fixations
@@ -260,12 +286,8 @@ def extract_fixations_with_labels(labelled_gaze_positions):
         fixation_labels = []
         for start_stop in fixation_indices:
             session = info['session']
-            
-            # this has to be written
-            # duration = get_duration(start_stop)
-            
-            # write the function below
-            # run, block = detect_run_and_block(start_stop, info)
+            duration = util.get_duration(start_stop)
+            run, block = detect_fixation_run_and_block(start_stop, info)
             
             # write the function below
             # fix_roi = find_roi_for_fixation(start_stop, positions)

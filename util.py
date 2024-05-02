@@ -135,3 +135,22 @@ def find_islands(binary_vec, min_samples=0):
         if len(binary_vec) - island_start >= min_samples:
             islands.append([island_start, len(binary_vec) - 1])
     return np.array(islands)
+
+
+def get_duration(start_stop):
+    """
+    Calculate duration from start and stop indices.
+    Parameters:
+    - start_stop (tuple): A tuple containing start and stop indices.
+    Returns:
+    - duration (int): Duration calculated from start and stop indices.
+    """
+    start, stop = start_stop
+    duration = stop - start
+    return duration
+
+
+
+
+
+
