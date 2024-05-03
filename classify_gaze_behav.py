@@ -13,6 +13,9 @@ import util
 import filter_behavior
 
 
+# Remember to remove outliers from the position data
+# Take the center of the monitor for tarantino for inter-run interval and check the fixations there compared to face
+
 # Determine root data directory based on whether it's running on a cluster or not
 is_cluster = True
 root_data_dir = util.get_root_data_dir(is_cluster)
@@ -28,8 +31,8 @@ labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
     unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
 # Find saccades
 saccades_m1, saccade_labels_m1 = filter_behavior.extract_saccades_with_labels(labelled_gaze_positions_m1)
-# function needds to be fully written
-# fixations_m1 = filter_behavior.extract_fixations_with_labels(labelled_gaze_positions_m1)
+# Find fixations
+fixations_m1, fixation_m1_labels = filter_behavior.extract_fixations_with_labels(labelled_gaze_positions_m1)
 
 # for each neuron see eye vs obj and also central fix (in interval) vs obj
 

@@ -10,7 +10,7 @@ from scipy.signal.windows import gaussian
 from numpy import convolve
 
 def fetch_monitor_info():
-    return {'height': 27, 'distance': 50, 'vertical_resolution': 768}
+    return {'height': 27, 'distance': 50, 'vertical_resolution': 1024}
 
 def fetch_default_saccade_pars():
     window = gaussian(21, 5, True)

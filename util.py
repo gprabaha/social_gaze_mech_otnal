@@ -45,6 +45,9 @@ def get_subfolders(root_dir):
 
 
 def calculate_roi_bounding_boxes(m1_landmarks, monitor_info=None):
+    
+    # for the face roi, just use the 4 extremeties of the far plane calibration 
+    
     if monitor_info is None:
         monitor_info = defaults.fetch_monitor_info() if hasattr(defaults, 'fetch_monitor_info') else None
     if monitor_info is None:
