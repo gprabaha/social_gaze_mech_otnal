@@ -8,6 +8,7 @@ Created on Tue Apr  9 10:25:48 2024
 
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 import util
 import filter_behavior
@@ -29,10 +30,16 @@ otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_i
 unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
 labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
     unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
+# Find fixations
+fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1)
 # Find saccades
 saccades_m1, saccade_labels_m1 = filter_behavior.extract_saccades_with_labels(labelled_gaze_positions_m1)
-# Find fixations
-fixations_m1, fixation_m1_labels = filter_behavior.extract_fixations_with_labels(labelled_gaze_positions_m1)
+# Save arrays to root_data_dir
+np.save(os.path.join(root_data_dir, 'labelled_gaze_positions.npy'), labelled_gaze_positions_m1)
+np.save(os.path.join(root_data_dir, 'fixations_m1.npy'), fixations_m1)
+np.save(os.path.join(root_data_dir, 'saccades_m1.npy'), saccades_m1)
+np.save(os.path.join(root_data_dir, 'fixation_labels_m1.npy'), fixation_labels_m1)
+np.save(os.path.join(root_data_dir, 'saccade_labels_m1.npy'), saccade_labels_m1)
 
 # for each neuron see eye vs obj and also central fix (in interval) vs obj
 

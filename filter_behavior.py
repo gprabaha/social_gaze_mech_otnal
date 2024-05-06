@@ -11,6 +11,7 @@ from tqdm import tqdm
 import os
 import scipy.io
 import glob
+from multiprocessing import Pool
 
 import util
 import defaults
@@ -229,34 +230,43 @@ def extract_saccade_positions(run_positions, saccade_start_stops):
         saccades.append(saccade)
     return saccades
 
-    
-###
-def extract_fixations_with_labels(labelled_gaze_positions):
-    session_identifier = 0
+
+
+def extract_fixations_with_labels_parallel(labelled_gaze_positions):
+    session_identifiers = list(range(len(labelled_gaze_positions)))
+    sessions = [(i, session[0], session[1]) for i, session in enumerate(labelled_gaze_positions)]
+    with Pool() as pool:
+        results = list(tqdm(pool.imap(get_session_fixations, sessions), total=len(sessions), desc="Extracting fixations in parallel", unit="session"))
+    all_fixations = []
     all_fixation_labels = []
-    for session in tqdm(labelled_gaze_positions, desc="Extracting fixations for session", unit="session"):
-        session_identifier += 1
-        positions = session[0]
-        info = session[1]
-        sampling_rate = info['sampling_rate']
-        n_samples = positions.shape[0]
-        time_vec = util.create_timevec(n_samples, sampling_rate)
-        category = info['category']
-        n_runs = info['num_runs']
-        n_intervals = n_runs - 1
-        fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, sampling_rate=sampling_rate)
-        all_fixations = util.find_islands(fix_vec_entire_session)
-        fixation_labels = []
-        for start_stop in all_fixations:
-            duration = util.get_duration(start_stop)
-            run, block = detect_fixation_run_and_block(start_stop, info)
-            fix_roi = find_roi_for_fixation(start_stop, positions)
-            agent = info['monkey_1']
-            # Construct the details for the current fixation
-            fixation_info = [session_identifier, duration, run, block, fix_roi, agent]
-            all_fixation_labels.append(fixation_info)
+    for session_fixations in results:
+        for fixation in session_fixations:
+            all_fixations.append(fixation)
+            all_fixation_labels.extend(session_fixations)
     return all_fixations, all_fixation_labels
-            
+
+
+def get_session_fixations(session):
+    session_identifier, positions, info = session
+    sampling_rate = info['sampling_rate']
+    n_samples = positions.shape[0]
+    time_vec = util.create_timevec(n_samples, sampling_rate)
+    category = info['category']
+    n_runs = info['num_runs']
+    n_intervals = n_runs - 1
+    fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, sampling_rate=sampling_rate)
+    all_fixations = util.find_islands(fix_vec_entire_session)
+    fixation_labels = []
+    for start_stop in all_fixations:
+        duration = util.get_duration(start_stop)
+        run, block = detect_fixation_run_and_block(start_stop, info)
+        fix_roi = find_roi_for_fixation(start_stop, positions, info)
+        agent = info['monkey_1']
+        # Construct the details for the current fixation
+        fixation_info = [category, session_identifier, run, block, duration, fix_roi, agent]
+        fixation_labels.append(fixation_info)
+    return fixation_labels
+
 
 def detect_fixation_run_and_block(start_stop, info):
     """
@@ -300,6 +310,6 @@ def check_fixation_position(info, fixation_position):
 def find_roi_for_fixation(start_stop, positions, info):
     start, stop = start_stop
     fix_pos = positions[start:stop,:]
-    mean_fix_pos = np.nanmean(positions, axis=0)
+    mean_fix_pos = np.nanmean(fix_pos, axis=0)
     return check_fixation_position(mean_fix_pos, info)
             

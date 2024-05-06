@@ -13,6 +13,8 @@ Needs to be adapted for otnal
 
 import numpy as np
 
+import util
+
 import pdb
 
 
@@ -164,9 +166,9 @@ def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
     fix_vector = np.zeros(data.shape[0])
     # Find segments based on NaN or time interval
     diff_time = np.diff(time, axis=0)
-    start_idc = np.where(diff_time > 2*dt)[0]  # Find indices where time interval is greater than 2*dt
+    start_idc = util.identify_outliers(data)
     # Include the first data point index
-    if start_idc[0] != 0:
+    if start_idc[0] != 0 or np.array(start_idc).size == 0:
         start_idc = np.insert(start_idc, 0, 0)
     # Loop through segments
     for i_segment in range(len(start_idc)):
