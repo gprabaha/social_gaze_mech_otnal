@@ -239,12 +239,10 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions):
         results = list(tqdm(pool.imap(get_session_fixations, sessions), total=len(sessions), desc="Extracting fixations in parallel", unit="session"))
     all_fixations = []
     all_fixation_labels = []
-    for session_fixations in results:
-        for fixation in session_fixations:
-            all_fixations.append(fixation)
-            all_fixation_labels.extend(session_fixations)
+    for session_fixations, session_labels in results:
+        all_fixations.extend(session_fixations)
+        all_fixation_labels.extend(session_labels)
     return all_fixations, all_fixation_labels
-
 
 def get_session_fixations(session):
     session_identifier, positions, info = session
@@ -254,10 +252,12 @@ def get_session_fixations(session):
     category = info['category']
     n_runs = info['num_runs']
     n_intervals = n_runs - 1
+    print(f"Detecting all fixations in: {info['session_name']}\n")
     fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, sampling_rate=sampling_rate)
-    all_fixations = util.find_islands(fix_vec_entire_session)
+    fixations = util.find_islands(fix_vec_entire_session)
     fixation_labels = []
-    for start_stop in all_fixations:
+    print(f"Labelling fixations for: {info['session_name']}\n")
+    for start_stop in fixations:
         duration = util.get_duration(start_stop)
         run, block = detect_fixation_run_and_block(start_stop, info)
         fix_roi = find_roi_for_fixation(start_stop, positions, info)
@@ -265,7 +265,8 @@ def get_session_fixations(session):
         # Construct the details for the current fixation
         fixation_info = [category, session_identifier, run, block, duration, fix_roi, agent]
         fixation_labels.append(fixation_info)
-    return fixation_labels
+    assert fixations.shape[0] == len(fixation_labels)
+    return fixations, fixation_labels
 
 
 def detect_fixation_run_and_block(start_stop, info):

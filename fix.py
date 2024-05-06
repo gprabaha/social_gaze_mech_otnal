@@ -164,16 +164,18 @@ def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
     dt = 1 / sampling_rate
     # Initialize fix_vector
     fix_vector = np.zeros(data.shape[0])
-    # Find segments based on NaN or time interval
-    diff_time = np.diff(time, axis=0)
-    start_idc = util.identify_outliers(data)
-    # Include the first data point index
-    if start_idc[0] != 0 or np.array(start_idc).size == 0:
-        start_idc = np.insert(start_idc, 0, 0)
+    # Identify outliers
+    outlier_idc = util.identify_outliers(data)
+    # Include the first data point index as -1 so that x+1=0
+    if outlier_idc[0] != -1 or np.array(outlier_idc).size == 0:
+        outlier_idc = np.insert(outlier_idc, 0, -1)
     # Loop through segments
-    for i_segment in range(len(start_idc)):
-        start_idx = start_idc[i_segment]
-        end_idx = start_idc[i_segment + 1] - 1 if i_segment + 1 < len(start_idc) else -1
+    for i_segment in range(len(outlier_idc)):
+        if outlier_idc[i_segment] + 1 != outlier_idc[i_segment + 1]:
+            start_idx = outlier_idc[i_segment] + 1
+        else:
+            continue
+        end_idx = outlier_idc[i_segment + 1] - 1 if i_segment + 1 < len(outlier_idc) else -1
         # Extract segment data
         segment_data = data[start_idx:end_idx + 1, :]
         # Skip if segment data is empty

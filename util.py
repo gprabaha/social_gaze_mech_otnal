@@ -154,8 +154,8 @@ def get_duration(start_stop):
     return duration
 
 
-def identify_outliers(data, window_size=50, stride=25, threshold=None,
-                      degree=5):
+def identify_outliers(data, window_size=500, stride=250, threshold=None,
+                      degree=10):
     num_points = data.shape[0]
     outlier_indices = []
     for i in range(0, num_points - window_size + 1, stride):
