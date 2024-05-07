@@ -12,6 +12,7 @@ import os
 import scipy.io
 import glob
 from multiprocessing import Pool
+import pickle
 
 import util
 import defaults
@@ -124,7 +125,7 @@ def get_unique_doses(otnal_doses):
 
 
 ###
-def extract_labelled_gaze_positions_m1(unique_doses, dose_inds, meta_info_list, session_paths, session_categories):
+def extract_labelled_gaze_positions_m1(root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories):
     """
     Extracts labelled gaze positions from files associated with unique doses.
     Parameters:
@@ -135,7 +136,7 @@ def extract_labelled_gaze_positions_m1(unique_doses, dose_inds, meta_info_list, 
     Returns:
     - labelled_gaze_positions (list): List of tuples containing gaze positions and associated metadata.
     """
-    labelled_gaze_positions = []
+    labelled_gaze_positions_m1 = []
     # Iterate over unique doses and associated indices
     for dose, indices_list in zip(unique_doses, dose_inds):
         for idx in tqdm(indices_list, desc="Processing indices for dose", unit="index"):
@@ -159,10 +160,12 @@ def extract_labelled_gaze_positions_m1(unique_doses, dose_inds, meta_info_list, 
                 # Append gaze positions and associated metadata to the list
                 meta_info = meta_info_list[idx]  # Copy to avoid modifying the original meta_info
                 meta_info.update({'sampling_rate': sampling_rate, 'category': session_categories[idx]})  # Add sampling rate to metadata
-                labelled_gaze_positions.append((gaze_positions, meta_info))
+                labelled_gaze_positions_m1.append((gaze_positions, meta_info))
             except Exception as e:
                 print(f"Error loading file '{mat_file_name}': {str(e)}")
-    return labelled_gaze_positions
+        with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'wb') as f:
+            pickle.dump(labelled_gaze_positions_m1, f)
+    return labelled_gaze_positions_m1
 
 
 ###
@@ -231,7 +234,6 @@ def extract_saccade_positions(run_positions, saccade_start_stops):
     return saccades
 
 
-
 def extract_fixations_with_labels_parallel(labelled_gaze_positions, parallel=True):
     session_identifiers = list(range(len(labelled_gaze_positions)))
     sessions = [(i, session[0], session[1]) for i, session in enumerate(labelled_gaze_positions)]
@@ -284,7 +286,6 @@ def detect_run_block_and_roi(start_stop, positions, info):
     - fix_roi (str): Detected region of interest.
     """
     start, stop = start_stop
-    
     # Detect run and block
     startS = info.get('startS', [])
     stopS = info.get('stopS', [])

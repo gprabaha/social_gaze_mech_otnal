@@ -15,6 +15,10 @@ import util
 import filter_behavior
 
 
+"""
+All fixations are out of bounds right now which cannot be correct. Check out what is going on
+"""
+
 # Remember to remove outliers from the position data
 # Take the center of the monitor for tarantino for inter-run interval and check the fixations there compared to face
 
@@ -29,11 +33,13 @@ meta_info_list = filter_behavior.extract_meta_info(session_paths)
 otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_info in meta_info_list], dtype=np.float64)
 # Find unique doses and their indices
 unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
-labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
-    unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
-# Save arrays to root_data_dir
-with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'wb') as f:
-    pickle.dump(labelled_gaze_positions_m1, f)
+
+if 'labelled_gaze_positions_m1' in globals():
+    print("labelled_gaze_positions_m1 is already loaded")
+else:
+    with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'rb') as f:
+        labelled_gaze_positions_m1 = pickle.load(f)
+
 # Find fixations
 # Parallel
 fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1)

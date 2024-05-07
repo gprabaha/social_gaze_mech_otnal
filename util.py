@@ -7,9 +7,7 @@ Created on Wed Apr 10 11:50:13 2024
 """
 
 import os
-import glob
 import numpy as np
-from scipy.io import loadmat
 from scipy.optimize import curve_fit
 from math import degrees, atan2
 

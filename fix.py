@@ -5,18 +5,13 @@ Created on Tue Apr 30 15:34:44 2024
 
 @author: pg496
 """
-
 """
-Needs to be adapted for otnal
+Script for fixation detection
 """
-
 
 import numpy as np
-
-import util
-
-import pdb
-
+import util  # Import utility functions here
+import pdb  # Import the Python debugger if needed
 
 def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
     """
@@ -36,15 +31,13 @@ def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
     # Calculate sampling rate if not provided
     if sampling_rate is None:
         sampling_rate = 1 / (time[1,:] - time[0,:])
-    # Set default values
+    # Set default values for parameters if not provided
     if minDur is None:
         minDur = 0.01
     if t2 is None:
         t2 = 15
     if t1 is None:
         t1 = 30
-    # Add NaN padding based on sampling rate
-    dt = 1 / sampling_rate
     # Initialize fix_vector
     fix_vector = np.zeros(data.shape[0])
     '''
@@ -57,8 +50,17 @@ def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
         fix_vector[t_range[0]:t_range[1] + 1] = 1
     return fix_vector
 
-
 def fixation_detection(data, t1, t2, minDur):
+    """
+    Detect fixations based on position and time data.
+    Args:
+    data: Combined position and time data.
+    t1: Spatial parameter t1.
+    t2: Spatial parameter t2.
+    minDur: Minimum fixation duration.
+    Returns:
+    List of fixation time ranges.
+    """
     n = len(data)
     if n == 0:
         return []  # Return empty list if data is empty
@@ -73,7 +75,7 @@ def fixation_detection(data, t1, t2, minDur):
         fixation_list.append(filter_fixations_t2(i, fixations, t2))
     # Duration thresholding
     fixation_list = min_duration(fixation_list, minDur)
-    # Final output
+    # Convert fixation list to time ranges
     fix_ranges = []
     for fix in fixation_list:
         s_ind = np.where(data[:, 2] == fix[4])[0][0]
@@ -81,8 +83,18 @@ def fixation_detection(data, t1, t2, minDur):
         fix_ranges.append([s_ind, e_ind])
     return fix_ranges
 
-
 def get_t1_filtered_fixations(n, x, y, t, t1):
+    """
+    Filter fixations based on spatial parameter t1.
+    Args:
+    n: Length of data.
+    x: X-coordinate data.
+    y: Y-coordinate data.
+    t: Time data.
+    t1: Spatial parameter t1.
+    Returns:
+    Array of fixations after filtering.
+    """
     fixations = np.zeros((n, 4))
     fixid = 0
     fixpointer = 0
@@ -99,26 +111,31 @@ def get_t1_filtered_fixations(n, x, y, t, t1):
             fixations = update_fixations(i, x, y, t, fixations, fixid)
     return fixations
 
-
 def update_fixations(i, x, y, t, fixations, fixid):
+    """
+    Update fixations array with new fixation data.
+    Args:
+    i: Index.
+    x: X-coordinate data.
+    y: Y-coordinate data.
+    t: Time data.
+    fixations: Array of fixations.
+    fixid: ID of the fixation.
+    Returns:
+    Updated fixations array.
+    """
     fixations[i, 0] = x[i]
     fixations[i, 1] = y[i]
     fixations[i, 2] = t[i]
     fixations[i, 3] = fixid
     return fixations
 
-
-def filter_fixations_t2(i, fixations, t2):
-    centerx_t2, centery_t2, n_t1_t2, n_t2, t1_t2, t2_t2, d_t2, out_points = fixations_t2(fixations, i, t2)
-    return [centerx_t2, centery_t2, n_t1_t2, n_t2, t1_t2, t2_t2, d_t2]
-
-
-def fixations_t2(fixations, fixation_id, t2):
+def filter_fixations_t2(fixation_id, fixations, t2):
     """
     Cluster fixations based on spatial criteria and apply t2 threshold.
     Args:
-    fixations: Array containing fixations.
     fixation_id: ID of the fixation.
+    fixations: Array containing fixations.
     t2: Spatial parameter t2.
     Returns:
     Fixation information after applying t2 threshold.
@@ -141,15 +158,14 @@ def fixations_t2(fixations, fixation_id, t2):
             list_out_points = np.vstack((list_out_points, fixations_id[i, :]))
     # Compute number of t2 fixations
     number_t2 = fixations_list_t2.shape[0]
-    fixx, fixy = np.nanmean(fixations_list_t2[:, :2], axis=0)
-    if number_t2 > 0:
+    if not np.any(fixations_list_t2[:, :2]):
+        start_time, end_time, duration = 0, 0, 0
+    else:
+        fixx, fixy = np.nanmean(fixations_list_t2[:, :2], axis=0)
         start_time = fixations_list_t2[0, 2]
         end_time = fixations_list_t2[-1, 2]
         duration = end_time - start_time
-    else:
-        start_time, end_time, duration = 0, 0, 0
     return fixx, fixy, number_t1, number_t2, start_time, end_time, duration, list_out_points
-
 
 def min_duration(fixation_list, minDur):
     """
@@ -161,4 +177,3 @@ def min_duration(fixation_list, minDur):
     Fixation list after applying duration threshold.
     """
     return [fix for fix in fixation_list if fix[6] >= minDur]
-
