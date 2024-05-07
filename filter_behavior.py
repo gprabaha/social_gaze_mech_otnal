@@ -232,17 +232,23 @@ def extract_saccade_positions(run_positions, saccade_start_stops):
 
 
 
-def extract_fixations_with_labels_parallel(labelled_gaze_positions):
+def extract_fixations_with_labels_parallel(labelled_gaze_positions, parallel=True):
     session_identifiers = list(range(len(labelled_gaze_positions)))
     sessions = [(i, session[0], session[1]) for i, session in enumerate(labelled_gaze_positions)]
-    with Pool() as pool:
-        results = list(tqdm(pool.imap(get_session_fixations, sessions), total=len(sessions), desc="Extracting fixations in parallel", unit="session"))
+    if parallel:
+        with Pool() as pool:
+            results = list(tqdm(pool.imap(get_session_fixations, sessions),
+                                total=len(sessions), desc="Extracting fixations in parallel", unit="session"))
+    else:
+        results = [get_session_fixations(session) for session in
+                   tqdm(sessions, desc="Extracting fixations in serial", unit="session")]
     all_fixations = []
     all_fixation_labels = []
     for session_fixations, session_labels in results:
         all_fixations.extend(session_fixations)
         all_fixation_labels.extend(session_labels)
     return all_fixations, all_fixation_labels
+
 
 def get_session_fixations(session):
     session_identifier, positions, info = session
@@ -259,8 +265,7 @@ def get_session_fixations(session):
     print(f"Labelling fixations for: {info['session_name']}\n")
     for start_stop in fixations:
         duration = util.get_duration(start_stop)
-        run, block = detect_fixation_run_and_block(start_stop, info)
-        fix_roi = find_roi_for_fixation(start_stop, positions, info)
+        run, block , fix_roi = detect_run_block_and_roi(start_stop, positions, info)
         agent = info['monkey_1']
         # Construct the details for the current fixation
         fixation_info = [category, session_identifier, run, block, duration, fix_roi, agent]
@@ -269,48 +274,52 @@ def get_session_fixations(session):
     return fixations, fixation_labels
 
 
-def detect_fixation_run_and_block(start_stop, info):
+def detect_run_block_and_roi(start_stop, positions, info):
     """
-    Detect the run and block based on start and stop indices and session info.
+    Detect the run, block, and ROI based on start and stop indices, gaze positions, and session info.
     Parameters:
     - start_stop (tuple): A tuple containing start and stop indices.
+    - positions (numpy.ndarray): Array containing gaze positions.
     - info (dict): Dictionary containing session information.
     Returns:
     - run (int or None): Detected run number or None.
     - block (str): Detected block identifier.
+    - fix_roi (str): Detected region of interest.
     """
     start, stop = start_stop
+    
+    # Detect run and block
     startS = info.get('startS', [])
     stopS = info.get('stopS', [])
-    # Check if start and stop are within the time limits of a particular run
     for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
         if start >= run_start and stop <= run_stop:
-            return i, 'mon_down'  # Within the time limits of a run, set run number and block as 'mon_down'
-        elif i < len(startS) and stop <= startS[i]:  # If in time gap between two runs
-            return None, 'mon_up'  # No run, block is 'mon_up'
-    # Check if start_stop is before the first run's start or after the last run's stop
-    if start < startS[0] or stop > stopS[-1]:
-        return None, 'discard'  # No run, block is 'discard'
-    # If start and stop are not within the same time period (run or inter-run interval)
-    return None, 'discard'  # No run, block is 'discard'
-
-
-def check_fixation_position(info, fixation_position):
+            run = i
+            block = 'mon_down'
+            break
+        elif i < len(startS) and stop <= startS[i]:
+            run = None
+            block = 'mon_up'
+            break
+    else:
+        if start < startS[0] or stop > stopS[-1]:
+            run = None
+            block = 'discard'
+        else:
+            run = None
+            block = 'discard'
+    # Find fixation ROI
+    fix_pos = positions[start:stop, :]
+    mean_fix_pos = np.nanmean(fix_pos, axis=0)
     bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
     for key in bounding_boxes:
         value = info.get(key)
         if value:
             bottom_left = value['bottomLeft']
             top_right = value['topRight']
-            if bottom_left[0] <= fixation_position[0] <= top_right[0] and \
-               bottom_left[1] <= fixation_position[1] <= top_right[1]:
-                return key
-    return None
-
-
-def find_roi_for_fixation(start_stop, positions, info):
-    start, stop = start_stop
-    fix_pos = positions[start:stop,:]
-    mean_fix_pos = np.nanmean(fix_pos, axis=0)
-    return check_fixation_position(mean_fix_pos, info)
-            
+            if bottom_left[0] <= mean_fix_pos[0] <= top_right[0] and \
+               bottom_left[1] <= mean_fix_pos[1] <= top_right[1]:
+                fix_roi = key
+                break
+    else:
+        fix_roi = 'out_of_roi' 
+    return run, block, fix_roi

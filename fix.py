@@ -12,6 +12,8 @@ Needs to be adapted for otnal
 
 
 import numpy as np
+from joblib import Parallel, delayed
+from multiprocessing import Pool
 
 import util
 
@@ -82,7 +84,7 @@ def min_duration(fixation_list, minDur):
     """
     return [fix for fix in fixation_list if fix[6] >= minDur]
 
-
+'''
 def fixation_detection(data, t1, t2, minDur):
     """
     Detect fixations from raw data.
@@ -133,7 +135,7 @@ def fixation_detection(data, t1, t2, minDur):
         e_ind = np.where(data[:, 2] == fix[5])[0][-1]
         fix_ranges.append([s_ind, e_ind])
     return fix_ranges
-
+'''
 
 def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
     """
@@ -164,30 +166,66 @@ def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
     dt = 1 / sampling_rate
     # Initialize fix_vector
     fix_vector = np.zeros(data.shape[0])
-    # Identify outliers
-    outlier_idc = util.identify_outliers(data)
-    # Include the first data point index as -1 so that x+1=0
-    if outlier_idc[0] != -1 or np.array(outlier_idc).size == 0:
-        outlier_idc = np.insert(outlier_idc, 0, -1)
-    # Loop through segments
-    for i_segment in range(len(outlier_idc)):
-        if outlier_idc[i_segment] + 1 != outlier_idc[i_segment + 1]:
-            start_idx = outlier_idc[i_segment] + 1
-        else:
-            continue
-        end_idx = outlier_idc[i_segment + 1] - 1 if i_segment + 1 < len(outlier_idc) else -1
-        # Extract segment data
-        segment_data = data[start_idx:end_idx + 1, :]
-        # Skip if segment data is empty
-        if not segment_data.any():
-            continue
-        # Call fixation_detection function on segment data
-        t_ind = fixation_detection(segment_data, t1, t2, minDur)
-        # Mark fixations in fix_vector
-        for t_range in t_ind:
-            fix_vector[t_range[0]:t_range[1] + 1] = 1
+    '''
+    Implement a proper outlier detection code here. The curve fit should
+    account for a situation where t_n is (x_a, y_a) and t_m is (x_a, y_b), so
+    the same x will have 2 y values, which can get complicated for polyfit
+    '''
+    t_ind = fixation_detection(data, t1, t2, minDur)
+    for t_range in t_ind:
+        fix_vector[t_range[0]:t_range[1] + 1] = 1
     return fix_vector
 
+
+def fixation_detection(data, t1, t2, minDur):
+    n = len(data)
+    if n == 0:
+        return []  # Return empty list if data is empty
+    fixations = np.column_stack((data, np.zeros((n, 1))))  # Initialize fixations array
+    
+    # Spatial clustering
+    fixid = 1
+    mx, my, d = 0, 0, 0
+    fixpointer = 1
+
+    results = Parallel(n_jobs=-1)(delayed(process_segment)(i, data, fixpointer, fixid, t1, fixations) for i in range(n))
+    for result in results:
+        if result is not None:
+            fixid, i, mx, my = result
+            fixations[i, 3] = fixid
+
+    # Temporal filtering
+    number_fixations = fixations[-1, 3]
+    with Pool() as pool:
+        fixation_list = pool.starmap(calculate_fixation, [(i, fixations, t2) for i in range(1, int(number_fixations) + 1)])
+    
+    # Duration thresholding
+    fixation_list = min_duration(fixation_list, minDur)
+    
+    # Final output
+    fix_ranges = []
+    for fix in fixation_list:
+        s_ind = np.where(data[:, 2] == fix[4])[0][0]
+        e_ind = np.where(data[:, 2] == fix[5])[0][-1]
+        fix_ranges.append([s_ind, e_ind])
+    return fix_ranges
+
+
+def process_segment(i, data, fixpointer, fixid, t1, fixations):
+    segment_data = data[fixpointer:i+1, :]
+    if not segment_data.any():
+        return None
+    mx, my = np.nanmean(segment_data[:, 0]), np.nanmean(segment_data[:, 1]) if segment_data.shape[0] > 1 else (segment_data[:, 0], segment_data[:, 1])
+    d = distance2p(mx, my, data[i, 0], data[i, 1])
+    if d > t1:
+        fixid += 1
+        fixpointer = i
+    return (fixid, i, mx, my)
+
+
+def calculate_fixation(i, fixations, t2):
+    centerx_t2, centery_t2, n_t1_t2, n_t2, t1_t2, t2_t2, d_t2, out_points = fixations_t2(fixations, i, t2)
+    return [centerx_t2, centery_t2, n_t1_t2, n_t2, t1_t2, t2_t2, d_t2]
 
 
 
