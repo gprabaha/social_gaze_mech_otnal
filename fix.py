@@ -12,9 +12,6 @@ Needs to be adapted for otnal
 
 
 import numpy as np
-from joblib import Parallel, delayed
-from multiprocessing import Pool
-from tqdm import tqdm
 
 import util
 
@@ -69,31 +66,11 @@ def fixation_detection(data, t1, t2, minDur):
     y = data[:, 1]
     t = data[:, 2]
     n = len(t)
-    # build initial fixations list
-    # categorize each data point to a fixation cluster with to tolerance 1
-    fixations = np.zeros((n, 4))  # Initialize fixations array
-    # initialize pointers
-    fixid = 1  # fixation id
-    mx = 0  # mean coordinate x
-    my = 0  # mean coordinate y
-    d = 0   # distance between data point and mean point
-    fixpointer = 0  # fixations pointer
-    #for i in tqdm(range(n), desc="Fix labelling location by t1 threshold:"):
-    for i in range(n):
-        mx = np.mean(x[fixpointer:i+1])
-        my = np.mean(y[fixpointer:i+1])
-        d = distance2p(mx, my, x[i], y[i])
-        if d > t1:
-            fixid += 1
-            fixpointer = i
-        fixations[i, 0] = x[i]
-        fixations[i, 1] = y[i]
-        fixations[i, 2] = t[i]
-        fixations[i, 3] = fixid
+    fixations = get_t1_filtered_fixations(n, x, y, t, t1)
     number_fixations = fixations[-1, 3]
-    with Pool() as pool:
-        fixation_list = pool.starmap(filter_fixations_t2,
-                                     [(i, fixations, t2) for i in range(1, int(number_fixations) + 1)])
+    fixation_list = []
+    for i in range(1, int(number_fixations) + 1):
+        fixation_list.append(filter_fixations_t2(i, fixations, t2))
     # Duration thresholding
     fixation_list = min_duration(fixation_list, minDur)
     # Final output
@@ -105,32 +82,30 @@ def fixation_detection(data, t1, t2, minDur):
     return fix_ranges
 
 
-def process_segment(i, data, fixpointer, fixid, t1, fixations):
-    segment_data = data[fixpointer:i+1, :]
-    if not segment_data.any():
-        return None
-    mx, my = (np.nanmean(segment_data[:, 0]), np.nanmean(segment_data[:, 1])) \
-        if segment_data.shape[0] > 1 else (segment_data[:, 0], segment_data[:, 1])
-    d = distance2p(mx, my, data[i, 0], data[i, 1])
-    if d > t1:
-        fixid += 1
-        fixpointer = i
-    return (fixid, i, mx, my)
+def get_t1_filtered_fixations(n, x, y, t, t1):
+    fixations = np.zeros((n, 4))
+    fixid = 0
+    fixpointer = 0
+    for i in range(n):
+        if not np.any(x[fixpointer:i+1]) or not np.any(y[fixpointer:i+1]):
+            fixations = update_fixations(i, x, y, t, fixations, fixid)
+        else:
+            mx = np.mean(x[fixpointer:i+1])
+            my = np.mean(y[fixpointer:i+1])
+            d = util.distance2p(mx, my, x[i], y[i])
+            if d > t1:
+                fixid += 1
+                fixpointer = i
+            fixations = update_fixations(i, x, y, t, fixations, fixid)
+    return fixations
 
 
-def distance2p(x1, y1, x2, y2):
-    """
-    Calculate the distance between two points.
-    Args:
-    x1, y1: Coordinates of the first point.
-    x2, y2: Coordinates of the second point.
-    Returns:
-    The distance between the two points.
-    """
-    dx = x2 - x1
-    dy = y2 - y1
-    distance2p = np.sqrt(dx**2 + dy**2)
-    return distance2p
+def update_fixations(i, x, y, t, fixations, fixid):
+    fixations[i, 0] = x[i]
+    fixations[i, 1] = y[i]
+    fixations[i, 2] = t[i]
+    fixations[i, 3] = fixid
+    return fixations
 
 
 def filter_fixations_t2(i, fixations, t2):
@@ -153,7 +128,7 @@ def fixations_t2(fixations, fixation_id, t2):
     # Clustering according to criterion t2
     fixx, fixy = np.nanmean(fixations_id[:, :2], axis=0)
     for i in range(number_t1):
-        d = distance2p(fixx, fixy, fixations_id[i, 0], fixations_id[i, 1])
+        d = util.distance2p(fixx, fixy, fixations_id[i, 0], fixations_id[i, 1])
         if d > t2:
             fixations_id[i, 3] = 0
     # Initialize lists

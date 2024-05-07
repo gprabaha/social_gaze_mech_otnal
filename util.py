@@ -191,5 +191,17 @@ def calculate_distances(x, y, curve_params):
     distances = np.abs(y - curve_y)
     return distances
 
-
+def distance2p(x1, y1, x2, y2):
+    """
+    Calculate the distance between two points.
+    Args:
+    x1, y1: Coordinates of the first point.
+    x2, y2: Coordinates of the second point.
+    Returns:
+    The distance between the two points.
+    """
+    dx = x2 - x1
+    dy = y2 - y1
+    distance2p = np.sqrt(dx**2 + dy**2)
+    return distance2p
 

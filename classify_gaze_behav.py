@@ -47,8 +47,8 @@ np.save(os.path.join(root_data_dir, 'fixation_labels_m1.npz'), fixation_labels_m
 """
 # Find saccades
 saccades_m1, saccade_labels_m1 = filter_behavior.extract_saccades_with_labels(labelled_gaze_positions_m1)
-np.save(os.path.join(root_data_dir, 'saccades_m1.npy'), saccades_m1)
-np.save(os.path.join(root_data_dir, 'saccade_labels_m1.npy'), saccade_labels_m1)
+np.save(os.path.join(root_data_dir, 'saccades_m1.npz'), saccades_m1)
+np.save(os.path.join(root_data_dir, 'saccade_labels_m1.npz'), saccade_labels_m1)
 
 # for each neuron see eye vs obj and also central fix (in interval) vs obj
 
