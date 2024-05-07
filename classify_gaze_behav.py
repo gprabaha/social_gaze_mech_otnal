@@ -9,6 +9,7 @@ Created on Tue Apr  9 10:25:48 2024
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import pickle
 
 import util
 import filter_behavior
@@ -31,14 +32,15 @@ unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(o
 labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
     unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
 # Save arrays to root_data_dir
-np.save(os.path.join(root_data_dir, 'labelled_gaze_positions.npy'), labelled_gaze_positions_m1)
+with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'wb') as f:
+    pickle.dump(labelled_gaze_positions_m1, f)
 # Find fixations
 # Parallel
-fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1)
+# fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1)
 # Serial: Debug
-#fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, False)
-np.save(os.path.join(root_data_dir, 'fixations_m1.npy'), fixations_m1)
-np.save(os.path.join(root_data_dir, 'fixation_labels_m1.npy'), fixation_labels_m1)
+fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, False)
+np.save(os.path.join(root_data_dir, 'fixations_m1.npz'), fixations_m1)
+np.save(os.path.join(root_data_dir, 'fixation_labels_m1.npz'), fixation_labels_m1)
 
 
 
