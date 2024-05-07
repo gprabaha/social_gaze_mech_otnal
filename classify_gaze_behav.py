@@ -36,9 +36,9 @@ with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'wb') a
     pickle.dump(labelled_gaze_positions_m1, f)
 # Find fixations
 # Parallel
-# fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1)
+fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1)
 # Serial: Debug
-fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, False)
+# fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, False)
 np.save(os.path.join(root_data_dir, 'fixations_m1.npz'), fixations_m1)
 np.save(os.path.join(root_data_dir, 'fixation_labels_m1.npz'), fixation_labels_m1)
 

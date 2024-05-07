@@ -240,8 +240,7 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, parallel=Tru
             results = list(tqdm(pool.imap(get_session_fixations, sessions),
                                 total=len(sessions), desc="Extracting fixations in parallel", unit="session"))
     else:
-        results = [get_session_fixations(session) for session in
-                   tqdm(sessions, desc="Extracting fixations in serial", unit="session")]
+        results = [get_session_fixations(session) for session in sessions]
     all_fixations = []
     all_fixation_labels = []
     for session_fixations, session_labels in results:
@@ -258,11 +257,9 @@ def get_session_fixations(session):
     category = info['category']
     n_runs = info['num_runs']
     n_intervals = n_runs - 1
-    print(f"\nDetecting all fixations in: {info['session_name']}")
     fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, sampling_rate=sampling_rate)
     fixations = util.find_islands(fix_vec_entire_session)
     fixation_labels = []
-    print(f"\nLabelling fixations for: {info['session_name']}")
     for start_stop in fixations:
         duration = util.get_duration(start_stop)
         run, block , fix_roi = detect_run_block_and_roi(start_stop, positions, info)

@@ -21,7 +21,121 @@ import util
 import pdb
 
 
+def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
+    """
+    Determine fixations based on position and time data.
+    Args:
+    pos: Position data (x, y).
+    time: Time data.
+    t1: Spatial parameter t1.
+    t2: Spatial parameter t2.
+    minDur: Minimum fixation duration.
+    sampling_rate: Sampling rate.
+    Returns:
+    Binary vector indicating fixations (1) and non-fixations (0).
+    """
+    # Combine position and time into a single data matrix
+    data = np.column_stack((pos, time))
+    # Calculate sampling rate if not provided
+    if sampling_rate is None:
+        sampling_rate = 1 / (time[1,:] - time[0,:])
+    # Set default values
+    if minDur is None:
+        minDur = 0.01
+    if t2 is None:
+        t2 = 15
+    if t1 is None:
+        t1 = 30
+    # Add NaN padding based on sampling rate
+    dt = 1 / sampling_rate
+    # Initialize fix_vector
+    fix_vector = np.zeros(data.shape[0])
+    '''
+    Implement a proper outlier detection code here. The curve fit should
+    account for a situation where t_n is (x_a, y_a) and t_m is (x_a, y_b), so
+    the same x will have 2 y values, which can get complicated for polyfit
+    '''
+    t_ind = fixation_detection(data, t1, t2, minDur)
+    for t_range in t_ind:
+        fix_vector[t_range[0]:t_range[1] + 1] = 1
+    return fix_vector
 
+
+def fixation_detection(data, t1, t2, minDur):
+    n = len(data)
+    if n == 0:
+        return []  # Return empty list if data is empty
+    x = data[:, 0]
+    y = data[:, 1]
+    t = data[:, 2]
+    n = len(t)
+    # build initial fixations list
+    # categorize each data point to a fixation cluster with to tolerance 1
+    fixations = np.zeros((n, 4))  # Initialize fixations array
+    # initialize pointers
+    fixid = 1  # fixation id
+    mx = 0  # mean coordinate x
+    my = 0  # mean coordinate y
+    d = 0   # distance between data point and mean point
+    fixpointer = 0  # fixations pointer
+    #for i in tqdm(range(n), desc="Fix labelling location by t1 threshold:"):
+    for i in range(n):
+        mx = np.mean(x[fixpointer:i+1])
+        my = np.mean(y[fixpointer:i+1])
+        d = distance2p(mx, my, x[i], y[i])
+        if d > t1:
+            fixid += 1
+            fixpointer = i
+        fixations[i, 0] = x[i]
+        fixations[i, 1] = y[i]
+        fixations[i, 2] = t[i]
+        fixations[i, 3] = fixid
+    number_fixations = fixations[-1, 3]
+    with Pool() as pool:
+        fixation_list = pool.starmap(filter_fixations_t2,
+                                     [(i, fixations, t2) for i in range(1, int(number_fixations) + 1)])
+    # Duration thresholding
+    fixation_list = min_duration(fixation_list, minDur)
+    # Final output
+    fix_ranges = []
+    for fix in fixation_list:
+        s_ind = np.where(data[:, 2] == fix[4])[0][0]
+        e_ind = np.where(data[:, 2] == fix[5])[0][-1]
+        fix_ranges.append([s_ind, e_ind])
+    return fix_ranges
+
+
+def process_segment(i, data, fixpointer, fixid, t1, fixations):
+    segment_data = data[fixpointer:i+1, :]
+    if not segment_data.any():
+        return None
+    mx, my = (np.nanmean(segment_data[:, 0]), np.nanmean(segment_data[:, 1])) \
+        if segment_data.shape[0] > 1 else (segment_data[:, 0], segment_data[:, 1])
+    d = distance2p(mx, my, data[i, 0], data[i, 1])
+    if d > t1:
+        fixid += 1
+        fixpointer = i
+    return (fixid, i, mx, my)
+
+
+def distance2p(x1, y1, x2, y2):
+    """
+    Calculate the distance between two points.
+    Args:
+    x1, y1: Coordinates of the first point.
+    x2, y2: Coordinates of the second point.
+    Returns:
+    The distance between the two points.
+    """
+    dx = x2 - x1
+    dy = y2 - y1
+    distance2p = np.sqrt(dx**2 + dy**2)
+    return distance2p
+
+
+def filter_fixations_t2(i, fixations, t2):
+    centerx_t2, centery_t2, n_t1_t2, n_t2, t1_t2, t2_t2, d_t2, out_points = fixations_t2(fixations, i, t2)
+    return [centerx_t2, centery_t2, n_t1_t2, n_t2, t1_t2, t2_t2, d_t2]
 
 
 def fixations_t2(fixations, fixation_id, t2):
@@ -72,161 +186,4 @@ def min_duration(fixation_list, minDur):
     Fixation list after applying duration threshold.
     """
     return [fix for fix in fixation_list if fix[6] >= minDur]
-
-'''
-def fixation_detection(data, t1, t2, minDur):
-    """
-    Detect fixations from raw data.
-    Args:
-    data: Raw data (x, y, t).
-    t1: Spatial parameter t1.
-    t2: Spatial parameter t2.
-    minDur: Minimum fixation duration.
-    Returns:
-    Fixation list computed with t1, t2, minDur criteria.
-    """
-    n = len(data)
-    if n == 0:
-        return []  # Return empty list if data is empty
-    fixations = np.column_stack((data, np.zeros((n, 1))))  # Initialize fixations array
-    # Spatial clustering
-    fixid = 1
-    mx, my, d = 0, 0, 0
-    fixpointer = 1
-    for i in range(n):
-        segment_data = data[fixpointer:i+1, :]
-        # Skip if segment data is empty
-        if not segment_data.any():
-            continue
-        if segment_data.shape[0] > 1:
-            mx = np.nanmean(segment_data[:, 0])
-            my = np.nanmean(segment_data[:, 1])
-        else:
-            mx = segment_data[:,0]
-            my = segment_data[:,1]
-        d = distance2p(mx, my, data[i, 0], data[i, 1])
-        if d > t1:
-            fixid += 1
-            fixpointer = i
-        fixations[i, 3] = fixid
-    # Temporal filtering
-    number_fixations = fixations[-1, 3]
-    fixation_list = []
-    for i in range(1, int(number_fixations) + 1):
-        centerx_t2, centery_t2, n_t1_t2, n_t2, t1_t2, t2_t2, d_t2, out_points = fixations_t2(fixations, i, t2)
-        fixation_list.append([centerx_t2, centery_t2, n_t1_t2, n_t2, t1_t2, t2_t2, d_t2])
-    # Duration thresholding
-    fixation_list = min_duration(fixation_list, minDur)
-    # Final output
-    fix_ranges = []
-    for fix in fixation_list:
-        s_ind = np.where(data[:, 2] == fix[4])[0][0]
-        e_ind = np.where(data[:, 2] == fix[5])[0][-1]
-        fix_ranges.append([s_ind, e_ind])
-    return fix_ranges
-'''
-
-def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
-    """
-    Determine fixations based on position and time data.
-    Args:
-    pos: Position data (x, y).
-    time: Time data.
-    t1: Spatial parameter t1.
-    t2: Spatial parameter t2.
-    minDur: Minimum fixation duration.
-    sampling_rate: Sampling rate.
-    Returns:
-    Binary vector indicating fixations (1) and non-fixations (0).
-    """
-    # Combine position and time into a single data matrix
-    data = np.column_stack((pos, time))
-    # Calculate sampling rate if not provided
-    if sampling_rate is None:
-        sampling_rate = 1 / (time[1,:] - time[0,:])
-    # Set default values
-    if minDur is None:
-        minDur = 0.01
-    if t2 is None:
-        t2 = 15
-    if t1 is None:
-        t1 = 30
-    # Add NaN padding based on sampling rate
-    dt = 1 / sampling_rate
-    # Initialize fix_vector
-    fix_vector = np.zeros(data.shape[0])
-    '''
-    Implement a proper outlier detection code here. The curve fit should
-    account for a situation where t_n is (x_a, y_a) and t_m is (x_a, y_b), so
-    the same x will have 2 y values, which can get complicated for polyfit
-    '''
-    t_ind = fixation_detection(data, t1, t2, minDur)
-    for t_range in t_ind:
-        fix_vector[t_range[0]:t_range[1] + 1] = 1
-    return fix_vector
-
-
-def fixation_detection(data, t1, t2, minDur):
-    n = len(data)
-    if n == 0:
-        return []  # Return empty list if data is empty
-    fixations = np.column_stack((data, np.zeros((n, 1))))  # Initialize fixations array
-    # Spatial clustering
-    fixid = 1
-    fixpointer = 1
-    results = Parallel(n_jobs=-1)(delayed(process_segment)
-                                  (i, data, fixpointer, fixid, t1, fixations) for i in tqdm(range(n), desc="Processing segment in session:"))
-    for result in results:
-        if result is not None:
-            fixid, i, mx, my = result
-            fixations[i, 3] = fixid
-    # Temporal filtering
-    number_fixations = fixations[-1, 3]
-    with Pool() as pool:
-        fixation_list = pool.starmap(filter_fixations_t2,
-                                     [(i, fixations, t2) for i in range(1, int(number_fixations) + 1)])
-    # Duration thresholding
-    fixation_list = min_duration(fixation_list, minDur)
-    # Final output
-    fix_ranges = []
-    for fix in fixation_list:
-        s_ind = np.where(data[:, 2] == fix[4])[0][0]
-        e_ind = np.where(data[:, 2] == fix[5])[0][-1]
-        fix_ranges.append([s_ind, e_ind])
-    return fix_ranges
-
-
-def process_segment(i, data, fixpointer, fixid, t1, fixations):
-    segment_data = data[fixpointer:i+1, :]
-    if not segment_data.any():
-        return None
-    mx, my = (np.nanmean(segment_data[:, 0]), np.nanmean(segment_data[:, 1])) if segment_data.shape[0] > 1 else (segment_data[:, 0], segment_data[:, 1])
-    d = distance2p(mx, my, data[i, 0], data[i, 1])
-    if d > t1:
-        fixid += 1
-        fixpointer = i
-    return (fixid, i, mx, my)
-
-
-def distance2p(x1, y1, x2, y2):
-    """
-    Calculate the distance between two points.
-    Args:
-    x1, y1: Coordinates of the first point.
-    x2, y2: Coordinates of the second point.
-    Returns:
-    The distance between the two points.
-    """
-    dx = x2 - x1
-    dy = y2 - y1
-    distance2p = np.sqrt(dx**2 + dy**2)
-    return distance2p
-
-
-def filter_fixations_t2(i, fixations, t2):
-    centerx_t2, centery_t2, n_t1_t2, n_t2, t1_t2, t2_t2, d_t2, out_points = fixations_t2(fixations, i, t2)
-    return [centerx_t2, centery_t2, n_t1_t2, n_t2, t1_t2, t2_t2, d_t2]
-
-
-
 
