@@ -34,7 +34,7 @@ def extract_meta_info(session_paths):
         meta_info = {'session_name': os.path.basename(os.path.normpath(session_path))}
         meta_info.update(get_info_data(session_path))
         meta_info.update(get_runs_data(session_path))
-        meta_info.update(get_m1_landmarks_data(session_path))
+        meta_info['roi_bb_corners'] = get_m1_roi_bounding_boxes(session_path)
         meta_info_list.append(meta_info)
     return meta_info_list
 
@@ -81,7 +81,7 @@ def get_runs_data(session_path):
         return {'startS': None, 'stopS': None, 'num_runs': 0}
 
 
-def get_m1_landmarks_data(session_path):
+def get_m1_roi_bounding_boxes(session_path):
     file_list_m1_landmarks = glob.glob(f"{session_path}/*M1_farPlaneCal.mat")
     if len(file_list_m1_landmarks) != 1:
         print(f"Warning: No m1_landmarks found in folder: {session_path}.")
@@ -163,8 +163,8 @@ def extract_labelled_gaze_positions_m1(root_data_dir, unique_doses, dose_inds, m
                 labelled_gaze_positions_m1.append((gaze_positions, meta_info))
             except Exception as e:
                 print(f"Error loading file '{mat_file_name}': {str(e)}")
-        with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'wb') as f:
-            pickle.dump(labelled_gaze_positions_m1, f)
+    with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'wb') as f:
+        pickle.dump(labelled_gaze_positions_m1, f)
     return labelled_gaze_positions_m1
 
 
@@ -259,21 +259,25 @@ def get_session_fixations(session):
     category = info['category']
     n_runs = info['num_runs']
     n_intervals = n_runs - 1
+    startS = info['startS']
+    stopS = info['stopS']
+    bbox_corners = info['roi_bb_corners']
     fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, sampling_rate=sampling_rate)
     fixations = util.find_islands(fix_vec_entire_session)
     fixation_labels = []
     for start_stop in fixations:
-        duration = util.get_duration(start_stop)
-        run, block , fix_roi = detect_run_block_and_roi(start_stop, positions, info)
+        fix_duration = util.get_duration(start_stop)
+        fix_positions = util.get_fix_positions(start_stop, positions)
+        run, block, fix_roi = detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, fix_positions, bbox_corners)
         agent = info['monkey_1']
         # Construct the details for the current fixation
-        fixation_info = [category, session_identifier, run, block, duration, fix_roi, agent]
+        fixation_info = [category, session_identifier, run, block, fix_duration, fix_roi, agent]
         fixation_labels.append(fixation_info)
     assert fixations.shape[0] == len(fixation_labels)
     return fixations, fixation_labels
 
 
-def detect_run_block_and_roi(start_stop, positions, info):
+def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, fix_positions, bbox_corners):
     """
     Detect the run, block, and ROI based on start and stop indices, gaze positions, and session info.
     Parameters:
@@ -285,10 +289,7 @@ def detect_run_block_and_roi(start_stop, positions, info):
     - block (str): Detected block identifier.
     - fix_roi (str): Detected region of interest.
     """
-    start, stop = start_stop
-    # Detect run and block
-    startS = info.get('startS', [])
-    stopS = info.get('stopS', [])
+    start, stop = start_stop*sampling_rate
     for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
         if start >= run_start and stop <= run_stop:
             run = i
@@ -306,18 +307,12 @@ def detect_run_block_and_roi(start_stop, positions, info):
             run = None
             block = 'discard'
     # Find fixation ROI
-    fix_pos = positions[start:stop, :]
-    mean_fix_pos = np.nanmean(fix_pos, axis=0)
+    mean_fix_pos = np.nanmean(fix_positions, axis=0)
     bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
-    for key in bounding_boxes:
-        value = info.get(key)
-        if value:
-            bottom_left = value['bottomLeft']
-            top_right = value['topRight']
-            if bottom_left[0] <= mean_fix_pos[0] <= top_right[0] and \
-               bottom_left[1] <= mean_fix_pos[1] <= top_right[1]:
-                fix_roi = key
-                break
+    inside_roi = [util.is_inside_quadrilateral(mean_fix_pos, bbox_corners[key]) for key in bbox_corners]
+    if np.any(inside_roi):
+        pdb.set_trace()
+        fix_roi = bbox_corners[bounding_boxes[inside_roi]]
     else:
         fix_roi = 'out_of_roi' 
     return run, block, fix_roi

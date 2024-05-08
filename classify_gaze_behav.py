@@ -24,7 +24,8 @@ All fixations are out of bounds right now which cannot be correct. Check out wha
 
 # Determine root data directory based on whether it's running on a cluster or not
 is_cluster = True
-use_parallel = True
+use_parallel = False
+remake_labelled_gaze_pos = False
 if 'labelled_gaze_positions_m1' in globals():
     print("labelled_gaze_positions_m1 is already loaded")
 else:
@@ -37,16 +38,19 @@ else:
     otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_info in meta_info_list], dtype=np.float64)
     # Find unique doses and their indices
     unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
-    with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'rb') as f:
-        labelled_gaze_positions_m1 = pickle.load(f)
+    if remake_labelled_gaze_pos:
+        labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
+    else:
+        with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'rb') as f:
+            labelled_gaze_positions_m1 = pickle.load(f)
 
 # Find fixations
 # Parallel
-fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, use_parallel)
+fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1[1:], use_parallel)
 # Serial: Debug
 # fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, False)
-np.save(os.path.join(root_data_dir, 'fixations_m1.npz'), fixations_m1)
-np.save(os.path.join(root_data_dir, 'fixation_labels_m1.npz'), fixation_labels_m1)
+np.save(os.path.join(root_data_dir, 'fixations_m1.npy'), fixations_m1)
+np.save(os.path.join(root_data_dir, 'fixation_labels_m1.npy'), fixation_labels_m1)
 
 
 

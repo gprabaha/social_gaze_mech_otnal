@@ -44,8 +44,6 @@ def get_subfolders(root_dir):
 
 
 
-
-
 def calculate_roi_bounding_box_corners(m1_landmarks):
     # Positive Y axis is downward so that needs to be accounted for
     # Face bounding box is just the one described the four corner points
@@ -53,9 +51,9 @@ def calculate_roi_bounding_box_corners(m1_landmarks):
     left_eye = m1_landmarks['eyeOnLeft'][0][0][0]
     right_eye = m1_landmarks['eyeOnRight'][0][0][0]
     eye_bb_corners = construct_eye_bounding_box(left_eye, right_eye, corner_name_order)
-    face_bb_corners = [m1_landmarks[key][0][0][0] for key in corner_name_order]
-    left_obj_bb_corners = [m1_landmarks['leftObject'][0][0][0][key][0][0] for key in corner_name_order]
-    right_obj_bb_corners = [m1_landmarks['rightObject'][0][0][0][key][0][0] for key in corner_name_order]
+    face_bb_corners = {key: m1_landmarks[key][0][0][0] for key in corner_name_order}
+    left_obj_bb_corners = {key: m1_landmarks['leftObject'][0][0][0][key][0][0] for key in corner_name_order}
+    right_obj_bb_corners = {key: m1_landmarks['rightObject'][0][0][0][key][0][0] for key in corner_name_order}
     return eye_bb_corners, face_bb_corners, left_obj_bb_corners, right_obj_bb_corners
 
 
@@ -66,21 +64,39 @@ def construct_eye_bounding_box(left_eye, right_eye, corner_name_order):
     right_eye_x, right_eye_y = right_eye
     # Coordinates of the left eye
     left_eye_x, left_eye_y = left_eye
-    # Determine the order of corners based on corner_name_order
-    corner_index = {'topLeft': 0, 'topRight': 1, 'bottomRight': 2, 'bottomLeft': 3}
-    ordered_corners = [None] * 4
-    for corner, index in corner_index.items():
+    corner_dict = {}
+    for corner in corner_name_order:
         if corner == 'topLeft':
-            ordered_corners[index] = (left_eye_x - offset, left_eye_y - offset)
+            corner_dict[corner] = (left_eye_x - offset, left_eye_y - offset)
         elif corner == 'topRight':
-            ordered_corners[index] = (right_eye_x + offset, right_eye_y - offset)
+            corner_dict[corner] = (right_eye_x + offset, right_eye_y - offset)
         elif corner == 'bottomRight':
-            ordered_corners[index] = (right_eye_x + offset, right_eye_y + offset)
+            corner_dict[corner] = (right_eye_x + offset, right_eye_y + offset)
         elif corner == 'bottomLeft':
-            ordered_corners[index] = (left_eye_x - offset, left_eye_y + offset)
-    # Rearrange the corners based on corner_name_order
-    bounding_box = [ordered_corners[corner_index[name]] for name in corner_name_order]
-    return bounding_box
+            corner_dict[corner] = (left_eye_x - offset, left_eye_y + offset)
+    return corner_dict
+
+
+def is_inside_quadrilateral(point, corners, tolerance=1e-10):
+    x, y = point
+    x1, y1 = corners['topLeft']
+    x2, y2 = corners['topRight']
+    x3, y3 = corners['bottomRight']
+    x4, y4 = corners['bottomLeft']
+    total_area = shoelace_formula(x1, y1, x2, y2, x3, y3) + \
+                 shoelace_formula(x1, y1, x3, y3, x4, y4)
+    area_point1 = shoelace_formula(x, y, x1, y1, x2, y2)
+    area_point2 = shoelace_formula(x, y, x2, y2, x3, y3)
+    area_point3 = shoelace_formula(x, y, x3, y3, x4, y4)
+    area_point4 = shoelace_formula(x, y, x4, y4, x1, y1)
+    
+    pdb.set_trace()
+    return abs(total_area - (area_point1 + area_point2 + area_point3 + area_point4)) < tolerance
+
+
+def shoelace_formula(x1, y1, x2, y2, x3, y3):
+    return 0.5 * abs((x1*y2 + x2*y3 + x3*y1) - (y1*x2 + y2*x3 + y3*x1))
+
 
 
 def distance(point1, point2):
@@ -88,6 +104,10 @@ def distance(point1, point2):
     x2, y2 = point2
     return sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
+
+def get_fix_positions(start_stop, positions):
+    start, stop = start_stop
+    return positions[start:stop,:]
 
 def px2deg(px, monitor_info=None):
     if monitor_info is None:
