@@ -24,25 +24,25 @@ All fixations are out of bounds right now which cannot be correct. Check out wha
 
 # Determine root data directory based on whether it's running on a cluster or not
 is_cluster = True
-root_data_dir = util.get_root_data_dir(is_cluster)
-# Get subfolders within the root data directory
-session_paths = util.get_subfolders(root_data_dir)
-# Extract meta-information from session paths
-meta_info_list = filter_behavior.extract_meta_info(session_paths)
-# Extract OT and NAL doses from meta-information and convert to numpy array
-otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_info in meta_info_list], dtype=np.float64)
-# Find unique doses and their indices
-unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
-
+use_parallel = True
 if 'labelled_gaze_positions_m1' in globals():
     print("labelled_gaze_positions_m1 is already loaded")
 else:
+    root_data_dir = util.get_root_data_dir(is_cluster)
+    # Get subfolders within the root data directory
+    session_paths = util.get_subfolders(root_data_dir)
+    # Extract meta-information from session paths
+    meta_info_list = filter_behavior.extract_meta_info(session_paths)
+    # Extract OT and NAL doses from meta-information and convert to numpy array
+    otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_info in meta_info_list], dtype=np.float64)
+    # Find unique doses and their indices
+    unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
     with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'rb') as f:
         labelled_gaze_positions_m1 = pickle.load(f)
 
 # Find fixations
 # Parallel
-fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1)
+fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, use_parallel)
 # Serial: Debug
 # fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, False)
 np.save(os.path.join(root_data_dir, 'fixations_m1.npz'), fixations_m1)

@@ -9,7 +9,7 @@ Created on Wed Apr 10 11:50:13 2024
 import os
 import numpy as np
 from scipy.optimize import curve_fit
-from math import degrees, atan2
+from math import degrees, atan2, sqrt
 
 import defaults
 
@@ -43,55 +43,50 @@ def get_subfolders(root_dir):
     return subfolders
 
 
-def calculate_roi_bounding_boxes(m1_landmarks, monitor_info=None):
-    
-    # for the face roi, just use the 4 extremeties of the far plane calibration 
-    
-    if monitor_info is None:
-        monitor_info = defaults.fetch_monitor_info() if hasattr(defaults, 'fetch_monitor_info') else None
-    if monitor_info is None:
-        raise ValueError("Monitor info is required for conversion.")
-    # Fetching coordinates in pixels
+
+
+
+def calculate_roi_bounding_box_corners(m1_landmarks):
+    # Positive Y axis is downward so that needs to be accounted for
+    # Face bounding box is just the one described the four corner points
+    corner_name_order = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft']
     left_eye = m1_landmarks['eyeOnLeft'][0][0][0]
     right_eye = m1_landmarks['eyeOnRight'][0][0][0]
-    mouth = m1_landmarks['mouth'][0][0][0]
-    lo_bottom_left = m1_landmarks[0]['leftObject'][0][0]['bottomLeft'][0][0]
-    lo_top_right = m1_landmarks[0]['leftObject'][0][0]['topRight'][0][0]
-    ro_bottom_left = m1_landmarks[0]['rightObject'][0][0]['bottomLeft'][0][0]
-    ro_top_right = m1_landmarks[0]['rightObject'][0][0]['topRight'][0][0]
-    # Calculate average y-coordinate of the eyes in pixels
-    avg_eye_y_px = (left_eye[1] + right_eye[1]) / 2
-    # Convert average eye y-coordinate to degrees of visual angle (DVA)
-    avg_eye_y_deg = px2deg(avg_eye_y_px, monitor_info)
-    # Calculate y-coordinates for eye bounding box
-    eye_top_y_deg = avg_eye_y_deg - 1
-    eye_bottom_y_deg = avg_eye_y_deg + 1
-    # Calculate mean x-position of the eyes in pixels
-    avg_eye_x_px = (left_eye[0] + right_eye[0]) / 2
-    # Convert mean eye x-position to degrees of visual angle (DVA)
-    avg_eye_x_deg = px2deg(avg_eye_x_px, monitor_info)
-    # Calculate x-coordinates for eye bounding box
-    eye_left_x_deg = avg_eye_x_deg - 2.5
-    eye_right_x_deg = avg_eye_x_deg + 2.5
-    # Calculate y-coordinates for face bounding box based on mouth position
-    face_top_y_deg = avg_eye_y_deg + 4
-    face_bottom_y_deg = avg_eye_y_deg + 1
-    # Calculate x-coordinates for face bounding box
-    face_left_x_deg = avg_eye_x_deg - 2.5
-    face_right_x_deg = avg_eye_x_deg + 2.5
-    # Create bounding boxes for left and right objects
-    left_obj_bbox = {'bottomLeft': (lo_bottom_left[0], lo_bottom_left[1]), 'topRight': (lo_top_right[0], lo_top_right[1])}
-    right_obj_bbox = {'bottomLeft': (ro_bottom_left[0], ro_bottom_left[1]), 'topRight': (ro_top_right[0], ro_top_right[1])}
-    # Convert coordinates from degrees to pixels
-    eye_bbox = {
-        'bottomLeft': (deg2px(eye_left_x_deg, monitor_info), deg2px(eye_bottom_y_deg, monitor_info)),
-        'topRight': (deg2px(eye_right_x_deg, monitor_info), deg2px(eye_top_y_deg, monitor_info))
-    }
-    face_bbox = {
-        'bottomLeft': (deg2px(face_left_x_deg, monitor_info), deg2px(face_bottom_y_deg, monitor_info)),
-        'topRight': (deg2px(face_right_x_deg, monitor_info), deg2px(face_top_y_deg, monitor_info))
-    }
-    return eye_bbox, face_bbox, left_obj_bbox, right_obj_bbox
+    eye_bb_corners = construct_eye_bounding_box(left_eye, right_eye, corner_name_order)
+    face_bb_corners = [m1_landmarks[key][0][0][0] for key in corner_name_order]
+    left_obj_bb_corners = [m1_landmarks['leftObject'][0][0][0][key][0][0] for key in corner_name_order]
+    right_obj_bb_corners = [m1_landmarks['rightObject'][0][0][0][key][0][0] for key in corner_name_order]
+    return eye_bb_corners, face_bb_corners, left_obj_bb_corners, right_obj_bb_corners
+
+
+def construct_eye_bounding_box(left_eye, right_eye, corner_name_order):
+    inter_eye_dist = distance(left_eye, right_eye)
+    offset = inter_eye_dist / 2
+    # Coordinates of the right eye
+    right_eye_x, right_eye_y = right_eye
+    # Coordinates of the left eye
+    left_eye_x, left_eye_y = left_eye
+    # Determine the order of corners based on corner_name_order
+    corner_index = {'topLeft': 0, 'topRight': 1, 'bottomRight': 2, 'bottomLeft': 3}
+    ordered_corners = [None] * 4
+    for corner, index in corner_index.items():
+        if corner == 'topLeft':
+            ordered_corners[index] = (left_eye_x - offset, left_eye_y - offset)
+        elif corner == 'topRight':
+            ordered_corners[index] = (right_eye_x + offset, right_eye_y - offset)
+        elif corner == 'bottomRight':
+            ordered_corners[index] = (right_eye_x + offset, right_eye_y + offset)
+        elif corner == 'bottomLeft':
+            ordered_corners[index] = (left_eye_x - offset, left_eye_y + offset)
+    # Rearrange the corners based on corner_name_order
+    bounding_box = [ordered_corners[corner_index[name]] for name in corner_name_order]
+    return bounding_box
+
+
+def distance(point1, point2):
+    x1, y1 = point1
+    x2, y2 = point2
+    return sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
 
 def px2deg(px, monitor_info=None):

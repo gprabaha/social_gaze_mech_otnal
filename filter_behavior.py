@@ -90,7 +90,7 @@ def get_m1_landmarks_data(session_path):
         data_m1_landmarks = scipy.io.loadmat(file_list_m1_landmarks[0])
         m1_landmarks = data_m1_landmarks.get('farPlaneCal', None)
         if m1_landmarks is not None:
-            eye_bbox, face_bbox, left_obj_bbox, right_obj_bbox = util.calculate_roi_bounding_boxes(m1_landmarks)
+            eye_bbox, face_bbox, left_obj_bbox, right_obj_bbox = util.calculate_roi_bounding_box_corners(m1_landmarks)
             return {'eye_bbox': eye_bbox, 'face_bbox': face_bbox, 'left_obj_bbox': left_obj_bbox, 'right_obj_bbox': right_obj_bbox}
         else:
             return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
