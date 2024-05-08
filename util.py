@@ -89,14 +89,17 @@ def is_inside_quadrilateral(point, corners, tolerance=1e-10):
     area_point2 = shoelace_formula(x, y, x2, y2, x3, y3)
     area_point3 = shoelace_formula(x, y, x3, y3, x4, y4)
     area_point4 = shoelace_formula(x, y, x4, y4, x1, y1)
-    
-    pdb.set_trace()
     return abs(total_area - (area_point1 + area_point2 + area_point3 + area_point4)) < tolerance
 
 
 def shoelace_formula(x1, y1, x2, y2, x3, y3):
+    x1 = np.float64(x1)
+    y1 = np.float64(y1)
+    x2 = np.float64(x2)
+    y2 = np.float64(y2)
+    x3 = np.float64(x3)
+    y3 = np.float64(y3)
     return 0.5 * abs((x1*y2 + x2*y3 + x3*y1) - (y1*x2 + y2*x3 + y3*x1))
-
 
 
 def distance(point1, point2):

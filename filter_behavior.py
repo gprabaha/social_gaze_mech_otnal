@@ -20,7 +20,8 @@ import fix
 
 import pdb
 
-###
+
+### Function to extract meta-information from session paths
 def extract_meta_info(session_paths):
     """
     Extracts meta-information from files in session paths.
@@ -38,7 +39,16 @@ def extract_meta_info(session_paths):
         meta_info_list.append(meta_info)
     return meta_info_list
 
+
+### Function to get information data
 def get_info_data(session_path):
+    """
+    Extracts information data from session path.
+    Parameters:
+    - session_path (str): Path to the session.
+    Returns:
+    - info_dict (dict): Dictionary containing information data.
+    """
     file_list_info = glob.glob(f"{session_path}/*metaInfo.mat")
     if len(file_list_info) != 1:
         print(f"Warning: No metaInfo found in folder: {session_path}.")
@@ -61,7 +71,15 @@ def get_info_data(session_path):
         return {'monkey_1': None, 'monkey_2': None, 'OT_dose': None, 'NAL_dose': None}
 
 
+### Function to get runs data
 def get_runs_data(session_path):
+    """
+    Extracts runs data from session path.
+    Parameters:
+    - session_path (str): Path to the session.
+    Returns:
+    - runs_dict (dict): Dictionary containing runs data.
+    """
     file_list_runs = glob.glob(f"{session_path}/*runs.mat")
     if len(file_list_runs) != 1:
         print(f"Warning: No runs found in folder: {session_path}.")
@@ -81,7 +99,15 @@ def get_runs_data(session_path):
         return {'startS': None, 'stopS': None, 'num_runs': 0}
 
 
+### Function to get M1 ROI bounding boxes
 def get_m1_roi_bounding_boxes(session_path):
+    """
+    Extracts M1 ROI bounding boxes from session path.
+    Parameters:
+    - session_path (str): Path to the session.
+    Returns:
+    - bbox_dict (dict): Dictionary containing M1 ROI bounding boxes.
+    """
     file_list_m1_landmarks = glob.glob(f"{session_path}/*M1_farPlaneCal.mat")
     if len(file_list_m1_landmarks) != 1:
         print(f"Warning: No m1_landmarks found in folder: {session_path}.")
@@ -99,7 +125,7 @@ def get_m1_roi_bounding_boxes(session_path):
         return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
 
 
-###
+### Function to get unique doses
 def get_unique_doses(otnal_doses):
     """
     Finds unique rows and their indices in the given array.
@@ -110,38 +136,35 @@ def get_unique_doses(otnal_doses):
     - indices_for_unique_rows (list): List of lists containing indices for each unique row.
     """
     unique_rows = np.unique(otnal_doses, axis=0)
-    # Initialize an empty list to store indices for each unique row
     indices_for_unique_rows = []
     session_category = np.empty(otnal_doses.shape[0])
     session_category[:] = np.nan
-    # Iterate over unique rows
     for i, row in enumerate(unique_rows):
         category = i
-        # Find indices where each unique row occurs in the original array
         indices_for_row = np.where( (otnal_doses == row).all(axis=1))[0]
         session_category[indices_for_row] = category
         indices_for_unique_rows.append(indices_for_row.tolist())
     return unique_rows, indices_for_unique_rows, session_category
 
 
-###
+### Function to extract labelled gaze positions for M1
 def extract_labelled_gaze_positions_m1(root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories):
     """
     Extracts labelled gaze positions from files associated with unique doses.
     Parameters:
+    - root_data_dir (str): Root directory for data storage.
     - unique_doses (ndarray): Unique dose combinations.
     - dose_inds (list): List of lists containing indices for each unique dose.
     - meta_info_list (list): List of dictionaries containing meta-information for each session.
     - session_paths (list): List of paths to sessions.
+    - session_categories (ndarray): Session categories.
     Returns:
-    - labelled_gaze_positions (list): List of tuples containing gaze positions and associated metadata.
+    - labelled_gaze_positions_m1 (list): List of tuples containing gaze positions and associated metadata.
     """
     labelled_gaze_positions_m1 = []
-    # Iterate over unique doses and associated indices
     for dose, indices_list in zip(unique_doses, dose_inds):
         for idx in tqdm(indices_list, desc="Processing indices for dose", unit="index"):
             folder_path = session_paths[idx]
-            # Assuming there's only one file with extension M1_gaze.mat in each folder
             mat_files = [f for f in os.listdir(folder_path) if 'M1_gaze.mat' in f]
             if len(mat_files) != 1:
                 print(f"Error: Multiple or no '*_M1_gaze.mat' files found in folder: {folder_path}")
@@ -149,17 +172,14 @@ def extract_labelled_gaze_positions_m1(root_data_dir, unique_doses, dose_inds, m
             mat_file = mat_files[0]
             mat_file_path = os.path.join(folder_path, mat_file)
             mat_file_name = os.path.basename(mat_file_path)
-            # Load *_M1_gaze.mat file
             try:
                 mat_data = scipy.io.loadmat(mat_file_path)
                 sampling_rate = float(mat_data['M1FS'])
-                M1Xpx = mat_data['M1Xpx'].squeeze()  # Squeeze to remove singleton dimensions
+                M1Xpx = mat_data['M1Xpx'].squeeze()
                 M1Ypx = mat_data['M1Ypx'].squeeze()
-                # Convert x and y positions to a single array
                 gaze_positions = np.array(np.column_stack((M1Xpx, M1Ypx)))
-                # Append gaze positions and associated metadata to the list
-                meta_info = meta_info_list[idx]  # Copy to avoid modifying the original meta_info
-                meta_info.update({'sampling_rate': sampling_rate, 'category': session_categories[idx]})  # Add sampling rate to metadata
+                meta_info = meta_info_list[idx]
+                meta_info.update({'sampling_rate': sampling_rate, 'category': session_categories[idx]})
                 labelled_gaze_positions_m1.append((gaze_positions, meta_info))
             except Exception as e:
                 print(f"Error loading file '{mat_file_name}': {str(e)}")
@@ -168,8 +188,121 @@ def extract_labelled_gaze_positions_m1(root_data_dir, unique_doses, dose_inds, m
     return labelled_gaze_positions_m1
 
 
-###
+### Function to extract fixations with labels, possibly in parallel
+def extract_fixations_with_labels_parallel(labelled_gaze_positions, parallel=True):
+    """
+    Extracts fixations with labels, possibly in parallel.
+    Parameters:
+    - labelled_gaze_positions (list): List of tuples containing gaze positions and associated metadata.
+    - parallel (bool): Whether to use parallel processing.
+    Returns:
+    - all_fixations (list): List of fixations.
+    - all_fixation_labels (list): List of labels for fixations.
+    """
+    session_identifiers = list(range(len(labelled_gaze_positions)))
+    sessions = [(i, session[0], session[1]) for i, session in enumerate(labelled_gaze_positions)]
+    if parallel:
+        with Pool() as pool:
+            results = list(tqdm(pool.imap(get_session_fixations, sessions),
+                                total=len(sessions), desc="Extracting fixations in parallel", unit="session"))
+    else:
+        results = [get_session_fixations(session) for session in sessions]
+    all_fixations = []
+    all_fixation_labels = []
+    for session_fixations, session_labels in results:
+        all_fixations.extend(session_fixations)
+        all_fixation_labels.extend(session_labels)
+    return all_fixations, all_fixation_labels
+
+
+### Function to get fixations for a session
+def get_session_fixations(session):
+    """
+    Extracts fixations for a session.
+    Parameters:
+    - session (tuple): Tuple containing session identifier, positions, and metadata.
+    Returns:
+    - fixations (list): List of fixations.
+    - fixation_labels (list): List of labels for fixations.
+    """
+    session_identifier, positions, info = session
+    sampling_rate = info['sampling_rate']
+    n_samples = positions.shape[0]
+    time_vec = util.create_timevec(n_samples, sampling_rate)
+    category = info['category']
+    n_runs = info['num_runs']
+    n_intervals = n_runs - 1
+    startS = info['startS']
+    stopS = info['stopS']
+    bbox_corners = info['roi_bb_corners']
+    fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, sampling_rate=sampling_rate)
+    fixations = util.find_islands(fix_vec_entire_session)
+    fixation_labels = []
+    for start_stop in fixations:
+        fix_duration = util.get_duration(start_stop)
+        fix_positions = util.get_fix_positions(start_stop, positions)
+        mean_fix_pos = np.nanmean(fix_positions, axis=0)
+        run, block, fix_roi = detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_pos, bbox_corners)
+        agent = info['monkey_1']
+        fixation_info = [category, session_identifier, run, block, fix_duration,  fix_roi, agent]
+        fixation_labels.append(fixation_info)
+    assert fixations.shape[0] == len(fixation_labels)
+    col_names = ['category', 'session_id', 'run', 'block', 'fix_duration', 'fix_roi', 'agent']
+    return fixations, fixation_labels
+
+
+### Function to detect run, block, and ROI for a fixation
+def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_pos, bbox_corners):
+    """
+    Detects run, block, and ROI for a fixation.
+    Parameters:
+    - start_stop (tuple): Start and stop indices of fixation.
+    - startS (list): List of start indices of runs.
+    - stopS (list): List of stop indices of runs.
+    - sampling_rate (float): Sampling rate.
+    - mean_fix_pos (ndarray): Mean position of fixation.
+    - bbox_corners (dict): Dictionary containing bounding boxes of ROIs.
+    Returns:
+    - run (int or None): Detected run number.
+    - block (str): Detected block.
+    - fix_roi (str): Detected ROI.
+    """
+    start, stop = start_stop*sampling_rate
+    for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
+        if start >= run_start and stop <= run_stop:
+            run = i
+            block = 'mon_down'
+            break
+        elif i < len(startS) and stop <= startS[i]:
+            run = None
+            block = 'mon_up'
+            break
+    else:
+        if start < startS[0] or stop > stopS[-1]:
+            run = None
+            block = 'discard'
+        else:
+            run = None
+            block = 'discard'
+    bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
+    inside_roi = [util.is_inside_quadrilateral(mean_fix_pos, bbox_corners[key]) for key in bbox_corners]
+    if np.any(inside_roi):
+        fix_roi = bounding_boxes[bool(inside_roi)]
+    else:
+        fix_roi = 'out_of_roi' 
+    return run, block, fix_roi
+
+
+### Function to extract saccades with labels
 def extract_saccades_with_labels(labelled_gaze_positions):
+    """
+    Extracts saccades with labels.
+    Parameters:
+    - labelled_gaze_positions (list): List of tuples containing gaze positions and associated metadata.
+    Returns:
+    - saccades (list): List of saccades.
+    - saccade_labels (list): List of labels for saccades.
+    """
     saccade_params = defaults.fetch_default_saccade_pars()
     vel_thresh = saccade_params['vel_thresh']
     min_samples = saccade_params['min_samples']
@@ -197,23 +330,24 @@ def extract_saccades_with_labels(labelled_gaze_positions):
             saccades_in_run = extract_saccade_positions(run_positions, saccade_start_stops)
             n_saccades = len(saccades_in_run)
             saccades.extend(saccades_in_run)
-            #import pdb; pdb.set_trace()
             saccade_labels.extend([[category, session_identifier, run]] * n_saccades)
     assert len(saccades) == len(saccade_labels)
     return saccades, saccade_labels
 
+
+### Function to find saccades
 def find_saccades(x, y, sr, vel_thresh, min_samples, smooth_func):
     """
-    Find start and stop indices of saccades.
+    Finds saccades.
     Parameters:
-    - x: array-like, x-coordinates of eye movements
-    - y: array-like, y-coordinates of eye movements
-    - sr: float, sampling rate
-    - vel_thresh: float, minimum velocity threshold for saccade onset
-    - min_samples: int, minimum duration of a saccade in samples
-    - smooth_func: function, function for smoothing input data
+    - x (array-like): x-coordinates of eye movements.
+    - y (array-like): y-coordinates of eye movements.
+    - sr (float): Sampling rate.
+    - vel_thresh (float): Minimum velocity threshold for saccade onset.
+    - min_samples (int): Minimum duration of a saccade in samples.
+    - smooth_func (function): Function for smoothing input data.
     Returns:
-    - start_stops: list of arrays, start and stop indices of saccades for each trial
+    - start_stops (list): List of start and stop indices of saccades for each trial.
     """
     assert x.shape == y.shape
     start_stops = []
@@ -226,93 +360,19 @@ def find_saccades(x, y, sr, vel_thresh, min_samples, smooth_func):
     start_stops = util.find_islands(above_thresh, min_samples)
     return start_stops
 
+
+### Function to extract saccade positions
 def extract_saccade_positions(run_positions, saccade_start_stops):
+    """
+    Extracts saccade positions.
+    Parameters:
+    - run_positions (ndarray): Array containing gaze positions for a run.
+    - saccade_start_stops (list): List of start and stop indices of saccades.
+    Returns:
+    - saccades (list): List of saccades.
+    """
     saccades = []
     for start, stop in saccade_start_stops:
         saccade = run_positions[start:stop+1, :]
         saccades.append(saccade)
     return saccades
-
-
-def extract_fixations_with_labels_parallel(labelled_gaze_positions, parallel=True):
-    session_identifiers = list(range(len(labelled_gaze_positions)))
-    sessions = [(i, session[0], session[1]) for i, session in enumerate(labelled_gaze_positions)]
-    if parallel:
-        with Pool() as pool:
-            results = list(tqdm(pool.imap(get_session_fixations, sessions),
-                                total=len(sessions), desc="Extracting fixations in parallel", unit="session"))
-    else:
-        results = [get_session_fixations(session) for session in sessions]
-    all_fixations = []
-    all_fixation_labels = []
-    for session_fixations, session_labels in results:
-        all_fixations.extend(session_fixations)
-        all_fixation_labels.extend(session_labels)
-    return all_fixations, all_fixation_labels
-
-
-def get_session_fixations(session):
-    session_identifier, positions, info = session
-    sampling_rate = info['sampling_rate']
-    n_samples = positions.shape[0]
-    time_vec = util.create_timevec(n_samples, sampling_rate)
-    category = info['category']
-    n_runs = info['num_runs']
-    n_intervals = n_runs - 1
-    startS = info['startS']
-    stopS = info['stopS']
-    bbox_corners = info['roi_bb_corners']
-    fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, sampling_rate=sampling_rate)
-    fixations = util.find_islands(fix_vec_entire_session)
-    fixation_labels = []
-    for start_stop in fixations:
-        fix_duration = util.get_duration(start_stop)
-        fix_positions = util.get_fix_positions(start_stop, positions)
-        run, block, fix_roi = detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, fix_positions, bbox_corners)
-        agent = info['monkey_1']
-        # Construct the details for the current fixation
-        fixation_info = [category, session_identifier, run, block, fix_duration, fix_roi, agent]
-        fixation_labels.append(fixation_info)
-    assert fixations.shape[0] == len(fixation_labels)
-    return fixations, fixation_labels
-
-
-def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, fix_positions, bbox_corners):
-    """
-    Detect the run, block, and ROI based on start and stop indices, gaze positions, and session info.
-    Parameters:
-    - start_stop (tuple): A tuple containing start and stop indices.
-    - positions (numpy.ndarray): Array containing gaze positions.
-    - info (dict): Dictionary containing session information.
-    Returns:
-    - run (int or None): Detected run number or None.
-    - block (str): Detected block identifier.
-    - fix_roi (str): Detected region of interest.
-    """
-    start, stop = start_stop*sampling_rate
-    for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
-        if start >= run_start and stop <= run_stop:
-            run = i
-            block = 'mon_down'
-            break
-        elif i < len(startS) and stop <= startS[i]:
-            run = None
-            block = 'mon_up'
-            break
-    else:
-        if start < startS[0] or stop > stopS[-1]:
-            run = None
-            block = 'discard'
-        else:
-            run = None
-            block = 'discard'
-    # Find fixation ROI
-    mean_fix_pos = np.nanmean(fix_positions, axis=0)
-    bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
-    inside_roi = [util.is_inside_quadrilateral(mean_fix_pos, bbox_corners[key]) for key in bbox_corners]
-    if np.any(inside_roi):
-        pdb.set_trace()
-        fix_roi = bbox_corners[bounding_boxes[inside_roi]]
-    else:
-        fix_roi = 'out_of_roi' 
-    return run, block, fix_roi

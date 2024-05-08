@@ -24,7 +24,7 @@ All fixations are out of bounds right now which cannot be correct. Check out wha
 
 # Determine root data directory based on whether it's running on a cluster or not
 is_cluster = True
-use_parallel = False
+use_parallel = True
 remake_labelled_gaze_pos = False
 if 'labelled_gaze_positions_m1' in globals():
     print("labelled_gaze_positions_m1 is already loaded")
