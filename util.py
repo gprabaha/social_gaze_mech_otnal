@@ -77,7 +77,7 @@ def construct_eye_bounding_box(left_eye, right_eye, corner_name_order):
     return corner_dict
 
 
-def is_inside_quadrilateral(point, corners, tolerance=1e-10):
+def is_inside_quadrilateral(point, corners, tolerance=1e-3):
     x, y = point
     x1, y1 = corners['topLeft']
     x2, y2 = corners['topRight']

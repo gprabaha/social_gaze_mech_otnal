@@ -13,6 +13,7 @@ import scipy.io
 import glob
 from multiprocessing import Pool
 import pickle
+import pandas as pd
 
 import util
 import defaults
@@ -212,7 +213,8 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, parallel=Tru
     for session_fixations, session_labels in results:
         all_fixations.extend(session_fixations)
         all_fixation_labels.extend(session_labels)
-    return all_fixations, all_fixation_labels
+    col_names = ['category', 'session_id', 'run', 'block', 'fix_duration', 'fix_roi', 'agent']
+    return all_fixations, pd.DataFrame(all_fixation_labels, columns=col_names)
 
 
 ### Function to get fixations for a session
@@ -247,7 +249,6 @@ def get_session_fixations(session):
         fixation_info = [category, session_identifier, run, block, fix_duration,  fix_roi, agent]
         fixation_labels.append(fixation_info)
     assert fixations.shape[0] == len(fixation_labels)
-    col_names = ['category', 'session_id', 'run', 'block', 'fix_duration', 'fix_roi', 'agent']
     return fixations, fixation_labels
 
 

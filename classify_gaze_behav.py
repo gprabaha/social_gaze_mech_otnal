@@ -8,6 +8,7 @@ Created on Tue Apr  9 10:25:48 2024
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import os
 import pickle
 
@@ -50,8 +51,7 @@ fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels
 # Serial: Debug
 # fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, False)
 np.save(os.path.join(root_data_dir, 'fixations_m1.npy'), fixations_m1)
-np.save(os.path.join(root_data_dir, 'fixation_labels_m1.npy'), fixation_labels_m1)
-
+fixation_labels_m1.to_csv(os.path.join(root_data_dir, 'fixation_labels_m1.csv'), index=False)
 
 
 """
