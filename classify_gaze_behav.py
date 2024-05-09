@@ -29,7 +29,7 @@ All fixations are out of bounds right now which cannot be correct. Check out wha
 is_cluster = True
 use_parallel = True
 remake_labelled_gaze_pos = False
-remake_fixations = True
+remake_fixations = False
 reload_labelled_pos = False
 
 root_data_dir = util.get_root_data_dir(is_cluster)
@@ -64,6 +64,9 @@ else:
     fixation_labels_m1 = pd.read_csv(os.path.join(root_data_dir, 'fixation_labels_m1.csv'))
 
 
+# if re_extract_spike_ts
+
+spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(session_paths[1:])
 
 
 
