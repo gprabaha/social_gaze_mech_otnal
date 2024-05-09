@@ -190,7 +190,7 @@ def extract_labelled_gaze_positions_m1(root_data_dir, unique_doses, dose_inds, m
 
 
 ### Function to extract fixations with labels, possibly in parallel
-def extract_fixations_with_labels_parallel(labelled_gaze_positions, parallel=True):
+def extract_fixations_with_labels_parallel(labelled_gaze_positions, root_data_dir, parallel=True):
     """
     Extracts fixations with labels, possibly in parallel.
     Parameters:
@@ -213,8 +213,9 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, parallel=Tru
     for session_fixations, session_labels in results:
         all_fixations.extend(session_fixations)
         all_fixation_labels.extend(session_labels)
-    col_names = ['category', 'session_id', 'run', 'block', 'fix_duration', 'fix_roi', 'agent']
-    return all_fixations, pd.DataFrame(all_fixation_labels, columns=col_names)
+    col_names = ['category', 'session_id', 'session_name', 'run', 'block', 'fix_duration', 'mean_x_pos', 'mean_y_pos', 'fix_roi', 'agent']
+    all_fixation_labels = pd.DataFrame(all_fixation_labels, columns=col_names)
+    return all_fixations, all_fixation_labels
 
 
 ### Function to get fixations for a session
@@ -228,6 +229,7 @@ def get_session_fixations(session):
     - fixation_labels (list): List of labels for fixations.
     """
     session_identifier, positions, info = session
+    session_name = info['session_name']
     sampling_rate = info['sampling_rate']
     n_samples = positions.shape[0]
     time_vec = util.create_timevec(n_samples, sampling_rate)
@@ -246,7 +248,7 @@ def get_session_fixations(session):
         mean_fix_pos = np.nanmean(fix_positions, axis=0)
         run, block, fix_roi = detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_pos, bbox_corners)
         agent = info['monkey_1']
-        fixation_info = [category, session_identifier, run, block, fix_duration,  fix_roi, agent]
+        fixation_info = [category, session_identifier, session_name, run, block, fix_duration, mean_fix_pos[0], mean_fix_pos[1], fix_roi, agent]
         fixation_labels.append(fixation_info)
     assert fixations.shape[0] == len(fixation_labels)
     return fixations, fixation_labels

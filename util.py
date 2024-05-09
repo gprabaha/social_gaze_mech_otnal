@@ -77,7 +77,10 @@ def construct_eye_bounding_box(left_eye, right_eye, corner_name_order):
     return corner_dict
 
 
-def is_inside_quadrilateral(point, corners, tolerance=1e-3):
+def is_inside_quadrilateral(point, corners, tolerance=1):
+    # It is okay to have 1 square pixel error in area matching
+    # This will avoid errord due to precision-related calculation mistakes
+    # Very few points pretty much in the boundary might get included as a consequence
     x, y = point
     x1, y1 = corners['topLeft']
     x2, y2 = corners['topRight']
