@@ -14,7 +14,7 @@ import util  # Import utility functions here
 import pdb  # Import the Python debugger if needed
 
 
-def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
+def is_fixation(pos, time, t1=None, t2=None, minDur=None, maxDur=None, sampling_rate=None):
     """
     Determine fixations based on position and time data.
     Args:
@@ -34,7 +34,9 @@ def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
         sampling_rate = 1 / (time[1,:] - time[0,:])
     # Set default values for parameters if not provided
     if minDur is None:
-        minDur = 0.01
+        minDur = 0.05
+    if maxDur is None:
+        maxDur = 2
     if t2 is None:
         t2 = 15
     if t1 is None:
@@ -46,13 +48,13 @@ def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
     account for a situation where t_n is (x_a, y_a) and t_m is (x_a, y_b), so
     the same x will have 2 y values, which can get complicated for polyfit
     '''
-    t_ind = fixation_detection(data, t1, t2, minDur)
+    t_ind = fixation_detection(data, t1, t2, minDur, maxDur)
     for t_range in t_ind:
         fix_vector[t_range[0]:t_range[1] + 1] = 1
     return fix_vector
 
 
-def fixation_detection(data, t1, t2, minDur):
+def fixation_detection(data, t1, t2, minDur, maxDur):
     """
     Detect fixations based on position and time data.
     Args:
@@ -77,6 +79,7 @@ def fixation_detection(data, t1, t2, minDur):
         fixation_list.append(filter_fixations_t2(i, fixations, t2))
     # Duration thresholding
     fixation_list = min_duration(fixation_list, minDur)
+    fixation_list = max_duration(fixation_list, maxDur)
     # Convert fixation list to time ranges
     fix_ranges = []
     for fix in fixation_list:
@@ -84,6 +87,20 @@ def fixation_detection(data, t1, t2, minDur):
         e_ind = np.where(data[:, 2] == fix[5])[0][-1]
         fix_ranges.append([s_ind, e_ind])
     return fix_ranges
+
+def min_duration(fixation_list, minDur):
+    """
+    Apply duration threshold to fixation list.
+    Args:
+    fixation_list: List of fixations.
+    minDur: Minimum fixation duration.
+    Returns:
+    Fixation list after applying duration threshold.
+    """
+    return [fix for fix in fixation_list if fix[6] >= minDur]
+
+def max_duration(fixation_list, maxDur):
+    return [fix for fix in fixation_list if fix[6] <= maxDur]
 
 
 def get_t1_filtered_fixations(n, x, y, t, t1):
@@ -172,14 +189,3 @@ def filter_fixations_t2(fixation_id, fixations, t2):
         duration = end_time - start_time
     return fixx, fixy, number_t1, number_t2, start_time, end_time, duration, list_out_points
 
-
-def min_duration(fixation_list, minDur):
-    """
-    Apply duration threshold to fixation list.
-    Args:
-    fixation_list: List of fixations.
-    minDur: Minimum fixation duration.
-    Returns:
-    Fixation list after applying duration threshold.
-    """
-    return [fix for fix in fixation_list if fix[6] >= minDur]

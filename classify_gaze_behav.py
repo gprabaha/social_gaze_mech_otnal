@@ -67,7 +67,7 @@ else:
 
 # if re_extract_spike_ts
 
-spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(session_paths[1:])
+spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(session_paths)
 
 
 
