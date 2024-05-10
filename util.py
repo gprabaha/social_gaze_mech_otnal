@@ -16,32 +16,63 @@ import defaults
 import pdb
 
 
-def get_root_data_dir(is_cluster):
+def create_timevec(n_samples, sampling_rate):
+    return [i * sampling_rate for i in range(n_samples)]
+
+
+def find_islands(binary_vec, min_samples=0):
+    islands = []
+    island_started = False
+    island_start = 0
+    for i, val in enumerate(binary_vec):
+        if val == 1 and not island_started:
+            island_started = True
+            island_start = i
+        elif val == 0 and island_started:
+            island_started = False
+            if i - island_start >= min_samples:
+                islands.append([island_start, i - 1])
+    # If the last island continues to the end of the array
+    if island_started:
+        if len(binary_vec) - island_start >= min_samples:
+            islands.append([island_start, len(binary_vec) - 1])
+    return np.array(islands)
+
+
+def get_duration(start_stop):
     """
-    Returns the root data directory based on whether it's running on a cluster or not.
+    Calculate duration from start and stop indices.
     Parameters:
-    - is_cluster (bool): Boolean flag indicating whether the program is running on a cluster.
+    - start_stop (tuple): A tuple containing start and stop indices.
     Returns:
-    - root_data_dir (str): Root data directory path.
+    - duration (int): Duration calculated from start and stop indices.
     """
-    if is_cluster:
-        root_data_dir = "/gpfs/milgram/project/chang/pg496/data_dir/otnal/"
-    else:
-        root_data_dir = "/Volumes/Stash/changlab/sorted_neural_data/social_gaze_otnal/AllFVProcessed/"
-    return root_data_dir
+    start, stop = start_stop
+    duration = stop - start
+    return duration
 
 
-def get_subfolders(root_dir):
-    """
-    Retrieves subfolders within a given directory.
-    Parameters:
-    - root_dir (str): Root directory path.
-    Returns:
-    - subfolders (list): List of subfolder paths.
-    """
-    subfolders = [f.path for f in os.scandir(root_dir) if f.is_dir()]
-    return subfolders
+def get_fix_positions(start_stop, positions):
+    start, stop = start_stop
+    return positions[start:stop,:]
 
+
+def is_inside_quadrilateral(point, corners, tolerance=1):
+    # It is okay to have 1 square pixel error in area matching
+    # This will avoid errord due to precision-related calculation mistakes
+    # Very few points pretty much in the boundary might get included as a consequence
+    x, y = point
+    x1, y1 = corners['topLeft']
+    x2, y2 = corners['topRight']
+    x3, y3 = corners['bottomRight']
+    x4, y4 = corners['bottomLeft']
+    total_area = shoelace_formula(x1, y1, x2, y2, x3, y3) + \
+                 shoelace_formula(x1, y1, x3, y3, x4, y4)
+    area_point1 = shoelace_formula(x, y, x1, y1, x2, y2)
+    area_point2 = shoelace_formula(x, y, x2, y2, x3, y3)
+    area_point3 = shoelace_formula(x, y, x3, y3, x4, y4)
+    area_point4 = shoelace_formula(x, y, x4, y4, x1, y1)
+    return abs(total_area - (area_point1 + area_point2 + area_point3 + area_point4)) < tolerance
 
 
 def calculate_roi_bounding_box_corners(m1_landmarks):
@@ -77,24 +108,6 @@ def construct_eye_bounding_box(left_eye, right_eye, corner_name_order):
     return corner_dict
 
 
-def is_inside_quadrilateral(point, corners, tolerance=1):
-    # It is okay to have 1 square pixel error in area matching
-    # This will avoid errord due to precision-related calculation mistakes
-    # Very few points pretty much in the boundary might get included as a consequence
-    x, y = point
-    x1, y1 = corners['topLeft']
-    x2, y2 = corners['topRight']
-    x3, y3 = corners['bottomRight']
-    x4, y4 = corners['bottomLeft']
-    total_area = shoelace_formula(x1, y1, x2, y2, x3, y3) + \
-                 shoelace_formula(x1, y1, x3, y3, x4, y4)
-    area_point1 = shoelace_formula(x, y, x1, y1, x2, y2)
-    area_point2 = shoelace_formula(x, y, x2, y2, x3, y3)
-    area_point3 = shoelace_formula(x, y, x3, y3, x4, y4)
-    area_point4 = shoelace_formula(x, y, x4, y4, x1, y1)
-    return abs(total_area - (area_point1 + area_point2 + area_point3 + area_point4)) < tolerance
-
-
 def shoelace_formula(x1, y1, x2, y2, x3, y3):
     x1 = np.float64(x1)
     y1 = np.float64(y1)
@@ -110,10 +123,6 @@ def distance(point1, point2):
     x2, y2 = point2
     return sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
-
-def get_fix_positions(start_stop, positions):
-    start, stop = start_stop
-    return positions[start:stop,:]
 
 def px2deg(px, monitor_info=None):
     if monitor_info is None:
@@ -137,40 +146,13 @@ def deg2px(deg, monitor_info=None):
     return px
 
 
-def create_timevec(n_samples, sampling_rate):
-    return [i * sampling_rate for i in range(n_samples)]
 
 
-def find_islands(binary_vec, min_samples=0):
-    islands = []
-    island_started = False
-    island_start = 0
-    for i, val in enumerate(binary_vec):
-        if val == 1 and not island_started:
-            island_started = True
-            island_start = i
-        elif val == 0 and island_started:
-            island_started = False
-            if i - island_start >= min_samples:
-                islands.append([island_start, i - 1])
-    # If the last island continues to the end of the array
-    if island_started:
-        if len(binary_vec) - island_start >= min_samples:
-            islands.append([island_start, len(binary_vec) - 1])
-    return np.array(islands)
 
 
-def get_duration(start_stop):
-    """
-    Calculate duration from start and stop indices.
-    Parameters:
-    - start_stop (tuple): A tuple containing start and stop indices.
-    Returns:
-    - duration (int): Duration calculated from start and stop indices.
-    """
-    start, stop = start_stop
-    duration = stop - start
-    return duration
+
+
+
 
 
 def identify_outliers(data, window_size=500, stride=250, threshold=None,

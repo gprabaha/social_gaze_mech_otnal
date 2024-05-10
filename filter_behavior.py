@@ -9,14 +9,12 @@ Created on Wed Apr 10 12:36:36 2024
 import numpy as np
 from tqdm import tqdm
 import os
-import scipy.io
-import glob
 from multiprocessing import Pool
 import pickle
 import pandas as pd
-import h5py
 
 import util
+import load_data
 import defaults
 import fix
 
@@ -34,94 +32,15 @@ def extract_meta_info(session_paths):
     """
     meta_info_list = []
     for session_path in session_paths:
-        dose_info = get_monkey_and_dose_data(session_path)
+        dose_info = load_data.get_monkey_and_dose_data(session_path)
         if ~len(dose_info) == 0:
             meta_info = {'session_name': os.path.basename(os.path.normpath(session_path))}
             meta_info.update(dose_info)
-            runs_info = get_runs_data(session_path)
+            runs_info = load_data.get_runs_data(session_path)
             meta_info.update(runs_info)
-            meta_info['roi_bb_corners'] = get_m1_roi_bounding_boxes(session_path)
+            meta_info['roi_bb_corners'] = load_data.get_m1_roi_bounding_boxes(session_path)
             meta_info_list.append(meta_info)
     return meta_info_list
-
-
-### Function to get information data
-def get_monkey_and_dose_data(session_path):
-    """
-    Extracts information data from session path.
-    Parameters:
-    - session_path (str): Path to the session.
-    Returns:
-    - info_dict (dict): Dictionary containing information data.
-    """
-    file_list_info = glob.glob(f"{session_path}/*metaInfo.mat")
-    if len(file_list_info) != 1:
-        print(f"Warning: No metaInfo or more than one metaInfo found in folder: {session_path}.")
-    try:
-        data_info = scipy.io.loadmat(file_list_info[0])
-        info = data_info.get('info', None)
-        if info is not None:
-            info = info[0][0]
-            return {
-                'monkey_1': info['monkey_1'][0],
-                'monkey_2': info['monkey_2'][0],
-                'OT_dose': float(info['OT_dose'][0]),
-                'NAL_dose': float(info['NAL_dose'][0])
-            }
-    except Exception as e:
-        print(f"Error loading meta_info for folder: {session_path}: {e}")
-
-
-
-### Function to get runs data
-def get_runs_data(session_path):
-    """
-    Extracts runs data from session path.
-    Parameters:
-    - session_path (str): Path to the session.
-    Returns:
-    - runs_dict (dict): Dictionary containing runs data.
-    """
-    file_list_runs = glob.glob(f"{session_path}/*runs.mat")
-    if len(file_list_runs) != 1:
-        print(f"Warning: No runs found in folder: {session_path}.")
-    try:
-        data_runs = scipy.io.loadmat(file_list_runs[0])
-        runs = data_runs.get('runs', None)
-        if runs is not None:
-            startS = [run['startS'][0][0] for run in runs[0]]
-            stopS = [run['stopS'][0][0] for run in runs[0]]
-            num_runs = len(startS)
-            return {'startS': startS, 'stopS': stopS, 'num_runs': num_runs}
-    except Exception as e:
-        print(f"Error loading runs for folder: {session_path}: {e}")
-
-
-
-### Function to get M1 ROI bounding boxes
-def get_m1_roi_bounding_boxes(session_path):
-    """
-    Extracts M1 ROI bounding boxes from session path.
-    Parameters:
-    - session_path (str): Path to the session.
-    Returns:
-    - bbox_dict (dict): Dictionary containing M1 ROI bounding boxes.
-    """
-    file_list_m1_landmarks = glob.glob(f"{session_path}/*M1_farPlaneCal.mat")
-    if len(file_list_m1_landmarks) != 1:
-        print(f"Warning: No m1_landmarks or more than one landmarks found in folder: {session_path}.")
-        return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
-    try:
-        data_m1_landmarks = scipy.io.loadmat(file_list_m1_landmarks[0])
-        m1_landmarks = data_m1_landmarks.get('farPlaneCal', None)
-        if m1_landmarks is not None:
-            eye_bbox, face_bbox, left_obj_bbox, right_obj_bbox = util.calculate_roi_bounding_box_corners(m1_landmarks)
-            return {'eye_bbox': eye_bbox, 'face_bbox': face_bbox, 'left_obj_bbox': left_obj_bbox, 'right_obj_bbox': right_obj_bbox}
-        else:
-            return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
-    except Exception as e:
-        print(f"Error loading m1_landmarks for folder: {session_path}: {e}")
-        return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
 
 
 ### Function to get unique doses
@@ -164,27 +83,13 @@ def extract_labelled_gaze_positions_m1(root_data_dir, unique_doses, dose_inds, m
     for dose, indices_list in zip(unique_doses, dose_inds):
         for idx in tqdm(indices_list, desc="Processing indices for dose", unit="index"):
             folder_path = session_paths[idx]
-            mat_files = [f for f in os.listdir(folder_path) if 'M1_gaze.mat' in f]
-            if len(mat_files) != 1:
-                print(f"Error: Multiple or no '*_M1_gaze.mat' files found in folder: {folder_path}")
-                continue
-            mat_file = mat_files[0]
-            mat_file_path = os.path.join(folder_path, mat_file)
-            mat_file_name = os.path.basename(mat_file_path)
-            try:
-                mat_data = scipy.io.loadmat(mat_file_path)
-                sampling_rate = float(mat_data['M1FS'])
-                M1Xpx = mat_data['M1Xpx'].squeeze()
-                M1Ypx = mat_data['M1Ypx'].squeeze()
-                gaze_positions = np.array(np.column_stack((M1Xpx, M1Ypx)))
-                meta_info = meta_info_list[idx]
-                meta_info.update({'sampling_rate': sampling_rate, 'category': session_categories[idx]})
-                labelled_gaze_positions_m1.append((gaze_positions, meta_info))
-            except Exception as e:
-                print(f"Error loading file '{mat_file_name}': {str(e)}")
+            gaze_data = load_data.get_labelled_gaze_positions_dict_m1(folder_path, meta_info_list, session_categories, idx)
+            if gaze_data is not None:
+                labelled_gaze_positions_m1.append(gaze_data)
     with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'wb') as f:
         pickle.dump(labelled_gaze_positions_m1, f)
     return labelled_gaze_positions_m1
+
 
 
 ### Function to extract fixations with labels, possibly in parallel
@@ -299,56 +204,11 @@ def extract_spiketimes_for_all_sessions(session_paths):
     spikeTs_ms = []
     spikeTs_labels = []
     for session_path in session_paths:
-        session_name =  os.path.basename(os.path.normpath(session_path))
         session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels = \
-            get_spiketimes_and_labels_for_one_session(session_path)
+            load_data.get_spiketimes_and_labels_for_one_session(session_path)
     return spikeTs_s, spikeTs_ms, spikeTs_labels
 
 
-def get_spiketimes_and_labels_for_one_session(session_path):
-    session_spikeTs_s = []
-    session_spikeTs_ms = []
-    session_spikeTs_labels = []
-    label_cols = []
-    file_list_spikeTs = glob.glob(f"{session_path}/*spikeTs.mat")
-    if len(file_list_spikeTs) != 1:
-        print(f"Warning: No runs found in folder: {session_path}.")
-    try:
-        data_spikeTs = scipy.io.loadmat(file_list_spikeTs[0])
-        pdb.set_trace()
-        spikeTs_struct = data_spikeTs.get('spikeTs_struct', None)
-        # Edit here to get all the spiketimes and labels
-        return session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels
-    except Exception as e:
-        return session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels
-    
-
-
-def get_runs_data(session_path):
-    """
-    Extracts runs data from session path.
-    Parameters:
-    - session_path (str): Path to the session.
-    Returns:
-    - runs_dict (dict): Dictionary containing runs data.
-    """
-    file_list_runs = glob.glob(f"{session_path}/*runs.mat")
-    if len(file_list_runs) != 1:
-        print(f"Warning: No runs found in folder: {session_path}.")
-        return {'startS': None, 'stopS': None, 'num_runs': 0}
-    try:
-        data_runs = scipy.io.loadmat(file_list_runs[0])
-        runs = data_runs.get('runs', None)
-        if runs is not None:
-            startS = [run['startS'][0][0] for run in runs[0]]
-            stopS = [run['stopS'][0][0] for run in runs[0]]
-            num_runs = len(startS)
-            return {'startS': startS, 'stopS': stopS, 'num_runs': num_runs}
-        else:
-            return {'startS': None, 'stopS': None, 'num_runs': 0}
-    except Exception as e:
-        print(f"Error loading runs for folder: {session_path}: {e}")
-        return {'startS': None, 'stopS': None, 'num_runs': 0}
 
 
 

@@ -13,6 +13,7 @@ import numpy as np
 import util  # Import utility functions here
 import pdb  # Import the Python debugger if needed
 
+
 def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
     """
     Determine fixations based on position and time data.
@@ -50,6 +51,7 @@ def is_fixation(pos, time, t1=None, t2=None, minDur=None, sampling_rate=None):
         fix_vector[t_range[0]:t_range[1] + 1] = 1
     return fix_vector
 
+
 def fixation_detection(data, t1, t2, minDur):
     """
     Detect fixations based on position and time data.
@@ -83,6 +85,7 @@ def fixation_detection(data, t1, t2, minDur):
         fix_ranges.append([s_ind, e_ind])
     return fix_ranges
 
+
 def get_t1_filtered_fixations(n, x, y, t, t1):
     """
     Filter fixations based on spatial parameter t1.
@@ -111,6 +114,7 @@ def get_t1_filtered_fixations(n, x, y, t, t1):
             fixations = update_fixations(i, x, y, t, fixations, fixid)
     return fixations
 
+
 def update_fixations(i, x, y, t, fixations, fixid):
     """
     Update fixations array with new fixation data.
@@ -129,6 +133,7 @@ def update_fixations(i, x, y, t, fixations, fixid):
     fixations[i, 2] = t[i]
     fixations[i, 3] = fixid
     return fixations
+
 
 def filter_fixations_t2(fixation_id, fixations, t2):
     """
@@ -166,6 +171,7 @@ def filter_fixations_t2(fixation_id, fixations, t2):
         end_time = fixations_list_t2[-1, 2]
         duration = end_time - start_time
     return fixx, fixy, number_t1, number_t2, start_time, end_time, duration, list_out_points
+
 
 def min_duration(fixation_list, minDur):
     """
