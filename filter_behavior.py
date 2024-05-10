@@ -34,11 +34,14 @@ def extract_meta_info(session_paths):
     """
     meta_info_list = []
     for session_path in session_paths:
-        meta_info = {'session_name': os.path.basename(os.path.normpath(session_path))}
-        meta_info.update(get_monkey_and_dose_data(session_path))
-        meta_info.update(get_runs_data(session_path))
-        meta_info['roi_bb_corners'] = get_m1_roi_bounding_boxes(session_path)
-        meta_info_list.append(meta_info)
+        dose_info = get_monkey_and_dose_data(session_path)
+        if ~len(dose_info) == 0:
+            meta_info = {'session_name': os.path.basename(os.path.normpath(session_path))}
+            meta_info.update(dose_info)
+            runs_info = get_runs_data(session_path)
+            meta_info.update(runs_info)
+            meta_info['roi_bb_corners'] = get_m1_roi_bounding_boxes(session_path)
+            meta_info_list.append(meta_info)
     return meta_info_list
 
 
@@ -53,8 +56,7 @@ def get_monkey_and_dose_data(session_path):
     """
     file_list_info = glob.glob(f"{session_path}/*metaInfo.mat")
     if len(file_list_info) != 1:
-        print(f"Warning: No metaInfo found in folder: {session_path}.")
-        return {'monkey_1': None, 'monkey_2': None, 'OT_dose': None, 'NAL_dose': None}
+        print(f"Warning: No metaInfo or more than one metaInfo found in folder: {session_path}.")
     try:
         data_info = scipy.io.loadmat(file_list_info[0])
         info = data_info.get('info', None)
@@ -66,11 +68,9 @@ def get_monkey_and_dose_data(session_path):
                 'OT_dose': float(info['OT_dose'][0]),
                 'NAL_dose': float(info['NAL_dose'][0])
             }
-        else:
-            return {'monkey_1': None, 'monkey_2': None, 'OT_dose': None, 'NAL_dose': None}
     except Exception as e:
         print(f"Error loading meta_info for folder: {session_path}: {e}")
-        return {'monkey_1': None, 'monkey_2': None, 'OT_dose': None, 'NAL_dose': None}
+
 
 
 ### Function to get runs data
@@ -85,7 +85,6 @@ def get_runs_data(session_path):
     file_list_runs = glob.glob(f"{session_path}/*runs.mat")
     if len(file_list_runs) != 1:
         print(f"Warning: No runs found in folder: {session_path}.")
-        return {'startS': None, 'stopS': None, 'num_runs': 0}
     try:
         data_runs = scipy.io.loadmat(file_list_runs[0])
         runs = data_runs.get('runs', None)
@@ -94,11 +93,9 @@ def get_runs_data(session_path):
             stopS = [run['stopS'][0][0] for run in runs[0]]
             num_runs = len(startS)
             return {'startS': startS, 'stopS': stopS, 'num_runs': num_runs}
-        else:
-            return {'startS': None, 'stopS': None, 'num_runs': 0}
     except Exception as e:
         print(f"Error loading runs for folder: {session_path}: {e}")
-        return {'startS': None, 'stopS': None, 'num_runs': 0}
+
 
 
 ### Function to get M1 ROI bounding boxes
@@ -112,7 +109,7 @@ def get_m1_roi_bounding_boxes(session_path):
     """
     file_list_m1_landmarks = glob.glob(f"{session_path}/*M1_farPlaneCal.mat")
     if len(file_list_m1_landmarks) != 1:
-        print(f"Warning: No m1_landmarks found in folder: {session_path}.")
+        print(f"Warning: No m1_landmarks or more than one landmarks found in folder: {session_path}.")
         return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
     try:
         data_m1_landmarks = scipy.io.loadmat(file_list_m1_landmarks[0])
@@ -311,29 +308,20 @@ def extract_spiketimes_for_all_sessions(session_paths):
 def get_spiketimes_and_labels_for_one_session(session_path):
     session_spikeTs_s = []
     session_spikeTs_ms = []
-    
+    session_spikeTs_labels = []
     label_cols = []
     file_list_spikeTs = glob.glob(f"{session_path}/*spikeTs.mat")
     if len(file_list_spikeTs) != 1:
         print(f"Warning: No runs found in folder: {session_path}.")
-    else:
-        with h5py.File(file_list_spikeTs[0], 'r') as f:
-            spikeTs_dataset = f['spikeTs']
-            #spikeS_dataset = spikeTs_dataset['spikeS']
-            n_units = len(spikeTs_dataset['spikeS'])
-            session_spikeTs_labels = np.empty([n_units, 0])
-            for row in spikeTs_dataset['spikeS']:
-                session_spikeTs_s.append(np.array(f[row[0]]))
-            for row in spikeTs_dataset['spikeMs']:
-                session_spikeTs_ms.append(np.array(f[row[0]]))
-            for key in spikeTs_dataset:
-                if not (key == 'spikeS' or key == 'spikeMs' or key == 'UUID'):
-                    label_cols.append(key)
-                    label_column = np.array([np.squeeze(np.array(f[row[0]])) for row in spikeTs_dataset[key]])
-                    import pdb; pdb.set_trace()
-                    session_spikeTs_labels = np.column_stack((session_spikeTs_labels, label_column))
-    pdb.set_trace()
-    return session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels
+    try:
+        data_spikeTs = scipy.io.loadmat(file_list_spikeTs[0])
+        pdb.set_trace()
+        spikeTs_struct = data_spikeTs.get('spikeTs_struct', None)
+        # Edit here to get all the spiketimes and labels
+        return session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels
+    except Exception as e:
+        return session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels
+    
 
 
 def get_runs_data(session_path):
