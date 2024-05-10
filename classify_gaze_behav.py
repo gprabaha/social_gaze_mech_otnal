@@ -14,6 +14,7 @@ import pickle
 
 import pdb
 
+import load_data
 import util
 import filter_behavior
 
@@ -28,11 +29,11 @@ All fixations are out of bounds right now which cannot be correct. Check out wha
 # Determine root data directory based on whether it's running on a cluster or not
 is_cluster = True
 use_parallel = True
-remake_labelled_gaze_pos = False
-remake_fixations = False
+remake_labelled_gaze_pos = True
+remake_fixations = True
 reload_labelled_pos = False
 
-root_data_dir = util.get_root_data_dir(is_cluster)
+root_data_dir = load_data.get_root_data_dir(is_cluster)
 if reload_labelled_pos:
     with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'rb') as f:
         labelled_gaze_positions_m1 = pickle.load(f)
@@ -40,7 +41,7 @@ else:
     print("labelled_gaze_positions_m1 is already loaded")
 
 # Get subfolders within the root data directory
-session_paths = util.get_subfolders(root_data_dir)
+session_paths = load_data.get_subfolders(root_data_dir)
 # Extract meta-information from session paths
 meta_info_list = filter_behavior.extract_meta_info(session_paths)
 # Extract OT and NAL doses from meta-information and convert to numpy array
@@ -56,7 +57,7 @@ if remake_fixations:
         labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
             root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
     fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(
-        labelled_gaze_positions_m1[1:], root_data_dir, use_parallel)  # The first file has funky session stop times
+        labelled_gaze_positions_m1, root_data_dir, use_parallel)  # The first file has funky session stop times
     np.save(os.path.join(root_data_dir, 'fixations_m1.npy'), fixations_m1)
     fixation_labels_m1.to_csv(os.path.join(root_data_dir, 'fixation_labels_m1.csv'), index=False)
 else:

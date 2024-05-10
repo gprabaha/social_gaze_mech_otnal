@@ -66,13 +66,38 @@ def is_inside_quadrilateral(point, corners, tolerance=1):
     x2, y2 = corners['topRight']
     x3, y3 = corners['bottomRight']
     x4, y4 = corners['bottomLeft']
-    total_area = shoelace_formula(x1, y1, x2, y2, x3, y3) + \
-                 shoelace_formula(x1, y1, x3, y3, x4, y4)
-    area_point1 = shoelace_formula(x, y, x1, y1, x2, y2)
-    area_point2 = shoelace_formula(x, y, x2, y2, x3, y3)
-    area_point3 = shoelace_formula(x, y, x3, y3, x4, y4)
-    area_point4 = shoelace_formula(x, y, x4, y4, x1, y1)
-    return abs(total_area - (area_point1 + area_point2 + area_point3 + area_point4)) < tolerance
+    total_area = get_area_using_shoelace_4pts(x1, y1, x2, y2, x3, y3, x4, y4)
+    triangle_area_point1 = get_area_using_shoelace_3pts(x, y, x1, y1, x2, y2)
+    triangle_area_point2 = get_area_using_shoelace_3pts(x, y, x2, y2, x3, y3)
+    triangle_area_point3 = get_area_using_shoelace_3pts(x, y, x3, y3, x4, y4)
+    triangle_area_point4 = get_area_using_shoelace_3pts(x, y, x4, y4, x1, y1)
+    return abs(total_area - (triangle_area_point1 + triangle_area_point2 +
+                             triangle_area_point3 + triangle_area_point4)) < tolerance
+
+
+def get_area_using_shoelace_3pts(x1, y1, x2, y2, x3, y3):
+    """
+    Calculate the area of a triangle using the Shoelace formula.
+    Parameters:
+    - x1, y1, x2, y2, x3, y3: Coordinates of the triangle vertices.
+    Returns:
+    - area: The area of the triangle.
+    """
+    return 0.5 * abs((x1*y2 + x2*y3 + x3*y1) - (y1*x2 + y2*x3 + y3*x1))
+
+
+def get_area_using_shoelace_4pts(x1, y1, x2, y2, x3, y3, x4, y4):
+    """
+    Calculate the area of a quadrilateral using the Shoelace formula.
+    Parameters:
+    - x1, y1, x2, y2, x3, y3, x4, y4: Coordinates of the quadrilateral vertices.
+    Returns:
+    - area: The area of the quadrilateral.
+    """
+    total_area = get_area_using_shoelace_3pts(x1, y1, x2, y2, x3, y3) + \
+                 get_area_using_shoelace_3pts(x1, y1, x3, y3, x4, y4)
+    return total_area
+
 
 
 def calculate_roi_bounding_box_corners(m1_landmarks):
@@ -82,9 +107,12 @@ def calculate_roi_bounding_box_corners(m1_landmarks):
     left_eye = m1_landmarks['eyeOnLeft'][0][0][0]
     right_eye = m1_landmarks['eyeOnRight'][0][0][0]
     eye_bb_corners = construct_eye_bounding_box(left_eye, right_eye, corner_name_order)
-    face_bb_corners = {key: m1_landmarks[key][0][0][0] for key in corner_name_order}
-    left_obj_bb_corners = {key: m1_landmarks['leftObject'][0][0][0][key][0][0] for key in corner_name_order}
-    right_obj_bb_corners = {key: m1_landmarks['rightObject'][0][0][0][key][0][0] for key in corner_name_order}
+    face_bb_corners = stretch_bounding_box_corners(
+        {key: m1_landmarks[key][0][0][0] for key in corner_name_order})
+    left_obj_bb_corners = stretch_bounding_box_corners(
+        {key: m1_landmarks['leftObject'][0][0][0][key][0][0] for key in corner_name_order})
+    right_obj_bb_corners = stretch_bounding_box_corners(
+        {key: m1_landmarks['rightObject'][0][0][0][key][0][0] for key in corner_name_order})
     return eye_bb_corners, face_bb_corners, left_obj_bb_corners, right_obj_bb_corners
 
 
@@ -105,17 +133,20 @@ def construct_eye_bounding_box(left_eye, right_eye, corner_name_order):
             corner_dict[corner] = (right_eye_x + offset, right_eye_y + offset)
         elif corner == 'bottomLeft':
             corner_dict[corner] = (left_eye_x - offset, left_eye_y + offset)
-    return corner_dict
+    return stretch_bounding_box_corners(corner_dict)
 
 
-def shoelace_formula(x1, y1, x2, y2, x3, y3):
-    x1 = np.float64(x1)
-    y1 = np.float64(y1)
-    x2 = np.float64(x2)
-    y2 = np.float64(y2)
-    x3 = np.float64(x3)
-    y3 = np.float64(y3)
-    return 0.5 * abs((x1*y2 + x2*y3 + x3*y1) - (y1*x2 + y2*x3 + y3*x1))
+def stretch_bounding_box_corners(bb_corner_coord_dict, scale=1.3):
+    # Calculate mean of x and y coordinates
+    mean_x = sum(point[0] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
+    mean_y = sum(point[1] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
+    # Mean shift
+    shifted_points = {(key, ((point[0] - mean_x), (point[1] - mean_y))) for key, point in bb_corner_coord_dict.items()}
+    # Scale points
+    scaled_points = {(key, ((point[0] * scale), (point[1] * scale))) for key, point in shifted_points}
+    # Shift points back
+    stretched_points = {(key, ((point[0] + mean_x), (point[1] + mean_y))) for key, point in scaled_points}
+    return stretched_points
 
 
 def distance(point1, point2):

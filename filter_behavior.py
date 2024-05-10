@@ -33,7 +33,7 @@ def extract_meta_info(session_paths):
     meta_info_list = []
     for session_path in session_paths:
         dose_info = load_data.get_monkey_and_dose_data(session_path)
-        if ~len(dose_info) == 0:
+        if dose_info is not None:
             meta_info = {'session_name': os.path.basename(os.path.normpath(session_path))}
             meta_info.update(dose_info)
             runs_info = load_data.get_runs_data(session_path)
