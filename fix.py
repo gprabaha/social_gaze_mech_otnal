@@ -11,10 +11,12 @@ Script for fixation detection
 
 import numpy as np
 import util  # Import utility functions here
+from tqdm import tqdm
+
 import pdb  # Import the Python debugger if needed
 
 
-def is_fixation(pos, time, t1=None, t2=None, minDur=None, maxDur=None, sampling_rate=None):
+def is_fixation(pos, time, session_name, t1=None, t2=None, minDur=None, maxDur=None, sampling_rate=None):
     """
     Determine fixations based on position and time data.
     Args:
@@ -48,13 +50,13 @@ def is_fixation(pos, time, t1=None, t2=None, minDur=None, maxDur=None, sampling_
     account for a situation where t_n is (x_a, y_a) and t_m is (x_a, y_b), so
     the same x will have 2 y values, which can get complicated for polyfit
     '''
-    t_ind = fixation_detection(data, t1, t2, minDur, maxDur)
+    t_ind = fixation_detection(data, t1, t2, minDur, maxDur, session_name)
     for t_range in t_ind:
         fix_vector[t_range[0]:t_range[1] + 1] = 1
     return fix_vector
 
 
-def fixation_detection(data, t1, t2, minDur, maxDur):
+def fixation_detection(data, t1, t2, minDur, maxDur, session_name):
     """
     Detect fixations based on position and time data.
     Args:
@@ -72,7 +74,7 @@ def fixation_detection(data, t1, t2, minDur, maxDur):
     y = data[:, 1]
     t = data[:, 2]
     n = len(t)
-    fixations = get_t1_filtered_fixations(n, x, y, t, t1)
+    fixations = get_t1_filtered_fixations(n, x, y, t, t1, session_name)
     number_fixations = fixations[-1, 3]
     fixation_list = []
     for i in range(1, int(number_fixations) + 1):
@@ -103,7 +105,7 @@ def max_duration(fixation_list, maxDur):
     return [fix for fix in fixation_list if fix[6] <= maxDur]
 
 
-def get_t1_filtered_fixations(n, x, y, t, t1):
+def get_t1_filtered_fixations(n, x, y, t, t1, session_name):
     """
     Filter fixations based on spatial parameter t1.
     Args:
@@ -118,7 +120,7 @@ def get_t1_filtered_fixations(n, x, y, t, t1):
     fixations = np.zeros((n, 4))
     fixid = 0
     fixpointer = 0
-    for i in range(n):
+    for i in tqdm(range(n), desc='{}: n data points t1_filtered'.format(session_name)):
         if not np.any(x[fixpointer:i+1]) or not np.any(y[fixpointer:i+1]):
             fixations = update_fixations(i, x, y, t, fixations, fixid)
         else:

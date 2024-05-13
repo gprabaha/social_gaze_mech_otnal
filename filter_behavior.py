@@ -142,7 +142,7 @@ def get_session_fixations(session):
     startS = info['startS']
     stopS = info['stopS']
     bbox_corners = info['roi_bb_corners']
-    fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, sampling_rate=sampling_rate)
+    fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, session_name, sampling_rate=sampling_rate)
     fixations = util.find_islands(fix_vec_entire_session)
     fixation_labels = []
     for start_stop in fixations:
@@ -191,6 +191,7 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
             run = None
             block = 'discard'
     bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
+    pdb.set_trace()
     inside_roi = [util.is_inside_quadrilateral(mean_fix_pos, bbox_corners[key]) for key in bbox_corners]
     if np.any(inside_roi):
         fix_roi = bounding_boxes[bool(inside_roi)]

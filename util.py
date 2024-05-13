@@ -61,6 +61,7 @@ def is_inside_quadrilateral(point, corners, tolerance=1):
     # It is okay to have 1 square pixel error in area matching
     # This will avoid errord due to precision-related calculation mistakes
     # Very few points pretty much in the boundary might get included as a consequence
+    pdb.set_trace()
     x, y = point
     x1, y1 = corners['topLeft']
     x2, y2 = corners['topRight']
@@ -145,7 +146,7 @@ def stretch_bounding_box_corners(bb_corner_coord_dict, scale=1.3):
     # Scale points
     scaled_points = {(key, ((point[0] * scale), (point[1] * scale))) for key, point in shifted_points}
     # Shift points back
-    stretched_points = {(key, ((point[0] + mean_x), (point[1] + mean_y))) for key, point in scaled_points}
+    stretched_points = {key: (point[0] + mean_x, point[1] + mean_y) for key, point in scaled_points}
     return stretched_points
 
 
