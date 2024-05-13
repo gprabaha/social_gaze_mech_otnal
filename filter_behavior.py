@@ -10,6 +10,7 @@ import numpy as np
 from tqdm import tqdm
 import os
 from multiprocessing import Pool
+from joblib import Parallel, delayed
 import pickle
 import pandas as pd
 
@@ -145,7 +146,7 @@ def get_session_fixations(session):
     fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, session_name, sampling_rate=sampling_rate)
     fixations = util.find_islands(fix_vec_entire_session)
     fixation_labels = []
-    for start_stop in fixations:
+    for start_stop in tqdm(fixations, desc='{}: processing fixation in session'.format(session_name)):
         fix_duration = util.get_duration(start_stop)
         fix_positions = util.get_fix_positions(start_stop, positions)
         mean_fix_pos = np.nanmean(fix_positions, axis=0)
@@ -191,7 +192,6 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
             run = None
             block = 'discard'
     bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
-    pdb.set_trace()
     inside_roi = [util.is_inside_quadrilateral(mean_fix_pos, bbox_corners[key]) for key in bbox_corners]
     if np.any(inside_roi):
         fix_roi = bounding_boxes[bool(inside_roi)]
@@ -200,14 +200,45 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
     return run, block, fix_roi
 
 
-def extract_spiketimes_for_all_sessions(session_paths):
+def extract_spiketimes_for_all_sessions(root_data_dir, session_paths, is_parallel=True):
     spikeTs_s = []
     spikeTs_ms = []
     spikeTs_labels = []
-    for session_path in session_paths:
-        session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels = \
-            load_data.get_spiketimes_and_labels_for_one_session(session_path)
-    return spikeTs_s, spikeTs_ms, spikeTs_labels
+    if is_parallel:
+        # Process sessions in parallel with tqdm progress bar
+        results = Parallel(n_jobs=-1)(delayed(
+            load_data.get_spiketimes_and_labels_for_one_session)(session_path)
+            for session_path in tqdm(session_paths, desc='Processing sessions'))
+        # Iterate over results and concatenate
+        for session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels \
+            in tqdm(results, desc='Processing results'):
+            spikeTs_s.extend(session_spikeTs_s)
+            spikeTs_ms.extend(session_spikeTs_ms)
+            spikeTs_labels.append(session_spikeTs_labels)
+    else:
+        # Process sessions sequentially
+        for session_path in session_paths:
+            session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels = load_data.get_spiketimes_and_labels_for_one_session(session_path)
+            spikeTs_s.extend(session_spikeTs_s)
+            spikeTs_ms.extend(session_spikeTs_ms)
+            spikeTs_labels.append(session_spikeTs_labels)
+    # Concatenate label dataframes
+    if spikeTs_labels:
+        all_labels = pd.concat(spikeTs_labels, ignore_index=True)
+    else:
+        all_labels = pd.DataFrame()
+    # Check if spiketimes lists and labels have the same length
+    if len(spikeTs_s) != len(all_labels):
+        print("Warning: Length mismatch between spiketimes lists and labels.")
+    # Save outputs to root_data_dir
+    spiketimes_s_path = os.path.join(root_data_dir, 'spiketimes_s.npy')
+    spiketimes_ms_path = os.path.join(root_data_dir, 'spiketimes_ms.npy')
+    labels_path = os.path.join(root_data_dir, 'labels.csv')
+    np.save(spiketimes_s_path, spikeTs_s)
+    np.save(spiketimes_ms_path, spikeTs_ms)
+    all_labels.to_csv(labels_path, index=False)
+    return spikeTs_s, spikeTs_ms, all_labels
+
 
 
 

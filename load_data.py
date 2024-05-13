@@ -10,6 +10,7 @@ import os
 import glob
 import scipy
 import numpy as np
+import pandas as pd
 
 import util
 
@@ -157,19 +158,34 @@ def get_spiketimes_and_labels_for_one_session(session_path):
     session_spikeTs_s = []
     session_spikeTs_ms = []
     session_spikeTs_labels = []
-    label_cols = []
-    session_name =  os.path.basename(os.path.normpath(session_path))
+    label_cols = ['session', 'channel', 'channel_label', 'unit_no_within_channel', 'unit_label', 'uuid', 'n_spikes', 'region']
+    session_name = os.path.basename(os.path.normpath(session_path))
     file_list_spikeTs = glob.glob(f"{session_path}/*spikeTs.mat")
     if len(file_list_spikeTs) != 1:
         print(f"\nWarning: No runs found in folder: {session_path}.")
     try:
         data_spikeTs = scipy.io.loadmat(file_list_spikeTs[0])
-        pdb.set_trace()
-        spikeTs_struct = data_spikeTs.get('spikeTs_struct', None)
-        # Edit here to get all the spiketimes and labels
-        return session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels
+        spikeTs_struct = data_spikeTs['spikeTs'][0]
+        for unit in spikeTs_struct:
+            spikeTs_sec = np.squeeze(unit['spikeS'])
+            spikeTs_ms = np.squeeze(unit['spikeMs'])
+            session_spikeTs_s.append(spikeTs_sec.tolist())  # Append spike times in seconds
+            session_spikeTs_ms.append(spikeTs_ms.tolist())  # Append spike times in milliseconds
+            chan = unit['chan'][0][0]
+            chan_label = unit['chanStr'][0]
+            unit_no_in_channel = unit['unit'][0][0]
+            unit_label = unit['unitStr'][0]
+            uuid = unit['UUID'][0]
+            n_spikes = unit['spikeN'][0][0]
+            region = unit['region'][0]
+            # Append label row to the labels list
+            session_spikeTs_labels.append([session_name, chan, chan_label, unit_no_in_channel, unit_label, uuid, n_spikes, region])
+        # Create DataFrame
+        spike_df = pd.DataFrame(session_spikeTs_labels, columns=label_cols)
+        return session_spikeTs_s, session_spikeTs_ms, spike_df
     except Exception as e:
-        return session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels
+        print(f"An error occurred: {e}")
+        return [], [], pd.DataFrame(columns=label_cols)
 
 
 def get_runs_data_copy(session_path):
