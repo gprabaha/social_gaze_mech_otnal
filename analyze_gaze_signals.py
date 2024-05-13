@@ -29,9 +29,9 @@ All fixations are out of bounds right now which cannot be correct. Check out wha
 # Determine root data directory based on whether it's running on a cluster or not
 is_cluster = True
 use_parallel = True
-remake_labelled_gaze_pos = True
-remake_fixations = True
-reload_labelled_pos = False
+remake_labelled_gaze_pos = False
+remake_fixations = False
+reload_labelled_pos = True
 
 root_data_dir = load_data.get_root_data_dir(is_cluster)
 if reload_labelled_pos:
@@ -67,7 +67,6 @@ else:
 
 # if re_extract_spike_ts
 spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(root_data_dir, session_paths, use_parallel)
-
 
 
 

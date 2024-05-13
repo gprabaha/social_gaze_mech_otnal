@@ -92,7 +92,6 @@ def extract_labelled_gaze_positions_m1(root_data_dir, unique_doses, dose_inds, m
     return labelled_gaze_positions_m1
 
 
-
 ### Function to extract fixations with labels, possibly in parallel
 def extract_fixations_with_labels_parallel(labelled_gaze_positions, root_data_dir, parallel=True):
     """
@@ -104,6 +103,7 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, root_data_di
     - all_fixations (list): List of fixations.
     - all_fixation_labels (list): List of labels for fixations.
     """
+    print("\nStarting to extract fixations:")
     session_identifiers = list(range(len(labelled_gaze_positions)))
     sessions = [(i, session[0], session[1]) for i, session in enumerate(labelled_gaze_positions)]
     if parallel:
@@ -146,7 +146,7 @@ def get_session_fixations(session):
     fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, session_name, sampling_rate=sampling_rate)
     fixations = util.find_islands(fix_vec_entire_session)
     fixation_labels = []
-    for start_stop in tqdm(fixations, desc='{}: processing fixation in session'.format(session_name)):
+    for start_stop in fixations:
         fix_duration = util.get_duration(start_stop)
         fix_positions = util.get_fix_positions(start_stop, positions)
         mean_fix_pos = np.nanmean(fix_positions, axis=0)
@@ -231,11 +231,16 @@ def extract_spiketimes_for_all_sessions(root_data_dir, session_paths, is_paralle
     if len(spikeTs_s) != len(all_labels):
         print("Warning: Length mismatch between spiketimes lists and labels.")
     # Save outputs to root_data_dir
-    spiketimes_s_path = os.path.join(root_data_dir, 'spiketimes_s.npy')
-    spiketimes_ms_path = os.path.join(root_data_dir, 'spiketimes_ms.npy')
+    spiketimes_s_path = os.path.join(root_data_dir, 'spiketimes_s.pkl')
+    spiketimes_ms_path = os.path.join(root_data_dir, 'spiketimes_ms.pkl')
     labels_path = os.path.join(root_data_dir, 'labels.csv')
-    np.save(spiketimes_s_path, spikeTs_s)
-    np.save(spiketimes_ms_path, spikeTs_ms)
+    # Save spikeTs_s as a pickle file
+    with open(spiketimes_s_path, 'wb') as f:
+        pickle.dump(spikeTs_s, f)
+    # Save spikeTs_ms as a pickle file
+    with open(spiketimes_ms_path, 'wb') as f:
+        pickle.dump(spikeTs_ms, f)
+    # Save arrays
     all_labels.to_csv(labels_path, index=False)
     return spikeTs_s, spikeTs_ms, all_labels
 
