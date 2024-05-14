@@ -144,11 +144,11 @@ def stretch_bounding_box_corners(bb_corner_coord_dict, scale=1.3):
     mean_x = sum(point[0] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
     mean_y = sum(point[1] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
     # Mean shift
-    shifted_points = {(key, ((point[0] - mean_x), (point[1] - mean_y))) for key, point in bb_corner_coord_dict.items()}
+    shifted_points = {key: (point[0]-mean_x, point[1]-mean_y) for key, point in bb_corner_coord_dict.items()}
     # Scale points
-    scaled_points = {(key, ((point[0] * scale), (point[1] * scale))) for key, point in shifted_points}
+    scaled_points = {key: (point[0]*scale, point[1]*scale) for key, point in shifted_points}
     # Shift points back
-    stretched_points = {key: (point[0] + mean_x, point[1] + mean_y) for key, point in scaled_points}
+    stretched_points = {key: (point[0]+mean_x, point[1]+mean_y) for key, point in scaled_points}
     return stretched_points
 
 
