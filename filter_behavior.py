@@ -193,6 +193,9 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
             block = 'discard'
     bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
     inside_roi = [util.is_inside_quadrilateral(mean_fix_pos, bbox_corners[key]) for key in bbox_corners]
+    # CHECK HERE IF FACE AND EYES BOTH HAVE VAL 1 FOR INSIDE_ROI
+    if inside_roi[0]:
+        pdb.set_trace()
     if np.any(inside_roi):
         fix_roi = bounding_boxes[bool(inside_roi)]
     else:
