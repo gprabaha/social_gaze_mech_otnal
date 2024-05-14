@@ -30,8 +30,9 @@ All fixations are out of bounds right now which cannot be correct. Check out wha
 is_cluster = True
 use_parallel = True
 remake_labelled_gaze_pos = False
-remake_fixations = False
-reload_labelled_pos = True
+reload_labelled_pos = False
+remake_fixations = True
+remake_spikeTs = True
 
 root_data_dir = load_data.get_root_data_dir(is_cluster)
 if reload_labelled_pos:
@@ -40,16 +41,15 @@ if reload_labelled_pos:
 elif 'labelled_gaze_positions_m1' in globals():
     print("labelled_gaze_positions_m1 is already loaded")
 
-# Get subfolders within the root data directory
-session_paths = load_data.get_subfolders(root_data_dir)
-# Extract meta-information from session paths
-meta_info_list = filter_behavior.extract_meta_info(session_paths)
-# Extract OT and NAL doses from meta-information and convert to numpy array
-otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_info in meta_info_list], dtype=np.float64)
-# Find unique doses and their indices
-unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
-
 if remake_labelled_gaze_pos:
+    # Get subfolders within the root data directory
+    session_paths = load_data.get_subfolders(root_data_dir)
+    # Extract meta-information from session paths
+    meta_info_list = filter_behavior.extract_meta_info(session_paths)
+    # Extract OT and NAL doses from meta-information and convert to numpy array
+    otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_info in meta_info_list], dtype=np.float64)
+    # Find unique doses and their indices
+    unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
     labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
         root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
 if remake_fixations:
@@ -58,15 +58,24 @@ if remake_fixations:
             root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
     fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(
         labelled_gaze_positions_m1, root_data_dir, use_parallel)  # The first file has funky session stop times
-    np.save(os.path.join(root_data_dir, 'fixations_m1.npy'), fixations_m1)
-    fixation_labels_m1.to_csv(os.path.join(root_data_dir, 'fixation_labels_m1.csv'), index=False)
 else:
     fixations_m1 = np.load(os.path.join(root_data_dir, 'fixations_m1.npy'))
     fixation_labels_m1 = pd.read_csv(os.path.join(root_data_dir, 'fixation_labels_m1.csv'))
 
 
-# if re_extract_spike_ts
-spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(root_data_dir, session_paths, use_parallel)
+if remake_spikeTs:
+    spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(root_data_dir, session_paths, use_parallel)
+else:
+    # Load spiketimes_s.pkl
+    spikeTs_s_path = os.path.join(root_data_dir, 'spiketimes_s.pkl')
+    with open(spikeTs_s_path, 'rb') as f:
+        spikeTs_s = pickle.load(f)
+    # Load spiketimes_ms.pkl
+    spikeTs_ms_path = os.path.join(root_data_dir, 'spiketimes_ms.pkl')
+    with open(spikeTs_ms_path, 'rb') as f:
+        spikeTs_ms = pickle.load(f)
+    # Load labels.csv
+    labels_path = os.path.join(root_data_dir, 'labels.csv')
 
 
 

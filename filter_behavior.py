@@ -119,6 +119,8 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, root_data_di
         all_fixation_labels.extend(session_labels)
     col_names = ['category', 'session_id', 'session_name', 'run', 'block', 'fix_duration', 'mean_x_pos', 'mean_y_pos', 'fix_roi', 'agent']
     all_fixation_labels = pd.DataFrame(all_fixation_labels, columns=col_names)
+    np.save(os.path.join(root_data_dir, 'fixations_m1.npy'), all_fixations)
+    all_fixation_labels.to_csv(os.path.join(root_data_dir, 'fixation_labels_m1.csv'), index=False)
     return all_fixations, all_fixation_labels
 
 
@@ -193,11 +195,11 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
             block = 'discard'
     bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
     inside_roi = [util.is_inside_quadrilateral(mean_fix_pos, bbox_corners[key]) for key in bbox_corners]
-    # CHECK HERE IF FACE AND EYES BOTH HAVE VAL 1 FOR INSIDE_ROI
-    if inside_roi[0]:
-        pdb.set_trace()
     if np.any(inside_roi):
-        fix_roi = bounding_boxes[bool(inside_roi)]
+        if inside_roi[0] and inside_roi[1]:
+            fix_roi = bounding_boxes[0]
+        else:
+            fix_roi = bounding_boxes[bool(inside_roi)]
     else:
         fix_roi = 'out_of_roi' 
     return run, block, fix_roi
