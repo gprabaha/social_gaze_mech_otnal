@@ -19,10 +19,6 @@ import util
 import filter_behavior
 
 
-"""
-All fixations are out of bounds right now which cannot be correct. Check out what is going on
-"""
-
 # Remember to remove outliers from the position data
 # Take the center of the monitor for tarantino for inter-run interval and check the fixations there compared to face
 
@@ -30,8 +26,8 @@ All fixations are out of bounds right now which cannot be correct. Check out wha
 is_cluster = True
 use_parallel = True
 remake_labelled_gaze_pos = False
-reload_labelled_pos = False
-remake_fixations = True
+reload_labelled_pos = True
+remake_fixations = False
 remake_spikeTs = False
 
 root_data_dir = load_data.get_root_data_dir(is_cluster)
