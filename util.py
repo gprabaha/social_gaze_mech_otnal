@@ -57,7 +57,7 @@ def get_fix_positions(start_stop, positions):
     return positions[start:stop,:]
 
 
-def is_inside_quadrilateral(point, corners, tolerance=1):
+def is_inside_quadrilateral(point, corners, tolerance=1e-3):
     # It is okay to have 1 square pixel error in area matching
     # This will avoid errord due to precision-related calculation mistakes
     # Very few points pretty much in the boundary might get included as a consequence

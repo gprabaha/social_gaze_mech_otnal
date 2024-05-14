@@ -90,20 +90,6 @@ def fixation_detection(data, t1, t2, minDur, maxDur, session_name):
         fix_ranges.append([s_ind, e_ind])
     return fix_ranges
 
-def min_duration(fixation_list, minDur):
-    """
-    Apply duration threshold to fixation list.
-    Args:
-    fixation_list: List of fixations.
-    minDur: Minimum fixation duration.
-    Returns:
-    Fixation list after applying duration threshold.
-    """
-    return [fix for fix in fixation_list if fix[6] >= minDur]
-
-def max_duration(fixation_list, maxDur):
-    return [fix for fix in fixation_list if fix[6] <= maxDur]
-
 
 def get_t1_filtered_fixations(n, x, y, t, t1, session_name):
     """
@@ -191,3 +177,17 @@ def filter_fixations_t2(fixation_id, fixations, t2):
         duration = end_time - start_time
     return fixx, fixy, number_t1, number_t2, start_time, end_time, duration, list_out_points
 
+
+def min_duration(fixation_list, minDur):
+    """
+    Apply duration threshold to fixation list.
+    Args:
+    fixation_list: List of fixations.
+    minDur: Minimum fixation duration.
+    Returns:
+    Fixation list after applying duration threshold.
+    """
+    return [fix for fix in fixation_list if fix[6] >= minDur]
+
+def max_duration(fixation_list, maxDur):
+    return [fix for fix in fixation_list if fix[6] <= maxDur]
