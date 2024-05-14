@@ -32,28 +32,26 @@ use_parallel = True
 remake_labelled_gaze_pos = False
 reload_labelled_pos = False
 remake_fixations = True
-remake_spikeTs = True
+remake_spikeTs = False
 
 root_data_dir = load_data.get_root_data_dir(is_cluster)
+session_paths = load_data.get_subfolders(root_data_dir)
 if reload_labelled_pos:
     with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'rb') as f:
         labelled_gaze_positions_m1 = pickle.load(f)
 elif 'labelled_gaze_positions_m1' in globals():
     print("labelled_gaze_positions_m1 is already loaded")
-
 if remake_labelled_gaze_pos:
-    # Get subfolders within the root data directory
-    session_paths = load_data.get_subfolders(root_data_dir)
-    # Extract meta-information from session paths
     meta_info_list = filter_behavior.extract_meta_info(session_paths)
-    # Extract OT and NAL doses from meta-information and convert to numpy array
     otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_info in meta_info_list], dtype=np.float64)
-    # Find unique doses and their indices
     unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
     labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
         root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
 if remake_fixations:
     if not reload_labelled_pos:
+        meta_info_list = filter_behavior.extract_meta_info(session_paths)
+        otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_info in meta_info_list], dtype=np.float64)
+        unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
         labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
             root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
     fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(
@@ -61,8 +59,6 @@ if remake_fixations:
 else:
     fixations_m1 = np.load(os.path.join(root_data_dir, 'fixations_m1.npy'))
     fixation_labels_m1 = pd.read_csv(os.path.join(root_data_dir, 'fixation_labels_m1.csv'))
-
-
 if remake_spikeTs:
     spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(root_data_dir, session_paths, use_parallel)
 else:

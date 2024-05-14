@@ -148,15 +148,24 @@ def get_session_fixations(session):
     fix_vec_entire_session = fix.is_fixation(util.px2deg(positions), time_vec, session_name, sampling_rate=sampling_rate)
     fixations = util.find_islands(fix_vec_entire_session)
     fixation_labels = []
+    smallest_area_differences_for_roi_detection = []
     for start_stop in fixations:
         fix_duration = util.get_duration(start_stop)
         fix_positions = util.get_fix_positions(start_stop, positions)
         mean_fix_pos = np.nanmean(fix_positions, axis=0)
-        run, block, fix_roi = detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_pos, bbox_corners)
+        run, block, fix_roi, smallest_diff = detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_pos, bbox_corners)
+        smallest_area_differences_for_roi_detection.append(smallest_diff)
         agent = info['monkey_1']
         fixation_info = [category, session_identifier, session_name, run, block, fix_duration, mean_fix_pos[0], mean_fix_pos[1], fix_roi, agent]
         fixation_labels.append(fixation_info)
     assert fixations.shape[0] == len(fixation_labels)
+    import matplotlib.pyplot as plt
+    # Assuming smallest_area_differences_for_roi_detection is your list
+    plt.hist(smallest_area_differences_for_roi_detection, bins=20)  # Adjust bins as needed
+    plt.title(f'{session_name} Histogram of Smallest Area Differences for ROI Detection')
+    plt.xlabel('Area Differences')
+    plt.ylabel('Frequency')
+    plt.show()
     return fixations, fixation_labels
 
 
@@ -194,15 +203,21 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
             run = None
             block = 'discard'
     bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
-    inside_roi = [util.is_inside_quadrilateral(mean_fix_pos, bbox_corners[key]) for key in bbox_corners]
-    if np.any(inside_roi):
-        if inside_roi[0] and inside_roi[1]:
+    
+    smallest_diff = np.inf
+    inside_all_roi = []
+    for key in bbox_corners:
+        inside_roi, area_diff = util.is_inside_quadrilateral(mean_fix_pos, bbox_corners[key])
+        inside_all_roi.append(inside_roi)
+        smallest_diff = area_diff if area_diff < smallest_diff else smallest_diff
+    if np.any(inside_all_roi):
+        if inside_all_roi[0] and inside_all_roi[1]:
             fix_roi = bounding_boxes[0]
         else:
-            fix_roi = bounding_boxes[bool(inside_roi)]
+            fix_roi = bounding_boxes[bool(inside_all_roi)]
     else:
         fix_roi = 'out_of_roi' 
-    return run, block, fix_roi
+    return run, block, fix_roi, smallest_diff
 
 
 def extract_spiketimes_for_all_sessions(root_data_dir, session_paths, is_parallel=True):
