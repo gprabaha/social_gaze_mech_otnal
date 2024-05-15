@@ -12,6 +12,7 @@ Script for fixation detection
 import numpy as np
 import util  # Import utility functions here
 from tqdm import tqdm
+import pandas as pd
 
 import pdb  # Import the Python debugger if needed
 
@@ -53,7 +54,7 @@ def is_fixation(pos, time, session_name, t1=None, t2=None, minDur=None, maxDur=N
     fix_list, fix_t_inds = fixation_detection(data, t1, t2, minDur, maxDur, session_name)
     for t_range in fix_t_inds:
         fix_vector[t_range[0]:t_range[1] + 1] = 1
-    return np.column_stack((fix_list, fix_vector))
+    return fix_list, fix_vector
 
 
 def fixation_detection(data, t1, t2, minDur, maxDur, session_name):
@@ -88,7 +89,8 @@ def fixation_detection(data, t1, t2, minDur, maxDur, session_name):
         s_ind = np.where(data[:, 2] == fix[4])[0][0]
         e_ind = np.where(data[:, 2] == fix[5])[0][-1]
         fix_ranges.append([s_ind, e_ind])
-    return fixation_list, fix_ranges
+    col_names = ['fix_x', 'fix_y', 'threshold_1', 'threshold_2', 'start_time', 'end_time', 'duration']
+    return pd.DataFrame(fixation_list, columns=col_names), fix_ranges
 
 
 def get_t1_filtered_fixations(n, x, y, t, t1, session_name):
@@ -175,7 +177,7 @@ def filter_fixations_t2(fixation_id, fixations, t2):
         start_time = fixations_list_t2[0, 2]
         end_time = fixations_list_t2[-1, 2]
         duration = end_time - start_time
-    return fixx, fixy, number_t1, number_t2, start_time, end_time, duration, list_out_points
+    return fixx, fixy, number_t1, number_t2, start_time, end_time, duration
 
 
 def min_duration(fixation_list, minDur):

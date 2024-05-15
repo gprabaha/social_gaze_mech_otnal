@@ -50,10 +50,11 @@ if remake_fixations:
         unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
         labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
             root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
-    fixations_m1, fixation_labels_m1, fix_encoded_postime = filter_behavior.extract_fixations_with_labels_parallel(
+    fixations_m1, fix_timepos_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(
         labelled_gaze_positions_m1, root_data_dir, use_parallel)  # The first file has funky session stop times
 else:
     fixations_m1 = np.load(os.path.join(root_data_dir, 'fixations_m1.npy'))
+    fix_timepos_m1 = np.load(os.path.join(root_data_dir, 'fixations_timepos_m1.npy'))
     fixation_labels_m1 = pd.read_csv(os.path.join(root_data_dir, 'fixation_labels_m1.csv'))
 if remake_spikeTs:
     spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(root_data_dir, session_paths, use_parallel)
