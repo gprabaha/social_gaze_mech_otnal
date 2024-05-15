@@ -146,7 +146,8 @@ def get_session_fixations(session):
     startS = info['startS']
     stopS = info['stopS']
     bbox_corners = info['roi_bb_corners']
-    fix_vec_entire_session = fix.is_fixation(positions, time_vec, session_name, sampling_rate=sampling_rate)
+    fix_encoded_pos_time_mat = fix.is_fixation(positions, time_vec, session_name, sampling_rate=sampling_rate)
+    fix_vec_entire_session = fix_encoded_pos_time_mat[:,-1]
     fixations = util.find_islands(fix_vec_entire_session)
     fixation_labels = []
     smallest_area_differences_for_roi_detection = []
@@ -160,13 +161,6 @@ def get_session_fixations(session):
         fixation_info = [category, session_identifier, session_name, run, block, fix_duration, mean_fix_pos[0], mean_fix_pos[1], fix_roi, agent]
         fixation_labels.append(fixation_info)
     assert fixations.shape[0] == len(fixation_labels)
-    if 0:
-        import matplotlib.pyplot as plt
-        plt.hist(smallest_area_differences_for_roi_detection, bins=20)  # Adjust bins as needed
-        plt.title(f'{session_name} Histogram of Smallest Area Differences for ROI Detection')
-        plt.xlabel('Area Differences')
-        plt.ylabel('Frequency')
-        plt.show()
     return fixations, fixation_labels
 
 

@@ -27,8 +27,8 @@ is_cluster = True
 use_parallel = True
 remake_labelled_gaze_pos = False
 reload_labelled_pos = True
-remake_fixations = False
-remake_spikeTs = False
+remake_fixations = True
+remake_spikeTs = True
 
 root_data_dir = load_data.get_root_data_dir(is_cluster)
 session_paths = load_data.get_subfolders(root_data_dir)
@@ -50,7 +50,7 @@ if remake_fixations:
         unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
         labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
             root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
-    fixations_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(
+    fixations_m1, fixation_labels_m1, fix_encoded_postime = filter_behavior.extract_fixations_with_labels_parallel(
         labelled_gaze_positions_m1, root_data_dir, use_parallel)  # The first file has funky session stop times
 else:
     fixations_m1 = np.load(os.path.join(root_data_dir, 'fixations_m1.npy'))
