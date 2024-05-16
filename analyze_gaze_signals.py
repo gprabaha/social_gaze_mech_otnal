@@ -27,10 +27,10 @@ between the edges of the bounds of the eyetracker rect
 
 # Determine root data directory based on whether it's running on a cluster or not
 is_cluster = True
-use_parallel = False
-remake_labelled_gaze_pos = True
-reload_labelled_pos = False
-remake_fixations = False
+use_parallel = True
+remake_labelled_gaze_pos = False
+reload_labelled_pos = True
+remake_fixations = True
 remake_spikeTs = False
 
 root_data_dir = load_data.get_root_data_dir(is_cluster)

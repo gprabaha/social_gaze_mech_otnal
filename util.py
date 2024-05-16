@@ -16,8 +16,75 @@ import defaults
 import pdb
 
 
+def calculate_roi_bounding_box_corners(m1_landmarks):
+    # Positive Y axis is downward so that needs to be accounted for
+    # Face bounding box is just the one described the four corner points
+    corner_name_order = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft']
+    left_eye = m1_landmarks['eyeOnLeft'][0][0][0]
+    right_eye = m1_landmarks['eyeOnRight'][0][0][0]
+    eye_bb_corners = construct_eye_bounding_box(left_eye, right_eye, corner_name_order)
+    face_bb_corners = stretch_bounding_box_corners(
+        {key: map_roi_coord_to_eyelink_space(
+            m1_landmarks[key][0][0][0]
+            ) for key in corner_name_order})
+    left_obj_bb_corners = stretch_bounding_box_corners(
+        {key: map_roi_coord_to_eyelink_space(
+            m1_landmarks['leftObject'][0][0][0][key][0][0]
+            ) for key in corner_name_order})
+    right_obj_bb_corners = stretch_bounding_box_corners(
+        {key: map_roi_coord_to_eyelink_space(
+            m1_landmarks['rightObject'][0][0][0][key][0][0]
+            ) for key in corner_name_order})
+    return eye_bb_corners, face_bb_corners, left_obj_bb_corners, right_obj_bb_corners
+
+
+def construct_eye_bounding_box(left_eye, right_eye, corner_name_order):
+    inter_eye_dist = distance(left_eye, right_eye)
+    offset = inter_eye_dist / 2
+    # Coordinates of the right eye
+    right_eye_x, right_eye_y = right_eye
+    # Coordinates of the left eye
+    left_eye_x, left_eye_y = left_eye
+    corner_dict = {}
+    for corner in corner_name_order:
+        if corner == 'topLeft':
+            corner_dict[corner] = map_roi_coord_to_eyelink_space(
+                (left_eye_x - offset, left_eye_y - offset)
+                )
+        elif corner == 'topRight':
+            corner_dict[corner] = map_roi_coord_to_eyelink_space(
+                (right_eye_x + offset, right_eye_y - offset)
+                )
+        elif corner == 'bottomRight':
+            corner_dict[corner] = map_roi_coord_to_eyelink_space(
+                (right_eye_x + offset, right_eye_y + offset)
+                )
+        elif corner == 'bottomLeft':
+            corner_dict[corner] = map_roi_coord_to_eyelink_space(
+                (left_eye_x - offset, left_eye_y + offset)
+                )
+    return stretch_bounding_box_corners(corner_dict)
+
+
+def map_roi_coord_to_eyelink_space(coordinate):
+    monitor_info = defaults.fetch_monitor_info()
+    hor_rez = monitor_info['horizontal_resolution']
+    vert_rez = monitor_info['vertical_resolution']
+    x_px_range = [-hor_rez*0.2, hor_rez+hor_rez*0.2]
+    y_px_range = [-vert_rez*0.2, vert_rez+vert_rez*0.2]
+    remapped_coord = (
+        span(x_px_range)*(coordinate[0]/span(x_px_range)) + min(x_px_range),
+        span(y_px_range)*(coordinate[1]/span(y_px_range)) + min(y_px_range)
+        )
+    return remapped_coord
+
+def span(array):
+    return max(array) - min(array)
+
+
 def create_timevec(n_samples, sampling_rate):
     return [i * sampling_rate for i in range(n_samples)]
+
 
 def find_islands(binary_vec, min_samples=0):
     islands = []
@@ -98,70 +165,6 @@ def get_area_using_shoelace_4pts(x1, y1, x2, y2, x3, y3, x4, y4):
     total_area = get_area_using_shoelace_3pts(x1, y1, x2, y2, x3, y3) + \
                  get_area_using_shoelace_3pts(x1, y1, x3, y3, x4, y4)
     return total_area
-
-
-
-def calculate_roi_bounding_box_corners(m1_landmarks):
-    # Positive Y axis is downward so that needs to be accounted for
-    # Face bounding box is just the one described the four corner points
-    corner_name_order = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft']
-    left_eye = m1_landmarks['eyeOnLeft'][0][0][0]
-    right_eye = m1_landmarks['eyeOnRight'][0][0][0]
-    eye_bb_corners = construct_eye_bounding_box(left_eye, right_eye, corner_name_order)
-    face_bb_corners = stretch_bounding_box_corners(
-        {key: map_roi_coord_to_eyelink_space(m1_landmarks[key][0][0][0])
-         for key in corner_name_order})
-    left_obj_bb_corners = stretch_bounding_box_corners(
-        {key: map_roi_coord_to_eyelink_space(m1_landmarks['leftObject'][0][0][0][key][0][0])
-         for key in corner_name_order})
-    right_obj_bb_corners = stretch_bounding_box_corners(
-        {key: map_roi_coord_to_eyelink_space(m1_landmarks['rightObject'][0][0][0][key][0][0])
-         for key in corner_name_order})
-    return eye_bb_corners, face_bb_corners, left_obj_bb_corners, right_obj_bb_corners
-
-
-def construct_eye_bounding_box(left_eye, right_eye, corner_name_order):
-    inter_eye_dist = distance(left_eye, right_eye)
-    offset = inter_eye_dist / 2
-    # Coordinates of the right eye
-    right_eye_x, right_eye_y = right_eye
-    # Coordinates of the left eye
-    left_eye_x, left_eye_y = left_eye
-    corner_dict = {}
-    for corner in corner_name_order:
-        if corner == 'topLeft':
-            corner_dict[corner] = map_roi_coord_to_eyelink_space(
-                (left_eye_x - offset, left_eye_y - offset)
-                )
-        elif corner == 'topRight':
-            corner_dict[corner] = map_roi_coord_to_eyelink_space(
-                (right_eye_x + offset, right_eye_y - offset)
-                )
-        elif corner == 'bottomRight':
-            corner_dict[corner] = map_roi_coord_to_eyelink_space(
-                (right_eye_x + offset, right_eye_y + offset)
-                )
-        elif corner == 'bottomLeft':
-            corner_dict[corner] = map_roi_coord_to_eyelink_space(
-                (left_eye_x - offset, left_eye_y + offset)
-                )
-    return stretch_bounding_box_corners(corner_dict)
-
-
-def map_roi_coord_to_eyelink_space(coordinate):
-    monitor_info = defaults.fetch_monitor_info()
-    hor_rez = monitor_info['horizontal_resolution']
-    vert_rez = monitor_info['vertical_resolution']
-    x_px_range = [-hor_rez*0.2, hor_rez+hor_rez*0.2]
-    y_px_range = [-vert_rez*0.2, vert_rez+vert_rez*0.2]
-    remapped_coord = (
-        span(x_px_range)*(coordinate[0]/span(x_px_range)) + min(x_px_range),
-        span(y_px_range)*(coordinate[1]/span(y_px_range)) + min(y_px_range)
-        )
-    return remapped_coord
-
-def span(array):
-    return max(array) - min(array)
 
 
 def stretch_bounding_box_corners(bb_corner_coord_dict, scale=1.3):
