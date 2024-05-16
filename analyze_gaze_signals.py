@@ -19,30 +19,36 @@ import util
 import filter_behavior
 
 
-# Remember to remove outliers from the position data
-# Take the center of the monitor for tarantino for inter-run interval and check the fixations there compared to face
+'''
+No fixation is now being detected inside the left object bounding box. This is
+most probably the position data poits have not been transformed to be remapped
+between the edges of the bounds of the eyetracker rect
+'''
 
 # Determine root data directory based on whether it's running on a cluster or not
 is_cluster = True
 use_parallel = True
 remake_labelled_gaze_pos = False
 reload_labelled_pos = True
-remake_fixations = True
+remake_fixations = False
 remake_spikeTs = True
 
 root_data_dir = load_data.get_root_data_dir(is_cluster)
 session_paths = load_data.get_subfolders(root_data_dir)
+
 if reload_labelled_pos:
     with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'rb') as f:
         labelled_gaze_positions_m1 = pickle.load(f)
 elif 'labelled_gaze_positions_m1' in globals():
     print("labelled_gaze_positions_m1 is already loaded")
+
 if remake_labelled_gaze_pos:
     meta_info_list = filter_behavior.extract_meta_info(session_paths)
     otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_info in meta_info_list], dtype=np.float64)
     unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
     labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
         root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
+
 if remake_fixations:
     if not reload_labelled_pos:
         meta_info_list = filter_behavior.extract_meta_info(session_paths)
@@ -56,6 +62,7 @@ else:
     fixations_m1 = np.load(os.path.join(root_data_dir, 'fixations_m1.npy'))
     fix_timepos_m1 = np.load(os.path.join(root_data_dir, 'fixations_timepos_m1.npy'))
     fixation_labels_m1 = pd.read_csv(os.path.join(root_data_dir, 'fixation_labels_m1.csv'))
+
 if remake_spikeTs:
     spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(root_data_dir, session_paths, use_parallel)
 else:
@@ -68,7 +75,21 @@ else:
     with open(spikeTs_ms_path, 'rb') as f:
         spikeTs_ms = pickle.load(f)
     # Load labels.csv
-    labels_path = os.path.join(root_data_dir, 'labels.csv')
+    labels_path = os.path.join(root_data_dir, 'spike_labels.csv')
+
+# ROI Indices
+face_roi_inds = fixation_labels_m1['fix_roi'] == 'face_bbox'
+eye_roi_inds = fixation_labels_m1['fix_roi'] == 'eye_bbox'
+left_obj_roi_inds = fixation_labels_m1['fix_roi'] == 'left_obj_bbox'
+right_obj_roi_inds = fixation_labels_m1['fix_roi'] == 'right_obj_bbox'
+
+# Agent Indices
+lynch_inds = fixation_labels_m1['agent'] == 'Lynch'
+tarantino_inds = fixation_labels_m1['agent'] == 'Tarantino'
+
+# Monitor up or down
+mon_up_inds = fixation_labels_m1['block'] == 'mon_up'
+mon_down_inds = fixation_labels_m1['block'] == 'mon_down'
 
 
 

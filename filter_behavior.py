@@ -249,7 +249,7 @@ def extract_spiketimes_for_all_sessions(root_data_dir, session_paths, is_paralle
     # Save outputs to root_data_dir
     spiketimes_s_path = os.path.join(root_data_dir, 'spiketimes_s.pkl')
     spiketimes_ms_path = os.path.join(root_data_dir, 'spiketimes_ms.pkl')
-    labels_path = os.path.join(root_data_dir, 'labels.csv')
+    labels_path = os.path.join(root_data_dir, 'spike_labels.csv')
     # Save spikeTs_s as a pickle file
     with open(spiketimes_s_path, 'wb') as f:
         pickle.dump(spikeTs_s, f)
