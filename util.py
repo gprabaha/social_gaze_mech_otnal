@@ -19,7 +19,6 @@ import pdb
 def create_timevec(n_samples, sampling_rate):
     return [i * sampling_rate for i in range(n_samples)]
 
-
 def find_islands(binary_vec, min_samples=0):
     islands = []
     island_started = False
@@ -110,11 +109,14 @@ def calculate_roi_bounding_box_corners(m1_landmarks):
     right_eye = m1_landmarks['eyeOnRight'][0][0][0]
     eye_bb_corners = construct_eye_bounding_box(left_eye, right_eye, corner_name_order)
     face_bb_corners = stretch_bounding_box_corners(
-        {key: m1_landmarks[key][0][0][0] for key in corner_name_order})
+        {key: map_roi_coord_to_eyelink_space(m1_landmarks[key][0][0][0])
+         for key in corner_name_order})
     left_obj_bb_corners = stretch_bounding_box_corners(
-        {key: m1_landmarks['leftObject'][0][0][0][key][0][0] for key in corner_name_order})
+        {key: map_roi_coord_to_eyelink_space(m1_landmarks['leftObject'][0][0][0][key][0][0])
+         for key in corner_name_order})
     right_obj_bb_corners = stretch_bounding_box_corners(
-        {key: m1_landmarks['rightObject'][0][0][0][key][0][0] for key in corner_name_order})
+        {key: map_roi_coord_to_eyelink_space(m1_landmarks['rightObject'][0][0][0][key][0][0])
+         for key in corner_name_order})
     return eye_bb_corners, face_bb_corners, left_obj_bb_corners, right_obj_bb_corners
 
 
@@ -128,14 +130,38 @@ def construct_eye_bounding_box(left_eye, right_eye, corner_name_order):
     corner_dict = {}
     for corner in corner_name_order:
         if corner == 'topLeft':
-            corner_dict[corner] = (left_eye_x - offset, left_eye_y - offset)
+            corner_dict[corner] = map_roi_coord_to_eyelink_space(
+                (left_eye_x - offset, left_eye_y - offset)
+                )
         elif corner == 'topRight':
-            corner_dict[corner] = (right_eye_x + offset, right_eye_y - offset)
+            corner_dict[corner] = map_roi_coord_to_eyelink_space(
+                (right_eye_x + offset, right_eye_y - offset)
+                )
         elif corner == 'bottomRight':
-            corner_dict[corner] = (right_eye_x + offset, right_eye_y + offset)
+            corner_dict[corner] = map_roi_coord_to_eyelink_space(
+                (right_eye_x + offset, right_eye_y + offset)
+                )
         elif corner == 'bottomLeft':
-            corner_dict[corner] = (left_eye_x - offset, left_eye_y + offset)
+            corner_dict[corner] = map_roi_coord_to_eyelink_space(
+                (left_eye_x - offset, left_eye_y + offset)
+                )
     return stretch_bounding_box_corners(corner_dict)
+
+
+def map_roi_coord_to_eyelink_space(coordinate):
+    monitor_info = defaults.fetch_monitor_info()
+    hor_rez = monitor_info['horizontal_resolution']
+    vert_rez = monitor_info['vertical_resolution']
+    x_px_range = [-hor_rez*0.2, hor_rez+hor_rez*0.2]
+    y_px_range = [-vert_rez*0.2, vert_rez+vert_rez*0.2]
+    remapped_coord = (
+        span(x_px_range)*(coordinate[0]/span(x_px_range)) + min(x_px_range),
+        span(y_px_range)*(coordinate[1]/span(y_px_range)) + min(y_px_range)
+        )
+    return remapped_coord
+
+def span(array):
+    return max(array) - min(array)
 
 
 def stretch_bounding_box_corners(bb_corner_coord_dict, scale=1.3):
@@ -145,9 +171,9 @@ def stretch_bounding_box_corners(bb_corner_coord_dict, scale=1.3):
     # Mean shift
     shifted_points = {key: (point[0]-mean_x, point[1]-mean_y) for key, point in bb_corner_coord_dict.items()}
     # Scale points
-    scaled_points = {key: (point[0]*scale, point[1]*scale) for key, point in shifted_points}
+    scaled_points = {key: (point[0]*scale, point[1]*scale) for key, point in shifted_points.items()}
     # Shift points back
-    stretched_points = {key: (point[0]+mean_x, point[1]+mean_y) for key, point in scaled_points}
+    stretched_points = {key: (point[0]+mean_x, point[1]+mean_y) for key, point in scaled_points.items()}
     return stretched_points
 
 

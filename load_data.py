@@ -106,7 +106,7 @@ def get_labelled_gaze_positions_dict_m1(folder_path, meta_info_list, session_cat
     Returns:
     - gaze_data (tuple): Tuple containing gaze positions and associated metadata.
     """
-    mat_files = [f for f in os.listdir(folder_path) if 'M1_gaze.mat' in f]
+    mat_files = [f for f in os.listdir(folder_path) if 'M1_gaze_regForm.mat' in f]
     if len(mat_files) != 1:
         print(f"\nError: Multiple or no '*_M1_gaze.mat' files found in folder: {folder_path}")
         return None
@@ -136,7 +136,7 @@ def get_m1_roi_bounding_boxes(session_path):
     Returns:
     - bbox_dict (dict): Dictionary containing M1 ROI bounding boxes.
     """
-    file_list_m1_landmarks = glob.glob(f"{session_path}/*M1_farPlaneCal.mat")
+    file_list_m1_landmarks = glob.glob(f"{session_path}/*M1_farPlaneCal_regForm.mat")
     if len(file_list_m1_landmarks) != 1:
         print(f"\nWarning: No m1_landmarks or more than one landmarks found in folder: {session_path}.")
         return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
@@ -160,7 +160,7 @@ def get_spiketimes_and_labels_for_one_session(session_path):
     session_spikeTs_labels = []
     label_cols = ['session', 'channel', 'channel_label', 'unit_no_within_channel', 'unit_label', 'uuid', 'n_spikes', 'region']
     session_name = os.path.basename(os.path.normpath(session_path))
-    file_list_spikeTs = glob.glob(f"{session_path}/*spikeTs.mat")
+    file_list_spikeTs = glob.glob(f"{session_path}/*spikeTs_regForm.mat")
     if len(file_list_spikeTs) != 1:
         print(f"\nWarning: No runs found in folder: {session_path}.")
     try:
