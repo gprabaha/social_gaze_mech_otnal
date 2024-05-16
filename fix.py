@@ -78,7 +78,7 @@ def fixation_detection(data, t1, t2, minDur, maxDur, session_name):
     fixations = get_t1_filtered_fixations(n, x, y, t, t1, session_name)
     number_fixations = fixations[-1, 3]
     fixation_list = []
-    for i in tqdm(range(1, int(number_fixations) + 1), desc=f"{session_name}: n fixations t2 filtered:"):
+    for i in tqdm(range(1, int(number_fixations) + 1), desc=f"{session_name}: n fixations t2 filtered"):
         fixation_list.append(filter_fixations_t2(i, fixations, t2))
     # Duration thresholding
     fixation_list = min_duration(fixation_list, minDur)

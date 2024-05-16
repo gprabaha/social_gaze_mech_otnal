@@ -158,7 +158,7 @@ def get_spiketimes_and_labels_for_one_session(session_path):
     session_spikeTs_s = []
     session_spikeTs_ms = []
     session_spikeTs_labels = []
-    label_cols = ['session', 'channel', 'channel_label', 'unit_no_within_channel', 'unit_label', 'uuid', 'n_spikes', 'region']
+    label_cols = ['session_name', 'channel', 'channel_label', 'unit_no_within_channel', 'unit_label', 'uuid', 'n_spikes', 'region']
     session_name = os.path.basename(os.path.normpath(session_path))
     file_list_spikeTs = glob.glob(f"{session_path}/*spikeTs_regForm.mat")
     if len(file_list_spikeTs) != 1:
@@ -187,29 +187,3 @@ def get_spiketimes_and_labels_for_one_session(session_path):
         print(f"An error occurred: {e}")
         return [], [], pd.DataFrame(columns=label_cols)
 
-
-def get_runs_data_copy(session_path):
-    """
-    Extracts runs data from session path.
-    Parameters:
-    - session_path (str): Path to the session.
-    Returns:
-    - runs_dict (dict): Dictionary containing runs data.
-    """
-    file_list_runs = glob.glob(f"{session_path}/*runs.mat")
-    if len(file_list_runs) != 1:
-        print(f"Warning: No runs found in folder: {session_path}.")
-        return {'startS': None, 'stopS': None, 'num_runs': 0}
-    try:
-        data_runs = scipy.io.loadmat(file_list_runs[0])
-        runs = data_runs.get('runs', None)
-        if runs is not None:
-            startS = [run['startS'][0][0] for run in runs[0]]
-            stopS = [run['stopS'][0][0] for run in runs[0]]
-            num_runs = len(startS)
-            return {'startS': startS, 'stopS': stopS, 'num_runs': num_runs}
-        else:
-            return {'startS': None, 'stopS': None, 'num_runs': 0}
-    except Exception as e:
-        print(f"Error loading runs for folder: {session_path}: {e}")
-        return {'startS': None, 'stopS': None, 'num_runs': 0}

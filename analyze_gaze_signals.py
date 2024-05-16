@@ -30,7 +30,7 @@ is_cluster = True
 use_parallel = True
 remake_labelled_gaze_pos = False
 reload_labelled_pos = True
-remake_fixations = True
+remake_fixations = False
 remake_spikeTs = False
 
 root_data_dir = load_data.get_root_data_dir(is_cluster)
@@ -39,23 +39,16 @@ session_paths = load_data.get_subfolders(root_data_dir)
 if reload_labelled_pos:
     with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'rb') as f:
         labelled_gaze_positions_m1 = pickle.load(f)
-elif 'labelled_gaze_positions_m1' in globals():
-    print("labelled_gaze_positions_m1 is already loaded")
-
-if remake_labelled_gaze_pos:
+elif remake_labelled_gaze_pos:
     meta_info_list = filter_behavior.extract_meta_info(session_paths)
-    otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_info in meta_info_list], dtype=np.float64)
-    unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
+    otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']]
+                            for meta_info in meta_info_list], dtype=np.float64)
+    unique_doses, dose_inds, session_categories = \
+        filter_behavior.get_unique_doses(otnal_doses)
     labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
         root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
 
 if remake_fixations:
-    if not reload_labelled_pos:
-        meta_info_list = filter_behavior.extract_meta_info(session_paths)
-        otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']] for meta_info in meta_info_list], dtype=np.float64)
-        unique_doses, dose_inds, session_categories = filter_behavior.get_unique_doses(otnal_doses)
-        labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
-            root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
     fixations_m1, fix_timepos_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(
         labelled_gaze_positions_m1, root_data_dir, use_parallel)  # The first file has funky session stop times
 else:
@@ -74,24 +67,31 @@ else:
     spikeTs_ms_path = os.path.join(root_data_dir, 'spiketimes_ms.pkl')
     with open(spikeTs_ms_path, 'rb') as f:
         spikeTs_ms = pickle.load(f)
-    # Load labels.csv
+    # Load spike_labels.csv
     labels_path = os.path.join(root_data_dir, 'spike_labels.csv')
+    spikeTs_labels = pd.read_csv(labels_path)
 
 # ROI Indices
-face_roi_inds = fixation_labels_m1['fix_roi'] == 'face_bbox'
-eye_roi_inds = fixation_labels_m1['fix_roi'] == 'eye_bbox'
-left_obj_roi_inds = fixation_labels_m1['fix_roi'] == 'left_obj_bbox'
-right_obj_roi_inds = fixation_labels_m1['fix_roi'] == 'right_obj_bbox'
+face_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'face_bbox'
+eye_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'eye_bbox'
+left_obj_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'left_obj_bbox'
+right_obj_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'right_obj_bbox'
 
 # Agent Indices
-lynch_inds = fixation_labels_m1['agent'] == 'Lynch'
-tarantino_inds = fixation_labels_m1['agent'] == 'Tarantino'
+lynch_bool_inds = fixation_labels_m1['agent'] == 'Lynch'
+tarantino_bool_inds = fixation_labels_m1['agent'] == 'Tarantino'
 
 # Monitor up or down
-mon_up_inds = fixation_labels_m1['block'] == 'mon_up'
-mon_down_inds = fixation_labels_m1['block'] == 'mon_down'
+mon_up_bool_inds = fixation_labels_m1['block'] == 'mon_up'
+mon_down_bool_inds = fixation_labels_m1['block'] == 'mon_down'
 
+all_sessions = fixation_labels_m1['session_name'].unique()
 
+for session in all_sessions:
+    session_fix_bool_inds = fixation_labels_m1['session_name'] == session
+    session_unit_indices = np.where(spikeTs_labels['session_name'] == session)[0]
+    for unit_index in session_unit_indices:
+        unit_spikeTs_s = spikeTs_s[unit_index]
 
 
 """
