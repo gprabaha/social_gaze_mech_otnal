@@ -52,7 +52,8 @@ elif remake_labelled_gaze_pos:
     labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
         root_data_dir, unique_doses, dose_inds, meta_info_list,
         session_paths, session_categories,
-        map_gaze_pos_coord_to_eyelink_space)
+        map_gaze_pos_coord_to_eyelink_space,
+        use_parallel)
 
 if remake_fixations:
     fixations_m1, fix_timepos_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(

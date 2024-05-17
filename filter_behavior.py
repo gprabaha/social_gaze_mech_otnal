@@ -9,8 +9,10 @@ Created on Wed Apr 10 12:36:36 2024
 import numpy as np
 from tqdm import tqdm
 import os
+import multiprocessing
 from multiprocessing import Pool
 from joblib import Parallel, delayed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -67,11 +69,10 @@ def get_unique_doses(otnal_doses):
     return unique_rows, indices_for_unique_rows, session_category
 
 
-### Function to extract labelled gaze positions for M1
 def extract_labelled_gaze_positions_m1(
         root_data_dir, unique_doses, dose_inds, meta_info_list,
         session_paths, session_categories,
-        map_gaze_pos_coord_to_eyelink_space):
+        map_gaze_pos_coord_to_eyelink_space, use_parallel=True):
     """
     Extracts labelled gaze positions from files associated with unique doses.
     Parameters:
@@ -81,21 +82,39 @@ def extract_labelled_gaze_positions_m1(
     - meta_info_list (list): List of dictionaries containing meta-information for each session.
     - session_paths (list): List of paths to sessions.
     - session_categories (ndarray): Session categories.
+    - map_gaze_pos_coord_to_eyelink_space (bool): Flag to determine if coordinates should be remapped.
+    - use_parallel (bool): Flag to determine if parallel processing should be used.
     Returns:
     - labelled_gaze_positions_m1 (list): List of tuples containing gaze positions and associated metadata.
     """
+
+    def process_index(idx):
+        folder_path = session_paths[idx]
+        return load_data.get_labelled_gaze_positions_dict_m1(
+            folder_path, meta_info_list, session_categories, idx,
+            map_gaze_pos_coord_to_eyelink_space)
+    
     labelled_gaze_positions_m1 = []
     for dose, indices_list in zip(unique_doses, dose_inds):
-        for idx in tqdm(indices_list, desc="Processing indices for dose", unit="index"):
-            folder_path = session_paths[idx]
-            gaze_data = load_data.get_labelled_gaze_positions_dict_m1(
-                folder_path, meta_info_list, session_categories, idx,
-                map_gaze_pos_coord_to_eyelink_space)
-            if gaze_data is not None:
-                labelled_gaze_positions_m1.append(gaze_data)
+        if use_parallel:
+            num_workers = min(multiprocessing.cpu_count(), len(indices_list))
+            with ThreadPoolExecutor(max_workers=num_workers) as executor:
+                futures = {executor.submit(process_index, idx): idx for idx in indices_list}
+                for future in tqdm(as_completed(futures),
+                                   desc="Processing indices for dose",
+                                   unit="index", total=len(indices_list)):
+                    gaze_data = future.result()
+                    if gaze_data is not None:
+                        labelled_gaze_positions_m1.append(gaze_data)
+        else:
+            for idx in tqdm(indices_list, desc="Processing indices for dose", unit="index"):
+                gaze_data = process_index(idx)
+                if gaze_data is not None:
+                    labelled_gaze_positions_m1.append(gaze_data)
     with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'wb') as f:
         pickle.dump(labelled_gaze_positions_m1, f)
     return labelled_gaze_positions_m1
+
 
 
 ### Function to extract fixations with labels, possibly in parallel
