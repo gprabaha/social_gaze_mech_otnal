@@ -18,14 +18,12 @@ import load_data
 import util
 import filter_behavior
 
-
 '''
 No fixation is now being detected inside the left object bounding box. This is
-most probably the position data poits have not been transformed to be remapped
+most probably the position data points have not been transformed to be remapped
 between the edges of the bounds of the eyetracker rect
 '''
 
-# Determine root data directory based on whether it's running on a cluster or not
 is_cluster = True
 use_parallel = True
 remake_labelled_gaze_pos = True
@@ -36,6 +34,7 @@ remake_spikeTs = False
 map_roi_coord_to_eyelink_space = True
 map_gaze_pos_coord_to_eyelink_space = True
 
+# Determine root data directory based on whether it's running on a cluster or not
 root_data_dir = load_data.get_root_data_dir(is_cluster)
 session_paths = load_data.get_subfolders(root_data_dir)
 
