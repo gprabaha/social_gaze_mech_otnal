@@ -71,7 +71,6 @@ def get_monkey_and_dose_data(session_path):
         print(f"\nError loading meta_info for folder: {session_path}: {e}")
 
 
-
 ### Function to get runs data
 def get_runs_data(session_path):
     """
@@ -96,39 +95,8 @@ def get_runs_data(session_path):
         print(f"\nError loading runs for folder: {session_path}: {e}")
 
 
-def get_labelled_gaze_positions_dict_m1(folder_path, meta_info_list, session_categories, idx):
-    """
-    Process gaze data from a session folder.
-    Parameters:
-    - folder_path (str): Path to the session folder.
-    - meta_info_list (list): List of dictionaries containing meta-information for each session.
-    - session_categories (ndarray): Session categories.
-    Returns:
-    - gaze_data (tuple): Tuple containing gaze positions and associated metadata.
-    """
-    mat_files = [f for f in os.listdir(folder_path) if 'M1_gaze_regForm.mat' in f]
-    if len(mat_files) != 1:
-        print(f"\nError: Multiple or no '*_M1_gaze.mat' files found in folder: {folder_path}")
-        return None
-    mat_file = mat_files[0]
-    mat_file_path = os.path.join(folder_path, mat_file)
-    mat_file_name = os.path.basename(mat_file_path)
-    try:
-        mat_data = scipy.io.loadmat(mat_file_path)
-        sampling_rate = float(mat_data['M1FS'])
-        M1Xpx = mat_data['M1Xpx'].squeeze()
-        M1Ypx = mat_data['M1Ypx'].squeeze()
-        gaze_positions = np.array(np.column_stack((M1Xpx, M1Ypx)))
-        meta_info = meta_info_list[idx]
-        meta_info.update({'sampling_rate': sampling_rate, 'category': session_categories[idx]})
-        return gaze_positions, meta_info
-    except Exception as e:
-        print(f"\nError loading file '{mat_file_name}': {str(e)}")
-        return None
-
-
 ### Function to get M1 ROI bounding boxes
-def get_m1_roi_bounding_boxes(session_path):
+def get_m1_roi_bounding_boxes(session_path, map_roi_coord_to_eyelink_space):
     """
     Extracts M1 ROI bounding boxes from session path.
     Parameters:
@@ -144,13 +112,47 @@ def get_m1_roi_bounding_boxes(session_path):
         data_m1_landmarks = scipy.io.loadmat(file_list_m1_landmarks[0])
         m1_landmarks = data_m1_landmarks.get('farPlaneCal', None)
         if m1_landmarks is not None:
-            eye_bbox, face_bbox, left_obj_bbox, right_obj_bbox = util.calculate_roi_bounding_box_corners(m1_landmarks)
+            eye_bbox, face_bbox, left_obj_bbox, right_obj_bbox = util.calculate_roi_bounding_box_corners(m1_landmarks, map_roi_coord_to_eyelink_space)
             return {'eye_bbox': eye_bbox, 'face_bbox': face_bbox, 'left_obj_bbox': left_obj_bbox, 'right_obj_bbox': right_obj_bbox}
         else:
             return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
     except Exception as e:
         print(f"\nError loading m1_landmarks for folder: {session_path}: {e}")
         return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
+
+
+def get_labelled_gaze_positions_dict_m1(folder_path, meta_info_list, session_categories, idx, map_gaze_pos_coord_to_eyelink_space):
+    """
+    Process gaze data from a session folder.
+    Parameters:
+    - folder_path (str): Path to the session folder.
+    - meta_info_list (list): List of dictionaries containing meta-information for each session.
+    - session_categories (ndarray): Session categories.
+    - idx (int): Index to access specific session data.
+    - map_gaze_pos_coord_to_eyelink_space (bool): Flag to determine if coordinates should be remapped.
+    Returns:
+    - gaze_data (tuple): Tuple containing gaze positions and associated metadata.
+    """
+    mat_files = [f for f in os.listdir(folder_path) if 'M1_gaze_regForm.mat' in f]
+    if len(mat_files) != 1:
+        print(f"\nError: Multiple or no '*_M1_gaze_regForm.mat' files found in folder: {folder_path}")
+        return None
+    mat_file_path = os.path.join(folder_path, mat_files[0])
+    mat_file_name = os.path.basename(mat_file_path)
+    try:
+        mat_data = scipy.io.loadmat(mat_file_path)
+        sampling_rate = float(mat_data['M1FS'])
+        M1Xpx = mat_data['M1Xpx'].squeeze()
+        M1Ypx = mat_data['M1Ypx'].squeeze()
+        gaze_positions = np.column_stack((M1Xpx, M1Ypx))
+        if map_gaze_pos_coord_to_eyelink_space:
+            gaze_positions = np.array([util.map_coord_to_eyelink_space(coord) for coord in gaze_positions])
+        meta_info = meta_info_list[idx]
+        meta_info.update({'sampling_rate': sampling_rate, 'category': session_categories[idx]})
+        return gaze_positions, meta_info
+    except Exception as e:
+        print(f"\nError loading file '{mat_file_name}': {str(e)}")
+        return None
 
 
 #### Workng on this

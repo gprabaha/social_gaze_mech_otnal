@@ -24,7 +24,7 @@ import pdb
 
 
 ### Function to extract meta-information from session paths
-def extract_meta_info(session_paths):
+def extract_meta_info(session_paths, map_roi_coord_to_eyelink_space):
     """
     Extracts meta-information from files in session paths.
     Parameters:
@@ -40,7 +40,7 @@ def extract_meta_info(session_paths):
             meta_info.update(dose_info)
             runs_info = load_data.get_runs_data(session_path)
             meta_info.update(runs_info)
-            meta_info['roi_bb_corners'] = load_data.get_m1_roi_bounding_boxes(session_path)
+            meta_info['roi_bb_corners'] = load_data.get_m1_roi_bounding_boxes(session_path, map_roi_coord_to_eyelink_space)
             meta_info_list.append(meta_info)
     return meta_info_list
 
@@ -68,7 +68,10 @@ def get_unique_doses(otnal_doses):
 
 
 ### Function to extract labelled gaze positions for M1
-def extract_labelled_gaze_positions_m1(root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories):
+def extract_labelled_gaze_positions_m1(
+        root_data_dir, unique_doses, dose_inds, meta_info_list,
+        session_paths, session_categories,
+        map_gaze_pos_coord_to_eyelink_space):
     """
     Extracts labelled gaze positions from files associated with unique doses.
     Parameters:
@@ -85,7 +88,9 @@ def extract_labelled_gaze_positions_m1(root_data_dir, unique_doses, dose_inds, m
     for dose, indices_list in zip(unique_doses, dose_inds):
         for idx in tqdm(indices_list, desc="Processing indices for dose", unit="index"):
             folder_path = session_paths[idx]
-            gaze_data = load_data.get_labelled_gaze_positions_dict_m1(folder_path, meta_info_list, session_categories, idx)
+            gaze_data = load_data.get_labelled_gaze_positions_dict_m1(
+                folder_path, meta_info_list, session_categories, idx,
+                map_gaze_pos_coord_to_eyelink_space)
             if gaze_data is not None:
                 labelled_gaze_positions_m1.append(gaze_data)
     with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'wb') as f:
@@ -202,7 +207,7 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
     bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
     smallest_diff = np.inf
     inside_all_roi = []
-    for key in bbox_corners:
+    for key in bounding_boxes:
         inside_roi, area_diff = util.is_inside_quadrilateral(mean_fix_pos, bbox_corners[key])
         inside_all_roi.append(inside_roi)
         smallest_diff = area_diff if area_diff < smallest_diff else smallest_diff

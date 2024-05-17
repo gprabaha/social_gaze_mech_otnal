@@ -28,10 +28,13 @@ between the edges of the bounds of the eyetracker rect
 # Determine root data directory based on whether it's running on a cluster or not
 is_cluster = True
 use_parallel = True
-remake_labelled_gaze_pos = False
-reload_labelled_pos = True
-remake_fixations = False
+remake_labelled_gaze_pos = True
+reload_labelled_pos = False
+remake_fixations = True
 remake_spikeTs = False
+
+map_roi_coord_to_eyelink_space = True
+map_gaze_pos_coord_to_eyelink_space = True
 
 root_data_dir = load_data.get_root_data_dir(is_cluster)
 session_paths = load_data.get_subfolders(root_data_dir)
@@ -40,13 +43,16 @@ if reload_labelled_pos:
     with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'rb') as f:
         labelled_gaze_positions_m1 = pickle.load(f)
 elif remake_labelled_gaze_pos:
-    meta_info_list = filter_behavior.extract_meta_info(session_paths)
+    meta_info_list = filter_behavior.extract_meta_info(session_paths,
+                                                       map_roi_coord_to_eyelink_space)
     otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']]
                             for meta_info in meta_info_list], dtype=np.float64)
     unique_doses, dose_inds, session_categories = \
         filter_behavior.get_unique_doses(otnal_doses)
     labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
-        root_data_dir, unique_doses, dose_inds, meta_info_list, session_paths, session_categories)
+        root_data_dir, unique_doses, dose_inds, meta_info_list,
+        session_paths, session_categories,
+        map_gaze_pos_coord_to_eyelink_space)
 
 if remake_fixations:
     fixations_m1, fix_timepos_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(
