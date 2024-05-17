@@ -134,11 +134,14 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, root_data_di
     print("\nStarting to extract fixations:")
     session_identifiers = list(range(len(labelled_gaze_positions)))
     sessions = [(i, session[0], session[1]) for i, session in enumerate(labelled_gaze_positions)]
+    num_cores = multiprocessing.cpu_count()
+    num_processes = min(num_cores, len(sessions))
     if parallel:
-        with Pool() as pool:
-            results = list(tqdm(pool.imap(get_session_fixations, sessions),
-                                total=len(sessions), desc="Extracting fixations in parallel", unit="session"))
+        print("\nExtracting in parallel")
+        with Pool(num_processes) as pool:
+            results = pool.map(get_session_fixations, sessions)
     else:
+        print("\nExtracting serially")
         results = [get_session_fixations(session) for session in sessions]
     all_fixations = []
     all_fix_timepos = []
