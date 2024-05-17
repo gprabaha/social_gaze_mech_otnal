@@ -38,16 +38,19 @@ def calculate_roi_bounding_box_corners(m1_landmarks, map_roi_coord_to_eyelink_sp
     left_eye = m1_landmarks['eyeOnLeft'][0][0][0]
     right_eye = m1_landmarks['eyeOnRight'][0][0][0]
 
-    def get_mapped_coord(key, coord):
+    def get_mapped_coord(coord):
         return map_coord_to_eyelink_space(coord) if map_roi_coord_to_eyelink_space else coord
 
     eye_bb_corners = construct_eye_bounding_box(left_eye, right_eye, corner_name_order, map_roi_coord_to_eyelink_space)
     face_bb_corners = stretch_bounding_box_corners(
-        {key: get_mapped_coord(key, m1_landmarks[key][0][0][0]) for key in corner_name_order})
+        {key: get_mapped_coord(m1_landmarks[key][0][0][0])
+         for key in corner_name_order})
     left_obj_bb_corners = stretch_bounding_box_corners(
-        {key: get_mapped_coord(key, m1_landmarks['leftObject'][0][0][0][key][0][0]) for key in corner_name_order})
+        {key: get_mapped_coord(m1_landmarks['leftObject'][0][0][0][key][0][0])
+         for key in corner_name_order})
     right_obj_bb_corners = stretch_bounding_box_corners(
-        {key: get_mapped_coord(key, m1_landmarks['rightObject'][0][0][0][key][0][0]) for key in corner_name_order})
+        {key: get_mapped_coord(m1_landmarks['rightObject'][0][0][0][key][0][0])
+         for key in corner_name_order})
     return eye_bb_corners, face_bb_corners, left_obj_bb_corners, right_obj_bb_corners
 
 
