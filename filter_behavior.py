@@ -95,24 +95,27 @@ def extract_labelled_gaze_positions_m1(
             map_gaze_pos_coord_to_eyelink_space)
     
     labelled_gaze_positions_m1 = []
-    for dose, indices_list in zip(unique_doses, dose_inds):
-        if use_parallel:
-            num_workers = min(multiprocessing.cpu_count(), len(indices_list))
-            with ThreadPoolExecutor(max_workers=num_workers) as executor:
-                futures = {executor.submit(process_index, idx): idx for idx in indices_list}
-                for future in tqdm(as_completed(futures),
-                                   desc="Processing indices for dose",
-                                   unit="index", total=len(indices_list)):
-                    gaze_data = future.result()
-                    if gaze_data is not None:
-                        labelled_gaze_positions_m1.append(gaze_data)
-        else:
-            for idx in tqdm(indices_list, desc="Processing indices for dose", unit="index"):
-                gaze_data = process_index(idx)
+    dose_index_pairs = [(dose, idx) for dose, indices_list in zip(unique_doses, dose_inds) for idx in indices_list]
+    if use_parallel:
+        num_workers = min(multiprocessing.cpu_count(), len(dose_index_pairs))
+        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+            futures = {executor.submit(process_index, idx): idx for _, idx in dose_index_pairs}
+            results = []
+            for future in tqdm(as_completed(futures), desc="Processing gaze position for session", unit="index", total=len(dose_index_pairs)):
+                idx = futures[future]
+                gaze_data = future.result()
                 if gaze_data is not None:
-                    labelled_gaze_positions_m1.append(gaze_data)
+                    results.append((idx, gaze_data))
+            # Sort results based on the original order of indices
+            results.sort(key=lambda x: x[0])
+            labelled_gaze_positions_m1 = [gaze_data for _, gaze_data in results]
+    else:
+        for _, idx in tqdm(dose_index_pairs, desc="Processing gaze position for session", unit="index"):
+            gaze_data = process_index(idx)
+            if gaze_data is not None:
+                labelled_gaze_positions_m1.append(gaze_data)
     with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'wb') as f:
-        pickle.dump(labelled_gaze_positions_m1, f)
+        pickle.dump(labelled_gaze_positions_m1, f) 
     return labelled_gaze_positions_m1
 
 
