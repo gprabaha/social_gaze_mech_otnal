@@ -120,10 +120,13 @@ def get_labelled_gaze_positions_dict_m1(idx, params):
         sampling_rate = float(mat_data['M1FS'])
         M1Xpx = mat_data['M1Xpx'].squeeze()
         M1Ypx = mat_data['M1Ypx'].squeeze()
-        gaze_positions = np.column_stack((M1Xpx, M1Ypx))
+        # Stack the coordinates
+        coordinates = np.column_stack((M1Xpx, M1Ypx))
         if map_gaze_pos_coord_to_eyelink_space:
             # Map coordinates to Eyelink space
-            gaze_positions = [util.map_coord_to_eyelink_space(position) for position in gaze_positions]
+            gaze_positions = util.map_coord_to_eyelink_space(coordinates)
+        else:
+            gaze_positions = coordinates
         meta_info = meta_info_list[idx]
         meta_info.update({'sampling_rate': sampling_rate, 'category': session_categories[idx]})
         return gaze_positions, meta_info

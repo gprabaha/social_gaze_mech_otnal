@@ -120,7 +120,7 @@ def extract_labelled_gaze_positions_m1(params):
     flag_info = util.get_filename_flag_info(params)
     file_name = f'labelled_gaze_positions_m1{flag_info}.pkl'
     with open(os.path.join(root_data_dir, file_name), 'wb') as f:
-        pickle.dump(labelled_gaze_positions_m1, f) 
+        pickle.dump(labelled_gaze_positions_m1, f)
     return labelled_gaze_positions_m1
 
 

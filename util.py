@@ -118,30 +118,6 @@ def get_fix_positions(start_stop, positions):
     return positions[start:stop,:]
 
 
-def map_coord_to_eyelink_space(coordinate):
-    """
-    Maps a coordinate to Eyelink space.
-    Parameters:
-    - coordinate (tuple): Coordinate to map.
-    Returns:
-    - remapped_coord (tuple): Remapped coordinate.
-    """
-    monitor_info = defaults.fetch_monitor_info()
-    hor_rez = monitor_info['horizontal_resolution']
-    vert_rez = monitor_info['vertical_resolution']
-    x_px_range = [-hor_rez*0.2, hor_rez+hor_rez*0.2]
-    y_px_range = [-vert_rez*0.2, vert_rez+vert_rez*0.2]
-    
-    def span(array):
-        return max(array) - min(array)
-    
-    remapped_coord = [
-        span(x_px_range)*(coordinate[0]/span(x_px_range)) + min(x_px_range),
-        span(y_px_range)*(coordinate[1]/span(y_px_range)) + min(y_px_range)
-        ]
-    return remapped_coord
-
-
 def calculate_roi_bounding_box_corners(m1_landmarks, map_roi_coord_to_eyelink_space):
     """
     Calculates the bounding box corners for regions of interest (ROIs) based on M1 landmarks.
@@ -181,8 +157,43 @@ def calculate_roi_bounding_box_corners(m1_landmarks, map_roi_coord_to_eyelink_sp
     right_obj_bb_corners = stretch_bounding_box_corners(
         {key: get_mapped_coord(m1_landmarks['rightObject'][0][0][0][key][0][0])
          for key in corner_name_order})
-    
     return eye_bb_corners, face_bb_corners, left_obj_bb_corners, right_obj_bb_corners
+
+
+def map_coord_to_eyelink_space(coordinate):
+    """
+    Maps a coordinate or coordinates to Eyelink space.
+    Parameters:
+    - coordinate (tuple, list, or numpy.ndarray): Coordinate(s) to map. 
+      Can be a 2-element tuple/list or a 2D array with 2 columns.
+    Returns:
+    - remapped_coord (tuple or numpy.ndarray): Remapped coordinate(s).
+    """
+    monitor_info = defaults.fetch_monitor_info()
+    hor_rez = monitor_info['horizontal_resolution']
+    vert_rez = monitor_info['vertical_resolution']
+    x_px_range = [-hor_rez*0.2, hor_rez+hor_rez*0.2]
+    y_px_range = [-vert_rez*0.2, vert_rez+vert_rez*0.2]
+
+    def span(array):
+        return max(array) - min(array)
+
+    def remap_single_coord(coord):
+        return [
+            span(x_px_range) * (coord[0] / span(x_px_range)) + min(x_px_range),
+            span(y_px_range) * (coord[1] / span(y_px_range)) + min(y_px_range)
+        ]
+    # Check if the input is a single coordinate or multiple coordinates
+    if (isinstance(coordinate, (tuple, list)) and len(coordinate) == 2) \
+        or (isinstance(coordinate, np.ndarray) and coordinate.ndim == 1):
+        # Single coordinate case
+        remapped_coord = remap_single_coord(coordinate)
+    elif isinstance(coordinate, np.ndarray) and coordinate.ndim == 2 and coordinate.shape[1] == 2:
+        # Multiple coordinates case (2D array)
+        remapped_coord = np.apply_along_axis(remap_single_coord, 1, coordinate)
+    else:
+        raise ValueError("Input must be a 2-element tuple/list or a 2D array with 2 columns")
+    return remapped_coord
 
 
 def construct_eye_bounding_box(left_eye, right_eye, corner_name_order, map_roi_coord_to_eyelink_space):

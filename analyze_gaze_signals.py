@@ -23,11 +23,11 @@ params = {}
 params.update({
     'is_cluster': True,
     'use_parallel': True,
-    'remake_labelled_gaze_pos': False,
-    'remake_fixations': False,
+    'remake_labelled_gaze_pos': True,
+    'remake_fixations': True,
     'remake_spikeTs': False,
     'map_roi_coord_to_eyelink_space': False,
-    'map_gaze_pos_coord_to_eyelink_space': False
+    'map_gaze_pos_coord_to_eyelink_space': True
 })
 
 # Determine root data directory based on whether it's running on a cluster or not
@@ -63,7 +63,9 @@ else:
 
 # ROIs fixated on
 rois_with_fixatins = fixation_labels_m1['fix_roi'].unique()
-print(f'Rois with fixations detected in them are:\n{rois_with_fixatins}')
+print(f"Remap ROI: {params['map_roi_coord_to_eyelink_space']}\n")
+print(f"Remap gaze positions: {params['map_gaze_pos_coord_to_eyelink_space']}\n")
+print(f'Rois with fixations detected in them are:\n{rois_with_fixatins}\n')
 
 # ROI Indices
 face_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'face_bbox'

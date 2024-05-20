@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set common parameters
-CPUS_PER_TASK=8
+CPUS_PER_TASK=12
 MEMORY_PER_CPU=24G
 PARTITION=psych_day
 TIME_LIMIT=4:00:00
