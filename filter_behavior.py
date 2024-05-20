@@ -26,7 +26,7 @@ import pdb
 
 
 ### Function to extract meta-information from session paths
-def extract_meta_info(session_paths, map_roi_coord_to_eyelink_space):
+def extract_meta_info(params):
     """
     Extracts meta-information from files in session paths.
     Parameters:
@@ -35,20 +35,20 @@ def extract_meta_info(session_paths, map_roi_coord_to_eyelink_space):
     - meta_info_list (list): List of dictionaries containing meta-information for each session.
     """
     meta_info_list = []
-    for session_path in session_paths:
+    for session_path in params['session_paths']:
         dose_info = load_data.get_monkey_and_dose_data(session_path)
         if dose_info is not None:
             meta_info = {'session_name': os.path.basename(os.path.normpath(session_path))}
             meta_info.update(dose_info)
             runs_info = load_data.get_runs_data(session_path)
             meta_info.update(runs_info)
-            meta_info['roi_bb_corners'] = load_data.get_m1_roi_bounding_boxes(session_path, map_roi_coord_to_eyelink_space)
+            meta_info['roi_bb_corners'] = load_data.load_m1_roi_related_coordinates(session_path, params)
             meta_info_list.append(meta_info)
     return meta_info_list
 
 
 ### Function to get unique doses
-def get_unique_doses(otnal_doses):
+def get_unique_doses(params):
     """
     Finds unique rows and their indices in the given array.
     Parameters:
@@ -57,6 +57,7 @@ def get_unique_doses(otnal_doses):
     - unique_rows (ndarray): Unique rows in the input array.
     - indices_for_unique_rows (list): List of lists containing indices for each unique row.
     """
+    otnal_doses = params['otnal_doses']
     unique_rows = np.unique(otnal_doses, axis=0)
     indices_for_unique_rows = []
     session_category = np.empty(otnal_doses.shape[0])
@@ -66,13 +67,13 @@ def get_unique_doses(otnal_doses):
         indices_for_row = np.where( (otnal_doses == row).all(axis=1))[0]
         session_category[indices_for_row] = category
         indices_for_unique_rows.append(indices_for_row.tolist())
-    return unique_rows, indices_for_unique_rows, session_category
+    params.update({'unique_doses': unique_rows,
+                   'dose_inds': indices_for_unique_rows,
+                   'session_category': session_category})
+    return params
 
 
-def extract_labelled_gaze_positions_m1(
-        root_data_dir, unique_doses, dose_inds, meta_info_list,
-        session_paths, session_categories,
-        map_gaze_pos_coord_to_eyelink_space, use_parallel=True):
+def extract_labelled_gaze_positions_m1(params):
     """
     Extracts labelled gaze positions from files associated with unique doses.
     Parameters:
@@ -87,7 +88,16 @@ def extract_labelled_gaze_positions_m1(
     Returns:
     - labelled_gaze_positions_m1 (list): List of tuples containing gaze positions and associated metadata.
     """
-
+    root_data_dir = params.get('root_data_dir')
+    unique_doses = params.get('unique_doses')
+    dose_inds = params.get('dose_inds')
+    meta_info_list = params.get('meta_info_list')
+    session_paths = params.get('session_paths')
+    session_categories = params.get('session_categories')
+    map_roi_coord_to_eyelink_space = params.get('map_roi_coord_to_eyelink_space')
+    map_gaze_pos_coord_to_eyelink_space = params.get('map_gaze_pos_coord_to_eyelink_space')
+    use_parallel = params.get('use_parallel', True)
+    
     def process_index(idx):
         folder_path = session_paths[idx]
         return load_data.get_labelled_gaze_positions_dict_m1(
@@ -114,14 +124,17 @@ def extract_labelled_gaze_positions_m1(
             gaze_data = process_index(idx)
             if gaze_data is not None:
                 labelled_gaze_positions_m1.append(gaze_data)
-    with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'wb') as f:
+    # Adjusted file name based on flags
+    flag_info = util.get_filename_flag_info(params)
+    file_name = f'labelled_gaze_positions_m1{flag_info}.pkl'
+    with open(os.path.join(root_data_dir, file_name), 'wb') as f:
         pickle.dump(labelled_gaze_positions_m1, f) 
     return labelled_gaze_positions_m1
 
 
 
 ### Function to extract fixations with labels, possibly in parallel
-def extract_fixations_with_labels_parallel(labelled_gaze_positions, root_data_dir, parallel=True):
+def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
     """
     Extracts fixations with labels, possibly in parallel.
     Parameters:
@@ -132,11 +145,13 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, root_data_di
     - all_fixation_labels (list): List of labels for fixations.
     """
     print("\nStarting to extract fixations:")
+    root_data_dir = params.get('root_data_dir')
+    use_parallel = params.get('use_parallel', True)
     session_identifiers = list(range(len(labelled_gaze_positions)))
     sessions = [(i, session[0], session[1]) for i, session in enumerate(labelled_gaze_positions)]
     num_cores = multiprocessing.cpu_count()
     num_processes = min(num_cores, len(sessions))
-    if parallel:
+    if use_parallel:
         print("\nExtracting in parallel")
         with Pool(num_processes) as pool:
             results = pool.map(get_session_fixations, sessions)
@@ -152,9 +167,16 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, root_data_di
         all_fixation_labels.extend(session_labels)
     col_names = ['category', 'session_id', 'session_name', 'run', 'block', 'fix_duration', 'mean_x_pos', 'mean_y_pos', 'fix_roi', 'agent']
     all_fixation_labels = pd.DataFrame(all_fixation_labels, columns=col_names)   
-    np.save(os.path.join(root_data_dir, 'fixations_m1.npy'), all_fixations)
-    np.save(os.path.join(root_data_dir, 'fixations_timepos_m1.npy'), all_fix_timepos)
-    all_fixation_labels.to_csv(os.path.join(root_data_dir, 'fixation_labels_m1.csv'), index=False)
+    flag_info = util.get_filename_flag_info(params)
+    # Save fixations
+    fixations_file_name = f'fixations_m1{flag_info}.npy'
+    np.save(os.path.join(root_data_dir, fixations_file_name), all_fixations)
+    # Save fixations time positions
+    fix_timepos_file_name = f'fixations_timepos_m1{flag_info}.npy'
+    np.save(os.path.join(root_data_dir, fix_timepos_file_name), all_fix_timepos)
+    # Save fixation labels
+    fixation_labels_file_name = f'fixation_labels_m1{flag_info}.csv'
+    all_fixation_labels.to_csv(os.path.join(root_data_dir, fixation_labels_file_name), index=False)
     return all_fixations, all_fix_timepos, all_fixation_labels
 
 
@@ -246,7 +268,12 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
     return run, block, fix_roi, smallest_diff
 
 
-def extract_spiketimes_for_all_sessions(root_data_dir, session_paths, is_parallel=True):
+def extract_spiketimes_for_all_sessions(params):
+    root_data_dir = params.get('root_data_dir')
+    session_paths = params.get('session_paths')
+    map_roi_coord_to_eyelink_space = params.get('map_roi_coord_to_eyelink_space')
+    map_gaze_pos_coord_to_eyelink_space = params.get('map_gaze_pos_coord_to_eyelink_space')
+    use_parallel = params.get('use_parallel', True)
     spikeTs_s = []
     spikeTs_ms = []
     spikeTs_labels = []
@@ -276,10 +303,12 @@ def extract_spiketimes_for_all_sessions(root_data_dir, session_paths, is_paralle
     # Check if spiketimes lists and labels have the same length
     if len(spikeTs_s) != len(all_labels):
         print("Warning: Length mismatch between spiketimes lists and labels.")
-    # Save outputs to root_data_dir
-    spiketimes_s_path = os.path.join(root_data_dir, 'spiketimes_s.pkl')
-    spiketimes_ms_path = os.path.join(root_data_dir, 'spiketimes_ms.pkl')
-    labels_path = os.path.join(root_data_dir, 'spike_labels.csv')
+    # Construct flag_info based on params
+    flag_info = util.get_filename_flag_info(params)
+    # Save outputs to root_data_dir with flag_info
+    spiketimes_s_path = os.path.join(root_data_dir, f'spiketimes_s{flag_info}.pkl')
+    spiketimes_ms_path = os.path.join(root_data_dir, f'spiketimes_ms{flag_info}.pkl')
+    labels_path = os.path.join(root_data_dir, f'spike_labels{flag_info}.csv')
     # Save spikeTs_s as a pickle file
     with open(spiketimes_s_path, 'wb') as f:
         pickle.dump(spikeTs_s, f)

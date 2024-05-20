@@ -16,6 +16,40 @@ import defaults
 import pdb
 
 
+def get_root_data_dir(params):
+    """
+    Returns the root data directory based on whether it's running on a cluster or not.
+    Parameters:
+    - is_cluster (bool): Boolean flag indicating whether the program is running on a cluster.
+    Returns:
+    - root_data_dir (str): Root data directory path.
+    """
+    is_cluster = params['is_cluster']
+    return "/gpfs/milgram/project/chang/pg496/data_dir/otnal/" if is_cluster \
+        else "/Volumes/Stash/changlab/sorted_neural_data/social_gaze_otnal/AllFVProcessed/"
+
+
+def get_subfolders(params):
+    """
+    Retrieves subfolders within a given directory.
+    Parameters:
+    - root_dir (str): Root directory path.
+    Returns:
+    - subfolders (list): List of subfolder paths.
+    """
+    root_dir = params['root_data_dir'] 
+    return [f.path for f in os.scandir(root_dir) if f.is_dir()]
+
+
+def get_filename_flag_info(params):
+    flag_info = ""
+    if params.get('map_roi_coord_to_eyelink_space', False):
+        flag_info += "_remapped_roi"
+    if params.get('map_gaze_pos_coord_to_eyelink_space', False):
+        flag_info += "_remapped_gaze"
+    return flag_info
+
+
 def map_coord_to_eyelink_space(coordinate):
     monitor_info = defaults.fetch_monitor_info()
     hor_rez = monitor_info['horizontal_resolution']

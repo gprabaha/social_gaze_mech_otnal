@@ -11,34 +11,21 @@ import glob
 import scipy.io
 import numpy as np
 import pandas as pd
+import pickle
 
 import util
 
 import pdb
 
 
-def get_root_data_dir(is_cluster):
-    """
-    Returns the root data directory based on whether it's running on a cluster or not.
-    Parameters:
-    - is_cluster (bool): Boolean flag indicating whether the program is running on a cluster.
-    Returns:
-    - root_data_dir (str): Root data directory path.
-    """
-    return "/gpfs/milgram/project/chang/pg496/data_dir/otnal/" if is_cluster \
-        else "/Volumes/Stash/changlab/sorted_neural_data/social_gaze_otnal/AllFVProcessed/"
-
-
-def get_subfolders(root_dir):
-    """
-    Retrieves subfolders within a given directory.
-    Parameters:
-    - root_dir (str): Root directory path.
-    Returns:
-    - subfolders (list): List of subfolder paths.
-    """
-    return [f.path for f in os.scandir(root_dir) if f.is_dir()]
-
+def load_labelled_gaze_positions(params):
+    root_data_dir = params['root_data_dir']
+    # Adjusted file name based on flags
+    flag_info = util.get_filename_flag_info(params)
+    file_name = f'labelled_gaze_positions_m1{flag_info}.pkl'
+    with open(os.path.join(root_data_dir, file_name), 'rb') as f:
+        return pickle.load(f)
+        
 
 def get_monkey_and_dose_data(session_path):
     """
@@ -51,7 +38,8 @@ def get_monkey_and_dose_data(session_path):
     file_list_info = glob.glob(f"{session_path}/*metaInfo.mat")
     if len(file_list_info) != 1:
         print(f"\nWarning: No metaInfo or more than one metaInfo found in folder: {session_path}.")
-        return {}
+        return {'OT_dose': None,
+                'NAL_dose': None}
     try:
         data_info = scipy.io.loadmat(file_list_info[0])
         info = data_info.get('info', [None])[0]
@@ -64,7 +52,8 @@ def get_monkey_and_dose_data(session_path):
             }
     except Exception as e:
         print(f"\nError loading meta_info for folder: {session_path}: {e}")
-    return {}
+    return {'OT_dose': None,
+            'NAL_dose': None}
 
 
 def get_runs_data(session_path):
@@ -91,7 +80,24 @@ def get_runs_data(session_path):
     return {}
 
 
-def get_m1_roi_bounding_boxes(session_path, map_roi_coord_to_eyelink_space):
+def load_m1_fixations(params):
+    root_data_dir = params.get('root_data_dir')
+    map_roi_coord_to_eyelink_space = params.get('map_roi_coord_to_eyelink_space', False)
+    map_gaze_pos_coord_to_eyelink_space = params.get('map_gaze_pos_coord_to_eyelink_space', False)
+    flag_info = util.get_filename_flag_info(params)
+    # Load fixations
+    fixations_file_name = f'fixations_m1{flag_info}.npy'
+    fixations_m1 = np.load(os.path.join(root_data_dir, fixations_file_name))
+    # Load fixations time positions
+    fix_timepos_file_name = f'fixations_timepos_m1{flag_info}.npy'
+    fix_timepos_m1 = np.load(os.path.join(root_data_dir, fix_timepos_file_name))
+    # Load fixation labels
+    fixation_labels_file_name = f'fixation_labels_m1{flag_info}.csv'
+    fixation_labels_m1 = pd.read_csv(os.path.join(root_data_dir, fixation_labels_file_name))
+    return fixations_m1, fix_timepos_m1, fixation_labels_m1
+
+
+def load_m1_roi_related_coordinates(session_path, map_roi_coord_to_eyelink_space):
     """
     Extracts M1 ROI bounding boxes from session path.
     Parameters:
@@ -198,3 +204,21 @@ def get_spiketimes_and_labels_for_one_session(session_path):
         print(f"An error occurred: {e}")
         return [], [], pd.DataFrame(columns=label_cols)
 
+
+def load_processed_spike_data(params):
+    root_data_dir = params.get('root_data_dir')
+    map_roi_coord_to_eyelink_space = params.get('map_roi_coord_to_eyelink_space', False)
+    map_gaze_pos_coord_to_eyelink_space = params.get('map_gaze_pos_coord_to_eyelink_space', False)
+    flag_info = util.get_filename_flag_info(params)
+    # Load spikeTs_s
+    spiketimes_s_path = os.path.join(root_data_dir, f'spiketimes_s{flag_info}.pkl')
+    with open(spiketimes_s_path, 'rb') as f:
+        spikeTs_s = pickle.load(f)
+    # Load spikeTs_ms
+    spiketimes_ms_path = os.path.join(root_data_dir, f'spiketimes_ms{flag_info}.pkl')
+    with open(spiketimes_ms_path, 'rb') as f:
+        spikeTs_ms = pickle.load(f)
+    # Load spike labels
+    labels_path = os.path.join(root_data_dir, f'spike_labels{flag_info}.csv')
+    spike_labels = pd.read_csv(labels_path)
+    return spikeTs_s, spikeTs_ms, spike_labels

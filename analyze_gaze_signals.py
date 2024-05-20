@@ -24,58 +24,47 @@ most probably the position data points have not been transformed to be remapped
 between the edges of the bounds of the eyetracker rect
 '''
 
-is_cluster = True
-use_parallel = True
-remake_labelled_gaze_pos = True
-reload_labelled_pos = False
-remake_fixations = True
-remake_spikeTs = False
-
-map_roi_coord_to_eyelink_space = True
-map_gaze_pos_coord_to_eyelink_space = True
+params = {}
+params.update({
+    'is_cluster': True,
+    'use_parallel': True,
+    'remake_labelled_gaze_pos': True,
+    'reload_labelled_pos': False,
+    'remake_fixations': True,
+    'remake_spikeTs': False,
+    'map_roi_coord_to_eyelink_space': False,
+    'map_gaze_pos_coord_to_eyelink_space': False
+})
 
 # Determine root data directory based on whether it's running on a cluster or not
-root_data_dir = load_data.get_root_data_dir(is_cluster)
-session_paths = load_data.get_subfolders(root_data_dir)
+root_data_dir = util.get_root_data_dir(params)
+params.update({'session_paths': root_data_dir})
 
-if reload_labelled_pos:
-    with open(os.path.join(root_data_dir, 'labelled_gaze_positions_m1.pkl'), 'rb') as f:
-        labelled_gaze_positions_m1 = pickle.load(f)
-elif remake_labelled_gaze_pos:
-    meta_info_list = filter_behavior.extract_meta_info(session_paths,
-                                                       map_roi_coord_to_eyelink_space)
+session_paths = util.get_subfolders(params)
+params.update({'session_paths': session_paths})
+
+if params('reload_labelled_pos'):
+    labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(params)
+elif params.get('remake_labelled_gaze_pos'):
+    meta_info_list = filter_behavior.extract_meta_info(params)
+    params.update({'meta_info_list': meta_info_list})
     otnal_doses = np.array([[meta_info['OT_dose'], meta_info['NAL_dose']]
                             for meta_info in meta_info_list], dtype=np.float64)
-    unique_doses, dose_inds, session_categories = \
-        filter_behavior.get_unique_doses(otnal_doses)
-    labelled_gaze_positions_m1 = filter_behavior.extract_labelled_gaze_positions_m1(
-        root_data_dir, unique_doses, dose_inds, meta_info_list,
-        session_paths, session_categories,
-        map_gaze_pos_coord_to_eyelink_space,
-        use_parallel)
+    params.update({'otnal_doses': otnal_doses})
+    params = filter_behavior.get_unique_doses(params)
+    labelled_gaze_positions_m1 = \
+        filter_behavior.extract_labelled_gaze_positions_m1(params)
 
-if remake_fixations:
+if params.get('remake_fixations'):
     fixations_m1, fix_timepos_m1, fixation_labels_m1 = filter_behavior.extract_fixations_with_labels_parallel(
-        labelled_gaze_positions_m1, root_data_dir, use_parallel)  # The first file has funky session stop times
+        labelled_gaze_positions_m1, params)  # The first file has funky session stop times
 else:
-    fixations_m1 = np.load(os.path.join(root_data_dir, 'fixations_m1.npy'))
-    fix_timepos_m1 = np.load(os.path.join(root_data_dir, 'fixations_timepos_m1.npy'))
-    fixation_labels_m1 = pd.read_csv(os.path.join(root_data_dir, 'fixation_labels_m1.csv'))
+    fixations_m1, fix_timepos_m1, fixation_labels_m1 = load_data.load_m1_fixations(params)
 
-if remake_spikeTs:
-    spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(root_data_dir, session_paths, use_parallel)
+if params.get('remake_spikeTs'):
+    spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(params)
 else:
-    # Load spiketimes_s.pkl
-    spikeTs_s_path = os.path.join(root_data_dir, 'spiketimes_s.pkl')
-    with open(spikeTs_s_path, 'rb') as f:
-        spikeTs_s = pickle.load(f)
-    # Load spiketimes_ms.pkl
-    spikeTs_ms_path = os.path.join(root_data_dir, 'spiketimes_ms.pkl')
-    with open(spikeTs_ms_path, 'rb') as f:
-        spikeTs_ms = pickle.load(f)
-    # Load spike_labels.csv
-    labels_path = os.path.join(root_data_dir, 'spike_labels.csv')
-    spikeTs_labels = pd.read_csv(labels_path)
+    spikeTs_s, spikeTs_ms, spikeTs_labels = load_data.load_processed_spike_data(params)
 
 # ROI Indices
 face_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'face_bbox'
