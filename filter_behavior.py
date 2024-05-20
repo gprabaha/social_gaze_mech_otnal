@@ -91,18 +91,10 @@ def extract_labelled_gaze_positions_m1(params):
     root_data_dir = params.get('root_data_dir')
     unique_doses = params.get('unique_doses')
     dose_inds = params.get('dose_inds')
-    meta_info_list = params.get('meta_info_list')
-    session_paths = params.get('session_paths')
-    session_categories = params.get('session_categories')
-    map_roi_coord_to_eyelink_space = params.get('map_roi_coord_to_eyelink_space')
-    map_gaze_pos_coord_to_eyelink_space = params.get('map_gaze_pos_coord_to_eyelink_space')
     use_parallel = params.get('use_parallel', True)
     
     def process_index(idx):
-        folder_path = session_paths[idx]
-        return load_data.get_labelled_gaze_positions_dict_m1(
-            folder_path, meta_info_list, session_categories, idx,
-            map_gaze_pos_coord_to_eyelink_space)
+        return load_data.get_labelled_gaze_positions_dict_m1(idx, params)
     
     labelled_gaze_positions_m1 = []
     dose_index_pairs = [(dose, idx) for dose, indices_list in zip(unique_doses, dose_inds) for idx in indices_list]
@@ -132,7 +124,6 @@ def extract_labelled_gaze_positions_m1(params):
     return labelled_gaze_positions_m1
 
 
-
 ### Function to extract fixations with labels, possibly in parallel
 def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
     """
@@ -147,7 +138,6 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
     print("\nStarting to extract fixations:")
     root_data_dir = params.get('root_data_dir')
     use_parallel = params.get('use_parallel', True)
-    session_identifiers = list(range(len(labelled_gaze_positions)))
     sessions = [(i, session[0], session[1]) for i, session in enumerate(labelled_gaze_positions)]
     num_cores = multiprocessing.cpu_count()
     num_processes = min(num_cores, len(sessions))
@@ -273,7 +263,7 @@ def extract_spiketimes_for_all_sessions(params):
     session_paths = params.get('session_paths')
     map_roi_coord_to_eyelink_space = params.get('map_roi_coord_to_eyelink_space')
     map_gaze_pos_coord_to_eyelink_space = params.get('map_gaze_pos_coord_to_eyelink_space')
-    use_parallel = params.get('use_parallel', True)
+    is_parallel = params.get('use_parallel', True)
     spikeTs_s = []
     spikeTs_ms = []
     spikeTs_labels = []
@@ -291,7 +281,8 @@ def extract_spiketimes_for_all_sessions(params):
     else:
         # Process sessions sequentially
         for session_path in session_paths:
-            session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels = load_data.get_spiketimes_and_labels_for_one_session(session_path)
+            session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels = \
+                load_data.get_spiketimes_and_labels_for_one_session(session_path)
             spikeTs_s.extend(session_spikeTs_s)
             spikeTs_ms.extend(session_spikeTs_ms)
             spikeTs_labels.append(session_spikeTs_labels)

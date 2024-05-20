@@ -15,12 +15,11 @@ import defaults
 
 import pdb
 
-
 def get_root_data_dir(params):
     """
     Returns the root data directory based on whether it's running on a cluster or not.
     Parameters:
-    - is_cluster (bool): Boolean flag indicating whether the program is running on a cluster.
+    - params (dict): Dictionary containing parameters.
     Returns:
     - root_data_dir (str): Root data directory path.
     """
@@ -33,7 +32,7 @@ def get_subfolders(params):
     """
     Retrieves subfolders within a given directory.
     Parameters:
-    - root_dir (str): Root directory path.
+    - params (dict): Dictionary containing parameters.
     Returns:
     - subfolders (list): List of subfolder paths.
     """
@@ -42,6 +41,13 @@ def get_subfolders(params):
 
 
 def get_filename_flag_info(params):
+    """
+    Constructs a filename flag based on specified parameters.
+    Parameters:
+    - params (dict): Dictionary containing parameters.
+    Returns:
+    - flag_info (str): Filename flag.
+    """
     flag_info = ""
     if params.get('map_roi_coord_to_eyelink_space', False):
         flag_info += "_remapped_roi"
@@ -50,7 +56,76 @@ def get_filename_flag_info(params):
     return flag_info
 
 
+def create_timevec(n_samples, sampling_rate):
+    """
+    Creates a time vector based on the number of samples and sampling rate.
+    Parameters:
+    - n_samples (int): Number of samples.
+    - sampling_rate (float): Sampling rate.
+    Returns:
+    - timevec (list): Time vector.
+    """
+    return [i * sampling_rate for i in range(n_samples)]
+
+
+def find_islands(binary_vec, min_samples=0):
+    """
+    Finds continuous islands in a binary vector.
+    Parameters:
+    - binary_vec (array): Binary vector.
+    - min_samples (int): Minimum number of samples for an island.
+    Returns:
+    - islands (array): Array containing start and stop indices of islands.
+    """
+    islands = []
+    island_started = False
+    island_start = 0
+    for i, val in enumerate(binary_vec):
+        if val == 1 and not island_started:
+            island_started = True
+            island_start = i
+        elif val == 0 and island_started:
+            island_started = False
+            if i - island_start >= min_samples:
+                islands.append([island_start, i - 1])
+    if island_started and len(binary_vec) - island_start >= min_samples:
+        islands.append([island_start, len(binary_vec) - 1])
+    return np.array(islands)
+
+
+def get_duration(start_stop):
+    """
+    Calculates the duration between start and stop indices.
+    Parameters:
+    - start_stop (tuple): Tuple containing start and stop indices.
+    Returns:
+    - duration (int): Duration.
+    """
+    start, stop = start_stop
+    return stop - start
+
+
+def get_fix_positions(start_stop, positions):
+    """
+    Retrieves fix positions from a given range of indices.
+    Parameters:
+    - start_stop (tuple): Tuple containing start and stop indices.
+    - positions (array): Array containing positions.
+    Returns:
+    - fix_positions (array): Array containing fix positions.
+    """
+    start, stop = start_stop
+    return positions[start:stop,:]
+
+
 def map_coord_to_eyelink_space(coordinate):
+    """
+    Maps a coordinate to Eyelink space.
+    Parameters:
+    - coordinate (tuple): Coordinate to map.
+    Returns:
+    - remapped_coord (tuple): Remapped coordinate.
+    """
     monitor_info = defaults.fetch_monitor_info()
     hor_rez = monitor_info['horizontal_resolution']
     vert_rez = monitor_info['vertical_resolution']
@@ -68,13 +143,34 @@ def map_coord_to_eyelink_space(coordinate):
 
 
 def calculate_roi_bounding_box_corners(m1_landmarks, map_roi_coord_to_eyelink_space):
+    """
+    Calculates the bounding box corners for regions of interest (ROIs) based on M1 landmarks.
+    Parameters:
+    - m1_landmarks (dict): Dictionary containing M1 landmarks data.
+    - map_roi_coord_to_eyelink_space (bool): Flag indicating whether to map coordinates to Eyelink space.
+    Returns:
+    - eye_bb_corners (dict): Bounding box corners for the eye region.
+    - face_bb_corners (dict): Bounding box corners for the face region.
+    - left_obj_bb_corners (dict): Bounding box corners for the left object region.
+    - right_obj_bb_corners (dict): Bounding box corners for the right object region.
+    """
+    # Define the order of corner names
     corner_name_order = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft']
+    # Extract coordinates for left and right eyes
     left_eye = m1_landmarks['eyeOnLeft'][0][0][0]
     right_eye = m1_landmarks['eyeOnRight'][0][0][0]
 
     def get_mapped_coord(coord):
+        """
+        Maps coordinates to Eyelink space if specified.
+        Parameters:
+        - coord (tuple): Coordinate to be mapped.
+        Returns:
+        - mapped_coord (tuple): Mapped coordinate.
+        """
         return map_coord_to_eyelink_space(coord) if map_roi_coord_to_eyelink_space else coord
 
+    # Calculate bounding box corners for each ROI
     eye_bb_corners = construct_eye_bounding_box(left_eye, right_eye, corner_name_order, map_roi_coord_to_eyelink_space)
     face_bb_corners = stretch_bounding_box_corners(
         {key: get_mapped_coord(m1_landmarks[key][0][0][0])
@@ -85,10 +181,22 @@ def calculate_roi_bounding_box_corners(m1_landmarks, map_roi_coord_to_eyelink_sp
     right_obj_bb_corners = stretch_bounding_box_corners(
         {key: get_mapped_coord(m1_landmarks['rightObject'][0][0][0][key][0][0])
          for key in corner_name_order})
+    
     return eye_bb_corners, face_bb_corners, left_obj_bb_corners, right_obj_bb_corners
 
 
+
 def construct_eye_bounding_box(left_eye, right_eye, corner_name_order, map_roi_coord_to_eyelink_space):
+    """
+    Constructs the bounding box for the eyes.
+    Parameters:
+    - left_eye (tuple): Left eye coordinates.
+    - right_eye (tuple): Right eye coordinates.
+    - corner_name_order (list): Order of corner names.
+    - map_roi_coord_to_eyelink_space (bool): Flag indicating whether to map coordinates to Eyelink space.
+    Returns:
+    - eye_bb_corners (dict): Dictionary containing eye bounding box coordinates.
+    """
     inter_eye_dist = distance(left_eye, right_eye)
     offset = inter_eye_dist / 2
 
@@ -110,51 +218,17 @@ def construct_eye_bounding_box(left_eye, right_eye, corner_name_order, map_roi_c
     return stretch_bounding_box_corners(corner_dict)
 
 
-def create_timevec(n_samples, sampling_rate):
-    return [i * sampling_rate for i in range(n_samples)]
-
-
-def find_islands(binary_vec, min_samples=0):
-    islands = []
-    island_started = False
-    island_start = 0
-    for i, val in enumerate(binary_vec):
-        if val == 1 and not island_started:
-            island_started = True
-            island_start = i
-        elif val == 0 and island_started:
-            island_started = False
-            if i - island_start >= min_samples:
-                islands.append([island_start, i - 1])
-    # If the last island continues to the end of the array
-    if island_started:
-        if len(binary_vec) - island_start >= min_samples:
-            islands.append([island_start, len(binary_vec) - 1])
-    return np.array(islands)
-
-
-def get_duration(start_stop):
-    """
-    Calculate duration from start and stop indices.
-    Parameters:
-    - start_stop (tuple): A tuple containing start and stop indices.
-    Returns:
-    - duration (int): Duration calculated from start and stop indices.
-    """
-    start, stop = start_stop
-    duration = stop - start
-    return duration
-
-
-def get_fix_positions(start_stop, positions):
-    start, stop = start_stop
-    return positions[start:stop,:]
-
-
 def is_inside_quadrilateral(point, corners, tolerance=1e-3):
-    # It is okay to have 1 square pixel error in area matching
-    # This will avoid errord due to precision-related calculation mistakes
-    # Very few points pretty much in the boundary might get included as a consequence
+    """
+    Checks if a point is inside a quadrilateral.
+    Parameters:
+    - point (tuple): Point coordinates.
+    - corners (dict): Dictionary containing corner coordinates.
+    - tolerance (float): Tolerance level for area difference.
+    Returns:
+    - inside_quad (bool): True if the point is inside the quadrilateral, False otherwise.
+    - area_diff (float): Difference in area.
+    """
     x, y = point
     x1, y1 = corners['topLeft']
     x2, y2 = corners['topRight']
@@ -170,10 +244,9 @@ def is_inside_quadrilateral(point, corners, tolerance=1e-3):
     inside_quad = area_diff < tolerance
     return inside_quad, area_diff
 
-
 def get_area_using_shoelace_3pts(x1, y1, x2, y2, x3, y3):
     """
-    Calculate the area of a triangle using the Shoelace formula.
+    Calculates the area of a triangle using the Shoelace formula.
     Parameters:
     - x1, y1, x2, y2, x3, y3: Coordinates of the triangle vertices.
     Returns:
@@ -181,10 +254,9 @@ def get_area_using_shoelace_3pts(x1, y1, x2, y2, x3, y3):
     """
     return 0.5 * abs((x1*y2 + x2*y3 + x3*y1) - (y1*x2 + y2*x3 + y3*x1))
 
-
 def get_area_using_shoelace_4pts(x1, y1, x2, y2, x3, y3, x4, y4):
     """
-    Calculate the area of a quadrilateral using the Shoelace formula.
+    Calculates the area of a quadrilateral using the Shoelace formula.
     Parameters:
     - x1, y1, x2, y2, x3, y3, x4, y4: Coordinates of the quadrilateral vertices.
     Returns:
@@ -196,22 +268,43 @@ def get_area_using_shoelace_4pts(x1, y1, x2, y2, x3, y3, x4, y4):
 
 
 def stretch_bounding_box_corners(bb_corner_coord_dict, scale=1.3):
-    # Calculate mean of x and y coordinates
+    """
+    Stretches bounding box corners.
+    Parameters:
+    - bb_corner_coord_dict (dict): Dictionary containing bounding box corner coordinates.
+    - scale (float): Scaling factor.
+    Returns:
+    - stretched_points (dict): Dictionary containing stretched corner coordinates.
+    """
     mean_x = sum(point[0] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
     mean_y = sum(point[1] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
-    # Mean shift
     shifted_points = {key: (point[0]-mean_x, point[1]-mean_y) for key, point in bb_corner_coord_dict.items()}
-    # Scale points
     scaled_points = {key: (point[0]*scale, point[1]*scale) for key, point in shifted_points.items()}
-    # Shift points back
     stretched_points = {key: (point[0]+mean_x, point[1]+mean_y) for key, point in scaled_points.items()}
     return stretched_points
 
 
 def distance(point1, point2):
+    """
+    Calculates the Euclidean distance between two points.
+    Parameters:
+    - point1 (tuple): First point coordinates.
+    - point2 (tuple): Second point coordinates.
+    Returns:
+    - dist (float): Euclidean distance.
+    """
     x1, y1 = point1
+    x2, y1 = point1
     x2, y2 = point2
     return sqrt((x2 - x1)**2 + (y2 - y1)**2)
+
+
+
+
+
+
+
+
 
 
 def px2deg(px, monitor_info=None):
