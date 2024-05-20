@@ -4,8 +4,8 @@
 #SBATCH --error=job_scripts/error_False_False.txt
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem-per-cpu=8G
-#SBATCH --time=3:00:00
+#SBATCH --mem-per-cpu=16G
+#SBATCH --time=2:00:00
 #SBATCH --partition=psych_day
 #SBATCH --mail-type=FAIL
 

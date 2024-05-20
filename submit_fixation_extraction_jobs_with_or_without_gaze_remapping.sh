@@ -2,9 +2,9 @@
 
 # Set common parameters
 CPUS_PER_TASK=8
-MEMORY_PER_CPU=8G
+MEMORY_PER_CPU=16G
 PARTITION=psych_day
-TIME_LIMIT=3:00:00
+TIME_LIMIT=2:00:00
 SCRIPT=analyze_gaze_signals_cluster.py
 
 # Create job_scripts directory if it doesn't exist
