@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Apr  9 10:25:48 2024
+Created on Mon May 20 11:41:20 2024
 
 @author: pg496
 """
@@ -23,6 +23,10 @@ No fixation is now being detected inside the left object bounding box. This is
 most probably the position data points have not been transformed to be remapped
 between the edges of the bounds of the eyetracker rect
 '''
+
+# Read parameters from environment variables
+map_roi_coord_to_eyelink_space = os.getenv('map_roi_coord_to_eyelink_space', 'False') == 'True'
+map_gaze_pos_coord_to_eyelink_space = os.getenv('map_gaze_pos_coord_to_eyelink_space', 'False') == 'True'
 
 params = {}
 params.update({

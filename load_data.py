@@ -137,9 +137,9 @@ def get_labelled_gaze_positions_dict_m1(folder_path, meta_info_list, session_cat
     Returns:
     - gaze_data (tuple): Tuple containing gaze positions and associated metadata.
     """
-    mat_files = [f for f in os.listdir(folder_path) if 'M1_gaze_regForm.mat' in f]
+    mat_files = [f for f in os.listdir(folder_path) if 'M1_gaze.mat' in f]
     if len(mat_files) != 1:
-        print(f"\nError: Multiple or no '*_M1_gaze_regForm.mat' files found in folder: {folder_path}")
+        print(f"\nError: Multiple or no '*_M1_gaze.mat' files found in folder: {folder_path}")
         return None
     mat_file_path = os.path.join(folder_path, mat_files[0])
     try:

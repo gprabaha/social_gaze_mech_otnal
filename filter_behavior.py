@@ -69,7 +69,7 @@ def get_unique_doses(params):
         indices_for_unique_rows.append(indices_for_row.tolist())
     params.update({'unique_doses': unique_rows,
                    'dose_inds': indices_for_unique_rows,
-                   'session_category': session_category})
+                   'session_categories': session_category})
     return params
 
 
