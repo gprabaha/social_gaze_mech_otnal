@@ -135,10 +135,10 @@ def map_coord_to_eyelink_space(coordinate):
     def span(array):
         return max(array) - min(array)
     
-    remapped_coord = (
+    remapped_coord = [
         span(x_px_range)*(coordinate[0]/span(x_px_range)) + min(x_px_range),
         span(y_px_range)*(coordinate[1]/span(y_px_range)) + min(y_px_range)
-        )
+        ]
     return remapped_coord
 
 
@@ -185,7 +185,6 @@ def calculate_roi_bounding_box_corners(m1_landmarks, map_roi_coord_to_eyelink_sp
     return eye_bb_corners, face_bb_corners, left_obj_bb_corners, right_obj_bb_corners
 
 
-
 def construct_eye_bounding_box(left_eye, right_eye, corner_name_order, map_roi_coord_to_eyelink_space):
     """
     Constructs the bounding box for the eyes.
@@ -216,6 +215,23 @@ def construct_eye_bounding_box(left_eye, right_eye, corner_name_order, map_roi_c
 
     corner_dict = {corner: get_mapped_corner(corner) for corner in corner_name_order}
     return stretch_bounding_box_corners(corner_dict)
+
+
+def stretch_bounding_box_corners(bb_corner_coord_dict, scale=1.3):
+    """
+    Stretches bounding box corners.
+    Parameters:
+    - bb_corner_coord_dict (dict): Dictionary containing bounding box corner coordinates.
+    - scale (float): Scaling factor.
+    Returns:
+    - stretched_points (dict): Dictionary containing stretched corner coordinates.
+    """
+    mean_x = sum(point[0] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
+    mean_y = sum(point[1] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
+    shifted_points = {key: (point[0]-mean_x, point[1]-mean_y) for key, point in bb_corner_coord_dict.items()}
+    scaled_points = {key: (point[0]*scale, point[1]*scale) for key, point in shifted_points.items()}
+    stretched_points = {key: (point[0]+mean_x, point[1]+mean_y) for key, point in scaled_points.items()}
+    return stretched_points
 
 
 def is_inside_quadrilateral(point, corners, tolerance=1e-3):
@@ -265,23 +281,6 @@ def get_area_using_shoelace_4pts(x1, y1, x2, y2, x3, y3, x4, y4):
     total_area = get_area_using_shoelace_3pts(x1, y1, x2, y2, x3, y3) + \
                  get_area_using_shoelace_3pts(x1, y1, x3, y3, x4, y4)
     return total_area
-
-
-def stretch_bounding_box_corners(bb_corner_coord_dict, scale=1.3):
-    """
-    Stretches bounding box corners.
-    Parameters:
-    - bb_corner_coord_dict (dict): Dictionary containing bounding box corner coordinates.
-    - scale (float): Scaling factor.
-    Returns:
-    - stretched_points (dict): Dictionary containing stretched corner coordinates.
-    """
-    mean_x = sum(point[0] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
-    mean_y = sum(point[1] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
-    shifted_points = {key: (point[0]-mean_x, point[1]-mean_y) for key, point in bb_corner_coord_dict.items()}
-    scaled_points = {key: (point[0]*scale, point[1]*scale) for key, point in shifted_points.items()}
-    stretched_points = {key: (point[0]+mean_x, point[1]+mean_y) for key, point in scaled_points.items()}
-    return stretched_points
 
 
 def distance(point1, point2):
