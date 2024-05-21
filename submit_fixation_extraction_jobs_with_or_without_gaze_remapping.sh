@@ -2,7 +2,7 @@
 
 # Set common parameters
 CPUS_PER_TASK=12
-MEMORY_PER_CPU=24G
+MEMORY_PER_CPU=16G
 PARTITION=psych_day
 TIME_LIMIT=4:00:00
 SCRIPT=analyze_gaze_signals_cluster.py

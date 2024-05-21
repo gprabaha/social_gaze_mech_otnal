@@ -203,8 +203,8 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
     root_data_dir = params.get('root_data_dir')
     use_parallel = params.get('use_parallel', True)
     all_fixations, all_fix_timepos, fix_detection_results = [], [], []
-    sessions_data = [(i, session_data[0], session_data[1], params)
-                     for i, session_data in enumerate(labelled_gaze_positions)]
+    sessions_data = [(session_data[0], session_data[1], params)
+                     for session_data in labelled_gaze_positions]
     if use_parallel:
         print("\nExtracting fixations in parallel")
         num_cores = multiprocessing.cpu_count()
@@ -240,8 +240,12 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
     info_list = np.array(info_list, dtype=object)
     # Save intermediate results for future label generation
     results_file_name = f'fixation_results_m1{flag_info}.npz'
-    np.savez(os.path.join(root_data_dir, results_file_name), 
-             fixations=fixations_list, timepos=timepos_list, info=info_list)
+    try:
+        np.savez(os.path.join(root_data_dir, results_file_name), 
+                 fixations=fixations_list, timepos=timepos_list, info=info_list)
+        print("Fix intermediate session data saved successfully.")
+    except Exception as e:
+        print(f"Error saving data: {e}")
     return all_fixations, all_fix_timepos, fix_detection_results
 
 
@@ -257,7 +261,7 @@ def get_session_fixations(session_data):
     - fixation_timepos_mat (list): List of fixation time positions.
     - info (dict): Metadata information for the session.
     """
-    session_identifier, positions, info, params = session_data
+    positions, info, params = session_data
     session_name = info['session_name']
     sampling_rate = info['sampling_rate']
     n_samples = positions.shape[0]
@@ -277,6 +281,7 @@ def generate_session_fixation_labels(fix_detection_result):
     Returns:
     - fixation_labels (list): List of fixation labels.
     """
+    #pdb.set_trace()
     session_fixations, session_timepos_mat, info = fix_detection_result
     fixation_labels = []
     category = info['category']
@@ -286,13 +291,16 @@ def generate_session_fixation_labels(fix_detection_result):
     sampling_rate = info['sampling_rate']
     bbox_corners = info['roi_bb_corners']
     agent = info['monkey_1']
-    for start_stop in tqdm(session_fixations,
-                           desc=f"{session_name}: n fixations labelled"):
-        fix_duration = util.get_duration(start_stop)
-        fix_positions = util.get_fix_positions(start_stop, session_timepos_mat)
-        mean_fix_pos = np.nanmean(fix_positions, axis=0)
+    for row in tqdm(session_timepos_mat.itertuples(index=False),
+                    desc=f"{session_name}: n fixations labelled"):
+        fix_x = row.fix_x
+        fix_y = row.fix_y
+        start_time = row.start_time
+        end_time = row.end_time
+        fix_duration = row.duration
+        mean_fix_pos = [fix_x, fix_y]
         run, block, fix_roi, smallest_diff = detect_run_block_and_roi(
-            start_stop, startS, stopS, sampling_rate, mean_fix_pos, bbox_corners)
+            [start_time, end_time], startS, stopS, sampling_rate, mean_fix_pos, bbox_corners)
         fixation_info = [category, session_name,
                          run, block, fix_duration,
                          mean_fix_pos[0], mean_fix_pos[1],
@@ -317,7 +325,9 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
     - block (str): Detected block.
     - fix_roi (str): Detected ROI.
     """
-    start, stop = start_stop*sampling_rate
+    #pdb.set_trace()
+    start = start_stop[0]*sampling_rate
+    stop = start_stop[1]*sampling_rate
     for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
         if start >= run_start and stop <= run_stop:
             run = i
@@ -338,7 +348,6 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
     smallest_diff = np.inf
     inside_all_roi = []
     for key in bounding_boxes:
-        pdb.set_trace()
         inside_roi, area_diff = util.is_inside_quadrilateral(
             mean_fix_pos, bbox_corners[key])
         inside_all_roi.append(inside_roi)

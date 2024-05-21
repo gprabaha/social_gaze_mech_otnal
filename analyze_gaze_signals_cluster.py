@@ -35,7 +35,7 @@ params.update({
     'remake_labelled_gaze_pos': True,
     'remake_fixations': True,
     'remake_fixation_labels': True,
-    'remake_spikeTs': False,
+    'remake_spikeTs': True,
     'map_roi_coord_to_eyelink_space': map_roi_coord_to_eyelink_space,
     'map_gaze_pos_coord_to_eyelink_space': map_gaze_pos_coord_to_eyelink_space
 })
