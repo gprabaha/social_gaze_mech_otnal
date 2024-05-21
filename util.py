@@ -125,10 +125,8 @@ def calculate_roi_bounding_box_corners(m1_landmarks, map_roi_coord_to_eyelink_sp
     - m1_landmarks (dict): Dictionary containing M1 landmarks data.
     - map_roi_coord_to_eyelink_space (bool): Flag indicating whether to map coordinates to Eyelink space.
     Returns:
-    - eye_bb_corners (dict): Bounding box corners for the eye region.
-    - face_bb_corners (dict): Bounding box corners for the face region.
-    - left_obj_bb_corners (dict): Bounding box corners for the left object region.
-    - right_obj_bb_corners (dict): Bounding box corners for the right object region.
+    - bbox_corners (dict): Dictionary with keys 'eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox'
+      containing bounding box corners for respective regions.
     """
     # Define the order of corner names
     corner_name_order = ['topLeft', 'topRight', 'bottomRight', 'bottomLeft']
@@ -147,17 +145,21 @@ def calculate_roi_bounding_box_corners(m1_landmarks, map_roi_coord_to_eyelink_sp
         return map_coord_to_eyelink_space(coord) if map_roi_coord_to_eyelink_space else coord
 
     # Calculate bounding box corners for each ROI
-    eye_bb_corners = construct_eye_bounding_box(left_eye, right_eye, corner_name_order, map_roi_coord_to_eyelink_space)
-    face_bb_corners = stretch_bounding_box_corners(
+    eye_bbox = construct_eye_bounding_box(left_eye, right_eye, corner_name_order, map_roi_coord_to_eyelink_space)
+    face_bbox = stretch_bounding_box_corners(
         {key: get_mapped_coord(m1_landmarks[key][0][0][0])
          for key in corner_name_order})
-    left_obj_bb_corners = stretch_bounding_box_corners(
+    left_obj_bbox = stretch_bounding_box_corners(
         {key: get_mapped_coord(m1_landmarks['leftObject'][0][0][0][key][0][0])
          for key in corner_name_order})
-    right_obj_bb_corners = stretch_bounding_box_corners(
+    right_obj_bbox = stretch_bounding_box_corners(
         {key: get_mapped_coord(m1_landmarks['rightObject'][0][0][0][key][0][0])
          for key in corner_name_order})
-    return eye_bb_corners, face_bb_corners, left_obj_bb_corners, right_obj_bb_corners
+    return {'eye_bbox': eye_bbox,
+        'face_bbox': face_bbox,
+        'left_obj_bbox': left_obj_bbox,
+        'right_obj_bbox': right_obj_bbox}
+
 
 
 def map_coord_to_eyelink_space(coordinate):

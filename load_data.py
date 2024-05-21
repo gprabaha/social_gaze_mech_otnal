@@ -169,10 +169,38 @@ def load_m1_fixations(params):
     # Load fixations time positions
     fix_timepos_file_name = f'fixations_timepos_m1{flag_info}.npy'
     fix_timepos_m1 = np.load(os.path.join(root_data_dir, fix_timepos_file_name))
+    return fixations_m1, fix_timepos_m1
+
+
+def load_fix_detection_results(params):
+    """
+    Loads fixation detection results from file.
+    
+    Parameters:
+    - params (dict): Dictionary of parameters.
+    
+    Returns:
+    - fix_detection_results (list): List of fixation detection results.
+    """
+    root_data_dir = params.get('root_data_dir')
+    flag_info = util.get_filename_flag_info(params)
+    results_file_name = f'fixation_results_m1{flag_info}.npy'
+    file_path = os.path.join(root_data_dir, results_file_name)
+    if os.path.exists(file_path):
+        fix_detection_results = np.load(file_path, allow_pickle=True)
+        return fix_detection_results
+    else:
+        print(f"File {file_path} does not exist.")
+        return None
+
+
+def load_m1_fixation_labels(params):
+    root_data_dir = params.get('root_data_dir')
+    flag_info = util.get_filename_flag_info(params)
     # Load fixation labels
     fixation_labels_file_name = f'fixation_labels_m1{flag_info}.csv'
     fixation_labels_m1 = pd.read_csv(os.path.join(root_data_dir, fixation_labels_file_name))
-    return fixations_m1, fix_timepos_m1, fixation_labels_m1
+    return fixation_labels_m1
 
 
 def get_spiketimes_and_labels_for_one_session(session_path):

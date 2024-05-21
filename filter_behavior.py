@@ -130,33 +130,83 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
     Extracts fixations with labels, possibly in parallel.
     Parameters:
     - labelled_gaze_positions (list): List of tuples containing gaze positions and associated metadata.
-    - parallel (bool): Whether to use parallel processing.
+    - params (dict): Dictionary of parameters.
     Returns:
     - all_fixations (list): List of fixations.
-    - all_fixation_labels (list): List of labels for fixations.
+    - all_fix_timepos (list): List of fixation time positions.
+    - all_fixation_labels (pd.DataFrame): DataFrame of labels for fixations.
     """
     print("\nStarting to extract fixations:")
     root_data_dir = params.get('root_data_dir')
     use_parallel = params.get('use_parallel', True)
-    sessions = [(i, session[0], session[1]) for i, session in enumerate(labelled_gaze_positions)]
-    num_cores = multiprocessing.cpu_count()
-    num_processes = min(num_cores, len(sessions))
-    if use_parallel:
-        print("\nExtracting in parallel")
-        with Pool(num_processes) as pool:
-            results = pool.map(get_session_fixations, sessions)
+    all_fixations, all_fix_timepos, fix_detection_results = [], [], []
+
+    if params.get('remake_fixations', False):
+        all_fixations, all_fix_timepos, fix_detection_results = \
+            extract_all_fixations_from_labelled_gaze_positions(
+                labelled_gaze_positions, params)
     else:
-        print("\nExtracting serially")
-        results = [get_session_fixations(session) for session in sessions]
-    all_fixations = []
-    all_fix_timepos = []
-    all_fixation_labels = []
-    for session_fixations, session_timepos_mat, session_labels in results:
+        # Load intermediate results if available
+        flag_info = util.get_filename_flag_info(params)
+        results_file_name = f'fixation_results_m1{flag_info}.npy'
+        if os.path.exists(os.path.join(root_data_dir, results_file_name)):
+            all_fixations, all_fix_timepos = load_data.load_m1_fixations(params)
+            fix_detection_results = load_data.load_fix_detection_results(params)
+        else:
+            all_fixations, all_fix_timepos, fix_detection_results = \
+                extract_all_fixations_from_labelled_gaze_positions(
+                    labelled_gaze_positions, params)
+    if params.get('remake_fixation_labels', False):
+        if use_parallel:
+            print("\nGenerating fixation labels in parallel")
+            num_cores = multiprocessing.cpu_count()
+            num_processes = min(num_cores, len(fix_detection_results))
+            with Pool(num_processes) as pool:
+                fixation_labels = pool.map(generate_session_fixation_labels, fix_detection_results)
+        else:
+            print("\nGenerating fixation labels serially")
+            fixation_labels = [generate_session_fixation_labels(result) for result in fix_detection_results]
+        all_fixation_labels = []
+        for session_labels in fixation_labels:
+            all_fixation_labels.extend(session_labels)
+        col_names = ['category', 'session_id', 'session_name', 'run', 'block',
+                     'fix_duration', 'mean_x_pos', 'mean_y_pos', 'fix_roi', 'agent']
+        all_fixation_labels = pd.DataFrame(all_fixation_labels, columns=col_names)
+        # Save fixation labels
+        fixation_labels_file_name = f'fixation_labels_m1{flag_info}.csv'
+        all_fixation_labels.to_csv(os.path.join(
+            root_data_dir, fixation_labels_file_name), index=False)
+    else:
+        all_fixation_labels = load_data.load_m1_fixation_labels(params)
+    return all_fixations, all_fix_timepos, all_fixation_labels
+
+
+def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, params):
+    """
+    Extracts fixations from labelled gaze positions.
+    Parameters:
+    - labelled_gaze_positions (list): List of labelled gaze positions.
+    - params (dict): Dictionary of parameters.
+    Returns:
+    - all_fixations (list): List of all fixations.
+    - all_fix_timepos (list): List of fixation time positions.
+    """
+    root_data_dir = params.get('root_data_dir')
+    use_parallel = params.get('use_parallel', True)
+    all_fixations, all_fix_timepos, fix_detection_results = [], [], []
+    sessions_data = [(i, session_data[0], session_data[1], params) for i, session_data in enumerate(labelled_gaze_positions)]
+    if use_parallel:
+        print("\nExtracting fixations in parallel")
+        num_cores = multiprocessing.cpu_count()
+        num_processes = min(num_cores, len(sessions_data))
+        with Pool(num_processes) as pool:
+            fix_detection_results = pool.map(get_session_fixations, sessions_data)
+    else:
+        print("\nExtracting fixations serially")
+        fix_detection_results = [get_session_fixations(session_data) for session_data in sessions_data]
+    for session_fixations, session_timepos_mat, info in fix_detection_results:
         all_fixations.extend(session_fixations)
         all_fix_timepos.extend(session_timepos_mat)
-        all_fixation_labels.extend(session_labels)
-    col_names = ['category', 'session_id', 'session_name', 'run', 'block', 'fix_duration', 'mean_x_pos', 'mean_y_pos', 'fix_roi', 'agent']
-    all_fixation_labels = pd.DataFrame(all_fixation_labels, columns=col_names)   
     flag_info = util.get_filename_flag_info(params)
     # Save fixations
     fixations_file_name = f'fixations_m1{flag_info}.npy'
@@ -164,10 +214,10 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
     # Save fixations time positions
     fix_timepos_file_name = f'fixations_timepos_m1{flag_info}.npy'
     np.save(os.path.join(root_data_dir, fix_timepos_file_name), all_fix_timepos)
-    # Save fixation labels
-    fixation_labels_file_name = f'fixation_labels_m1{flag_info}.csv'
-    all_fixation_labels.to_csv(os.path.join(root_data_dir, fixation_labels_file_name), index=False)
-    return all_fixations, all_fix_timepos, all_fixation_labels
+    # Save intermediate results for future label generation
+    results_file_name = f'fixation_results_m1{flag_info}.npy'
+    np.save(os.path.join(root_data_dir, results_file_name), fix_detection_results)
+    return all_fixations, all_fix_timepos, fix_detection_results
 
 
 ### Function to get fixations for a session
@@ -176,36 +226,49 @@ def get_session_fixations(session):
     Extracts fixations for a session.
     Parameters:
     - session (tuple): Tuple containing session identifier, positions, and metadata.
+    - params (dict): Dictionary of parameters.
     Returns:
     - fixations (list): List of fixations.
-    - fixation_labels (list): List of labels for fixations.
+    - fixation_timepos_mat (list): List of fixation time positions.
+    - info (dict): Metadata information for the session.
     """
-    session_identifier, positions, info = session
+    session_identifier, positions, info, params = session
     session_name = info['session_name']
     sampling_rate = info['sampling_rate']
     n_samples = positions.shape[0]
     time_vec = util.create_timevec(n_samples, sampling_rate)
-    category = info['category']
-    n_runs = info['num_runs']
-    n_intervals = n_runs - 1
-    startS = info['startS']
-    stopS = info['stopS']
-    bbox_corners = info['roi_bb_corners']
     fix_timepos_mat, fix_vec_entire_session = fix.is_fixation(positions, time_vec, session_name, sampling_rate=sampling_rate)
     fixations = util.find_islands(fix_vec_entire_session)
+    return fixations, fix_timepos_mat, info
+
+
+### Function to generate fixation labels for each session
+def generate_session_fixation_labels(fix_detection_result):
+    """
+    Generates fixation labels for each session.
+    Parameters:
+    - fix_detection_result (tuple): Tuple containing fixation detection results and session information.
+    Returns:
+    - fixation_labels (list): List of fixation labels.
+    """
+    session_fixations, session_timepos_mat, info = fix_detection_result
     fixation_labels = []
-    smallest_area_differences_for_roi_detection = []
-    for start_stop in fixations:
+    category = info['category']
+    session_identifier = info['session_identifier']
+    session_name = info['session_name']
+    startS = info['startS']
+    stopS = info['stopS']
+    sampling_rate = info['sampling_rate']
+    bbox_corners = info['roi_bb_corners']
+    agent = info['monkey_1']
+    for start_stop in session_fixations:
         fix_duration = util.get_duration(start_stop)
-        fix_positions = util.get_fix_positions(start_stop, positions)
+        fix_positions = util.get_fix_positions(start_stop, session_timepos_mat)
         mean_fix_pos = np.nanmean(fix_positions, axis=0)
         run, block, fix_roi, smallest_diff = detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_pos, bbox_corners)
-        smallest_area_differences_for_roi_detection.append(smallest_diff)
-        agent = info['monkey_1']
         fixation_info = [category, session_identifier, session_name, run, block, fix_duration, mean_fix_pos[0], mean_fix_pos[1], fix_roi, agent]
         fixation_labels.append(fixation_info)
-    assert fixations.shape[0] == len(fixation_labels)
-    return fixations, fix_timepos_mat, fixation_labels
+    return fixation_labels
 
 
 ### Function to detect run, block, and ROI for a fixation
@@ -245,6 +308,7 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
     smallest_diff = np.inf
     inside_all_roi = []
     for key in bounding_boxes:
+        pdb.set_trace()
         inside_roi, area_diff = util.is_inside_quadrilateral(mean_fix_pos, bbox_corners[key])
         inside_all_roi.append(inside_roi)
         smallest_diff = area_diff if area_diff < smallest_diff else smallest_diff
