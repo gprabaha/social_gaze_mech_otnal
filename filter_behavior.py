@@ -99,13 +99,17 @@ def extract_labelled_gaze_positions_m1(params):
         return load_data.get_labelled_gaze_positions_dict_m1(idx, params)
     
     labelled_gaze_positions_m1 = []
-    dose_index_pairs = [(dose, idx) for dose, indices_list in zip(unique_doses, dose_inds) for idx in indices_list]
+    dose_index_pairs = [(dose, idx) for dose, indices_list
+                        in zip(unique_doses, dose_inds) for idx in indices_list]
     if use_parallel:
         num_workers = min(multiprocessing.cpu_count(), len(dose_index_pairs))
         with ThreadPoolExecutor(max_workers=num_workers) as executor:
-            futures = {executor.submit(process_index, idx): idx for _, idx in dose_index_pairs}
+            futures = {executor.submit(process_index, idx):
+                       idx for _, idx in dose_index_pairs}
             results = []
-            for future in tqdm(as_completed(futures), desc="Processing gaze position for session", unit="index", total=len(dose_index_pairs)):
+            for future in tqdm(as_completed(futures),
+                               desc="Processing gaze position for session",
+                               unit="index", total=len(dose_index_pairs)):
                 idx = futures[future]
                 gaze_data = future.result()
                 if gaze_data is not None:
@@ -114,7 +118,9 @@ def extract_labelled_gaze_positions_m1(params):
             results.sort(key=lambda x: x[0])
             labelled_gaze_positions_m1 = [gaze_data for _, gaze_data in results]
     else:
-        for _, idx in tqdm(dose_index_pairs, desc="Processing gaze position for session", unit="index"):
+        for _, idx in tqdm(dose_index_pairs,
+                           desc="Processing gaze position for session",
+                           unit="index"):
             gaze_data = process_index(idx)
             if gaze_data is not None:
                 labelled_gaze_positions_m1.append(gaze_data)
@@ -281,7 +287,8 @@ def generate_session_fixation_labels(fix_detection_result):
     sampling_rate = info['sampling_rate']
     bbox_corners = info['roi_bb_corners']
     agent = info['monkey_1']
-    for start_stop in tqdm(session_fixations, desc=f"{session_name}: n fixations labelled"):
+    for start_stop in tqdm(session_fixations,
+                           desc=f"{session_name}: n fixations labelled"):
         fix_duration = util.get_duration(start_stop)
         fix_positions = util.get_fix_positions(start_stop, session_timepos_mat)
         mean_fix_pos = np.nanmean(fix_positions, axis=0)
@@ -426,7 +433,8 @@ def extract_saccades_with_labels(labelled_gaze_positions):
     saccades = []
     saccade_labels = []
     session_identifier = 0
-    for session in tqdm(labelled_gaze_positions, desc="Extracting saccades for session", unit="session"):
+    for session in tqdm(labelled_gaze_positions,
+                        desc="Extracting saccades for session", unit="session"):
         session_identifier += 1
         positions = session[0]
         info = session[1]
@@ -442,11 +450,15 @@ def extract_saccades_with_labels(labelled_gaze_positions):
             run_positions = positions[run_time,:]
             run_x = util.px2deg(run_positions[:,0].T)
             run_y = util.px2deg(run_positions[:,1].T)
-            saccade_start_stops = find_saccades(run_x, run_y, sampling_rate, vel_thresh, min_samples, smooth_func)
-            saccades_in_run = extract_saccade_positions(run_positions, saccade_start_stops)
+            saccade_start_stops = find_saccades(
+                run_x, run_y, sampling_rate,
+                vel_thresh, min_samples, smooth_func)
+            saccades_in_run = extract_saccade_positions(
+                run_positions, saccade_start_stops)
             n_saccades = len(saccades_in_run)
             saccades.extend(saccades_in_run)
-            saccade_labels.extend([[category, session_identifier, run]] * n_saccades)
+            saccade_labels.extend(
+                [[category, session_identifier, run]] * n_saccades)
     assert len(saccades) == len(saccade_labels)
     return saccades, saccade_labels
 

@@ -162,7 +162,6 @@ def calculate_roi_bounding_box_corners(m1_landmarks, map_roi_coord_to_eyelink_sp
         'right_obj_bbox': right_obj_bbox}
 
 
-
 def map_coord_to_eyelink_space(coordinate):
     """
     Maps a coordinate or coordinates to Eyelink space.
@@ -278,11 +277,8 @@ def is_inside_quadrilateral(point, corners, tolerance=1e-3):
     triangle_area_point2 = get_area_using_shoelace_3pts(x, y, x2, y2, x3, y3)
     triangle_area_point3 = get_area_using_shoelace_3pts(x, y, x3, y3, x4, y4)
     triangle_area_point4 = get_area_using_shoelace_3pts(x, y, x4, y4, x1, y1)
-    sum_of_triangles = \
-        triangle_area_point1 + \
-            triangle_area_point2 + \
-                triangle_area_point3 + \
-                    triangle_area_point4
+    sum_of_triangles = triangle_area_point1 + triangle_area_point2 + \
+        triangle_area_point3 + triangle_area_point4
     area_diff = abs(total_area - sum_of_triangles)
     inside_quad = area_diff < tolerance
     return inside_quad, area_diff
