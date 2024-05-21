@@ -178,7 +178,7 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
         all_fixation_labels = []
         for session_labels in fixation_labels:
             all_fixation_labels.extend(session_labels)
-        col_names = ['category', 'session_id', 'session_name', 'run', 'block',
+        col_names = ['category', 'session_name', 'run', 'block',
                      'fix_duration', 'mean_x_pos', 'mean_y_pos', 'fix_roi', 'agent']
         all_fixation_labels = pd.DataFrame(all_fixation_labels, columns=col_names)
         # Save fixation labels
@@ -280,7 +280,6 @@ def generate_session_fixation_labels(fix_detection_result):
     session_fixations, session_timepos_mat, info = fix_detection_result
     fixation_labels = []
     category = info['category']
-    session_identifier = info['session_identifier']
     session_name = info['session_name']
     startS = info['startS']
     stopS = info['stopS']
@@ -294,7 +293,7 @@ def generate_session_fixation_labels(fix_detection_result):
         mean_fix_pos = np.nanmean(fix_positions, axis=0)
         run, block, fix_roi, smallest_diff = detect_run_block_and_roi(
             start_stop, startS, stopS, sampling_rate, mean_fix_pos, bbox_corners)
-        fixation_info = [category, session_identifier, session_name,
+        fixation_info = [category, session_name,
                          run, block, fix_duration,
                          mean_fix_pos[0], mean_fix_pos[1],
                          fix_roi, agent]
