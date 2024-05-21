@@ -140,7 +140,6 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
     root_data_dir = params.get('root_data_dir')
     use_parallel = params.get('use_parallel', True)
     all_fixations, all_fix_timepos, fix_detection_results = [], [], []
-
     if params.get('remake_fixations', False):
         all_fixations, all_fix_timepos, fix_detection_results = \
             extract_all_fixations_from_labelled_gaze_positions(
@@ -162,10 +161,12 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
             num_cores = multiprocessing.cpu_count()
             num_processes = min(num_cores, len(fix_detection_results))
             with Pool(num_processes) as pool:
-                fixation_labels = pool.map(generate_session_fixation_labels, fix_detection_results)
+                fixation_labels = pool.map(
+                    generate_session_fixation_labels, fix_detection_results)
         else:
             print("\nGenerating fixation labels serially")
-            fixation_labels = [generate_session_fixation_labels(result) for result in fix_detection_results]
+            fixation_labels = [generate_session_fixation_labels(result)
+                               for result in fix_detection_results]
         all_fixation_labels = []
         for session_labels in fixation_labels:
             all_fixation_labels.extend(session_labels)
@@ -194,7 +195,8 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
     root_data_dir = params.get('root_data_dir')
     use_parallel = params.get('use_parallel', True)
     all_fixations, all_fix_timepos, fix_detection_results = [], [], []
-    sessions_data = [(i, session_data[0], session_data[1], params) for i, session_data in enumerate(labelled_gaze_positions)]
+    sessions_data = [(i, session_data[0], session_data[1], params)
+                     for i, session_data in enumerate(labelled_gaze_positions)]
     if use_parallel:
         print("\nExtracting fixations in parallel")
         num_cores = multiprocessing.cpu_count()
@@ -203,7 +205,8 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
             fix_detection_results = pool.map(get_session_fixations, sessions_data)
     else:
         print("\nExtracting fixations serially")
-        fix_detection_results = [get_session_fixations(session_data) for session_data in sessions_data]
+        fix_detection_results = [get_session_fixations(session_data)
+                                 for session_data in sessions_data]
     for session_fixations, session_timepos_mat, info in fix_detection_results:
         all_fixations.extend(session_fixations)
         all_fix_timepos.extend(session_timepos_mat)
@@ -237,7 +240,8 @@ def get_session_fixations(session):
     sampling_rate = info['sampling_rate']
     n_samples = positions.shape[0]
     time_vec = util.create_timevec(n_samples, sampling_rate)
-    fix_timepos_mat, fix_vec_entire_session = fix.is_fixation(positions, time_vec, session_name, sampling_rate=sampling_rate)
+    fix_timepos_mat, fix_vec_entire_session = fix.is_fixation(
+        positions, time_vec, session_name, sampling_rate=sampling_rate)
     fixations = util.find_islands(fix_vec_entire_session)
     return fixations, fix_timepos_mat, info
 
@@ -261,12 +265,16 @@ def generate_session_fixation_labels(fix_detection_result):
     sampling_rate = info['sampling_rate']
     bbox_corners = info['roi_bb_corners']
     agent = info['monkey_1']
-    for start_stop in session_fixations:
+    for start_stop in tqdm(session_fixations, desc=f"{session_name}: Generating fixation labels"):
         fix_duration = util.get_duration(start_stop)
         fix_positions = util.get_fix_positions(start_stop, session_timepos_mat)
         mean_fix_pos = np.nanmean(fix_positions, axis=0)
-        run, block, fix_roi, smallest_diff = detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_pos, bbox_corners)
-        fixation_info = [category, session_identifier, session_name, run, block, fix_duration, mean_fix_pos[0], mean_fix_pos[1], fix_roi, agent]
+        run, block, fix_roi, smallest_diff = detect_run_block_and_roi(
+            start_stop, startS, stopS, sampling_rate, mean_fix_pos, bbox_corners)
+        fixation_info = [category, session_identifier, session_name,
+                         run, block, fix_duration,
+                         mean_fix_pos[0], mean_fix_pos[1],
+                         fix_roi, agent]
         fixation_labels.append(fixation_info)
     return fixation_labels
 
@@ -309,7 +317,8 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
     inside_all_roi = []
     for key in bounding_boxes:
         pdb.set_trace()
-        inside_roi, area_diff = util.is_inside_quadrilateral(mean_fix_pos, bbox_corners[key])
+        inside_roi, area_diff = util.is_inside_quadrilateral(
+            mean_fix_pos, bbox_corners[key])
         inside_all_roi.append(inside_roi)
         smallest_diff = area_diff if area_diff < smallest_diff else smallest_diff
     if np.any(inside_all_roi):
@@ -325,8 +334,6 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
 def extract_spiketimes_for_all_sessions(params):
     root_data_dir = params.get('root_data_dir')
     session_paths = params.get('session_paths')
-    map_roi_coord_to_eyelink_space = params.get('map_roi_coord_to_eyelink_space')
-    map_gaze_pos_coord_to_eyelink_space = params.get('map_gaze_pos_coord_to_eyelink_space')
     is_parallel = params.get('use_parallel', True)
     spikeTs_s = []
     spikeTs_ms = []

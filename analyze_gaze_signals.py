@@ -22,9 +22,8 @@ between the edges of the bounds of the eyetracker rect
 params = {}
 params.update({
     'is_cluster': True,
-    'use_parallel': False,
-    'truncate_data_for_debugging': True,
-    'remake_labelled_gaze_pos': False,
+    'use_parallel': True,
+    'remake_labelled_gaze_pos': True,
     'remake_fixations': True,
     'remake_fixation_labels': True,
     'remake_spikeTs': False,

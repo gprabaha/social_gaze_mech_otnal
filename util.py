@@ -145,7 +145,8 @@ def calculate_roi_bounding_box_corners(m1_landmarks, map_roi_coord_to_eyelink_sp
         return map_coord_to_eyelink_space(coord) if map_roi_coord_to_eyelink_space else coord
 
     # Calculate bounding box corners for each ROI
-    eye_bbox = construct_eye_bounding_box(left_eye, right_eye, corner_name_order, map_roi_coord_to_eyelink_space)
+    eye_bbox = construct_eye_bounding_box(
+        left_eye, right_eye, corner_name_order, map_roi_coord_to_eyelink_space)
     face_bbox = stretch_bounding_box_corners(
         {key: get_mapped_coord(m1_landmarks[key][0][0][0])
          for key in corner_name_order})
@@ -190,7 +191,9 @@ def map_coord_to_eyelink_space(coordinate):
         or (isinstance(coordinate, np.ndarray) and coordinate.ndim == 1):
         # Single coordinate case
         remapped_coord = remap_single_coord(coordinate)
-    elif isinstance(coordinate, np.ndarray) and coordinate.ndim == 2 and coordinate.shape[1] == 2:
+    elif isinstance(coordinate, np.ndarray) \
+        and coordinate.ndim == 2 \
+            and coordinate.shape[1] == 2:
         # Multiple coordinates case (2D array)
         remapped_coord = np.apply_along_axis(remap_single_coord, 1, coordinate)
     else:
@@ -224,9 +227,11 @@ def construct_eye_bounding_box(left_eye, right_eye, corner_name_order, map_roi_c
 
     def get_mapped_corner(corner):
         coord = get_corner_coord(corner, left_eye, right_eye, offset)
-        return map_coord_to_eyelink_space(coord) if map_roi_coord_to_eyelink_space else coord
+        return map_coord_to_eyelink_space(coord) \
+            if map_roi_coord_to_eyelink_space else coord
 
-    corner_dict = {corner: get_mapped_corner(corner) for corner in corner_name_order}
+    corner_dict = {corner: get_mapped_corner(corner)
+                   for corner in corner_name_order}
     return stretch_bounding_box_corners(corner_dict)
 
 
@@ -239,11 +244,16 @@ def stretch_bounding_box_corners(bb_corner_coord_dict, scale=1.3):
     Returns:
     - stretched_points (dict): Dictionary containing stretched corner coordinates.
     """
-    mean_x = sum(point[0] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
-    mean_y = sum(point[1] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
-    shifted_points = {key: (point[0]-mean_x, point[1]-mean_y) for key, point in bb_corner_coord_dict.items()}
-    scaled_points = {key: (point[0]*scale, point[1]*scale) for key, point in shifted_points.items()}
-    stretched_points = {key: (point[0]+mean_x, point[1]+mean_y) for key, point in scaled_points.items()}
+    mean_x = sum(point[0] for point in
+                 bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
+    mean_y = sum(point[1] for point in
+                 bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
+    shifted_points = {key: (point[0]-mean_x, point[1]-mean_y)
+                      for key, point in bb_corner_coord_dict.items()}
+    scaled_points = {key: (point[0]*scale, point[1]*scale)
+                     for key, point in shifted_points.items()}
+    stretched_points = {key: (point[0]+mean_x, point[1]+mean_y)
+                        for key, point in scaled_points.items()}
     return stretched_points
 
 
@@ -268,7 +278,11 @@ def is_inside_quadrilateral(point, corners, tolerance=1e-3):
     triangle_area_point2 = get_area_using_shoelace_3pts(x, y, x2, y2, x3, y3)
     triangle_area_point3 = get_area_using_shoelace_3pts(x, y, x3, y3, x4, y4)
     triangle_area_point4 = get_area_using_shoelace_3pts(x, y, x4, y4, x1, y1)
-    sum_of_triangles = triangle_area_point1 + triangle_area_point2 + triangle_area_point3 + triangle_area_point4
+    sum_of_triangles = \
+        triangle_area_point1 + \
+            triangle_area_point2 + \
+                triangle_area_point3 + \
+                    triangle_area_point4
     area_diff = abs(total_area - sum_of_triangles)
     inside_quad = area_diff < tolerance
     return inside_quad, area_diff
