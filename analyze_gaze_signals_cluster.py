@@ -58,12 +58,13 @@ if params.get('remake_labelled_gaze_pos'):
 else:
     labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(params)
 
-if params.get('remake_fixations'):
+if params.get('remake_fixations') or params.get('remake_fixation_labels'):
     fixations_m1, fix_timepos_m1, fixation_labels_m1 = \
         filter_behavior.extract_fixations_with_labels_parallel(
             labelled_gaze_positions_m1, params)  # The first file has funky session stop times
 else:
-    fixations_m1, fix_timepos_m1, fixation_labels_m1 = load_data.load_m1_fixations(params)
+    fixations_m1, fix_timepos_m1 = load_data.load_m1_fixations(params)
+    all_fixation_labels = load_data.load_m1_fixation_labels(params)
 
 if params.get('remake_spikeTs'):
     spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(params)
@@ -72,7 +73,9 @@ else:
 
 # ROIs fixated on
 rois_with_fixatins = fixation_labels_m1['fix_roi'].unique()
-print(f'Rois with fixations detected in them are:\n{rois_with_fixatins}')
+print(f"Remap ROI: {params['map_roi_coord_to_eyelink_space']}\n")
+print(f"Remap gaze positions: {params['map_gaze_pos_coord_to_eyelink_space']}\n")
+print(f'Rois with fixations detected in them are:\n{rois_with_fixatins}\n')
 
 # ROI Indices
 face_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'face_bbox'

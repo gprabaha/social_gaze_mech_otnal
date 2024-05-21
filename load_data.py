@@ -175,23 +175,29 @@ def load_m1_fixations(params):
 def load_fix_detection_results(params):
     """
     Loads fixation detection results from file.
-    
     Parameters:
     - params (dict): Dictionary of parameters.
-    
     Returns:
     - fix_detection_results (list): List of fixation detection results.
     """
     root_data_dir = params.get('root_data_dir')
     flag_info = util.get_filename_flag_info(params)
-    results_file_name = f'fixation_results_m1{flag_info}.npy'
+    results_file_name = f'fixation_results_m1{flag_info}.npz'
     file_path = os.path.join(root_data_dir, results_file_name)
     if os.path.exists(file_path):
-        fix_detection_results = np.load(file_path, allow_pickle=True)
+        # Load the .npz file
+        with np.load(file_path, allow_pickle=True) as data:
+            fixations_list = data['fixations']
+            timepos_list = data['timepos']
+            info_list = data['info']
+        # Reconstruct the fix_detection_results list
+        fix_detection_results = [(fixations_list[i], timepos_list[i], info_list[i]) 
+                                 for i in range(len(fixations_list))]
         return fix_detection_results
     else:
         print(f"File {file_path} does not exist.")
         return None
+
 
 
 def load_m1_fixation_labels(params):

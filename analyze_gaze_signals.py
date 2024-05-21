@@ -23,7 +23,7 @@ params = {}
 params.update({
     'is_cluster': True,
     'use_parallel': True,
-    'remake_labelled_gaze_pos': True,
+    'remake_labelled_gaze_pos': False,
     'remake_fixations': True,
     'remake_fixation_labels': True,
     'remake_spikeTs': False,
@@ -53,7 +53,7 @@ else:
 if params.get('remake_fixations') or params.get('remake_fixation_labels'):
     fixations_m1, fix_timepos_m1, fixation_labels_m1 = \
         filter_behavior.extract_fixations_with_labels_parallel(
-            labelled_gaze_positions_m1, params)  # The first file has funky session stop times
+            labelled_gaze_positions_m1[:2], params)  # The first file has funky session stop times
 else:
     fixations_m1, fix_timepos_m1 = load_data.load_m1_fixations(params)
     all_fixation_labels = load_data.load_m1_fixation_labels(params)

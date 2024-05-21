@@ -38,11 +38,13 @@ def extract_meta_info(params):
     for session_path in params['session_paths']:
         dose_info = load_data.get_monkey_and_dose_data(session_path)
         if dose_info is not None:
-            meta_info = {'session_name': os.path.basename(os.path.normpath(session_path))}
+            meta_info = {'session_name':
+                         os.path.basename(os.path.normpath(session_path))}
             meta_info.update(dose_info)
             runs_info = load_data.get_runs_data(session_path)
             meta_info.update(runs_info)
-            meta_info['roi_bb_corners'] = load_data.load_m1_roi_related_coordinates(session_path, params)
+            meta_info['roi_bb_corners'] = \
+                load_data.load_m1_roi_related_coordinates(session_path, params)
             meta_info_list.append(meta_info)
     return meta_info_list
 
@@ -210,6 +212,7 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
     for session_fixations, session_timepos_mat, info in fix_detection_results:
         all_fixations.extend(session_fixations)
         all_fix_timepos.extend(session_timepos_mat)
+    
     flag_info = util.get_filename_flag_info(params)
     # Save fixations
     fixations_file_name = f'fixations_m1{flag_info}.npy'
@@ -217,14 +220,27 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
     # Save fixations time positions
     fix_timepos_file_name = f'fixations_timepos_m1{flag_info}.npy'
     np.save(os.path.join(root_data_dir, fix_timepos_file_name), all_fix_timepos)
+    # Separate components of fix_detection_results
+    fixations_list = []
+    timepos_list = []
+    info_list = []
+    for session_fixations, session_timepos_mat, info in fix_detection_results:
+        fixations_list.append(session_fixations)
+        timepos_list.append(session_timepos_mat)
+        info_list.append(info)
+    # Convert lists to numpy arrays for saving
+    fixations_list = np.array(fixations_list, dtype=object)
+    timepos_list = np.array(timepos_list, dtype=object)
+    info_list = np.array(info_list, dtype=object)
     # Save intermediate results for future label generation
-    results_file_name = f'fixation_results_m1{flag_info}.npy'
-    np.save(os.path.join(root_data_dir, results_file_name), fix_detection_results)
+    results_file_name = f'fixation_results_m1{flag_info}.npz'
+    np.savez(os.path.join(root_data_dir, results_file_name), 
+             fixations=fixations_list, timepos=timepos_list, info=info_list)
     return all_fixations, all_fix_timepos, fix_detection_results
 
 
 ### Function to get fixations for a session
-def get_session_fixations(session):
+def get_session_fixations(session_data):
     """
     Extracts fixations for a session.
     Parameters:
@@ -235,7 +251,7 @@ def get_session_fixations(session):
     - fixation_timepos_mat (list): List of fixation time positions.
     - info (dict): Metadata information for the session.
     """
-    session_identifier, positions, info, params = session
+    session_identifier, positions, info, params = session_data
     session_name = info['session_name']
     sampling_rate = info['sampling_rate']
     n_samples = positions.shape[0]
@@ -265,7 +281,7 @@ def generate_session_fixation_labels(fix_detection_result):
     sampling_rate = info['sampling_rate']
     bbox_corners = info['roi_bb_corners']
     agent = info['monkey_1']
-    for start_stop in tqdm(session_fixations, desc=f"{session_name}: Generating fixation labels"):
+    for start_stop in tqdm(session_fixations, desc=f"{session_name}: n fixations labelled"):
         fix_duration = util.get_duration(start_stop)
         fix_positions = util.get_fix_positions(start_stop, session_timepos_mat)
         mean_fix_pos = np.nanmean(fix_positions, axis=0)
