@@ -155,7 +155,7 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
     else:
         # Load intermediate results if available
         flag_info = util.get_filename_flag_info(params)
-        results_file_name = f'fixation_results_m1{flag_info}.npy'
+        results_file_name = f'fixation_results_m1{flag_info}.npz'
         if os.path.exists(os.path.join(root_data_dir, results_file_name)):
             all_fixations, all_fix_timepos = load_data.load_m1_fixations(params)
             fix_detection_results = load_data.load_fix_detection_results(params)
@@ -182,6 +182,7 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
                      'fix_duration', 'mean_x_pos', 'mean_y_pos', 'fix_roi', 'agent']
         all_fixation_labels = pd.DataFrame(all_fixation_labels, columns=col_names)
         # Save fixation labels
+        flag_info = util.get_filename_flag_info(params)
         fixation_labels_file_name = f'fixation_labels_m1{flag_info}.csv'
         all_fixation_labels.to_csv(os.path.join(
             root_data_dir, fixation_labels_file_name), index=False)
@@ -291,6 +292,7 @@ def generate_session_fixation_labels(fix_detection_result):
     sampling_rate = info['sampling_rate']
     bbox_corners = info['roi_bb_corners']
     agent = info['monkey_1']
+    #pdb.set_trace()
     for row in tqdm(session_timepos_mat.itertuples(index=False),
                     desc=f"{session_name}: n fixations labelled"):
         fix_x = row.fix_x
@@ -325,9 +327,7 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
     - block (str): Detected block.
     - fix_roi (str): Detected ROI.
     """
-    #pdb.set_trace()
-    start = start_stop[0]*sampling_rate
-    stop = start_stop[1]*sampling_rate
+    start, stop = start_stop
     for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
         if start >= run_start and stop <= run_stop:
             run = i

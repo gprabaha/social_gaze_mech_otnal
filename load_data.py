@@ -36,10 +36,10 @@ def get_monkey_and_dose_data(session_path):
         info = data_info.get('info', [None])[0]
         if info is not None:
             return {
-                'monkey_1': info['monkey_1'][0],
-                'monkey_2': info['monkey_2'][0],
-                'OT_dose': float(info['OT_dose'][0]),
-                'NAL_dose': float(info['NAL_dose'][0])
+                'monkey_1': info['monkey_1'][0][0],
+                'monkey_2': info['monkey_2'][0][0],
+                'OT_dose': float(info['OT_dose'][0][0]),
+                'NAL_dose': float(info['NAL_dose'][0][0])
             }
     except Exception as e:
         print(f"\nError loading meta_info for folder: {session_path}: {e}")
