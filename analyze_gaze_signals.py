@@ -12,6 +12,7 @@ import numpy as np
 import load_data
 import util
 import filter_behavior
+import plotter
 
 '''
 No fixation is now being detected inside the left object bounding box. This is
@@ -22,7 +23,7 @@ between the edges of the bounds of the eyetracker rect
 params = {}
 params.update({
     'is_cluster': True,
-    'use_parallel': False,
+    'use_parallel': True,
     'remake_labelled_gaze_pos': True,
     'remake_fixations': True,
     'remake_fixation_labels': True,
@@ -53,10 +54,10 @@ else:
 if params.get('remake_fixations') or params.get('remake_fixation_labels'):
     fixations_m1, fix_timepos_m1, fixation_labels_m1 = \
         filter_behavior.extract_fixations_with_labels_parallel(
-            labelled_gaze_positions_m1[1:2], params)  # The first file has funky session stop times
+            labelled_gaze_positions_m1[1:], params)  # The first file has funky session stop times
 else:
     fixations_m1, fix_timepos_m1 = load_data.load_m1_fixations(params)
-    all_fixation_labels = load_data.load_m1_fixation_labels(params)
+    fixation_labels_m1 = load_data.load_m1_fixation_labels(params)
 
 if params.get('remake_spikeTs'):
     spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(params)
@@ -84,6 +85,9 @@ mon_up_bool_inds = fixation_labels_m1['block'] == 'mon_up'
 mon_down_bool_inds = fixation_labels_m1['block'] == 'mon_down'
 
 all_sessions = fixation_labels_m1['session_name'].unique()
+
+plotter.plot_fixation_proportions_for_diff_conditions(fixation_labels_m1)
+
 
 for session in all_sessions:
     session_fix_bool_inds = fixation_labels_m1['session_name'] == session
