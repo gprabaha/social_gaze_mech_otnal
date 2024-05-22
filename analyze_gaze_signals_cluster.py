@@ -94,11 +94,7 @@ mon_down_bool_inds = fixation_labels_m1['block'] == 'mon_down'
 
 all_sessions = fixation_labels_m1['session_name'].unique()
 
-for session in all_sessions:
-    session_fix_bool_inds = fixation_labels_m1['session_name'] == session
-    session_unit_indices = np.where(spikeTs_labels['session_name'] == session)[0]
-    for unit_index in session_unit_indices:
-        unit_spikeTs_s = spikeTs_s[unit_index]
+plotter.plot_fixation_proportions_for_diff_conditions(fixation_labels_m1)
 
 
 """
