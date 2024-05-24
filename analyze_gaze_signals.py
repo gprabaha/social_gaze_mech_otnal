@@ -61,7 +61,7 @@ top of the 2D histogram plot
 plotter.plot_gaze_heatmaps_for_conditions(params)
 
 
-
+'''
 if params.get('remake_fixations') or params.get('remake_fixation_labels'):
     fixations_m1, fix_timepos_m1, fixation_labels_m1 = \
         filter_behavior.extract_fixations_with_labels_parallel(
@@ -105,6 +105,11 @@ for session in all_sessions:
     session_unit_indices = np.where(spikeTs_labels['session_name'] == session)[0]
     for unit_index in session_unit_indices:
         unit_spikeTs_s = spikeTs_s[unit_index]
+'''
+
+
+
+
 
 
 """

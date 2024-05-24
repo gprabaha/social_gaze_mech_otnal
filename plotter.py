@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
+from tqdm import tqdm
 import os
 
 import util
@@ -83,7 +84,8 @@ def plot_gaze_heatmaps_for_conditions(params):
 
 
 def plot_gaze_heatmaps_for_all_sessions(labelled_gaze_positions_m1, params, plots_dir):
-    for session_idx, (gaze_positions, session_info) in enumerate(labelled_gaze_positions_m1):
+    print(f"\nCondition: Gaze remap -- {params['map_gaze_pos_coord_to_eyelink_space']}| ROI remap -- {params['map_roi_coord_to_eyelink_space']}\n")
+    for session_idx, (gaze_positions, session_info) in enumerate(tqdm(labelled_gaze_positions_m1, desc="Processing Sessions")):
         plot_gaze_heatmap_for_one_session(gaze_positions, session_info, session_idx, plots_dir)
 
 
