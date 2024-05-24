@@ -9,9 +9,11 @@ Created on Wed May 22 11:35:03 2024
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
 import os
 
 import util
+import load_data
 
 import pdb
 
@@ -60,5 +62,63 @@ def plot_fixation_proportions_for_diff_conditions(fixation_labels_m1, params):
     plt.savefig(plot_path)
     plt.close()
 
-# Example usage:
-# plot_fixation_proportions(fixation_labels_m1)
+
+def plot_gaze_heatmaps_for_conditions(params):
+    root_data_dir = params['root_data_dir']
+    heatmap_base_dir = os.path.join(root_data_dir, 'plots', 'heatmap')
+    os.makedirs(heatmap_base_dir, exist_ok=True)
+    conditions = [(roi, gaze) for roi in [True, False] for gaze in [True, False]]
+    for roi_condition, gaze_condition in conditions:
+        # Update params for current condition
+        params['map_roi_coord_to_eyelink_space'] = roi_condition
+        params['map_gaze_pos_coord_to_eyelink_space'] = gaze_condition
+        # Load the corresponding labelled gaze positions
+        labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(params)
+        # Create a directory for this condition
+        condition_dir = f"roi_{roi_condition}_gaze_{gaze_condition}"
+        plots_dir = os.path.join(heatmap_base_dir, condition_dir)
+        os.makedirs(plots_dir, exist_ok=True)
+        # Generate the plots
+        plot_gaze_heatmaps_for_all_sessions(labelled_gaze_positions_m1, params, plots_dir)
+
+
+def plot_gaze_heatmaps_for_all_sessions(labelled_gaze_positions_m1, params, plots_dir):
+    for session_idx, (gaze_positions, session_info) in enumerate(labelled_gaze_positions_m1):
+        plot_gaze_heatmap_for_one_session(gaze_positions, session_info, session_idx, plots_dir)
+
+
+def plot_gaze_heatmap_for_one_session(gaze_positions, session_info, session_idx, plots_dir):
+    sampling_rate = session_info['sampling_rate']
+    start_times = session_info['startS']
+    stop_times = session_info['stopS']
+    roi_bb_corners = session_info['roi_bb_corners']
+    for run_idx, (start, stop) in enumerate(zip(start_times, stop_times)):
+        start_idx = round(start / sampling_rate)
+        stop_idx = round(stop / sampling_rate)
+        # Isolate the gaze positions within the start and stop indices
+        gaze_run = gaze_positions[start_idx:stop_idx]
+        # Generate the 2D histogram
+        heatmap, xedges, yedges = np.histogram2d(gaze_run[:, 0], gaze_run[:, 1], bins=50)
+        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+        plt.figure(figsize=(10, 8))
+        plt.imshow(heatmap.T, extent=extent, origin='lower', cmap='hot', aspect='auto')
+        # Plot ROI quadrilaterals
+        for roi_name, corners in roi_bb_corners.items():
+            points = [corners['topRight'], corners['topLeft'], corners['bottomLeft'], corners['bottomRight']]
+            polygon = Polygon(points, closed=True, fill=False, edgecolor='blue', linewidth=2, label=roi_name)
+            plt.gca().add_patch(polygon)
+        plt.colorbar(label='Frequency')
+        plt.title(f'Session {session_idx + 1}, Run {run_idx + 1}')
+        plt.xlabel('X coordinate')
+        plt.ylabel('Y coordinate')
+        plt.legend(loc='upper right')
+        # Save the plot
+        plot_filename = f'session_{session_idx + 1}_run_{run_idx + 1}.png'
+        plt.savefig(os.path.join(plots_dir, plot_filename))
+        plt.close()
+
+
+
+
+
+

@@ -20,6 +20,7 @@ most probably the position data points have not been transformed to be remapped
 between the edges of the bounds of the eyetracker rect
 '''
 
+
 params = {}
 params.update({
     'is_cluster': True,
@@ -50,6 +51,16 @@ if params.get('remake_labelled_gaze_pos'):
         filter_behavior.extract_labelled_gaze_positions_m1(params)
 else:
     labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(params)
+
+
+'''
+plot a histogram of gaze positions separately for monitor up and monitor down
+conditions for each session (across runs) and overlay the bounding boxes on
+top of the 2D histogram plot
+'''
+plotter.plot_gaze_heatmaps_for_conditions(params)
+
+
 
 if params.get('remake_fixations') or params.get('remake_fixation_labels'):
     fixations_m1, fix_timepos_m1, fixation_labels_m1 = \
