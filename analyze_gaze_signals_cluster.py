@@ -17,6 +17,7 @@ import pdb
 import load_data
 import util
 import filter_behavior
+import plotter
 
 '''
 No fixation is now being detected inside the left object bounding box. This is
@@ -78,23 +79,9 @@ print(f"Remap ROI: {params['map_roi_coord_to_eyelink_space']}\n")
 print(f"Remap gaze positions: {params['map_gaze_pos_coord_to_eyelink_space']}\n")
 print(f'Rois with fixations detected in them are:\n{rois_with_fixatins}\n')
 
-# ROI Indices
-face_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'face_bbox'
-eye_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'eye_bbox'
-left_obj_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'left_obj_bbox'
-right_obj_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'right_obj_bbox'
-
-# Agent Indices
-lynch_bool_inds = fixation_labels_m1['agent'] == 'Lynch'
-tarantino_bool_inds = fixation_labels_m1['agent'] == 'Tarantino'
-
-# Monitor up or down
-mon_up_bool_inds = fixation_labels_m1['block'] == 'mon_up'
-mon_down_bool_inds = fixation_labels_m1['block'] == 'mon_down'
-
 all_sessions = fixation_labels_m1['session_name'].unique()
 
-plotter.plot_fixation_proportions_for_diff_conditions(fixation_labels_m1)
+plotter.plot_fixation_proportions_for_diff_conditions(fixation_labels_m1, params)
 
 
 """

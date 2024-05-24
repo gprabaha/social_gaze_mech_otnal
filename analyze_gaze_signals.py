@@ -24,9 +24,9 @@ params = {}
 params.update({
     'is_cluster': True,
     'use_parallel': True,
-    'remake_labelled_gaze_pos': True,
-    'remake_fixations': True,
-    'remake_fixation_labels': True,
+    'remake_labelled_gaze_pos': False,
+    'remake_fixations': False,
+    'remake_fixation_labels': False,
     'remake_spikeTs': False,
     'map_roi_coord_to_eyelink_space': True,
     'map_gaze_pos_coord_to_eyelink_space': False
@@ -54,7 +54,7 @@ else:
 if params.get('remake_fixations') or params.get('remake_fixation_labels'):
     fixations_m1, fix_timepos_m1, fixation_labels_m1 = \
         filter_behavior.extract_fixations_with_labels_parallel(
-            labelled_gaze_positions_m1[1:], params)  # The first file has funky session stop times
+            labelled_gaze_positions_m1, params)  # The first file has funky session stop times
 else:
     fixations_m1, fix_timepos_m1 = load_data.load_m1_fixations(params)
     fixation_labels_m1 = load_data.load_m1_fixation_labels(params)
@@ -86,7 +86,7 @@ mon_down_bool_inds = fixation_labels_m1['block'] == 'mon_down'
 
 all_sessions = fixation_labels_m1['session_name'].unique()
 
-plotter.plot_fixation_proportions_for_diff_conditions(fixation_labels_m1)
+plotter.plot_fixation_proportions_for_diff_conditions(fixation_labels_m1, params)
 
 
 for session in all_sessions:

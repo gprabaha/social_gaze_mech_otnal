@@ -219,7 +219,6 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
     for session_fixations, session_timepos_mat, info in fix_detection_results:
         all_fixations.extend(session_fixations)
         all_fix_timepos.extend(session_timepos_mat)
-    
     flag_info = util.get_filename_flag_info(params)
     # Save fixations
     fixations_file_name = f'fixations_m1{flag_info}.npy'
