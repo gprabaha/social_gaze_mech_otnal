@@ -38,7 +38,13 @@ def fetch_data_source_dir(params):
     return data_source_dir, params
 
 
-def get_subfolders(params):
+def fetch_processed_data_dir(params):
+    root_data_dir = params.get('root_data_dir')
+    processed_data_dir = os.path.join(root_data_dir, 'processed_data')
+    params.update({'processed_data_dir': processed_data_dir})
+    return processed_data_dir, params
+
+def fetch_session_subfolder_paths_from_source(params):
     """
     Retrieves subfolders within a given directory.
     Parameters:
@@ -46,8 +52,12 @@ def get_subfolders(params):
     Returns:
     - subfolders (list): List of subfolder paths.
     """
-    root_dir = params['root_data_dir'] 
-    return [f.path for f in os.scandir(root_dir) if f.is_dir()]
+    data_source_dir = params['data_source_dir']
+    session_paths = [f.path for f in os.scandir(data_source_dir)
+                     if f.is_dir()]
+    params.update({'session_paths': session_paths})
+    return session_paths, params
+
 
 def add_datestr_to_dir_path(path):
     # Get the current date as a string in YYYYMMDD format

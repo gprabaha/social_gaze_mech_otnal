@@ -143,11 +143,11 @@ def load_labelled_gaze_positions(params):
     Returns:
     - labelled_gaze_positions (tuple): Tuple containing gaze positions and associated metadata.
     """
-    root_data_dir = params['root_data_dir']
+    processed_data_dir = util.fetch_processed_data_dir(params)
     # Adjusted file name based on flags
     flag_info = util.get_filename_flag_info(params)
     file_name = f'labelled_gaze_positions_m1{flag_info}.pkl'
-    with open(os.path.join(root_data_dir, file_name), 'rb') as f:
+    with open(os.path.join(processed_data_dir, file_name), 'rb') as f:
         return pickle.load(f)
 
 
@@ -161,14 +161,14 @@ def load_m1_fixations(params):
     - fix_timepos_m1 (ndarray): M1 fixation time positions.
     - fixation_labels_m1 (DataFrame): DataFrame containing fixation labels.
     """
-    root_data_dir = params.get('root_data_dir')
+    processed_data_dir = util.fetch_processed_data_dir(params)
     flag_info = util.get_filename_flag_info(params)
     # Load fixations
     fixations_file_name = f'fixations_m1{flag_info}.npy'
-    fixations_m1 = np.load(os.path.join(root_data_dir, fixations_file_name))
+    fixations_m1 = np.load(os.path.join(processed_data_dir, fixations_file_name))
     # Load fixations time positions
     fix_timepos_file_name = f'fixations_timepos_m1{flag_info}.npy'
-    fix_timepos_m1 = np.load(os.path.join(root_data_dir, fix_timepos_file_name))
+    fix_timepos_m1 = np.load(os.path.join(processed_data_dir, fix_timepos_file_name))
     return fixations_m1, fix_timepos_m1
 
 
@@ -180,10 +180,10 @@ def load_fix_detection_results(params):
     Returns:
     - fix_detection_results (list): List of fixation detection results.
     """
-    root_data_dir = params.get('root_data_dir')
+    processed_data_dir = util.fetch_processed_data_dir(params)
     flag_info = util.get_filename_flag_info(params)
     results_file_name = f'fixation_results_m1{flag_info}.npz'
-    file_path = os.path.join(root_data_dir, results_file_name)
+    file_path = os.path.join(processed_data_dir, results_file_name)
     if os.path.exists(file_path):
         # Load the .npz file
         with np.load(file_path, allow_pickle=True) as data:
@@ -199,13 +199,12 @@ def load_fix_detection_results(params):
         return None
 
 
-
 def load_m1_fixation_labels(params):
-    root_data_dir = params.get('root_data_dir')
+    processed_data_dir = util.fetch_processed_data_dir(params)
     flag_info = util.get_filename_flag_info(params)
     # Load fixation labels
     fixation_labels_file_name = f'fixation_labels_m1{flag_info}.csv'
-    fixation_labels_m1 = pd.read_csv(os.path.join(root_data_dir, fixation_labels_file_name))
+    fixation_labels_m1 = pd.read_csv(os.path.join(processed_data_dir, fixation_labels_file_name))
     return fixation_labels_m1
 
 

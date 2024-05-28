@@ -35,11 +35,9 @@ params.update({
 
 # Determine root data directory based on whether it's running on a cluster or not
 root_data_dir, params = util.fetch_root_data_dir(params)
-
 data_source_dir, params = util.fetch_data_source_dir(params)
+session_paths, params = util.fetch_session_subfolder_paths_from_source(params)
 
-session_paths = util.get_subfolders(params)
-params.update({'session_paths': session_paths})
 
 if params.get('remake_labelled_gaze_pos'):
     meta_info_list = filter_behavior.extract_meta_info(params)
