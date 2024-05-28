@@ -45,6 +45,7 @@ def fetch_processed_data_dir(params):
     params.update({'processed_data_dir': processed_data_dir})
     return processed_data_dir, params
 
+
 def fetch_session_subfolder_paths_from_source(params):
     """
     Retrieves subfolders within a given directory.
@@ -161,7 +162,7 @@ def remap_source_coords(coord, params, remapping_type):
             if coord.ndim == 1 and coord.shape[0] == 2:
                 return np.array(remap_single_coord_from_inverted_to_standard_y_axis(coord))
             elif coord.ndim == 2 and coord.shape[1] == 2:
-                return np.array([remap_single_coord_from_inverted_to_standard_y_axis(c) for c in coord])
+                return np.apply_along_axis(remap_single_coord_from_inverted_to_standard_y_axis, 0, coord)
         elif isinstance(coord, dict):
             return {key: remap_inverted_to_standard_y_axis(value) for key, value in coord.items()}
         return coord
@@ -184,7 +185,7 @@ def remap_source_coords(coord, params, remapping_type):
             remapped_coord = remap_single_coord_to_eyelink_space(coord)
             return type(coord)(remapped_coord) if isinstance(coord, (tuple, list)) else np.array(remapped_coord)
         elif isinstance(coord, np.ndarray) and coord.ndim == 2 and coord.shape[1] == 2:
-            return np.apply_along_axis(remap_single_coord_to_eyelink_space, 1, coord)
+            return np.apply_along_axis(remap_single_coord_to_eyelink_space, 0, coord)
         elif isinstance(coord, dict):
             return {key: map_coord_to_eyelink_space(value) for key, value in coord.items()}
         else:
@@ -220,9 +221,6 @@ def get_bl_and_tr_roi_coords_m1(m1_landmarks, params):
     - bbox_corners (dict): Dictionary with keys 'eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox'
       containing bounding box corners for respective regions.
     """
-    map_roi_coord_to_eyelink_space = params.get("map_roi_coord_to_eyelink_space")
-    # Define the order of corner names
-    corner_name_order = ['bottomLeft', 'topRight']
     # Calculate bounding box corners for each ROI
     eye_bbox = construct_eye_bounding_box( m1_landmarks, params )
     face_bbox = construct_face_bounding_box( m1_landmarks, params )
@@ -342,6 +340,7 @@ def is_inside_quadrilateral(point, corners, tolerance=1e-3):
     inside_quad = area_diff < tolerance
     return inside_quad, area_diff
 
+
 def get_area_using_shoelace_3pts(x1, y1, x2, y2, x3, y3):
     """
     Calculates the area of a triangle using the Shoelace formula.
@@ -351,6 +350,7 @@ def get_area_using_shoelace_3pts(x1, y1, x2, y2, x3, y3):
     - area: The area of the triangle.
     """
     return 0.5 * abs((x1*y2 + x2*y3 + x3*y1) - (y1*x2 + y2*x3 + y3*x1))
+
 
 def get_area_using_shoelace_4pts(x1, y1, x2, y2, x3, y3, x4, y4):
     """

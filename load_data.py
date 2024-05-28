@@ -92,7 +92,7 @@ def load_farplane_cal_and_get_bl_and_tr_roi_coords_m1(params):
         m1_landmarks = data_m1_landmarks.get('farPlaneCal', None)
         if m1_landmarks is not None:
             # Minimize computations by calling the util function once
-            return util.calculate_roi_bounding_box_corners(m1_landmarks, params)
+            return util.get_bl_and_tr_roi_coords_m1(m1_landmarks, params)
     except Exception as e:
         print(f"\nError loading m1_landmarks for folder: {session_path}: {e}")
     return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
@@ -124,11 +124,8 @@ def get_labelled_gaze_positions_dict_m1(idx, params):
         M1Ypx = mat_data['M1Ypx'].squeeze()
         # Stack the coordinates
         coordinates = np.column_stack((M1Xpx, M1Ypx))
-        if map_gaze_pos_coord_to_eyelink_space:
-            # Map coordinates to Eyelink space
-            gaze_positions = util.map_coord_to_eyelink_space(coordinates)
-        else:
-            gaze_positions = coordinates
+        coordinates_inverted_y = util.remap_source_coords(coordinates, params, 'inverted_to_standard_y_axis')
+        gaze_positions = util.remap_source_coords(coordinates_inverted_y, params, 'to_eyelink_space')
         meta_info = meta_info_list[idx]
         meta_info.update({'sampling_rate': sampling_rate, 'category': session_categories[idx]})
         return gaze_positions, meta_info
