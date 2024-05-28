@@ -74,7 +74,7 @@ def get_runs_data(params):
     return {}
 
 
-def load_m1_roi_related_coordinates(params):
+def load_farplane_cal_and_get_bl_and_tr_roi_coords_m1(params):
     """
     Extracts M1 ROI bounding boxes from session path.
     Parameters:
@@ -83,7 +83,6 @@ def load_m1_roi_related_coordinates(params):
     - bbox_dict (dict): Dictionary containing M1 ROI bounding boxes.
     """
     session_path = params['session_paths']
-    map_roi_coord_to_eyelink_space = params['map_roi_coord_to_eyelink_space']
     file_list_m1_landmarks = glob.glob(f"{session_path}/*M1_farPlaneCal_regForm.mat")
     if len(file_list_m1_landmarks) != 1:
         print(f"\nWarning: No m1_landmarks or more than one landmarks found in folder: {session_path}.")
@@ -93,7 +92,7 @@ def load_m1_roi_related_coordinates(params):
         m1_landmarks = data_m1_landmarks.get('farPlaneCal', None)
         if m1_landmarks is not None:
             # Minimize computations by calling the util function once
-            return util.calculate_roi_bounding_box_corners(m1_landmarks, map_roi_coord_to_eyelink_space)
+            return util.calculate_roi_bounding_box_corners(m1_landmarks, params)
     except Exception as e:
         print(f"\nError loading m1_landmarks for folder: {session_path}: {e}")
     return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
