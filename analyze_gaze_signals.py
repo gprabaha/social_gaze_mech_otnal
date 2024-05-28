@@ -38,7 +38,7 @@ params.update({
 root_data_dir, params = util.fetch_root_data_dir(params)
 data_source_dir, params = util.fetch_data_source_dir(params)
 session_paths, params = util.fetch_session_subfolder_paths_from_source(params)
-
+processed_data_dir, params = util.fetch_processed_data_dir(params)
 
 if params.get('remake_labelled_gaze_pos'):
     meta_info_list = filter_behavior.extract_meta_info(params)

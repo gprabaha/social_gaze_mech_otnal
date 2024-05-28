@@ -44,7 +44,7 @@ def extract_meta_info(params):
             runs_info = load_data.get_runs_data(session_path)
             meta_info.update(runs_info)
             meta_info['roi_bb_corners'] = \
-                load_data.load_m1_roi_related_coordinates(session_path, params)
+                load_data.load_farplane_cal_and_get_bl_and_tr_roi_coords_m1(session_path, params)
             meta_info_list.append(meta_info)
     return meta_info_list
 
@@ -90,7 +90,7 @@ def extract_labelled_gaze_positions_m1(params):
     Returns:
     - labelled_gaze_positions_m1 (list): List of tuples containing gaze positions and associated metadata.
     """
-    root_data_dir = params.get('root_data_dir')
+    processed_data_dir = params['processed_data_dir']
     unique_doses = params.get('unique_doses')
     dose_inds = params.get('dose_inds')
     use_parallel = params.get('use_parallel', True)
@@ -127,7 +127,7 @@ def extract_labelled_gaze_positions_m1(params):
     # Adjusted file name based on flags
     flag_info = util.get_filename_flag_info(params)
     file_name = f'labelled_gaze_positions_m1{flag_info}.pkl'
-    with open(os.path.join(root_data_dir, file_name), 'wb') as f:
+    with open(os.path.join(processed_data_dir, file_name), 'wb') as f:
         pickle.dump(labelled_gaze_positions_m1, f)
     return labelled_gaze_positions_m1
 
@@ -145,7 +145,7 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
     - all_fixation_labels (pd.DataFrame): DataFrame of labels for fixations.
     """
     print("\nStarting to extract fixations:")
-    root_data_dir = params.get('root_data_dir')
+    processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', True)
     all_fixations, all_fix_timepos, fix_detection_results = [], [], []
     if params.get('remake_fixations', False):
@@ -156,7 +156,7 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
         # Load intermediate results if available
         flag_info = util.get_filename_flag_info(params)
         results_file_name = f'fixation_results_m1{flag_info}.npz'
-        if os.path.exists(os.path.join(root_data_dir, results_file_name)):
+        if os.path.exists(os.path.join(processed_data_dir, results_file_name)):
             all_fixations, all_fix_timepos = load_data.load_m1_fixations(params)
             fix_detection_results = load_data.load_fix_detection_results(params)
         else:
@@ -185,7 +185,7 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
         flag_info = util.get_filename_flag_info(params)
         fixation_labels_file_name = f'fixation_labels_m1{flag_info}.csv'
         all_fixation_labels.to_csv(os.path.join(
-            root_data_dir, fixation_labels_file_name), index=False)
+            processed_data_dir, fixation_labels_file_name), index=False)
     else:
         all_fixation_labels = load_data.load_m1_fixation_labels(params)
     return all_fixations, all_fix_timepos, all_fixation_labels

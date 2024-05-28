@@ -18,7 +18,7 @@ import util
 import pdb
 
 
-def get_monkey_and_dose_data(params):
+def get_monkey_and_dose_data(session_path):
     """
     Extracts information data from session path.
     Parameters:
@@ -26,7 +26,6 @@ def get_monkey_and_dose_data(params):
     Returns:
     - info_dict (dict): Dictionary containing information data.
     """
-    session_path = params['session_paths']
     file_list_info = glob.glob(f"{session_path}/*metaInfo.mat")
     if len(file_list_info) != 1:
         print(f"\nWarning: No metaInfo or more than one metaInfo found in folder: {session_path}.")
@@ -48,7 +47,7 @@ def get_monkey_and_dose_data(params):
             'NAL_dose': None}
 
 
-def get_runs_data(params):
+def get_runs_data(session_path):
     """
     Extracts runs data from session path.
     Parameters:
@@ -56,7 +55,6 @@ def get_runs_data(params):
     Returns:
     - runs_dict (dict): Dictionary containing runs data.
     """
-    session_path = params['session_paths']
     file_list_runs = glob.glob(f"{session_path}/*runs.mat")
     if len(file_list_runs) != 1:
         print(f"\nWarning: No runs found in folder: {session_path}.")
@@ -74,7 +72,7 @@ def get_runs_data(params):
     return {}
 
 
-def load_farplane_cal_and_get_bl_and_tr_roi_coords_m1(params):
+def load_farplane_cal_and_get_bl_and_tr_roi_coords_m1(session_path, params):
     """
     Extracts M1 ROI bounding boxes from session path.
     Parameters:
@@ -82,14 +80,13 @@ def load_farplane_cal_and_get_bl_and_tr_roi_coords_m1(params):
     Returns:
     - bbox_dict (dict): Dictionary containing M1 ROI bounding boxes.
     """
-    session_path = params['session_paths']
     file_list_m1_landmarks = glob.glob(f"{session_path}/*M1_farPlaneCal_regForm.mat")
     if len(file_list_m1_landmarks) != 1:
         print(f"\nWarning: No m1_landmarks or more than one landmarks found in folder: {session_path}.")
         return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
     try:
         data_m1_landmarks = scipy.io.loadmat(file_list_m1_landmarks[0])
-        m1_landmarks = data_m1_landmarks.get('farPlaneCal', None)
+        m1_landmarks = data_m1_landmarks['farPlaneCal']
         if m1_landmarks is not None:
             # Minimize computations by calling the util function once
             return util.get_bl_and_tr_roi_coords_m1(m1_landmarks, params)
@@ -142,7 +139,7 @@ def load_labelled_gaze_positions(params):
     Returns:
     - labelled_gaze_positions (tuple): Tuple containing gaze positions and associated metadata.
     """
-    processed_data_dir = util.fetch_processed_data_dir(params)
+    processed_data_dir = params['processed_data_dir']
     # Adjusted file name based on flags
     flag_info = util.get_filename_flag_info(params)
     file_name = f'labelled_gaze_positions_m1{flag_info}.pkl'
@@ -160,7 +157,7 @@ def load_m1_fixations(params):
     - fix_timepos_m1 (ndarray): M1 fixation time positions.
     - fixation_labels_m1 (DataFrame): DataFrame containing fixation labels.
     """
-    processed_data_dir = util.fetch_processed_data_dir(params)
+    processed_data_dir = params['processed_data_dir']
     flag_info = util.get_filename_flag_info(params)
     # Load fixations
     fixations_file_name = f'fixations_m1{flag_info}.npy'
@@ -179,7 +176,7 @@ def load_fix_detection_results(params):
     Returns:
     - fix_detection_results (list): List of fixation detection results.
     """
-    processed_data_dir = util.fetch_processed_data_dir(params)
+    processed_data_dir = params['processed_data_dir']
     flag_info = util.get_filename_flag_info(params)
     results_file_name = f'fixation_results_m1{flag_info}.npz'
     file_path = os.path.join(processed_data_dir, results_file_name)
@@ -199,7 +196,7 @@ def load_fix_detection_results(params):
 
 
 def load_m1_fixation_labels(params):
-    processed_data_dir = util.fetch_processed_data_dir(params)
+    processed_data_dir = params['processed_data_dir']
     flag_info = util.get_filename_flag_info(params)
     # Load fixation labels
     fixation_labels_file_name = f'fixation_labels_m1{flag_info}.csv'
