@@ -18,14 +18,15 @@ import util
 import pdb
 
 
-def get_monkey_and_dose_data(session_path):
+def get_monkey_and_dose_data(params):
     """
     Extracts information data from session path.
     Parameters:
-    - session_path (str): Path to the session.
+    - params (dict): Dictionary containing parameters including session path.
     Returns:
     - info_dict (dict): Dictionary containing information data.
     """
+    session_path = params['session_paths']
     file_list_info = glob.glob(f"{session_path}/*metaInfo.mat")
     if len(file_list_info) != 1:
         print(f"\nWarning: No metaInfo or more than one metaInfo found in folder: {session_path}.")
@@ -47,14 +48,15 @@ def get_monkey_and_dose_data(session_path):
             'NAL_dose': None}
 
 
-def get_runs_data(session_path):
+def get_runs_data(params):
     """
     Extracts runs data from session path.
     Parameters:
-    - session_path (str): Path to the session.
+    - params (dict): Dictionary containing parameters including session path.
     Returns:
     - runs_dict (dict): Dictionary containing runs data.
     """
+    session_path = params['session_paths']
     file_list_runs = glob.glob(f"{session_path}/*runs.mat")
     if len(file_list_runs) != 1:
         print(f"\nWarning: No runs found in folder: {session_path}.")
@@ -72,15 +74,16 @@ def get_runs_data(session_path):
     return {}
 
 
-def load_m1_roi_related_coordinates(session_path, map_roi_coord_to_eyelink_space):
+def load_m1_roi_related_coordinates(params):
     """
     Extracts M1 ROI bounding boxes from session path.
     Parameters:
-    - session_path (str): Path to the session.
-    - map_roi_coord_to_eyelink_space (bool): Flag to determine if coordinates should be remapped.
+    - params (dict): Dictionary containing parameters including session path and map_roi_coord_to_eyelink_space flag.
     Returns:
     - bbox_dict (dict): Dictionary containing M1 ROI bounding boxes.
     """
+    session_path = params['session_paths']
+    map_roi_coord_to_eyelink_space = params['map_roi_coord_to_eyelink_space']
     file_list_m1_landmarks = glob.glob(f"{session_path}/*M1_farPlaneCal_regForm.mat")
     if len(file_list_m1_landmarks) != 1:
         print(f"\nWarning: No m1_landmarks or more than one landmarks found in folder: {session_path}.")
