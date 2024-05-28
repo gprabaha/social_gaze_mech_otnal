@@ -10,12 +10,13 @@ import os
 import numpy as np
 from scipy.optimize import curve_fit
 from math import degrees, atan2, sqrt
+from datetime import datetime
 
 import defaults
 
 import pdb
 
-def get_root_data_dir(params):
+def fetch_root_data_dir(params):
     """
     Returns the root data directory based on whether it's running on a cluster or not.
     Parameters:
@@ -24,8 +25,17 @@ def get_root_data_dir(params):
     - root_data_dir (str): Root data directory path.
     """
     is_cluster = params['is_cluster']
-    return "/gpfs/milgram/project/chang/pg496/data_dir/otnal/" if is_cluster \
+    root_data_dir = "/gpfs/milgram/project/chang/pg496/data_dir/otnal/" if is_cluster \
         else "/Volumes/Stash/changlab/sorted_neural_data/social_gaze_otnal/AllFVProcessed/"
+    params.update({'root_data_dir': root_data_dir})
+    return root_data_dir, params
+
+
+def fetch_data_source_dir(params):
+    root_data_dir = params.get('root_data_dir')
+    data_source_dir = os.path.join(root_data_dir, 'data_source')
+    params.update({'data_source_dir': data_source_dir})
+    return data_source_dir, params
 
 
 def get_subfolders(params):
@@ -38,6 +48,11 @@ def get_subfolders(params):
     """
     root_dir = params['root_data_dir'] 
     return [f.path for f in os.scandir(root_dir) if f.is_dir()]
+
+def add_datestr_to_dir_path(path):
+    # Get the current date as a string in YYYYMMDD format
+    date_str = datetime.now().strftime("%Y%m%d")
+    return os.path.join(path, date_str)
 
 
 def get_filename_flag_info(params):

@@ -34,8 +34,9 @@ params.update({
 })
 
 # Determine root data directory based on whether it's running on a cluster or not
-root_data_dir = util.get_root_data_dir(params)
-params.update({'root_data_dir': root_data_dir})
+root_data_dir, params = util.fetch_root_data_dir(params)
+
+data_source_dir, params = util.fetch_data_source_dir(params)
 
 session_paths = util.get_subfolders(params)
 params.update({'session_paths': session_paths})
