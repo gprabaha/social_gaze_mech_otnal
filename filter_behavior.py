@@ -223,20 +223,19 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
         # Lists of results of each session
         all_fixations.extend(session_fixations)
         all_fix_timepos.append(session_timepos_df)
-        # Concatenated fixation list
+        # Separate components of fix_detection_results
         fixations_list.append(session_fixations)
-        timepos_list = pd.concat([timepos_list, session_timepos_df],
-                                 ignore_index=True)
+        timepos_list = pd.concat([timepos_list, session_timepos_df], ignore_index=True)
         info_list.append(info)
     flag_info = util.get_filename_flag_info(params)
     # Save fixations
     fixations_file_name = f'fixations_m1{flag_info}.npy'
     np.save(os.path.join(processed_data_dir, fixations_file_name),
             np.array(all_fixations, dtype=object))
-    # Save fixation time positions
-    fix_timepos_file_name = f'fixations_timepos_m1{flag_info}.npy'
-    np.save(os.path.join(processed_data_dir, fix_timepos_file_name),
-            np.array(all_fix_timepos, dtype=object))
+    # Save fixation time positions using pickle
+    fix_timepos_file_name = f'fixations_timepos_m1{flag_info}.pkl'
+    with open(os.path.join(processed_data_dir, fix_timepos_file_name), 'wb') as f:
+        pickle.dump(all_fix_timepos, f)
     # Convert lists to numpy arrays for saving
     fixations_list = np.array(fixations_list, dtype=object)
     info_list = np.array(info_list, dtype=object)

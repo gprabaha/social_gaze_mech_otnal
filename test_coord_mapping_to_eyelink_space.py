@@ -18,7 +18,7 @@ import plotter
 params = {}
 params.update({
     'is_cluster': True,
-    'use_parallel': False,
+    'use_parallel': True,
     'remake_labelled_gaze_pos': False,
     'remake_fixations': True,
     'remake_fixation_labels': True,
