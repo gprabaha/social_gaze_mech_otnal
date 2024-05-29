@@ -204,6 +204,9 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
     processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', True)
     all_fixations, all_fix_timepos, fix_detection_results = [], [], []
+    fixations_list = []
+    timepos_list = pd.DataFrame()
+    info_list = []
     sessions_data = [(session_data[0], session_data[1], params)
                      for session_data in labelled_gaze_positions]
     if use_parallel:
@@ -216,33 +219,33 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
         print("\nExtracting fixations serially")
         fix_detection_results = [get_session_fixations(session_data)
                                  for session_data in sessions_data]
-    for session_fixations, session_timepos_mat, info in fix_detection_results:
+    for session_fixations, session_timepos_df, info in fix_detection_results:
+        # Lists of results of each session
         all_fixations.extend(session_fixations)
-        all_fix_timepos.extend(session_timepos_mat)
+        all_fix_timepos.append(session_timepos_df)
+        # Concatenated fixation list
+        fixations_list.append(session_fixations)
+        timepos_list = pd.concat([timepos_list, session_timepos_df],
+                                 ignore_index=True)
+        info_list.append(info)
     flag_info = util.get_filename_flag_info(params)
     # Save fixations
     fixations_file_name = f'fixations_m1{flag_info}.npy'
-    np.save(os.path.join(processed_data_dir, fixations_file_name), all_fixations)
-    # Save fixations time positions
+    np.save(os.path.join(processed_data_dir, fixations_file_name),
+            np.array(all_fixations, dtype=object))
+    # Save fixation time positions
     fix_timepos_file_name = f'fixations_timepos_m1{flag_info}.npy'
-    np.save(os.path.join(processed_data_dir, fix_timepos_file_name), all_fix_timepos)
-    # Separate components of fix_detection_results
-    fixations_list = []
-    timepos_list = []
-    info_list = []
-    for session_fixations, session_timepos_mat, info in fix_detection_results:
-        fixations_list.append(session_fixations)
-        timepos_list.append(session_timepos_mat)
-        info_list.append(info)
+    np.save(os.path.join(processed_data_dir, fix_timepos_file_name),
+            np.array(all_fix_timepos, dtype=object))
     # Convert lists to numpy arrays for saving
     fixations_list = np.array(fixations_list, dtype=object)
-    timepos_list = np.array(timepos_list, dtype=object)
     info_list = np.array(info_list, dtype=object)
     # Save intermediate results for future label generation
     results_file_name = f'fixation_results_m1{flag_info}.npz'
+    timepos_file_name = f'timepos_list_m1{flag_info}.csv'
     try:
-        np.savez(os.path.join(processed_data_dir, results_file_name), 
-                 fixations=fixations_list, timepos=timepos_list, info=info_list)
+        np.savez(os.path.join(processed_data_dir, results_file_name), fixations=fixations_list, info=info_list)
+        timepos_list.to_csv(os.path.join(processed_data_dir, timepos_file_name), index=False)
         print("Fix intermediate session data saved successfully.")
     except Exception as e:
         print(f"Error saving data: {e}")
@@ -266,10 +269,10 @@ def get_session_fixations(session_data):
     sampling_rate = info['sampling_rate']
     n_samples = positions.shape[0]
     time_vec = util.create_timevec(n_samples, sampling_rate)
-    fix_timepos_mat, fix_vec_entire_session = fix.is_fixation(
+    fix_timepos_df, fix_vec_entire_session = fix.is_fixation(
         positions, time_vec, session_name, sampling_rate=sampling_rate)
     fixations = util.find_islands(fix_vec_entire_session)
-    return fixations, fix_timepos_mat, info
+    return fixations, fix_timepos_df, info
 
 
 ### Function to generate fixation labels for each session

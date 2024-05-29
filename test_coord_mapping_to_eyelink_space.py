@@ -28,6 +28,7 @@ params.update({
     'map_gaze_pos_coord_to_eyelink_space': True
 })
 
+
 # Determine root data directory based on whether it's running on a cluster or not
 root_data_dir, params = util.fetch_root_data_dir(params)
 data_source_dir, params = util.fetch_data_source_dir(params)
