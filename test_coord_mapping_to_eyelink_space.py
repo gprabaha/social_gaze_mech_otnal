@@ -23,7 +23,7 @@ params = {}
 params.update({
     'is_cluster': True,
     'use_parallel': True,
-    'remake_labelled_gaze_pos': False,
+    'remake_labelled_gaze_pos': True,
     'remake_fixations': True,
     'remake_fixation_labels': True,
     'remake_spikeTs': False,

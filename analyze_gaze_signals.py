@@ -25,9 +25,9 @@ params = {}
 params.update({
     'is_cluster': True,
     'use_parallel': True,
-    'remake_labelled_gaze_pos': False,
-    'remake_fixations': False,
-    'remake_fixation_labels': False,
+    'remake_labelled_gaze_pos': True,
+    'remake_fixations': True,
+    'remake_fixation_labels': True,
     'remake_spikeTs': False,
     'remap_source_coord_from_inverted_to_standard_y_axis': True,
     'map_roi_coord_to_eyelink_space': True,

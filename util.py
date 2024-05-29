@@ -72,21 +72,30 @@ def remap_source_coords(coord, params, remapping_type):
     def remap_inverted_to_standard_y_axis(coord):
         def remap_single_coord_from_inverted_to_standard_y_axis(coord):
             return (coord[0], -coord[1])
-        if not params.get('remap_source_coord_from_inverted_to_standard_y_axis', False):
+        if not params.get(
+                'remap_source_coord_from_inverted_to_standard_y_axis', False):
             return coord
         if isinstance(coord, (list, tuple)):
-            if len(coord) == 2 and all(isinstance(i, (int, float)) for i in coord):
-                remapped_coord = remap_single_coord_from_inverted_to_standard_y_axis(coord)
+            if len(coord) == 2 and all(isinstance(i, (int, float))
+                                       for i in coord):
+                remapped_coord = \
+                    remap_single_coord_from_inverted_to_standard_y_axis(coord)
                 return type(coord)(remapped_coord)
-            elif all(isinstance(i, (list, tuple, np.ndarray)) and len(i) == 2 for i in coord):
-                return [remap_single_coord_from_inverted_to_standard_y_axis(c) for c in coord]
+            elif all(isinstance(i, (list, tuple, np.ndarray)) \
+                     and len(i) == 2 for i in coord):
+                return [remap_single_coord_from_inverted_to_standard_y_axis(c)
+                        for c in coord]
         elif isinstance(coord, np.ndarray):
             if coord.ndim == 1 and coord.shape[0] == 2:
-                return np.array(remap_single_coord_from_inverted_to_standard_y_axis(coord))
+                return np.array(
+                    remap_single_coord_from_inverted_to_standard_y_axis(coord))
             elif coord.ndim == 2 and coord.shape[1] == 2:
-                return np.apply_along_axis(remap_single_coord_from_inverted_to_standard_y_axis, 1, coord)
+                return np.apply_along_axis(
+                    remap_single_coord_from_inverted_to_standard_y_axis,
+                    1, coord)
         elif isinstance(coord, dict):
-            return {key: remap_inverted_to_standard_y_axis(value) for key, value in coord.items()}
+            return {key: remap_inverted_to_standard_y_axis(value)
+                    for key, value in coord.items()}
         return coord
 
     def map_coord_to_eyelink_space(coord):
@@ -103,26 +112,40 @@ def remap_source_coords(coord, params, remapping_type):
                 span(y_px_range) * (coord[1] / span(y_px_range)) + min(y_px_range)]
         if not params.get('map_roi_coord_to_eyelink_space', False):
             return coord
-        if (isinstance(coord, (tuple, list)) and len(coord) == 2) or (isinstance(coord, np.ndarray) and coord.ndim == 1):
+        if (isinstance(coord, (tuple, list)) and len(coord) == 2) \
+            or (isinstance(coord, np.ndarray) and coord.ndim == 1):
             remapped_coord = remap_single_coord_to_eyelink_space(coord)
-            return type(coord)(remapped_coord) if isinstance(coord, (tuple, list)) else np.array(remapped_coord)
-        elif isinstance(coord, np.ndarray) and coord.ndim == 2 and coord.shape[1] == 2:
-            return np.apply_along_axis(remap_single_coord_to_eyelink_space, 1, coord)
+            return type(coord)(remapped_coord) \
+                if isinstance(coord, (tuple, list)) \
+                    else np.array(remapped_coord)
+        elif isinstance(coord, np.ndarray) \
+            and coord.ndim == 2 \
+                and coord.shape[1] == 2:
+            return np.apply_along_axis(
+                remap_single_coord_to_eyelink_space, 1, coord)
         elif isinstance(coord, dict):
-            return {key: map_coord_to_eyelink_space(value) for key, value in coord.items()}
+            return {key: map_coord_to_eyelink_space(value)
+                    for key, value in coord.items()}
         else:
-            raise ValueError("Input must be a 2-element tuple/list or a 2D array with 2 columns")
+            raise ValueError(
+                "Input must be a 2-element tuple/list or a 2D array with 2 columns")
 
     def stretch_bounding_box_corners(bb_corner_coord_dict, scale=1.3):
         if isinstance(bb_corner_coord_dict, dict):
-            mean_x = sum(point[0] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
-            mean_y = sum(point[1] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
-            shifted_points = {key: (point[0] - mean_x, point[1] - mean_y) for key, point in bb_corner_coord_dict.items()}
-            scaled_points = {key: (point[0] * scale, point[1] * scale) for key, point in shifted_points.items()}
-            stretched_points = {key: (point[0] + mean_x, point[1] + mean_y) for key, point in scaled_points.items()}
+            mean_x = sum(point[0] for point in
+                         bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
+            mean_y = sum(point[1] for point in 
+                        bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
+            shifted_points = {key: (point[0] - mean_x, point[1] - mean_y)
+                              for key, point in bb_corner_coord_dict.items()}
+            scaled_points = {key: (point[0] * scale, point[1] * scale)
+                             for key, point in shifted_points.items()}
+            stretched_points = {key: (point[0] + mean_x, point[1] + mean_y)
+                             for key, point in scaled_points.items()}
             return stretched_points
         else:
-            raise ValueError("Input for 'stretch_from_center_of_mass' must be a dictionary")
+            raise ValueError(
+                "Input for 'stretch_from_center_of_mass' must be a dictionary")
 
     if remapping_type == 'inverted_to_standard_y_axis':
         return remap_inverted_to_standard_y_axis(coord)
@@ -179,7 +202,7 @@ def construct_eye_bounding_box(m1_landmarks, params):
     center_x = (left_eye[0] + right_eye[0]) / 2
     center_y = (left_eye[1] + right_eye[1]) / 2
     # Calculate offset
-    inter_eye_dist = abs(left_eye[1] - right_eye[1])
+    inter_eye_dist = abs(left_eye[0] - right_eye[0])
     offset = inter_eye_dist / 2
     # Calculate bounding box corners
     bottom_left = (center_x - 2 * offset, center_y - offset)
@@ -231,6 +254,9 @@ def construct_object_bounding_box(m1_landmarks, params, which_object):
         bottom_left = coord['bottomLeft'][0][0]
         top_right = coord['topRight'][0][0]
         bbox_dict = {'bottomLeft': bottom_left, 'topRight': top_right}
+        bbox_dict = remap_source_coords(
+            remap_source_coords(bbox_dict, params, 'inverted_to_standard_y_axis'),
+            params, 'to_eyelink_space')
     else:
         raise ValueError("Input 'which_object' must be a leftObject or rightObject.")
     return remap_source_coords(bbox_dict, params, 'stretch_from_center_of_mass')
