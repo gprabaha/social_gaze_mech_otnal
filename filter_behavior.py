@@ -201,7 +201,7 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
     - all_fixations (list): List of all fixations.
     - all_fix_timepos (list): List of fixation time positions.
     """
-    root_data_dir = params.get('root_data_dir')
+    processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', True)
     all_fixations, all_fix_timepos, fix_detection_results = [], [], []
     sessions_data = [(session_data[0], session_data[1], params)
@@ -222,10 +222,10 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
     flag_info = util.get_filename_flag_info(params)
     # Save fixations
     fixations_file_name = f'fixations_m1{flag_info}.npy'
-    np.save(os.path.join(root_data_dir, fixations_file_name), all_fixations)
+    np.save(os.path.join(processed_data_dir, fixations_file_name), all_fixations)
     # Save fixations time positions
     fix_timepos_file_name = f'fixations_timepos_m1{flag_info}.npy'
-    np.save(os.path.join(root_data_dir, fix_timepos_file_name), all_fix_timepos)
+    np.save(os.path.join(processed_data_dir, fix_timepos_file_name), all_fix_timepos)
     # Separate components of fix_detection_results
     fixations_list = []
     timepos_list = []
@@ -241,7 +241,7 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
     # Save intermediate results for future label generation
     results_file_name = f'fixation_results_m1{flag_info}.npz'
     try:
-        np.savez(os.path.join(root_data_dir, results_file_name), 
+        np.savez(os.path.join(processed_data_dir, results_file_name), 
                  fixations=fixations_list, timepos=timepos_list, info=info_list)
         print("Fix intermediate session data saved successfully.")
     except Exception as e:
@@ -300,7 +300,7 @@ def generate_session_fixation_labels(fix_detection_result):
         end_time = row.end_time
         fix_duration = row.duration
         mean_fix_pos = [fix_x, fix_y]
-        run, block, fix_roi, smallest_diff = detect_run_block_and_roi(
+        run, block, fix_roi = detect_run_block_and_roi(
             [start_time, end_time], startS, stopS, sampling_rate, mean_fix_pos, bbox_corners)
         fixation_info = [category, session_name,
                          run, block, fix_duration,
@@ -344,21 +344,17 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
             run = None
             block = 'discard'
     bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
-    smallest_diff = np.inf
-    inside_all_roi = []
-    for key in bounding_boxes:
-        inside_roi, area_diff = util.is_inside_quadrilateral(
-            mean_fix_pos, bbox_corners[key])
-        inside_all_roi.append(inside_roi)
-        smallest_diff = area_diff if area_diff < smallest_diff else smallest_diff
-    if np.any(inside_all_roi):
-        if inside_all_roi[0] and inside_all_roi[1]:
+    inside_roi = [False] * len(bounding_boxes)
+    for i, key in enumerate(bounding_boxes):
+        inside_roi[i] = util.is_inside_roi(mean_fix_pos, bbox_corners[key])
+    if np.any(inside_roi):
+        if inside_roi[0] and inside_roi[1]:
             fix_roi = bounding_boxes[0]
         else:
-            fix_roi = bounding_boxes[bool(inside_all_roi)]
+            fix_roi = bounding_boxes[np.argmax(inside_roi)]
     else:
         fix_roi = 'out_of_roi' 
-    return run, block, fix_roi, smallest_diff
+    return run, block, fix_roi
 
 
 def extract_spiketimes_for_all_sessions(params):

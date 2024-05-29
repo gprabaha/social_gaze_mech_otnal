@@ -18,14 +18,14 @@ import plotter
 params = {}
 params.update({
     'is_cluster': True,
-    'use_parallel': True,
-    'remake_labelled_gaze_pos': True,
-    'remake_fixations': False,
-    'remake_fixation_labels': False,
+    'use_parallel': False,
+    'remake_labelled_gaze_pos': False,
+    'remake_fixations': True,
+    'remake_fixation_labels': True,
     'remake_spikeTs': False,
     'remap_source_coord_from_inverted_to_standard_y_axis': True,
-    'map_roi_coord_to_eyelink_space': True,
-    'map_gaze_pos_coord_to_eyelink_space': False
+    'map_roi_coord_to_eyelink_space': False,
+    'map_gaze_pos_coord_to_eyelink_space': True
 })
 
 # Determine root data directory based on whether it's running on a cluster or not
@@ -34,10 +34,11 @@ data_source_dir, params = util.fetch_data_source_dir(params)
 session_paths, params = util.fetch_session_subfolder_paths_from_source(params)
 processed_data_dir, params = util.fetch_processed_data_dir(params)
 
-for remap_gaze_value in [True, False]:
-    for map_roi_value in [True, False]:
-        params['map_roi_coord_to_eyelink_space'] = map_roi_value
-        params['map_gaze_pos_coord_to_eyelink_space'] = remap_gaze_value
+
+for remap_gaze_coord in [True, False]:
+    for remap_roi_coord in [True, False]:
+        params['map_roi_coord_to_eyelink_space'] = remap_roi_coord
+        params['map_gaze_pos_coord_to_eyelink_space'] = remap_gaze_coord
         if params.get('remake_labelled_gaze_pos'):
             meta_info_list = filter_behavior.extract_meta_info(params)
             params.update({'meta_info_list': meta_info_list})
@@ -49,3 +50,18 @@ for remap_gaze_value in [True, False]:
                 filter_behavior.extract_labelled_gaze_positions_m1(params)
         else:
             labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(params)
+        if params.get('remake_fixations') or params.get('remake_fixation_labels'):
+            fixations_m1, fix_timepos_m1, fixation_labels_m1 = \
+                filter_behavior.extract_fixations_with_labels_parallel(
+                    labelled_gaze_positions_m1, params)  # The first file has funky session stop times
+        else:
+            fixations_m1, fix_timepos_m1 = load_data.load_m1_fixations(params)
+            all_fixation_labels = load_data.load_m1_fixation_labels(params)
+
+
+
+
+
+
+
+

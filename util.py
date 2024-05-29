@@ -236,9 +236,6 @@ def construct_object_bounding_box(m1_landmarks, params, which_object):
     return remap_source_coords(bbox_dict, params, 'stretch_from_center_of_mass')
 
 
-
-
-
 def get_filename_flag_info(params):
     """
     Constructs a filename flag based on specified parameters.
@@ -317,7 +314,24 @@ def get_fix_positions(start_stop, positions):
     return positions[start:stop,:]
 
 
-
+def is_inside_roi(coord, bbox_corner_dict):
+    # Extract the bounding box corners
+    top_right = bbox_corner_dict['topRight']
+    bottom_left = bbox_corner_dict['bottomLeft']
+    
+    # Function to check if a single coordinate is inside the bounding box
+    def is_inside_single(coord):
+        x, y = coord
+        return bottom_left[0] <= x <= top_right[0] and bottom_left[1] <= y <= top_right[1]
+    
+    # Check if coord is a single coordinate or a list of coordinates
+    if isinstance(coord, (list, tuple)) and len(coord) == 2 and isinstance(coord[0], (int, float)):
+        # Single coordinate case
+        return is_inside_single(coord)
+    else:
+        # List of coordinates case
+        return [is_inside_single(c) for c in coord]
+    
     
 
 def is_inside_quadrilateral(point, corners, tolerance=1e-3):
