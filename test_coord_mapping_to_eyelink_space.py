@@ -23,9 +23,9 @@ params = {}
 params.update({
     'is_cluster': True,
     'use_parallel': True,
-    'remake_labelled_gaze_pos': True,
-    'remake_fixations': True,
-    'remake_fixation_labels': True,
+    'remake_labelled_gaze_pos': False,
+    'remake_fixations': False,
+    'remake_fixation_labels': False,
     'remake_spikeTs': False,
     'remap_source_coord_from_inverted_to_standard_y_axis': True,
     'map_roi_coord_to_eyelink_space': map_roi_coord_to_eyelink_space,
@@ -51,6 +51,8 @@ if params.get('remake_labelled_gaze_pos'):
         filter_behavior.extract_labelled_gaze_positions_m1(params)
 else:
     labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(params)
+
+
 if params.get('remake_fixations') or params.get('remake_fixation_labels'):
     fixations_m1, fix_timepos_m1, fixation_labels_m1 = \
         filter_behavior.extract_fixations_with_labels_parallel(
@@ -60,8 +62,7 @@ else:
     all_fixation_labels = load_data.load_m1_fixation_labels(params)
 
 
-
-
+plotter.plot_gaze_heatmaps_for_conditions(params)
 
 
 

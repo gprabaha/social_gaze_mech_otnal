@@ -203,9 +203,9 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
     """
     processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', True)
-    all_fixations, all_fix_timepos, fix_detection_results = [], [], []
+    all_fixations, fix_timepos_list, fix_detection_results = [], [], []
     fixations_list = []
-    timepos_list = pd.DataFrame()
+    all_fix_timepos = pd.DataFrame()
     info_list = []
     sessions_data = [(session_data[0], session_data[1], params)
                      for session_data in labelled_gaze_positions]
@@ -220,34 +220,28 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
         fix_detection_results = [get_session_fixations(session_data)
                                  for session_data in sessions_data]
     for session_fixations, session_timepos_df, info in fix_detection_results:
-        # Lists of results of each session
-        all_fixations.extend(session_fixations)
-        all_fix_timepos.append(session_timepos_df)
-        # Separate components of fix_detection_results
+        # List of individual session data
         fixations_list.append(session_fixations)
-        timepos_list = pd.concat([timepos_list, session_timepos_df], ignore_index=True)
+        fix_timepos_list.append(session_timepos_df)
+        # Concatenated data
+        all_fixations.extend(session_fixations)
+        all_fix_timepos = pd.concat([all_fix_timepos, session_timepos_df], ignore_index=True)
         info_list.append(info)
     flag_info = util.get_filename_flag_info(params)
-    # Save fixations
+    # Save intermediate results for future label generation
+    fix_timepos_file_name = f'fix_session_timepos_list_m1{flag_info}.pkl'
+    with open(os.path.join(processed_data_dir, fix_timepos_file_name), 'wb') as f:
+        pickle.dump(fix_timepos_list, f)
+    fixations_list = np.array(fixations_list, dtype=object)
+    info_list = np.array(info_list, dtype=object)
+    results_file_name = f'fixation_session_results_m1{flag_info}.npz'
+    np.savez(os.path.join(processed_data_dir, results_file_name), fixations=fixations_list, info=info_list)
     fixations_file_name = f'fixations_m1{flag_info}.npy'
     np.save(os.path.join(processed_data_dir, fixations_file_name),
             np.array(all_fixations, dtype=object))
-    # Save fixation time positions using pickle
-    fix_timepos_file_name = f'fixations_timepos_m1{flag_info}.pkl'
-    with open(os.path.join(processed_data_dir, fix_timepos_file_name), 'wb') as f:
-        pickle.dump(all_fix_timepos, f)
-    # Convert lists to numpy arrays for saving
-    fixations_list = np.array(fixations_list, dtype=object)
-    info_list = np.array(info_list, dtype=object)
-    # Save intermediate results for future label generation
-    results_file_name = f'fixation_results_m1{flag_info}.npz'
-    timepos_file_name = f'timepos_list_m1{flag_info}.csv'
-    try:
-        np.savez(os.path.join(processed_data_dir, results_file_name), fixations=fixations_list, info=info_list)
-        timepos_list.to_csv(os.path.join(processed_data_dir, timepos_file_name), index=False)
-        print("Fix intermediate session data saved successfully.")
-    except Exception as e:
-        print(f"Error saving data: {e}")
+    timepos_file_name = f'fix_timepos_m1{flag_info}.csv'
+    all_fix_timepos.to_csv(os.path.join(processed_data_dir,
+                                        timepos_file_name), index=False)
     return all_fixations, all_fix_timepos, fix_detection_results
 
 
