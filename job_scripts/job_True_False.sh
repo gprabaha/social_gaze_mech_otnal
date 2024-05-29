@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=analyze_gaze_True_False
+#SBATCH --job-name=test_comb_True_False
 #SBATCH --output=job_scripts/output_True_False.txt
 #SBATCH --error=job_scripts/error_True_False.txt
 #SBATCH --ntasks=1
@@ -14,4 +14,4 @@ conda activate nn_gpu
 export map_roi_coord_to_eyelink_space=True
 export map_gaze_pos_coord_to_eyelink_space=False
 
-python analyze_gaze_signals_cluster.py
+python test_coord_mapping_to_eyelink_space.py

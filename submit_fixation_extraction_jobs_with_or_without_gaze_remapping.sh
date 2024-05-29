@@ -5,7 +5,7 @@ CPUS_PER_TASK=12
 MEMORY_PER_CPU=16G
 PARTITION=psych_day
 TIME_LIMIT=4:00:00
-SCRIPT=analyze_gaze_signals_cluster.py
+SCRIPT=test_coord_mapping_to_eyelink_space.py
 
 # Create job_scripts directory if it doesn't exist
 JOB_SCRIPTS_DIR="job_scripts"
@@ -27,7 +27,7 @@ for combination in "${combinations[@]}"; do
     JOB_SCRIPT="${JOB_SCRIPTS_DIR}/job_${map_roi}_${map_gaze}.sh"
     cat <<EOT > $JOB_SCRIPT
 #!/bin/bash
-#SBATCH --job-name=analyze_gaze_${map_roi}_${map_gaze}
+#SBATCH --job-name=test_comb_${map_roi}_${map_gaze}
 #SBATCH --output=${JOB_SCRIPTS_DIR}/output_${map_roi}_${map_gaze}.txt
 #SBATCH --error=${JOB_SCRIPTS_DIR}/error_${map_roi}_${map_gaze}.txt
 #SBATCH --ntasks=1
