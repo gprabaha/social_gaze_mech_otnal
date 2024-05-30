@@ -17,6 +17,7 @@ import defaults
 
 import pdb
 
+
 def fetch_root_data_dir(params):
     """
     Returns the root data directory based on whether it's running on a cluster or not.
@@ -221,9 +222,12 @@ def construct_face_bounding_box(m1_landmarks, params):
     - bounding_box (dict): Bounding box dictionary containing 'bottomLeft' and 'topRight' corners.
     """
     # Extract and remap coordinates for the face
-    face_coords = {key: m1_landmarks[key][0][0][0] for key in ['topLeft', 'topRight', 'bottomLeft', 'bottomRight']}
-    face_coords = remap_source_coords(face_coords, params, 'inverted_to_standard_y_axis')
-    face_coords = remap_source_coords(face_coords, params, 'to_eyelink_space')
+    face_coords = {key: m1_landmarks[key][0][0][0] for key
+                   in ['topLeft', 'topRight', 'bottomLeft', 'bottomRight']}
+    face_coords = remap_source_coords(face_coords, 
+                                     params, 'inverted_to_standard_y_axis')
+    face_coords = remap_source_coords(face_coords,
+                                      params, 'to_eyelink_space')
     # Find pairs of corners and calculate distances
     max_distance = 0
     max_distance_corners = None

@@ -78,7 +78,8 @@ def fixation_detection(data, t1, t2, minDur, maxDur, session_name):
     fixations = get_t1_filtered_fixations(n, x, y, t, t1, session_name)
     number_fixations = fixations[-1, 3]
     fixation_list = []
-    for i in tqdm(range(1, int(number_fixations) + 1), desc=f"{session_name}: n fixations t2 filtered"):
+    for i in tqdm(range(1, int(number_fixations) + 1),
+                  desc=f"{session_name}: n fixations t2 filtered"):
         fixation_list.append(filter_fixations_t2(i, fixations, t2))
     # Duration thresholding
     fixation_list = min_duration(fixation_list, minDur)
@@ -89,7 +90,8 @@ def fixation_detection(data, t1, t2, minDur, maxDur, session_name):
         s_ind = np.where(data[:, 2] == fix[4])[0][0]
         e_ind = np.where(data[:, 2] == fix[5])[0][-1]
         fix_ranges.append([s_ind, e_ind])
-    col_names = ['fix_x', 'fix_y', 'threshold_1', 'threshold_2', 'start_time', 'end_time', 'duration']
+    col_names = ['fix_x', 'fix_y', 'threshold_1', 'threshold_2',
+                 'start_time', 'end_time', 'duration']
     return pd.DataFrame(fixation_list, columns=col_names), fix_ranges
 
 
@@ -108,7 +110,8 @@ def get_t1_filtered_fixations(n, x, y, t, t1, session_name):
     fixations = np.zeros((n, 4))
     fixid = 0
     fixpointer = 0
-    for i in tqdm(range(n), desc='{}: n data points t1 filtered'.format(session_name)):
+    for i in tqdm(range(n),
+                  desc='{}: n data points t1 filtered'.format(session_name)):
         if not np.any(x[fixpointer:i+1]) or not np.any(y[fixpointer:i+1]):
             fixations = update_fixations(i, x, y, t, fixations, fixid)
         else:

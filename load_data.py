@@ -83,7 +83,8 @@ def load_farplane_cal_and_get_bl_and_tr_roi_coords_m1(session_path, params):
     file_list_m1_landmarks = glob.glob(f"{session_path}/*M1_farPlaneCal_regForm.mat")
     if len(file_list_m1_landmarks) != 1:
         print(f"\nWarning: No m1_landmarks or more than one landmarks found in folder: {session_path}.")
-        return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
+        return {'eye_bbox': None, 'face_bbox': None,
+                'left_obj_bbox': None, 'right_obj_bbox': None}
     try:
         data_m1_landmarks = scipy.io.loadmat(file_list_m1_landmarks[0])
         m1_landmarks = data_m1_landmarks['farPlaneCal']
@@ -92,7 +93,8 @@ def load_farplane_cal_and_get_bl_and_tr_roi_coords_m1(session_path, params):
             return util.get_bl_and_tr_roi_coords_m1(m1_landmarks, params)
     except Exception as e:
         print(f"\nError loading m1_landmarks for folder: {session_path}: {e}")
-    return {'eye_bbox': None, 'face_bbox': None, 'left_obj_bbox': None, 'right_obj_bbox': None}
+    return {'eye_bbox': None, 'face_bbox': None,
+            'left_obj_bbox': None, 'right_obj_bbox': None}
 
 
 def get_labelled_gaze_positions_dict_m1(idx, params):
@@ -121,10 +123,13 @@ def get_labelled_gaze_positions_dict_m1(idx, params):
         M1Ypx = mat_data['M1Ypx'].squeeze()
         # Stack the coordinates
         coordinates = np.column_stack((M1Xpx, M1Ypx))
-        coordinates_inverted_y = util.remap_source_coords(coordinates, params, 'inverted_to_standard_y_axis')
-        gaze_positions = util.remap_source_coords(coordinates_inverted_y, params, 'to_eyelink_space')
+        coordinates_inverted_y = util.remap_source_coords(
+            coordinates, params, 'inverted_to_standard_y_axis')
+        gaze_positions = util.remap_source_coords(
+            coordinates_inverted_y, params, 'to_eyelink_space')
         meta_info = meta_info_list[idx]
-        meta_info.update({'sampling_rate': sampling_rate, 'category': session_categories[idx]})
+        meta_info.update({'sampling_rate': sampling_rate,
+                          'category': session_categories[idx]})
         return gaze_positions, meta_info
     except Exception as e:
         print(f"\nError loading file '{mat_files[0]}': {e}")
@@ -145,7 +150,7 @@ def load_labelled_gaze_positions(params):
     file_name = f'labelled_gaze_positions_m1{flag_info}.pkl'
     with open(os.path.join(processed_data_dir, file_name), 'rb') as f:
         return pickle.load(f)
-
+    
 
 def load_m1_fixations(params):
     """
@@ -153,18 +158,14 @@ def load_m1_fixations(params):
     Parameters:
     - params (dict): Dictionary containing root data directory and other parameters.
     Returns:
-    - fixations_m1 (ndarray): M1 fixations.
-    - fix_timepos_m1 (pd.DataFrame): M1 fixation time positions.
+    - fixations_df (pd.DataFrame): DataFrame containing M1 fixations and their time positions.
     """
     processed_data_dir = params['processed_data_dir']
     flag_info = util.get_filename_flag_info(params)
-    # Load fixations
-    fixations_file_name = f'fixations_m1{flag_info}.npy'
-    fixations_m1 = np.load(os.path.join(processed_data_dir, fixations_file_name), allow_pickle=True)
     # Load fixations time positions
     fix_timepos_file_name = f'fix_timepos_m1{flag_info}.csv'
     fix_timepos_m1 = pd.read_csv(os.path.join(processed_data_dir, fix_timepos_file_name))
-    return fixations_m1, fix_timepos_m1
+    return fix_timepos_m1
 
 
 def load_fix_detection_results(params):
@@ -186,7 +187,8 @@ def load_fix_detection_results(params):
             info_list = data['info']
         # Load fixations time positions from CSV
         fix_timepos_file_name = f'fix_timepos_m1{flag_info}.csv'
-        timepos_df = pd.read_csv(os.path.join(processed_data_dir, fix_timepos_file_name))
+        timepos_df = pd.read_csv(os.path.join(
+            processed_data_dir, fix_timepos_file_name))
         timepos_list = [timepos_df] * len(fixations_list)  # Assuming timepos_list is a list of identical DataFrames
         # Reconstruct the fix_detection_results list
         fix_detection_results = [(fixations_list[i], timepos_list[i], info_list[i]) 
@@ -202,7 +204,8 @@ def load_m1_fixation_labels(params):
     flag_info = util.get_filename_flag_info(params)
     # Load fixation labels
     fixation_labels_file_name = f'fixation_labels_m1{flag_info}.csv'
-    fixation_labels_m1 = pd.read_csv(os.path.join(processed_data_dir, fixation_labels_file_name))
+    fixation_labels_m1 = pd.read_csv(os.path.join(
+        processed_data_dir, fixation_labels_file_name))
     return fixation_labels_m1
 
 
@@ -219,7 +222,9 @@ def get_spiketimes_and_labels_for_one_session(session_path):
     session_spikeTs_s = []
     session_spikeTs_ms = []
     session_spikeTs_labels = []
-    label_cols = ['session_name', 'channel', 'channel_label', 'unit_no_within_channel', 'unit_label', 'uuid', 'n_spikes', 'region']
+    label_cols = ['session_name', 'channel', 'channel_label',
+                  'unit_no_within_channel', 'unit_label', 'uuid',
+                  'n_spikes', 'region']
     session_name = os.path.basename(os.path.normpath(session_path))
     file_list_spikeTs = glob.glob(f"{session_path}/*spikeTs_regForm.mat")
     if len(file_list_spikeTs) != 1:
