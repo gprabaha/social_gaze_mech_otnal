@@ -2,7 +2,7 @@
 
 # Set common parameters
 CPUS_PER_TASK=12
-MEMORY_PER_CPU=16G
+MEMORY_PER_CPU=4G
 PARTITION=psych_day
 TIME_LIMIT=4:00:00
 SCRIPT=test_coord_mapping_to_eyelink_space.py

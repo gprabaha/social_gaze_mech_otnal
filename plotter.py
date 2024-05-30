@@ -32,12 +32,10 @@ def plot_fixation_proportions_for_diff_conditions(fixation_labels_m1, params):
     # Define the conditions
     conditions = {
         'mon_up': valid_runs['block'] == 'mon_up',
-        'mon_down': valid_runs['block'] == 'mon_down'
-    }
+        'mon_down': valid_runs['block'] == 'mon_down'}
     agents = {
         'Lynch': valid_runs['agent'] == 'Lynch',
-        'Tarantino': valid_runs['agent'] == 'Tarantino'
-    }
+        'Tarantino': valid_runs['agent'] == 'Tarantino'}
     rois = ['face_bbox', 'eye_bbox', 'left_obj_bbox', 'right_obj_bbox']
     # Initialize the plot
     fig, axes = plt.subplots(2, 2, figsize=(14, 10), sharey=True)
@@ -69,7 +67,8 @@ def plot_gaze_heatmaps_for_conditions(params):
     heatmap_base_dir = util.add_datestr_to_dir_path(
         os.path.join(root_data_dir, 'plots', 'heatmap'))
     os.makedirs(heatmap_base_dir, exist_ok=True)
-    conditions = [(roi, gaze) for roi in [True, False] for gaze in [True, False]]
+    conditions = [(roi, gaze) for roi in [True, False]
+                  for gaze in [True, False]]
     for roi_condition, gaze_condition in conditions:
         # Update params for current condition
         params['map_roi_coord_to_eyelink_space'] = roi_condition
