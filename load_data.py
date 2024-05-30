@@ -154,17 +154,16 @@ def load_m1_fixations(params):
     - params (dict): Dictionary containing root data directory and other parameters.
     Returns:
     - fixations_m1 (ndarray): M1 fixations.
-    - fix_timepos_m1 (ndarray): M1 fixation time positions.
-    - fixation_labels_m1 (DataFrame): DataFrame containing fixation labels.
+    - fix_timepos_m1 (pd.DataFrame): M1 fixation time positions.
     """
     processed_data_dir = params['processed_data_dir']
     flag_info = util.get_filename_flag_info(params)
     # Load fixations
     fixations_file_name = f'fixations_m1{flag_info}.npy'
-    fixations_m1 = np.load(os.path.join(processed_data_dir, fixations_file_name))
+    fixations_m1 = np.load(os.path.join(processed_data_dir, fixations_file_name), allow_pickle=True)
     # Load fixations time positions
-    fix_timepos_file_name = f'fixations_timepos_m1{flag_info}.npy'
-    fix_timepos_m1 = np.load(os.path.join(processed_data_dir, fix_timepos_file_name))
+    fix_timepos_file_name = f'fix_timepos_m1{flag_info}.csv'
+    fix_timepos_m1 = pd.read_csv(os.path.join(processed_data_dir, fix_timepos_file_name))
     return fixations_m1, fix_timepos_m1
 
 
@@ -178,14 +177,17 @@ def load_fix_detection_results(params):
     """
     processed_data_dir = params['processed_data_dir']
     flag_info = util.get_filename_flag_info(params)
-    results_file_name = f'fixation_results_m1{flag_info}.npz'
+    results_file_name = f'fixation_session_results_m1{flag_info}.npz'
     file_path = os.path.join(processed_data_dir, results_file_name)
     if os.path.exists(file_path):
         # Load the .npz file
         with np.load(file_path, allow_pickle=True) as data:
             fixations_list = data['fixations']
-            timepos_list = data['timepos']
             info_list = data['info']
+        # Load fixations time positions from CSV
+        fix_timepos_file_name = f'fix_timepos_m1{flag_info}.csv'
+        timepos_df = pd.read_csv(os.path.join(processed_data_dir, fix_timepos_file_name))
+        timepos_list = [timepos_df] * len(fixations_list)  # Assuming timepos_list is a list of identical DataFrames
         # Reconstruct the fix_detection_results list
         fix_detection_results = [(fixations_list[i], timepos_list[i], info_list[i]) 
                                  for i in range(len(fixations_list))]
