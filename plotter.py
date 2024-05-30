@@ -133,10 +133,10 @@ def plot_gaze_heatmap_for_one_session(gaze_positions, session_info,
     plt.close()
 
 
-def plot_fixation_heatmaps_for_conditions(
-        all_fixation_labels, labelled_gaze_positions_m1, params):
+def plot_fixation_heatmaps_for_conditions(params):
     root_data_dir = params['root_data_dir']
-    heatmap_base_dir = util.add_datestr_to_dir_path(os.path.join(root_data_dir, 'plots', 'heatmap_fix'))
+    heatmap_base_dir = util.add_datestr_to_dir_path(
+        os.path.join(root_data_dir, 'plots', 'heatmap_fix'))
     os.makedirs(heatmap_base_dir, exist_ok=True)
     conditions = [(roi, gaze) for roi in [True, False]
                   for gaze in [True, False]]
@@ -144,6 +144,8 @@ def plot_fixation_heatmaps_for_conditions(
         # Update params for current condition
         params['map_roi_coord_to_eyelink_space'] = roi_condition
         params['map_gaze_pos_coord_to_eyelink_space'] = gaze_condition
+        labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(params)
+        all_fixation_labels = load_data.load_m1_fixation_labels(params)
         # Create a directory for this condition
         condition_dir = f"roi_{roi_condition}_gaze_{gaze_condition}"
         plots_dir = os.path.join(heatmap_base_dir, condition_dir)

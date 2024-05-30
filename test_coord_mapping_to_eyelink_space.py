@@ -54,9 +54,8 @@ else:
 
 
 if params.get('remake_fixations') or params.get('remake_fixation_labels'):
-    fix_timepos_m1, fixation_labels_m1 = \
-        filter_behavior.extract_fixations_with_labels_parallel(
-            labelled_gaze_positions_m1, params)  # The first file has funky session stop times
+    all_fixation_labels = filter_behavior.extract_fixations_with_labels_parallel(
+        labelled_gaze_positions_m1, params)  # The first file has funky session stop times
 else:
     all_fixation_labels = load_data.load_m1_fixation_labels(params)
 
