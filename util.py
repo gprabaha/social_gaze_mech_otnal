@@ -181,28 +181,28 @@ def construct_eye_bounding_box(m1_landmarks, params):
     """
     Constructs the bounding box for the eyes.
     Parameters:
-    - left_eye (tuple, list, numpy array): Left eye coordinates.
-    - right_eye (tuple, list, numpy array): Right eye coordinates.
+    - m1_landmarks (dict): Dictionary containing landmarks for the eyes.
     - params (dict): Parameters dictionary.
         - map_roi_coord_to_eyelink_space (bool): Flag indicating whether to map coordinates to Eyelink space.
     Returns:
     - eye_bb_corners (dict): Dictionary containing eye bounding box coordinates.
     """
-    # Extract coordinates for left and right eyes
-    left_eye = remap_source_coords( m1_landmarks['eyeOnLeft'][0][0][0],
-                                   params, 'inverted_to_standard_y_axis' )
-    left_eye = remap_source_coords( left_eye, params, 'to_eyelink_space' )
-    right_eye = remap_source_coords( m1_landmarks['eyeOnRight'][0][0][0],
-                                    params, 'inverted_to_standard_y_axis' )
-    right_eye = remap_source_coords( right_eye, params, 'to_eyelink_space' )
-    # Check if left_eye and right_eye are valid
+    # Extract and remap coordinates for left and right eyes
+    left_eye = remap_source_coords(m1_landmarks['eyeOnLeft'][0][0][0],
+                                   params, 'inverted_to_standard_y_axis')
+    left_eye = remap_source_coords(left_eye, params, 'to_eyelink_space')
+    right_eye = remap_source_coords(m1_landmarks['eyeOnRight'][0][0][0],
+                                    params, 'inverted_to_standard_y_axis')
+    right_eye = remap_source_coords(right_eye, params, 'to_eyelink_space')
+    # Validate left_eye and right_eye coordinates
     if not (len(left_eye) == len(right_eye) == 2):
         raise ValueError("Left eye and right eye coordinates should be 2-element tuples, lists, or arrays.")
     # Calculate the center of mass
     center_x = (left_eye[0] + right_eye[0]) / 2
     center_y = (left_eye[1] + right_eye[1]) / 2
+    # Calculate inter-eye distance using Euclidean norm
+    inter_eye_dist = np.linalg.norm(np.array(left_eye) - np.array(right_eye))
     # Calculate offset
-    inter_eye_dist = abs(left_eye[0] - right_eye[0])
     offset = inter_eye_dist / 2
     # Calculate bounding box corners
     bottom_left = (center_x - 2 * offset, center_y - offset)
@@ -213,50 +213,61 @@ def construct_eye_bounding_box(m1_landmarks, params):
 
 def construct_face_bounding_box(m1_landmarks, params):
     """
-    Find the corners with the maximum distance and return the corresponding bounding box.
+    Constructs a bounding box square for the face.
     Parameters:
     - m1_landmarks (dict): Landmarks dictionary.
     - params (dict): Parameters dictionary.
     Returns:
     - bounding_box (dict): Bounding box dictionary containing 'bottomLeft' and 'topRight' corners.
     """
-    # Extract coordinates for the face_coord_keys
+    # Extract and remap coordinates for the face
     face_coords = {key: m1_landmarks[key][0][0][0] for key in ['topLeft', 'topRight', 'bottomLeft', 'bottomRight']}
     face_coords = remap_source_coords(face_coords, params, 'inverted_to_standard_y_axis')
-    face_coords = remap_source_coords( face_coords, params, 'to_eyelink_space' )
+    face_coords = remap_source_coords(face_coords, params, 'to_eyelink_space')
     # Find pairs of corners and calculate distances
     max_distance = 0
     max_distance_corners = None
     for pair in itertools.combinations(face_coords.keys(), 2):
         corner1, corner2 = pair
-        distance = np.linalg.norm(np.array(face_coords[corner1]) - np.array(face_coords[corner2]))
+        distance = np.linalg.norm(np.array(face_coords[corner1])
+                                  - np.array(face_coords[corner2]))
         if distance > max_distance:
             max_distance = distance
             max_distance_corners = (corner1, corner2)
     # Check if the points are diagonally opposite
     if not (set(max_distance_corners) == set(['topLeft', 'bottomRight']) or
             set(max_distance_corners) == set(['topRight', 'bottomLeft'])):
-        raise ValueError("The points with maximum distance should be diagonally opposite.")
-    # Return the bounding box with bottomLeft and topRight corners
-    if set(max_distance_corners) == set(['topLeft', 'bottomRight']):
-        bbox_dict = {'bottomLeft': face_coords['bottomLeft'], 'topRight': face_coords['topRight']}
-    else:
-        # Construct bottomLeft and topRight from bottomRight and topLeft
-        bottom_left = (face_coords['topLeft'][0], face_coords['bottomLeft'][1])
-        top_right = (face_coords['bottomRight'][0], face_coords['topRight'][1])
-        bbox_dict = {'bottomLeft': bottom_left, 'topRight': top_right}
+        raise ValueError(
+            "The points with maximum distance should be diagonally opposite.")
+    # Calculate the center of the bounding box
+    center_x = np.mean([face_coords[corner][0] for corner in face_coords])
+    center_y = np.mean([face_coords[corner][1] for corner in face_coords])
+    # Calculate the side length of the bounding box square using the largest x or y distance
+    max_x_distance = max(abs(face_coords[corner1][0] - face_coords[corner2][0])
+                         for corner1, corner2 in 
+                        itertools.combinations(face_coords.keys(), 2))
+    max_y_distance = max(abs(face_coords[corner1][1] - face_coords[corner2][1])
+                         for corner1, corner2 in
+                         itertools.combinations(face_coords.keys(), 2))
+    side_length = max(max_x_distance, max_y_distance)
+    # Calculate the bottomLeft and topRight corners of the bounding box square
+    half_side = side_length / 2
+    bottom_left = (center_x - half_side, center_y - half_side)
+    top_right = (center_x + half_side, center_y + half_side)
+    bbox_dict = {'bottomLeft': bottom_left, 'topRight': top_right}
     return remap_source_coords(bbox_dict, params, 'stretch_from_center_of_mass')
 
 
 def construct_object_bounding_box(m1_landmarks, params, which_object):
     if which_object == 'leftObject' or which_object == 'rightObject':
         coord = m1_landmarks[which_object][0][0][0]
-        bottom_left = coord['bottomLeft'][0][0]
-        top_right = coord['topRight'][0][0]
+        bottom_left = remap_source_coords(coord['bottomLeft'][0][0],
+                                          params, 'inverted_to_standard_y_axis')
+        bottom_left = remap_source_coords(bottom_left, params, 'to_eyelink_space')
+        top_right = remap_source_coords(coord['topRight'][0][0],
+                                          params, 'inverted_to_standard_y_axis')
+        top_right = remap_source_coords(top_right, params, 'to_eyelink_space')
         bbox_dict = {'bottomLeft': bottom_left, 'topRight': top_right}
-        bbox_dict = remap_source_coords(
-            remap_source_coords(bbox_dict, params, 'inverted_to_standard_y_axis'),
-            params, 'to_eyelink_space')
     else:
         raise ValueError("Input 'which_object' must be a leftObject or rightObject.")
     return remap_source_coords(bbox_dict, params, 'stretch_from_center_of_mass')

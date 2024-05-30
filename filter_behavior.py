@@ -440,13 +440,10 @@ def generate_session_fixation_labels(fix_detection_result):
         mean_fix_pos = [fix_x, fix_y]
         run, block, fix_roi = detect_run_block_and_roi(
             [start_time, end_time], info['startS'], info['stopS'],
-            info['sampling_rate'], mean_fix_pos, info['roi_bb_corners']
-        )
-        fixation_info = [
-            start_time, end_time, info['category'], info['session_name'],
-            run, block, fix_duration, mean_fix_pos[0], mean_fix_pos[1],
-            fix_roi, info['monkey_1']
-        ]
+            info['sampling_rate'], mean_fix_pos, info['roi_bb_corners'])
+        fixation_info = [start_time, end_time, info['category'],
+                         info['session_name'], run, block, fix_duration,
+                         mean_fix_pos[0], mean_fix_pos[1], fix_roi, info['monkey_1']]
         fixation_labels.append(fixation_info)
     return fixation_labels
 
