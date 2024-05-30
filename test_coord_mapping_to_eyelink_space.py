@@ -61,8 +61,6 @@ else:
     all_fixation_labels = load_data.load_m1_fixation_labels(params)
 
 
-#plotter.plot_gaze_heatmaps_for_conditions(params)
-
 
 
 
