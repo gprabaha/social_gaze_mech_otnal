@@ -35,7 +35,7 @@ def fetch_root_data_dir(params):
 
 def fetch_data_source_dir(params):
     root_data_dir = params.get('root_data_dir')
-    data_source_dir = os.path.join(root_data_dir, 'data_source')
+    data_source_dir = os.path.join(root_data_dir, 'data_source_7point3')
     params.update({'data_source_dir': data_source_dir})
     return data_source_dir, params
 

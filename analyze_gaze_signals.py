@@ -21,6 +21,12 @@ between the edges of the bounds of the eyetracker rect
 '''
 
 
+'''
+
+Check out data loading differences between scipy.io and mat73 and use the
+latter if it seems to work out better
+'''
+
 params = {}
 params.update({
     'is_cluster': True,
