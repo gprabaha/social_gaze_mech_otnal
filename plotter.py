@@ -32,21 +32,24 @@ def plot_fixation_proportions_for_diff_conditions(params):
     else:
         plots_dir = 'plots'
     os.makedirs(plots_dir, exist_ok=True)
-    fixation_labels_file = os.path.join(root_data_dir, 'fixation_labels_m1.csv')
-    fixation_labels_m1 = pd.read_csv(fixation_labels_file)
-    valid_runs = fixation_labels_m1[~fixation_labels_m1['run'].isna()]
-    conditions = {
-        'mon_up': valid_runs['block'] == 'mon_up',
-        'mon_down': valid_runs['block'] == 'mon_down'}
-    agents = {
-        'Lynch': valid_runs['agent'] == 'Lynch',
-        'Tarantino': valid_runs['agent'] == 'Tarantino'}
-    rois = ['face_bbox', 'eye_bbox', 'left_obj_bbox', 'right_obj_bbox']
+    
     mapping_conditions = [(roi, gaze) for roi in [True, False]
                           for gaze in [True, False]]
     for roi_condition, gaze_condition in mapping_conditions:
         params['map_roi_coord_to_eyelink_space'] = roi_condition
         params['map_gaze_pos_coord_to_eyelink_space'] = gaze_condition
+        fixation_labels_m1 = load_data.load_m1_fixations(params)
+        '''
+        This needs to be changed!! Might be discarding all the monitor-up fixations
+        '''
+        valid_runs = fixation_labels_m1[~fixation_labels_m1['run'].isna()]
+        conditions = {
+            'mon_up': valid_runs['block'] == 'mon_up',
+            'mon_down': valid_runs['block'] == 'mon_down'}
+        agents = {
+            'Lynch': valid_runs['agent'] == 'Lynch',
+            'Tarantino': valid_runs['agent'] == 'Tarantino'}
+        rois = ['face_bbox', 'eye_bbox', 'left_obj_bbox', 'right_obj_bbox']
         fig, axes = plt.subplots(2, 2, figsize=(14, 10), sharey=True)
         fig.suptitle(
             f'Proportion of Fixations on Different ROIs{remap_flag}',

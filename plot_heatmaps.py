@@ -31,10 +31,10 @@ data_source_dir, params = util.fetch_data_source_dir(params)
 session_paths, params = util.fetch_session_subfolder_paths_from_source(params)
 processed_data_dir, params = util.fetch_processed_data_dir(params)
 
+
+plotter.plot_fixation_proportions_for_diff_conditions(params)
 plotter.plot_gaze_heatmaps_for_conditions(params)
-
 plotter.plot_fixation_heatmaps_for_conditions(params)
-
 
 
 

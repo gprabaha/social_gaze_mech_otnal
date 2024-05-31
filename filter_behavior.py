@@ -440,24 +440,26 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
     - fix_roi (str): Detected ROI.
     """
     start, stop = start_stop
-    for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
-        if start >= run_start and stop <= run_stop:
-            run = i
-            block = 'mon_down'
-            break
-        elif i < len(startS) and stop <= startS[i]:
-            run = None
-            block = 'mon_up'
-            break
+    # Check if fixation is before the first start time or after the last stop time
+    if start < startS[0] or stop > stopS[-1]:
+        run = None
+        block = 'discard'
     else:
-        if start < startS[0] or stop > stopS[-1]:
-            run = None
-            block = 'discard'
+        for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
+            if start >= run_start and stop <= run_stop:
+                run = i
+                block = 'mon_down'
+                break
+            elif i < len(startS) and stop <= startS[i]:
+                run = None
+                block = 'mon_up'
+                break
         else:
             run = None
             block = 'discard'
     fix_roi = determine_fix_roi(mean_fix_pos, bbox_corners)
     return run, block, fix_roi
+
 
 
 def determine_fix_roi(mean_fix_pos, bbox_corners):
