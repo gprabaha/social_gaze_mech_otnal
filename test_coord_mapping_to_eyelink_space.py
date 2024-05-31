@@ -16,8 +16,10 @@ import filter_behavior
 import plotter
 
 # Read parameters from environment variables
-map_roi_coord_to_eyelink_space = os.getenv('map_roi_coord_to_eyelink_space', 'False') == 'True'
-map_gaze_pos_coord_to_eyelink_space = os.getenv('map_gaze_pos_coord_to_eyelink_space', 'False') == 'True'
+map_roi_coord_to_eyelink_space = os.getenv(
+    'map_roi_coord_to_eyelink_space', 'False') == 'True'
+map_gaze_pos_coord_to_eyelink_space = os.getenv(
+    'map_gaze_pos_coord_to_eyelink_space', 'False') == 'True'
 
 params = {}
 params.update({

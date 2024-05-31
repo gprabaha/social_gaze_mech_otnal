@@ -52,6 +52,12 @@ if params.get('remake_labelled_gaze_pos'):
 else:
     labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(params)
 
+if params.get('remake_fixations') or params.get('remake_fixation_labels'):
+    all_fixation_labels = filter_behavior.extract_fixations_with_labels_parallel(
+        labelled_gaze_positions_m1, params)  # The first file has funky session stop times
+else:
+    all_fixation_labels = load_data.load_m1_fixation_labels(params)
+
 
 '''
 plot a histogram of gaze positions separately for monitor up and monitor down
