@@ -62,7 +62,7 @@ def fetch_session_subfolder_paths_from_source(params):
     return session_paths, params
 
 
-def add_datestr_to_dir_path(path):
+def add_date_dir_to_path(path):
     # Get the current date as a string in YYYYMMDD format
     date_str = datetime.now().strftime("%Y%m%d")
     return os.path.join(path, date_str)

@@ -77,7 +77,9 @@ def get_runs_data(session_path):
         if runs is not None:
             startS = [run['startS'][0][0] for run in runs]
             stopS = [run['stopS'][0][0] for run in runs]
-            return {'startS': startS, 'stopS': stopS, 'num_runs': len(startS)}
+            return {'startS': startS,
+                    'stopS': stopS,
+                    'num_runs': len(startS)}
     except:
         print(f"\nError loading runs for folder: {session_path} with mat73; Loading with scipy instead")
         data_runs = scipy.io.loadmat(file_list_runs[0])
@@ -85,7 +87,9 @@ def get_runs_data(session_path):
         if runs is not None:
             startS = [run['startS'][0][0] for run in runs]
             stopS = [run['stopS'][0][0] for run in runs]
-            return {'startS': startS, 'stopS': stopS, 'num_runs': len(startS)}
+            return {'startS': startS,
+                    'stopS': stopS,
+                    'num_runs': len(startS)}
     return {}
 
 
@@ -149,10 +153,13 @@ def get_labelled_gaze_positions_dict_m1(idx, params):
         M1Xpx = mat_data['M1Xpx'].squeeze()
         M1Ypx = mat_data['M1Ypx'].squeeze()
         coordinates = np.column_stack((M1Xpx, M1Ypx))
-        coordinates_inverted_y = util.remap_source_coords(coordinates, params, 'inverted_to_standard_y_axis')
-        gaze_positions = util.remap_source_coords(coordinates_inverted_y, params, 'to_eyelink_space')
+        coordinates_inverted_y = util.remap_source_coords(
+            coordinates, params, 'inverted_to_standard_y_axis')
+        gaze_positions = util.remap_source_coords(
+            coordinates_inverted_y, params, 'to_eyelink_space')
         meta_info = meta_info_list[idx]
-        meta_info.update({'sampling_rate': sampling_rate, 'category': session_categories[idx]})
+        meta_info.update({'sampling_rate': sampling_rate,
+                          'category': session_categories[idx]})
         return gaze_positions, meta_info
     except:
         print(f"\nError loading file '{mat_files[0]}' with mat73; Loading with scipy instead")
@@ -162,10 +169,13 @@ def get_labelled_gaze_positions_dict_m1(idx, params):
             M1Xpx = mat_data['M1Xpx'].squeeze()
             M1Ypx = mat_data['M1Ypx'].squeeze()
             coordinates = np.column_stack((M1Xpx, M1Ypx))
-            coordinates_inverted_y = util.remap_source_coords(coordinates, params, 'inverted_to_standard_y_axis')
-            gaze_positions = util.remap_source_coords(coordinates_inverted_y, params, 'to_eyelink_space')
+            coordinates_inverted_y = util.remap_source_coords(
+                coordinates, params, 'inverted_to_standard_y_axis')
+            gaze_positions = util.remap_source_coords(
+                coordinates_inverted_y, params, 'to_eyelink_space')
             meta_info = meta_info_list[idx]
-            meta_info.update({'sampling_rate': sampling_rate, 'category': session_categories[idx]})
+            meta_info.update({'sampling_rate': sampling_rate,
+                              'category': session_categories[idx]})
             return gaze_positions, meta_info
         except Exception as e:
             print(f"\nError loading file '{mat_files[0]}': {e}")
@@ -202,7 +212,8 @@ def load_m1_fixations(params):
     flag_info = util.get_filename_flag_info(params)
     # Load fixations time positions
     fix_timepos_file_name = f'fix_timepos_m1{flag_info}.csv'
-    fix_timepos_m1 = pd.read_csv(os.path.join(processed_data_dir, fix_timepos_file_name))
+    fix_timepos_m1 = pd.read_csv(os.path.join(
+        processed_data_dir, fix_timepos_file_name))
     return fix_timepos_m1
 
 
