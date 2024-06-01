@@ -1,0 +1,260 @@
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_121021 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_121021 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_121021 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_030921 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_030921 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_030921 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_031521 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_031521 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_031521 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062322 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062322 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062322 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_060221 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_060221 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_060221 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062921 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062921 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062921 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061721 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061721 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061721 with mat73; Loading with scipy instead
+
+Warning: No metaInfo or more than one metaInfo found in folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_060321.
+
+Warning: No runs found in folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_060321.
+
+Warning: No m1_landmarks or more than one landmarks found in folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_060321.
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062722 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062722 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062722 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_032421 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_032421 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_032421 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070121 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070121 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070121 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070822 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070822 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070822 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070622 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070622 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070622 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062222 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062222 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062222 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062822 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062822 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062822 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070122 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070122 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070122 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061521 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061521 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061521 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070722 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070722 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070722 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070522 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070522 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070522 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_030321 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_030321 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_030321 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062422 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062422 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062422 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_032221 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_032221 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_032221 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062922 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062922 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062922 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_073021 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_073021 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_073021 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062421 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062421 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062421 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_063022 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_063022 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_063022 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_120221 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_120221 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_120221 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062221 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062221 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062221 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_112320 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_112320 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_112320 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_120220 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_120220 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_120220 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_121621 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_121621 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_121621 with mat73; Loading with scipy instead
+
+Error loading meta_info for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061821 with mat73; Loading with scipy instead
+
+Error loading runs for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061821 with mat73; Loading with scipy instead
+
+Error loading m1_landmarks for folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061821 with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_030921_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_062722_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_032421_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_070822_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_062222_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_062822_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_061521_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_120221_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_112320_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_060221_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_120220_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_062421_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_062322_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_063022_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_062422_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_062922_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_062921_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_121621_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_073021_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_070622_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_061821_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_121021_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_031521_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_061721_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_070121_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_070122_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_070722_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_030321_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_070522_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_062221_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Error loading file 'OTNAL_FV_032221_M1_gaze.mat' with mat73; Loading with scipy instead
+
+Starting to extract fixations:
+
+Extracting fixations in parallel
+
+Generating fixation labels in parallel

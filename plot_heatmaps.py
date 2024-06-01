@@ -21,7 +21,8 @@ params.update({
     'remake_spikeTs': False,
     'remap_source_coord_from_inverted_to_standard_y_axis': True,
     'map_roi_coord_to_eyelink_space': False,
-    'map_gaze_pos_coord_to_eyelink_space': True
+    'map_gaze_pos_coord_to_eyelink_space': True,
+    'export_plots_to_local_folder': True
 })
 
 

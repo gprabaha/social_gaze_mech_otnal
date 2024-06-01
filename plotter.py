@@ -22,27 +22,26 @@ import pdb
 def plot_fixation_proportions_for_diff_conditions(params):
     """
     Plots the proportion of fixations on different ROIs for different conditions.
+
     Parameters:
     - params (dict): Dictionary containing parameters.
     """
     root_data_dir = params['root_data_dir']
-    remap_flag = util.get_filename_flag_info(params)
     if params.get('export_plots_to_local_folder', True):
-        plots_dir = os.path.join(root_data_dir, 'plots')
-    else:
         plots_dir = 'plots'
+    else:
+        plots_dir = os.path.join(root_data_dir, 'plots')
     os.makedirs(plots_dir, exist_ok=True)
-    
     mapping_conditions = [(roi, gaze) for roi in [True, False]
                           for gaze in [True, False]]
     for roi_condition, gaze_condition in mapping_conditions:
         params['map_roi_coord_to_eyelink_space'] = roi_condition
         params['map_gaze_pos_coord_to_eyelink_space'] = gaze_condition
-        fixation_labels_m1 = load_data.load_m1_fixations(params)
-        '''
-        This needs to be changed!! Might be discarding all the monitor-up fixations
-        '''
-        valid_runs = fixation_labels_m1[~fixation_labels_m1['run'].isna()]
+        remap_flag = util.get_filename_flag_info(params)
+        fixation_labels_m1 = load_data.load_m1_fixation_labels(params)
+        # Filtering out discarded runs
+        valid_runs = fixation_labels_m1[fixation_labels_m1['block']
+                                        != 'discard']
         conditions = {
             'mon_up': valid_runs['block'] == 'mon_up',
             'mon_down': valid_runs['block'] == 'mon_down'}
@@ -52,13 +51,14 @@ def plot_fixation_proportions_for_diff_conditions(params):
         rois = ['face_bbox', 'eye_bbox', 'left_obj_bbox', 'right_obj_bbox']
         fig, axes = plt.subplots(2, 2, figsize=(14, 10), sharey=True)
         fig.suptitle(
-            f'Proportion of Fixations on Different ROIs{remap_flag}',
+            f'Proportion of Fixations on Different ROIs {remap_flag}',
             fontsize=16)
         for i, (agent_name, agent_cond) in enumerate(agents.items()):
             for j, (block_name, block_cond) in enumerate(conditions.items()):
                 ax = axes[i, j]
                 data = valid_runs[agent_cond & block_cond]
-                proportions = [np.mean(data['fix_roi'] == roi) for roi in rois]
+                proportions = [np.mean(data['fix_roi'] == roi)
+                               for roi in rois]
                 ax.bar(rois, proportions, color=[
                     'blue', 'orange', 'green', 'red'])
                 ax.set_title(f'{agent_name} - {block_name}')
@@ -66,11 +66,8 @@ def plot_fixation_proportions_for_diff_conditions(params):
                 ax.set_ylabel('Proportion of Fixations')
                 ax.set_xlabel('ROI')
         plt.tight_layout(rect=[0, 0, 1, 0.96])
-        condition_dir = f"roi_{roi_condition}_gaze_{gaze_condition}"
-        condition_plots_dir = os.path.join(plots_dir, condition_dir)
-        os.makedirs(condition_plots_dir, exist_ok=True)
         plot_filename = f'fixation_proportions{remap_flag}.png'
-        plot_path = os.path.join(condition_plots_dir, plot_filename)
+        plot_path = os.path.join(plots_dir, plot_filename)
         plt.savefig(plot_path)
         plt.close()
 
@@ -83,10 +80,10 @@ def plot_gaze_heatmaps_for_conditions(params):
     """
     root_data_dir = params['root_data_dir']
     if params.get('export_plots_to_local_folder', True):
+        heatmap_base_dir = util.add_date_dir_to_path('plots/heatmap')
+    else:
         heatmap_base_dir = util.add_date_dir_to_path(
             os.path.join(root_data_dir, 'plots', 'heatmap'))
-    else:
-        heatmap_base_dir = util.add_date_dir_to_path('plots/heatmap')
     os.makedirs(heatmap_base_dir, exist_ok=True)
     conditions = [(roi, gaze) for roi in [True, False]
                   for gaze in [True, False]]
@@ -120,14 +117,16 @@ def plot_gaze_heatmap_for_one_session(gaze_positions, session_info,
     roi_bb_corners = session_info['roi_bb_corners']
     # Combine all runs into one for plotting
     all_gaze_positions = np.vstack(
-        [gaze_positions[round(start / sampling_rate):round(stop / sampling_rate)]
+        [gaze_positions[round(start / sampling_rate):
+                        round(stop / sampling_rate)]
          for start, stop in zip(start_times, stop_times)])
     # Generate the 2D histogram
     heatmap, xedges, yedges = np.histogram2d(
         all_gaze_positions[:, 0], all_gaze_positions[:, 1], bins=50)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     plt.figure(figsize=(10, 8))
-    plt.imshow(heatmap.T, extent=extent, origin='lower', cmap='hot', aspect='auto')
+    plt.imshow(heatmap.T, extent=extent,
+               origin='lower', cmap='hot', aspect='auto')
     # Plot ROI bounding boxes with diff colors
     colors = ['blue', 'green', 'red', 'cyan', 'magenta', 'yellow', 'gray']
     for i, (roi_name, corners) in enumerate(roi_bb_corners.items()):
@@ -153,10 +152,10 @@ def plot_gaze_heatmap_for_one_session(gaze_positions, session_info,
 def plot_fixation_heatmaps_for_conditions(params):
     root_data_dir = params['root_data_dir']
     if params.get('export_plots_to_local_folder', True):
+        heatmap_base_dir = util.add_date_dir_to_path('plots/heatmap_fix')
+    else:
         heatmap_base_dir = util.add_date_dir_to_path(
             os.path.join(root_data_dir, 'plots', 'heatmap_fix'))
-    else:
-        heatmap_base_dir = util.add_date_dir_to_path('plots/heatmap_fix')
     os.makedirs(heatmap_base_dir, exist_ok=True)
     conditions = [(roi, gaze) for roi in [True, False]
                   for gaze in [True, False]]
@@ -164,7 +163,8 @@ def plot_fixation_heatmaps_for_conditions(params):
         # Update params for current condition
         params['map_roi_coord_to_eyelink_space'] = roi_condition
         params['map_gaze_pos_coord_to_eyelink_space'] = gaze_condition
-        labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(params)
+        labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(
+            params)
         all_fixation_labels = load_data.load_m1_fixation_labels(params)
         # Create a directory for this condition
         condition_dir = f"roi_{roi_condition}_gaze_{gaze_condition}"
@@ -178,8 +178,8 @@ def plot_fixation_heatmaps_for_conditions(params):
 def plot_fixation_heatmaps_for_all_sessions(
         all_fixation_labels, labelled_gaze_positions_m1, params, plots_dir):
     print(f"\nCondition: Gaze remap -- {params['map_gaze_pos_coord_to_eyelink_space']}| ROI remap -- {params['map_roi_coord_to_eyelink_space']}\n")
-    for session_idx, (gaze_positions, session_info) in \
-        enumerate(tqdm(labelled_gaze_positions_m1, desc="Processing Sessions")):
+    for session_idx, (gaze_positions, session_info) in enumerate(
+            tqdm(labelled_gaze_positions_m1, desc="Processing Sessions")):
         session_name = session_info['session_name']
         roi_bb_corners = session_info['roi_bb_corners']
         session_fixations = all_fixation_labels[

@@ -1,6 +1,3 @@
-__pycache__/
-
-# Job script outputs
-*error*.txt
-*output*.txt
-*tmp*
+/plots/*
+!/plots/**/
+!plots/heatmap/20240531/
