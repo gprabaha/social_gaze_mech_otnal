@@ -195,7 +195,6 @@ def load_labelled_gaze_positions(params):
     # Adjusted file name based on flags
     flag_info = util.get_filename_flag_info(params)
     file_name = f'labelled_gaze_positions_m1{flag_info}.pkl'
-    print(os.path.join(processed_data_dir, file_name))
     with open(os.path.join(processed_data_dir, file_name), 'rb') as f:
         return pickle.load(f)
     
