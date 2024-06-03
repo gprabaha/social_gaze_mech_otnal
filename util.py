@@ -72,7 +72,8 @@ def remap_source_coords(coord, params, remapping_type):
 
     def remap_inverted_to_standard_y_axis(coord):
         def remap_single_coord_from_inverted_to_standard_y_axis(coord):
-            return (coord[0], -coord[1])
+            x = np.array(coord, dtype=np.int16)
+            return (x[0], -x[1])
         if not params.get(
                 'remap_source_coord_from_inverted_to_standard_y_axis', False):
             return coord
@@ -162,20 +163,22 @@ def get_bl_and_tr_roi_coords_m1(m1_landmarks, params):
     Calculates the bounding box corners for regions of interest (ROIs) based on M1 landmarks.
     Parameters:
     - m1_landmarks (dict): Dictionary containing M1 landmarks data.
-    - map_roi_coord_to_eyelink_space (bool): Flag indicating whether to map coordinates to Eyelink space.
+    - params (dict): Dictionary containing parameters including 'session_name'.
     Returns:
     - bbox_corners (dict): Dictionary with keys 'eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox'
       containing bounding box corners for respective regions.
     """
     # Calculate bounding box corners for each ROI
-    eye_bbox = construct_eye_bounding_box( m1_landmarks, params )
-    face_bbox = construct_face_bounding_box( m1_landmarks, params )
+    eye_bbox = construct_eye_bounding_box(m1_landmarks, params)
+    face_bbox = construct_face_bounding_box(m1_landmarks, params)
     left_obj_bbox = construct_object_bounding_box(m1_landmarks, params, 'leftObject')
     right_obj_bbox = construct_object_bounding_box(m1_landmarks, params, 'rightObject')
-    return {'eye_bbox': eye_bbox,
+    return {
+        'eye_bbox': eye_bbox,
         'face_bbox': face_bbox,
         'left_obj_bbox': left_obj_bbox,
-        'right_obj_bbox': right_obj_bbox}
+        'right_obj_bbox': right_obj_bbox
+    }
 
 
 def construct_eye_bounding_box(m1_landmarks, params):
