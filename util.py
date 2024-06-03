@@ -72,8 +72,8 @@ def remap_source_coords(coord, params, remapping_type):
 
     def remap_inverted_to_standard_y_axis(coord):
         def remap_single_coord_from_inverted_to_standard_y_axis(coord):
-            x = np.array(coord, dtype=np.int16)
-            return (x[0], -x[1])
+            coord = np.array(coord, dtype=np.int16)
+            return (coord[0], -coord[1])
         if not params.get(
                 'remap_source_coord_from_inverted_to_standard_y_axis', False):
             return coord
@@ -109,6 +109,7 @@ def remap_source_coords(coord, params, remapping_type):
             vert_rez = monitor_info['vertical_resolution']
             x_px_range = [-hor_rez * 0.2, hor_rez + hor_rez * 0.2]
             y_px_range = [-vert_rez * 0.2, vert_rez + vert_rez * 0.2]
+            coord = np.array(coord, dtype=np.int16)
             return [
                 span(x_px_range) * (coord[0] / span(x_px_range)) + min(x_px_range),
                 span(y_px_range) * (coord[1] / span(y_px_range)) + min(y_px_range)]
