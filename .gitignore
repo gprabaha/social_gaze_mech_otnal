@@ -1,3 +1,2 @@
 /plots/*
-!/plots/**/
-!plots/heatmap/20240531/
+__pycache__
