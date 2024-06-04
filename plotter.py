@@ -32,47 +32,42 @@ def plot_fixation_proportions_for_diff_conditions(params):
     else:
         plots_dir = os.path.join(root_data_dir, 'plots')
     os.makedirs(plots_dir, exist_ok=True)
-    mapping_conditions = [(roi, gaze) for roi in [True, False]
-                          for gaze in [True, False]]
-    for roi_condition, gaze_condition in mapping_conditions:
-        params['map_roi_coord_to_eyelink_space'] = roi_condition
-        params['map_gaze_pos_coord_to_eyelink_space'] = gaze_condition
-        remap_flag = util.get_filename_flag_info(params)
-        fixation_labels_m1 = load_data.load_m1_fixation_labels(params)
-        # Filtering out discarded runs
-        valid_runs = fixation_labels_m1[fixation_labels_m1['block']
-                                        != 'discard']
-        conditions = {
-            'mon_up': valid_runs['block'] == 'mon_up',
-            'mon_down': valid_runs['block'] == 'mon_down'}
-        agents = {
-            'Lynch': valid_runs['agent'] == 'Lynch',
-            'Tarantino': valid_runs['agent'] == 'Tarantino'}
-        rois = ['face_bbox', 'eye_bbox', 'left_obj_bbox', 'right_obj_bbox']
-        fig, axes = plt.subplots(2, 2, figsize=(14, 10), sharey=True)
-        fig.suptitle(
-            f'Proportion of Fixations on Different ROIs {remap_flag}',
-            fontsize=16)
-        for i, (agent_name, agent_cond) in enumerate(agents.items()):
-            for j, (block_name, block_cond) in enumerate(conditions.items()):
-                ax = axes[i, j]
-                data = valid_runs[agent_cond & block_cond]
-                proportions = [np.mean(data['fix_roi'] == roi)
-                               for roi in rois]
-                ax.bar(rois, proportions, color=[
-                    'blue', 'orange', 'green', 'red'])
-                ax.set_title(f'{agent_name} - {block_name}')
-                ax.set_ylim(0, 1)
-                ax.set_ylabel('Proportion of Fixations')
-                ax.set_xlabel('ROI')
-        plt.tight_layout(rect=[0, 0, 1, 0.96])
-        plot_filename = f'fixation_proportions{remap_flag}.png'
-        plot_path = os.path.join(plots_dir, plot_filename)
-        plt.savefig(plot_path)
-        plt.close()
+    remap_flag = util.get_filename_flag_info(params)
+    fixation_labels_m1 = load_data.load_m1_fixation_labels(params)
+    # Filtering out discarded runs
+    valid_runs = fixation_labels_m1[fixation_labels_m1['block']
+                                    != 'discard']
+    conditions = {
+        'mon_up': valid_runs['block'] == 'mon_up',
+        'mon_down': valid_runs['block'] == 'mon_down'}
+    agents = {
+        'Lynch': valid_runs['agent'] == 'Lynch',
+        'Tarantino': valid_runs['agent'] == 'Tarantino'}
+    rois = ['face_bbox', 'eye_bbox', 'left_obj_bbox', 'right_obj_bbox']
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10), sharey=True)
+    fig.suptitle(
+        f'Proportion of Fixations on Different ROIs {remap_flag}',
+        fontsize=16)
+    for i, (agent_name, agent_cond) in enumerate(agents.items()):
+        for j, (block_name, block_cond) in enumerate(conditions.items()):
+            ax = axes[i, j]
+            data = valid_runs[agent_cond & block_cond]
+            proportions = [np.mean(data['fix_roi'] == roi)
+                           for roi in rois]
+            ax.bar(rois, proportions, color=[
+                'blue', 'orange', 'green', 'red'])
+            ax.set_title(f'{agent_name} - {block_name}')
+            ax.set_ylim(0, 1)
+            ax.set_ylabel('Proportion of Fixations')
+            ax.set_xlabel('ROI')
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plot_filename = f'fixation_proportions{remap_flag}.png'
+    plot_path = os.path.join(plots_dir, plot_filename)
+    plt.savefig(plot_path)
+    plt.close()
 
 
-def plot_gaze_heatmaps_for_conditions(params):
+def plot_gaze_heatmaps(params):
     """
     Generates and saves gaze heatmaps for different conditions.
     Parameters:
@@ -80,28 +75,20 @@ def plot_gaze_heatmaps_for_conditions(params):
     """
     root_data_dir = params['root_data_dir']
     if params.get('export_plots_to_local_folder', True):
-        heatmap_base_dir = util.add_date_dir_to_path('plots/heatmap')
+        plots_dir = util.add_date_dir_to_path('plots/gaze_heatmaps')
     else:
-        heatmap_base_dir = util.add_date_dir_to_path(
-            os.path.join(root_data_dir, 'plots', 'heatmap'))
-    os.makedirs(heatmap_base_dir, exist_ok=True)
-    conditions = [(roi, gaze) for roi in [True, False]
-                  for gaze in [True, False]]
-    for roi_condition, gaze_condition in conditions:
-        params['map_roi_coord_to_eyelink_space'] = roi_condition
-        params['map_gaze_pos_coord_to_eyelink_space'] = gaze_condition
-        labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(
-            params)
-        condition_dir = f"roi_{roi_condition}_gaze_{gaze_condition}"
-        plots_dir = os.path.join(heatmap_base_dir, condition_dir)
-        os.makedirs(plots_dir, exist_ok=True)
-        plot_gaze_heatmaps_for_all_sessions(
-            labelled_gaze_positions_m1, params, plots_dir)
+        plots_dir = util.add_date_dir_to_path(
+            os.path.join(root_data_dir, 'plots', 'gaze_heatmaps'))
+    plots_dir = util.add_date_dir_to_path(plots_dir)
+    os.makedirs(plots_dir, exist_ok=True)
+    labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(
+        params)
+    plot_gaze_heatmaps_for_all_sessions(
+        labelled_gaze_positions_m1, params, plots_dir)
 
 
 def plot_gaze_heatmaps_for_all_sessions(labelled_gaze_positions_m1,
                                         params, plots_dir):
-    print(f"\nCondition: Gaze remap -- {params['map_gaze_pos_coord_to_eyelink_space']}| ROI remap -- {params['map_roi_coord_to_eyelink_space']}\n")
     for session_idx, (gaze_positions, session_info) \
         in enumerate(tqdm(labelled_gaze_positions_m1,
                           desc="Processing Sessions")):
@@ -149,35 +136,24 @@ def plot_gaze_heatmap_for_one_session(gaze_positions, session_info,
     plt.close()
 
 
-def plot_fixation_heatmaps_for_conditions(params):
+def plot_fixation_heatmaps(params):
     root_data_dir = params['root_data_dir']
     if params.get('export_plots_to_local_folder', True):
-        heatmap_base_dir = util.add_date_dir_to_path('plots/heatmap_fix')
+        plots_dir = util.add_date_dir_to_path('plots/fix_heatmaps')
     else:
-        heatmap_base_dir = util.add_date_dir_to_path(
-            os.path.join(root_data_dir, 'plots', 'heatmap_fix'))
-    os.makedirs(heatmap_base_dir, exist_ok=True)
-    conditions = [(roi, gaze) for roi in [True, False]
-                  for gaze in [True, False]]
-    for roi_condition, gaze_condition in conditions:
-        # Update params for current condition
-        params['map_roi_coord_to_eyelink_space'] = roi_condition
-        params['map_gaze_pos_coord_to_eyelink_space'] = gaze_condition
-        labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(
-            params)
-        all_fixation_labels = load_data.load_m1_fixation_labels(params)
-        # Create a directory for this condition
-        condition_dir = f"roi_{roi_condition}_gaze_{gaze_condition}"
-        plots_dir = os.path.join(heatmap_base_dir, condition_dir)
-        os.makedirs(plots_dir, exist_ok=True)
-        # Generate the plots
-        plot_fixation_heatmaps_for_all_sessions(
+        plots_dir = util.add_date_dir_to_path(
+            os.path.join(root_data_dir, 'plots', 'fix_heatmaps'))
+    plots_dir = util.add_date_dir_to_path(plots_dir)
+    os.makedirs(plots_dir, exist_ok=True)
+    labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(
+        params)
+    all_fixation_labels = load_data.load_m1_fixation_labels(params)
+    plot_fixation_heatmaps_for_all_sessions(
             all_fixation_labels, labelled_gaze_positions_m1, params, plots_dir)
 
 
 def plot_fixation_heatmaps_for_all_sessions(
         all_fixation_labels, labelled_gaze_positions_m1, params, plots_dir):
-    print(f"\nCondition: Gaze remap -- {params['map_gaze_pos_coord_to_eyelink_space']}| ROI remap -- {params['map_roi_coord_to_eyelink_space']}\n")
     for session_idx, (gaze_positions, session_info) in enumerate(
             tqdm(labelled_gaze_positions_m1, desc="Processing Sessions")):
         session_name = session_info['session_name']

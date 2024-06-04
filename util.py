@@ -155,7 +155,8 @@ def remap_source_coords(coord, params, remapping_type):
     elif remapping_type == 'to_eyelink_space':
         return map_coord_to_eyelink_space(coord)
     elif remapping_type == 'stretch_from_center_of_mass':
-        stretch_bounding_box_corners(coord, scale=1.3)
+        scale = params['bbox_expansion_factor']
+        stretch_bounding_box_corners(coord, scale=scale)
     return coord
 
 
@@ -208,10 +209,14 @@ def construct_eye_bounding_box(m1_landmarks, params):
     # Calculate inter-eye distance using Euclidean norm
     inter_eye_dist = np.linalg.norm(np.array(left_eye) - np.array(right_eye))
     # Calculate offset
-    offset = inter_eye_dist / 2
+    offset = inter_eye_dist / params['inter_eye_dist_denom_for_eye_bbox_offset']
     # Calculate bounding box corners
-    bottom_left = (center_x - 2 * offset, center_y - offset)
-    top_right = (center_x + 2 * offset, center_y + offset)
+    multiple_in_x_dir = params['offset_multiples_in_x_dir']
+    multiple_in_y_dir = params['offset_multiples_in_y_dir']
+    bottom_left = (center_x - multiple_in_x_dir * offset,
+                   center_y - multiple_in_y_dir * offset)
+    top_right = (center_x + multiple_in_x_dir * offset,
+                 center_y + multiple_in_y_dir * offset)
     bbox_dict = {'bottomLeft': bottom_left, 'topRight': top_right}
     return remap_source_coords(bbox_dict, params, 'stretch_from_center_of_mass')
 
@@ -229,7 +234,7 @@ def construct_face_bounding_box(m1_landmarks, params):
     face_coords = {key: m1_landmarks[key][0][0][0] for key
                    in ['topLeft', 'topRight', 'bottomLeft', 'bottomRight']}
     face_coords = remap_source_coords(face_coords, 
-                                     params, 'inverted_to_standard_y_axis')
+                                      params, 'inverted_to_standard_y_axis')
     face_coords = remap_source_coords(face_coords,
                                       params, 'to_eyelink_space')
     # Find pairs of corners and calculate distances
@@ -251,12 +256,10 @@ def construct_face_bounding_box(m1_landmarks, params):
     center_x = np.mean([face_coords[corner][0] for corner in face_coords])
     center_y = np.mean([face_coords[corner][1] for corner in face_coords])
     # Calculate the side length of the bounding box square using the largest x or y distance
-    max_x_distance = max(abs(face_coords[corner1][0] - face_coords[corner2][0])
-                         for corner1, corner2 in 
-                        itertools.combinations(face_coords.keys(), 2))
-    max_y_distance = max(abs(face_coords[corner1][1] - face_coords[corner2][1])
-                         for corner1, corner2 in
-                         itertools.combinations(face_coords.keys(), 2))
+    max_x_distance = abs(face_coords[max_distance_corners[0]][0]
+                         - face_coords[max_distance_corners[1]][0])
+    max_y_distance = abs(face_coords[max_distance_corners[0]][1]
+                         - face_coords[max_distance_corners[1]][1])
     side_length = max(max_x_distance, max_y_distance)
     # Calculate the bottomLeft and topRight corners of the bounding box square
     half_side = side_length / 2

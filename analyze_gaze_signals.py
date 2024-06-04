@@ -14,37 +14,33 @@ import util
 import filter_behavior
 import plotter
 
-'''
-No fixation is now being detected inside the left object bounding box. This is
-most probably the position data points have not been transformed to be remapped
-between the edges of the bounds of the eyetracker rect
-'''
-
-
-'''
-
-Check out data loading differences between scipy.io and mat73 and use the
-latter if it seems to work out better
-'''
 
 params = {}
 params.update({
     'is_cluster': True,
-    'use_parallel': True,
+    'use_parallel': False,
     'remake_labelled_gaze_pos': True,
     'remake_fixations': True,
     'remake_fixation_labels': True,
     'remake_spikeTs': False,
     'remap_source_coord_from_inverted_to_standard_y_axis': True,
-    'map_roi_coord_to_eyelink_space': True,
-    'map_gaze_pos_coord_to_eyelink_space': False
+    'map_roi_coord_to_eyelink_space': False,
+    'map_gaze_pos_coord_to_eyelink_space': True,
+    'export_plots_to_local_folder': False,
+    'inter_eye_dist_denom_for_eye_bbox_offset': 2,
+    'offset_multiples_in_x_dir': 3,
+    'offset_multiples_in_y_dir': 1,
+    'bbox_expansion_factor': 1.5
+    
 })
+
 
 # Determine root data directory based on whether it's running on a cluster or not
 root_data_dir, params = util.fetch_root_data_dir(params)
 data_source_dir, params = util.fetch_data_source_dir(params)
 session_paths, params = util.fetch_session_subfolder_paths_from_source(params)
 processed_data_dir, params = util.fetch_processed_data_dir(params)
+
 
 if params.get('remake_labelled_gaze_pos'):
     meta_info_list = filter_behavior.extract_meta_info(params)
@@ -58,6 +54,7 @@ if params.get('remake_labelled_gaze_pos'):
 else:
     labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(params)
 
+
 if params.get('remake_fixations') or params.get('remake_fixation_labels'):
     all_fixation_labels = filter_behavior.extract_fixations_with_labels_parallel(
         labelled_gaze_positions_m1, params)  # The first file has funky session stop times
@@ -65,12 +62,9 @@ else:
     all_fixation_labels = load_data.load_m1_fixation_labels(params)
 
 
-'''
-plot a histogram of gaze positions separately for monitor up and monitor down
-conditions for each session (across runs) and overlay the bounding boxes on
-top of the 2D histogram plot
-'''
-plotter.plot_gaze_heatmaps_for_conditions(params)
+plotter.plot_fixation_proportions_for_diff_conditions(params)
+plotter.plot_gaze_heatmaps(params)
+plotter.plot_fixation_heatmaps(params)
 
 
 '''

@@ -4,3 +4,9 @@ Warning: No metaInfo or more than one metaInfo found in folder: /gpfs/milgram/pr
 Warning: No runs found in folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_060321.
 
 Warning: No m1_landmarks or more than one landmarks found in folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_060321.
+
+Starting to extract fixations:
+
+Extracting fixations in parallel
+
+Generating fixation labels in parallel
