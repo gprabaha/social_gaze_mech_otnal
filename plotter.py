@@ -79,7 +79,6 @@ def plot_gaze_heatmaps(params):
     else:
         plots_dir = util.add_date_dir_to_path(
             os.path.join(root_data_dir, 'plots', 'gaze_heatmaps'))
-    plots_dir = util.add_date_dir_to_path(plots_dir)
     os.makedirs(plots_dir, exist_ok=True)
     labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(
         params)
@@ -143,7 +142,6 @@ def plot_fixation_heatmaps(params):
     else:
         plots_dir = util.add_date_dir_to_path(
             os.path.join(root_data_dir, 'plots', 'fix_heatmaps'))
-    plots_dir = util.add_date_dir_to_path(plots_dir)
     os.makedirs(plots_dir, exist_ok=True)
     labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(
         params)

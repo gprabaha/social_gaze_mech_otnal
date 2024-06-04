@@ -18,7 +18,7 @@ import plotter
 params = {}
 params.update({
     'is_cluster': True,
-    'use_parallel': False,
+    'use_parallel': True,
     'remake_labelled_gaze_pos': True,
     'remake_fixations': True,
     'remake_fixation_labels': True,
@@ -29,10 +29,24 @@ params.update({
     'export_plots_to_local_folder': False,
     'inter_eye_dist_denom_for_eye_bbox_offset': 2,
     'offset_multiples_in_x_dir': 3,
-    'offset_multiples_in_y_dir': 1,
-    'bbox_expansion_factor': 1.5
+    'offset_multiples_in_y_dir': 1.5,
+    'bbox_expansion_factor': 1.3
     
 })
+
+"""
+
+- Fixation detection is working fine now. Retry saccade detection
+
+- Use the start and end times of various ROI fixations to during the
+monitor-up and monitor down blocks as long as they are not discards. Then
+use the timepoints to go to the neural spiketimes for that session to compare
+firing rates corresponding to looks within for each of the bboxes between
+the monitor-up and monitor-down condition
+
+- Start looking at CEBRA stuff
+
+"""
 
 
 # Determine root data directory based on whether it's running on a cluster or not
