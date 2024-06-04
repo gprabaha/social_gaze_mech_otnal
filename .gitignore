@@ -1,2 +1,4 @@
+error_*
+output_*
 /plots/*
 __pycache__
