@@ -284,7 +284,7 @@ def parallel_generate_labels(fix_detection_results):
     num_processes = min(num_cores, len(fix_detection_results))
     with Pool(num_processes) as pool:
         fixation_labels = pool.map(
-            generate_session_fixation_labels, fix_detection_results)
+            add_labels_to_fixations, fix_detection_results)
     return fixation_labels
 
 
@@ -297,7 +297,7 @@ def serial_generate_labels(fix_detection_results):
     - fixation_labels (list): List of generated labels.
     """
     print("\nGenerating fixation labels serially")
-    return [generate_session_fixation_labels(result)
+    return [add_labels_to_fixations(result)
             for result in fix_detection_results]
 
 
@@ -394,7 +394,7 @@ def get_session_fixations(session_data):
 
 
 ### Function to generate fixation labels for each session
-def generate_session_fixation_labels(fix_detection_result):
+def add_labels_to_fixations(fix_detection_result):
     """
     Generates fixation labels for each session.
     Parameters:
@@ -533,19 +533,8 @@ def extract_spiketimes_for_all_sessions(params):
     return spikeTs_s, spikeTs_ms, all_labels
 
 
-
-
-
-
-
-
-
-
-
-
-
 ### Function to extract saccades with labels
-def extract_saccades_with_labels(labelled_gaze_positions):
+def extract_saccades_with_labels(labelled_gaze_positions, params):
     """
     Extracts saccades with labels.
     Parameters:

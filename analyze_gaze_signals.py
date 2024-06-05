@@ -75,6 +75,7 @@ if params.get('remake_fixations') or params.get('remake_fixation_labels'):
 else:
     all_fixation_labels = load_data.load_m1_fixation_labels(params)
 
+saccades_m1, saccade_labels_m1 = filter_behavior.extract_saccades_with_labels(labelled_gaze_positions_m1)
 
 plotter.plot_fixation_proportions_for_diff_conditions(params)
 plotter.plot_gaze_heatmaps(params)
