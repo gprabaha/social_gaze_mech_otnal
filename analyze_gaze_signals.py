@@ -18,7 +18,7 @@ import plotter
 params = {}
 params.update({
     'is_cluster': True,
-    'use_parallel': False,
+    'use_parallel': True,
     'remake_labelled_gaze_pos': False,
     'remake_fixations': False,
     'remake_fixation_labels': False,
@@ -82,10 +82,12 @@ if params.get('remake_saccades'):
 else:
     labelled_saccades_m1 = load_data.load_saccade_labels(params)
 
+'''
 if params.get('remake_spikeTs'):
     spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(params)
 else:
     spikeTs_s, spikeTs_ms, spikeTs_labels = load_data.load_processed_spike_data(params)
+'''
 
 # plotter.plot_fixation_proportions_for_diff_conditions(params)
 # plotter.plot_gaze_heatmaps(params)

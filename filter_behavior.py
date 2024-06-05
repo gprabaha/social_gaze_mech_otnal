@@ -8,6 +8,7 @@ Created on Wed Apr 10 12:36:36 2024
 
 import numpy as np
 from tqdm import tqdm
+from tqdm_joblib import tqdm_joblib
 import os
 import multiprocessing
 from multiprocessing import Pool
@@ -502,13 +503,14 @@ def extract_saccades_with_labels(labelled_gaze_positions, params):
     sessions_data = [(session_data[0], session_data[1],
                       vel_thresh, min_samples, smooth_func)
                      for session_data in labelled_gaze_positions]
+    
     if use_parallel:
-        results = Parallel(n_jobs=n_jobs)(
-            delayed(extract_saccades_for_session)(session_data)
-            for session_data in tqdm(
-                    sessions_data,
-                    desc="Extracting saccades in parallel",
-                    unit="session"))
+        with tqdm_joblib(tqdm(
+                desc="Extracting saccades in parallel",
+                total=num_sessions, unit="session")):
+            results = Parallel(n_jobs=n_jobs)(
+                delayed(extract_saccades_for_session)(session_data)
+                for session_data in sessions_data)
     else:
         results = [extract_saccades_for_session(session_data)
                    for session_data in
@@ -517,7 +519,7 @@ def extract_saccades_with_labels(labelled_gaze_positions, params):
                         unit="session")]
     saccades = [s for session_saccades in results for s in session_saccades]
     columns = ["start_time", "end_time", "duration", "trajectory",
-               "start_roi", "end_roi", "session_name", "category", "run"]
+               "start_roi", "end_roi", "session_name", "category", "run", "block"]
     labelled_saccades = pd.DataFrame(saccades, columns=columns)
     save_saccade_labels(labelled_saccades, params)
     return labelled_saccades
@@ -558,9 +560,11 @@ def extract_saccades_for_session(session_data):
                                       info['roi_bb_corners'])
             end_roi = determine_roi(run_positions[stop, :2],
                                     info['roi_bb_corners'])
+            block = determine_block(
+                start_time, end_time, info['startS'], info['stopS'])
             session_saccades.append(
                 [start_time, end_time, duration, saccade,
-                 start_roi, end_roi, session_name, category, run])
+                 start_roi, end_roi, session_name, category, run, block])
     return session_saccades
 
 
@@ -599,13 +603,33 @@ def determine_roi(position, bbox_corners):
     - roi (str): Detected ROI.
     """
     bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
-    inside_roi = [util.is_inside_roi(position, bbox_corners[key])
-                  for key in bounding_boxes]
+    inside_roi = [util.is_inside_roi(position, bbox_corners[key]) for key in bounding_boxes]
     if any(inside_roi):
         if inside_roi[0] and inside_roi[1]:
             return bounding_boxes[0]
         return bounding_boxes[inside_roi.index(True)]
     return 'out_of_roi'
+
+
+def determine_block(start_time, end_time, startS, stopS):
+    """
+    Determines the block for a saccade based on start and stop times.
+    Parameters:
+    - start_time (float): Start time of the saccade.
+    - end_time (float): End time of the saccade.
+    - startS (list): List of start indices of runs.
+    - stopS (list): List of stop indices of runs.
+    Returns:
+    - block (str): Detected block.
+    """
+    if start_time < startS[0] or end_time > stopS[-1]:
+        return 'discard'
+    for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
+        if start_time >= run_start and end_time <= run_stop:
+            return 'mon_down'
+        elif i < len(startS) and end_time <= startS[i]:
+            return 'mon_up'
+    return 'discard'
 
 
 def save_saccade_labels(labelled_saccades, params):
@@ -619,7 +643,7 @@ def save_saccade_labels(labelled_saccades, params):
     flag_info = util.get_filename_flag_info(params)
     if not os.path.exists(processed_data_dir):
         os.makedirs(processed_data_dir)
-    file_path = os.path.join(processed_data_dir, f'labelled_saccades{flag_info}.csv')
+    file_path = os.path.join(processed_data_dir, f'labelled_saccades_{flag_info}.csv')
     labelled_saccades.to_csv(file_path, index=False)
     print(f"Saccade labels saved to {file_path}")
 
