@@ -554,14 +554,12 @@ def extract_saccades_for_session(session_data):
             start_time = time_vec[start]
             end_time = time_vec[stop]
             duration = end_time - start_time
-            trajectory = np.column_stack(
-                (run_x[start:stop + 1], run_y[start:stop + 1]))
             start_roi = determine_roi(run_positions[start, :2],
                                       info['roi_bb_corners'])
             end_roi = determine_roi(run_positions[stop, :2],
                                     info['roi_bb_corners'])
             session_saccades.append(
-                [start_time, end_time, duration, trajectory,
+                [start_time, end_time, duration, saccade,
                  start_roi, end_roi, session_name, category, run])
     return session_saccades
 
@@ -621,7 +619,7 @@ def save_saccade_labels(labelled_saccades, params):
     flag_info = util.get_filename_flag_info(params)
     if not os.path.exists(processed_data_dir):
         os.makedirs(processed_data_dir)
-    file_path = os.path.join(processed_data_dir, f'labelled_saccades_{flag_info}.csv')
+    file_path = os.path.join(processed_data_dir, f'labelled_saccades{flag_info}.csv')
     labelled_saccades.to_csv(file_path, index=False)
     print(f"Saccade labels saved to {file_path}")
 

@@ -363,22 +363,35 @@ def get_fix_positions(start_stop, positions):
 
 
 def is_inside_roi(coord, bbox_corner_dict):
+    """
+    Check if coordinates are inside the ROI defined by bounding box corners.
+    Parameters:
+    - coord (array-like): Single coordinate or array of coordinates.
+    - bbox_corner_dict (dict): Dictionary with 'topRight' and 'bottomLeft' corners of the bounding box.
+    Returns:
+    - bool or list of bool: Whether each coordinate is inside the bounding box.
+    """
     # Extract the bounding box corners
     top_right = bbox_corner_dict['topRight']
     bottom_left = bbox_corner_dict['bottomLeft']
-    
+
     # Function to check if a single coordinate is inside the bounding box
-    def is_inside_single(coord):
-        x, y = coord
+    def is_inside_single(x, y):
         return bottom_left[0] <= x <= top_right[0] and bottom_left[1] <= y <= top_right[1]
-    
-    # Check if coord is a single coordinate or a list of coordinates
-    if isinstance(coord, (list, tuple)) and len(coord) == 2 and isinstance(coord[0], (int, float)):
-        # Single coordinate case
-        return is_inside_single(coord)
+
+    if isinstance(coord, np.ndarray):
+        if coord.ndim == 1 and coord.size == 2:
+            # Single coordinate case
+            return is_inside_single(coord[0], coord[1])
+        elif coord.ndim == 2 and coord.shape[1] == 2:
+            # Array of coordinates case
+            return np.array([is_inside_single(c[0], c[1]) for c in coord])
+    elif isinstance(coord, (list, tuple)) and len(coord) == 2 and isinstance(coord[0], (int, float)):
+        # Single coordinate case for list or tuple
+        return is_inside_single(coord[0], coord[1])
     else:
         # List of coordinates case
-        return [is_inside_single(c) for c in coord]
+        return [is_inside_single(c[0], c[1]) for c in coord]
 
 
 

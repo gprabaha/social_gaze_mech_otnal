@@ -18,11 +18,11 @@ import plotter
 params = {}
 params.update({
     'is_cluster': True,
-    'use_parallel': True,
-    'remake_labelled_gaze_pos': True,
-    'remake_fixations': True,
-    'remake_fixation_labels': True,
-    'remake_saccades': True
+    'use_parallel': False,
+    'remake_labelled_gaze_pos': False,
+    'remake_fixations': False,
+    'remake_fixation_labels': False,
+    'remake_saccades': True,
     'remake_spikeTs': False,
     'remap_source_coord_from_inverted_to_standard_y_axis': True,
     'map_roi_coord_to_eyelink_space': False,
@@ -76,13 +76,16 @@ if params.get('remake_fixations') or params.get('remake_fixation_labels'):
 else:
     all_fixation_labels = load_data.load_m1_fixation_labels(params)
 
-if params.get('remake_labelled_gaze_pos'):
+if params.get('remake_saccades'):
     labelled_saccades_m1 = filter_behavior.extract_saccades_with_labels(
         labelled_gaze_positions_m1, params)
 else:
-    labelled_saccades_m1 = load_saccade_labels(params)
+    labelled_saccades_m1 = load_data.load_saccade_labels(params)
 
-
+if params.get('remake_spikeTs'):
+    spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(params)
+else:
+    spikeTs_s, spikeTs_ms, spikeTs_labels = load_data.load_processed_spike_data(params)
 
 # plotter.plot_fixation_proportions_for_diff_conditions(params)
 # plotter.plot_gaze_heatmaps(params)
@@ -98,10 +101,7 @@ else:
     fixations_m1, fix_timepos_m1 = load_data.load_m1_fixations(params)
     fixation_labels_m1 = load_data.load_m1_fixation_labels(params)
 
-if params.get('remake_spikeTs'):
-    spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(params)
-else:
-    spikeTs_s, spikeTs_ms, spikeTs_labels = load_data.load_processed_spike_data(params)
+
 
 # ROIs fixated on
 rois_with_fixatins = fixation_labels_m1['fix_roi'].unique()

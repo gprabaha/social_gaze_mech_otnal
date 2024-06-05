@@ -223,8 +223,8 @@ def load_saccade_labels(params):
     """
     processed_data_dir = params['processed_data_dir']
     flag_info = util.get_filename_flag_info(params)
-    file_path = os.path.join(processed_data_dir, f'labelled_saccades_{flag_info}.csv')
-    
+    file_path = os.path.join(
+        processed_data_dir, f'labelled_saccades{flag_info}.csv')
     if os.path.exists(file_path):
         labelled_saccades = pd.read_csv(file_path)
         print(f"Saccade labels loaded from {file_path}")
