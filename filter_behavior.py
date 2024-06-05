@@ -503,7 +503,6 @@ def extract_saccades_with_labels(labelled_gaze_positions, params):
     sessions_data = [(session_data[0], session_data[1],
                       vel_thresh, min_samples, smooth_func)
                      for session_data in labelled_gaze_positions]
-    
     if use_parallel:
         with tqdm_joblib(tqdm(
                 desc="Extracting saccades in parallel",
@@ -643,61 +642,61 @@ def save_saccade_labels(labelled_saccades, params):
     flag_info = util.get_filename_flag_info(params)
     if not os.path.exists(processed_data_dir):
         os.makedirs(processed_data_dir)
-    file_path = os.path.join(processed_data_dir, f'labelled_saccades_{flag_info}.csv')
+    file_path = os.path.join(processed_data_dir, f'labelled_saccades{flag_info}.csv')
     labelled_saccades.to_csv(file_path, index=False)
     print(f"Saccade labels saved to {file_path}")
 
 
-
-
-
-
 def extract_spiketimes_for_all_sessions(params):
-    root_data_dir = params.get('root_data_dir')
+    processed_data_dir = params.get('processed_data_dir')
     session_paths = params.get('session_paths')
     is_parallel = params.get('use_parallel', True)
-    spikeTs_s = []
-    spikeTs_ms = []
     spikeTs_labels = []
     if is_parallel:
         # Process sessions in parallel with tqdm progress bar
         results = Parallel(n_jobs=-1)(delayed(
-            load_data.get_spiketimes_and_labels_for_one_session)(session_path)
-            for session_path in tqdm(session_paths, desc='Processing sessions'))
+            load_data.get_spiketimes_and_labels_for_one_session)(
+                session_path, processed_data_dir)
+            for session_path in tqdm(
+                    session_paths, desc='Loading spiketimes'))
         # Iterate over results and concatenate
-        for session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels \
-            in tqdm(results, desc='Processing results'):
-            spikeTs_s.extend(session_spikeTs_s)
-            spikeTs_ms.extend(session_spikeTs_ms)
-            spikeTs_labels.append(session_spikeTs_labels)
+        for labelled_spiketimes in tqdm(results, desc='concatenating results'):
+            spikeTs_labels.append(labelled_spiketimes)
     else:
         # Process sessions sequentially
         for session_path in session_paths:
-            session_spikeTs_s, session_spikeTs_ms, session_spikeTs_labels = \
-                load_data.get_spiketimes_and_labels_for_one_session(session_path)
-            spikeTs_s.extend(session_spikeTs_s)
-            spikeTs_ms.extend(session_spikeTs_ms)
-            spikeTs_labels.append(session_spikeTs_labels)
+            labelled_spiketimes = \
+                load_data.get_spiketimes_and_labels_for_one_session(
+                    session_path, processed_data_dir)
+            spikeTs_labels.append(labelled_spiketimes)
     # Concatenate label dataframes
     if spikeTs_labels:
         all_labels = pd.concat(spikeTs_labels, ignore_index=True)
     else:
         all_labels = pd.DataFrame()
-    # Check if spiketimes lists and labels have the same length
-    if len(spikeTs_s) != len(all_labels):
-        print("Warning: Length mismatch between spiketimes lists and labels.")
     # Construct flag_info based on params
     flag_info = util.get_filename_flag_info(params)
     # Save outputs to root_data_dir with flag_info
-    spiketimes_s_path = os.path.join(root_data_dir, f'spiketimes_s{flag_info}.pkl')
-    spiketimes_ms_path = os.path.join(root_data_dir, f'spiketimes_ms{flag_info}.pkl')
-    labels_path = os.path.join(root_data_dir, f'spike_labels{flag_info}.csv')
-    # Save spikeTs_s as a pickle file
-    with open(spiketimes_s_path, 'wb') as f:
-        pickle.dump(spikeTs_s, f)
-    # Save spikeTs_ms as a pickle file
-    with open(spiketimes_ms_path, 'wb') as f:
-        pickle.dump(spikeTs_ms, f)
-    # Save arrays
+    labels_path = os.path.join(processed_data_dir, f'spike_labels{flag_info}.csv')
+    # Save DataFrame
     all_labels.to_csv(labels_path, index=False)
-    return spikeTs_s, spikeTs_ms, all_labels
+    print(f"All labelled spiketimes saved to {labels_path}")
+    return all_labels
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -234,53 +234,41 @@ def load_saccade_labels(params):
         return None
 
 
-
-def get_spiketimes_and_labels_for_one_session(session_path):
+def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
     """
     Extracts spike times and labels from a session.
     Parameters:
     - session_path (str): Path to the session.
     Returns:
-    - session_spikeTs_s (list): List of spike times in seconds.
-    - session_spikeTs_ms (list): List of spike times in milliseconds.
-    - spike_df (DataFrame): DataFrame containing spike labels.
+    - labelled_spiketimes (DataFrame): DataFrame containing spike times and labels for each unit.
     """
-    session_spikeTs_s = []
-    session_spikeTs_ms = []
-    session_spikeTs_labels = []
-    label_cols = ['session_name', 'channel', 'channel_label',
-                  'unit_no_within_channel', 'unit_label', 'uuid',
-                  'n_spikes', 'region']
+    label_cols = ['spikeS', 'spikeMs', 'session_name', 'channel', 'channel_label',
+                  'unit_no_within_channel', 'unit_label', 'uuid', 'n_spikes', 'region']
     session_name = os.path.basename(os.path.normpath(session_path))
-    file_list_spikeTs = glob.glob(f"{session_path}/*spikeTs_regForm.mat")
+    file_list_spikeTs = glob.glob(f"{session_path}/*spikeTs.mat")
     if len(file_list_spikeTs) != 1:
         print(f"\nWarning: No spikeTs or more than one spikeTs found in folder: {session_path}.")
-        return session_spikeTs_s, session_spikeTs_ms, pd.DataFrame(columns=label_cols)
+        return pd.DataFrame(columns=label_cols)
     try:
         data_spikeTs = mat73.loadmat(file_list_spikeTs[0])
-        spikeTs_struct = data_spikeTs['spikeTs'][0]
-        for unit in spikeTs_struct:
-            spikeTs_sec = np.squeeze(unit['spikeS'])
-            spikeTs_ms = np.squeeze(unit['spikeMs'])
-            session_spikeTs_s.append(spikeTs_sec.tolist())  # Append spike times in seconds
-            session_spikeTs_ms.append(spikeTs_ms.tolist())  # Append spike times in milliseconds
-            chan = unit['chan'][0][0]
-            chan_label = unit['chanStr'][0]
-            unit_no_in_channel = unit['unit'][0][0]
-            unit_label = unit['unitStr'][0]
-            uuid = unit['UUID'][0]
-            n_spikes = unit['spikeN'][0][0]
-            region = unit['region'][0]
-            # Append label row to the labels list
-            session_spikeTs_labels.append(
-                [session_name, chan, chan_label, unit_no_in_channel,
-                 unit_label, uuid, n_spikes, region])
-        # Create DataFrame
-        spike_df = pd.DataFrame(session_spikeTs_labels, columns=label_cols)
-        return session_spikeTs_s, session_spikeTs_ms, spike_df
+        spikeTs_struct = data_spikeTs['spikeTs']
+        spikeS = [np.squeeze(spikeS).tolist() for spikeS in spikeTs_struct['spikeS']]
+        spikeMs = [np.squeeze(spikeMs).tolist() for spikeMs in spikeTs_struct['spikeMs']]
+        chan = spikeTs_struct['chan']
+        chan_label = spikeTs_struct['chanStr']
+        unit_no_in_channel = spikeTs_struct['unit']
+        unit_label = spikeTs_struct['unitStr']
+        uuid = spikeTs_struct['UUID']
+        n_spikes = spikeTs_struct['spikeN']
+        region = spikeTs_struct['region']
+        # Combine all lists into a single DataFrame
+        session_spikeTs_labels = list(zip(spikeS, spikeMs, [session_name]*len(spikeS), chan, chan_label,
+                                          unit_no_in_channel, unit_label, uuid, n_spikes, region))
+        labelled_spiketimes = pd.DataFrame(session_spikeTs_labels, columns=label_cols)
+        return labelled_spiketimes
     except Exception as e:
         print(f"An error occurred: {e}")
-        return [], [], pd.DataFrame(columns=label_cols)
+        return pd.DataFrame(columns=label_cols)
 
 
 def load_processed_spike_data(params):
@@ -307,4 +295,13 @@ def load_processed_spike_data(params):
     labels_path = os.path.join(root_data_dir, f'spike_labels{flag_info}.csv')
     spike_labels = pd.read_csv(labels_path)
     return spikeTs_s, spikeTs_ms, spike_labels
+
+
+
+
+
+
+
+
+
 

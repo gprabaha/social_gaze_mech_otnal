@@ -22,8 +22,8 @@ params.update({
     'remake_labelled_gaze_pos': False,
     'remake_fixations': False,
     'remake_fixation_labels': False,
-    'remake_saccades': True,
-    'remake_spikeTs': False,
+    'remake_saccades': False,
+    'remake_spikeTs': True,
     'remap_source_coord_from_inverted_to_standard_y_axis': True,
     'map_roi_coord_to_eyelink_space': False,
     'map_gaze_pos_coord_to_eyelink_space': True,
@@ -82,84 +82,18 @@ if params.get('remake_saccades'):
 else:
     labelled_saccades_m1 = load_data.load_saccade_labels(params)
 
-'''
-if params.get('remake_spikeTs'):
-    spikeTs_s, spikeTs_ms, spikeTs_labels = filter_behavior.extract_spiketimes_for_all_sessions(params)
-else:
-    spikeTs_s, spikeTs_ms, spikeTs_labels = load_data.load_processed_spike_data(params)
-'''
+
+labelled_spiketimes = filter_behavior.extract_spiketimes_for_all_sessions(params)
+
 
 # plotter.plot_fixation_proportions_for_diff_conditions(params)
 # plotter.plot_gaze_heatmaps(params)
 # plotter.plot_fixation_heatmaps(params)
 
 
-'''
-if params.get('remake_fixations') or params.get('remake_fixation_labels'):
-    fixations_m1, fix_timepos_m1, fixation_labels_m1 = \
-        filter_behavior.extract_fixations_with_labels_parallel(
-            labelled_gaze_positions_m1, params)  # The first file has funky session stop times
-else:
-    fixations_m1, fix_timepos_m1 = load_data.load_m1_fixations(params)
-    fixation_labels_m1 = load_data.load_m1_fixation_labels(params)
-
-
-
-# ROIs fixated on
-rois_with_fixatins = fixation_labels_m1['fix_roi'].unique()
-print(f"Remap ROI: {params['map_roi_coord_to_eyelink_space']}\n")
-print(f"Remap gaze positions: {params['map_gaze_pos_coord_to_eyelink_space']}\n")
-print(f'Rois with fixations detected in them are:\n{rois_with_fixatins}\n')
-
-# ROI Indices
-face_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'face_bbox'
-eye_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'eye_bbox'
-left_obj_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'left_obj_bbox'
-right_obj_roi_bool_inds = fixation_labels_m1['fix_roi'] == 'right_obj_bbox'
-
-# Agent Indices
-lynch_bool_inds = fixation_labels_m1['agent'] == 'Lynch'
-tarantino_bool_inds = fixation_labels_m1['agent'] == 'Tarantino'
-
-# Monitor up or down
-mon_up_bool_inds = fixation_labels_m1['block'] == 'mon_up'
-mon_down_bool_inds = fixation_labels_m1['block'] == 'mon_down'
-
-all_sessions = fixation_labels_m1['session_name'].unique()
-
-plotter.plot_fixation_proportions_for_diff_conditions(fixation_labels_m1, params)
-
-
-for session in all_sessions:
-    session_fix_bool_inds = fixation_labels_m1['session_name'] == session
-    session_unit_indices = np.where(spikeTs_labels['session_name'] == session)[0]
-    for unit_index in session_unit_indices:
-        unit_spikeTs_s = spikeTs_s[unit_index]
-'''
-
-
-
-
 
 
 """
-# Find saccades
-saccades_m1, saccade_labels_m1 = filter_behavior.extract_saccades_with_labels(labelled_gaze_positions_m1)
-np.save(os.path.join(root_data_dir, 'saccades_m1.npz'), saccades_m1)
-np.save(os.path.join(root_data_dir, 'saccade_labels_m1.npz'), saccade_labels_m1)
-
-# for each neuron see eye vs obj and also central fix (in interval) vs obj
-
-saccade_lengths_m1 = [saccade.shape[0] for saccade in saccades_m1]
-# Plot the histogram
-plt.hist(saccade_lengths_m1, bins=50, color='skyblue', edgecolor='black')
-plt.xlabel('Number of Samples')
-plt.ylabel('Frequency')
-plt.title('Histogram of Saccade Lengths')
-plt.grid(True)
-plt.show()
-
-
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
 
