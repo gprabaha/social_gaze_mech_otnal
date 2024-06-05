@@ -213,6 +213,28 @@ def load_m1_fixation_labels(params):
     return fixation_labels_m1
 
 
+def load_saccade_labels(params):
+    """
+    Loads the labelled saccades from a specified directory.
+    Parameters:
+    - params (dict): Dictionary containing parameters including the load directory.
+    Returns:
+    - labelled_saccades (DataFrame): DataFrame containing saccade information with labels.
+    """
+    processed_data_dir = params['processed_data_dir']
+    flag_info = util.get_filename_flag_info(params)
+    file_path = os.path.join(processed_data_dir, f'labelled_saccades_{flag_info}.csv')
+    
+    if os.path.exists(file_path):
+        labelled_saccades = pd.read_csv(file_path)
+        print(f"Saccade labels loaded from {file_path}")
+        return labelled_saccades
+    else:
+        print(f"No file found at {file_path}")
+        return None
+
+
+
 def get_spiketimes_and_labels_for_one_session(session_path):
     """
     Extracts spike times and labels from a session.
