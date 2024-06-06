@@ -82,9 +82,10 @@ if params.get('remake_saccades'):
 else:
     labelled_saccades_m1 = load_data.load_saccade_labels(params)
 
-
-labelled_spiketimes = filter_behavior.extract_spiketimes_for_all_sessions(params)
-
+if params.get('remake_spikeTs'):
+    labelled_spiketimes = filter_behavior.extract_spiketimes_for_all_sessions(params)
+else:
+    labelled_spiketimes = load_data.load_processed_spiketimes(params)
 
 # plotter.plot_fixation_proportions_for_diff_conditions(params)
 # plotter.plot_gaze_heatmaps(params)

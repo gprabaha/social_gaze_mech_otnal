@@ -555,9 +555,9 @@ def extract_saccades_for_session(session_data):
             start_time = time_vec[start]
             end_time = time_vec[stop]
             duration = end_time - start_time
-            start_roi = determine_roi(run_positions[start, :2],
+            start_roi = determine_roi_of_coord(run_positions[start, :2],
                                       info['roi_bb_corners'])
-            end_roi = determine_roi(run_positions[stop, :2],
+            end_roi = determine_roi_of_coord(run_positions[stop, :2],
                                     info['roi_bb_corners'])
             block = determine_block(
                 start_time, end_time, info['startS'], info['stopS'])
@@ -592,7 +592,7 @@ def find_saccades(x, y, sr, vel_thresh, min_samples, smooth_func):
     return start_stops
 
 
-def determine_roi(position, bbox_corners):
+def determine_roi_of_coord(position, bbox_corners):
     """
     Determines the ROI based on position and bounding box corners.
     Parameters:

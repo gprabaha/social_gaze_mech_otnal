@@ -77,7 +77,8 @@ def load_farplane_cal_and_get_bl_and_tr_roi_coords_m1(session_path, params):
     Extracts M1 ROI bounding boxes from session path.
     Parameters:
     - session_path (str): Path to the session directory.
-    - params (dict): Dictionary containing parameters including session path and map_roi_coord_to_eyelink_space flag.
+    - params (dict): Dictionary containing parameters including session path
+    and map_roi_coord_to_eyelink_space flag.
     Returns:
     - bbox_dict (dict): Dictionary containing M1 ROI bounding boxes.
     """
@@ -271,31 +272,17 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
         return pd.DataFrame(columns=label_cols)
 
 
-def load_processed_spike_data(params):
-    """
-    Load processed spike data from files.
-    Parameters:
-    - params (dict): Dictionary containing root data directory and other parameters.
-    Returns:
-    - spikeTs_s (list): List of spike times in seconds.
-    - spikeTs_ms (list): List of spike times in milliseconds.
-    - spike_labels (DataFrame): DataFrame containing spike labels.
-    """
-    root_data_dir = params.get('root_data_dir')
+def load_processed_spiketimes(params):
+    processed_data_dir = params.get('processed_data_dir')
     flag_info = util.get_filename_flag_info(params)
-    # Load spikeTs_s
-    spiketimes_s_path = os.path.join(root_data_dir, f'spiketimes_s{flag_info}.pkl')
-    with open(spiketimes_s_path, 'rb') as f:
-        spikeTs_s = pickle.load(f)
-    # Load spikeTs_ms
-    spiketimes_ms_path = os.path.join(root_data_dir, f'spiketimes_ms{flag_info}.pkl')
-    with open(spiketimes_ms_path, 'rb') as f:
-        spikeTs_ms = pickle.load(f)
-    # Load spike labels
-    labels_path = os.path.join(root_data_dir, f'spike_labels{flag_info}.csv')
-    spike_labels = pd.read_csv(labels_path)
-    return spikeTs_s, spikeTs_ms, spike_labels
-
+    labels_path = os.path.join(
+        processed_data_dir, f'spike_labels{flag_info}.csv')
+    if os.path.exists(labels_path):
+        labelled_spiketimes = pd.read_csv(labels_path)
+        print(f"All labelled spiketimes loaded from {labels_path}")
+        return labelled_spiketimes
+    else:
+        raise FileNotFoundError(f"No such file: {labels_path}")
 
 
 
