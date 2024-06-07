@@ -747,9 +747,13 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
     raster_bin_size = float(params['raster_bin_size'])
     raster_pre_event_time = float(params['raster_pre_event_time'])
     raster_post_event_time = float(params['raster_post_event_time'])
+    num_bins = int(
+        (raster_pre_event_time + raster_post_event_time) / raster_bin_size)
     # Filter data for the current session
-    session_fixations = labelled_fixations[labelled_fixations['session_name'] == session]
-    session_neurons = labelled_spiketimes[labelled_spiketimes['session_name'] == session]
+    session_fixations = labelled_fixations[
+        labelled_fixations['session_name'] == session]
+    session_neurons = labelled_spiketimes[
+        labelled_spiketimes['session_name'] == session]
     # Pre-allocate memory for the dataframe
     num_neurons = session_neurons['uuid'].nunique()
     num_fixations = session_fixations.shape[0]
@@ -763,20 +767,31 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
     session_data = pd.DataFrame(index=np.arange(num_rasters), columns=columns)
     idx = 0  # Index for pre-allocated dataframe
     # Create a tqdm progress bar for unit processing within the session
-    for uuid in tqdm(session_neurons['uuid'].unique(), 
+    for uuid in tqdm(session_neurons['uuid'].unique(),
                      desc=f"Processing unit in session {session}"):
-        neuron_spikes_str = session_neurons[session_neurons['uuid'] == uuid]['spikeS'].values[0]
-        neuron_spikes = ast.literal_eval(neuron_spikes_str)
+        neuron_spikes_str = session_neurons[
+            session_neurons['uuid'] == uuid]['spikeS'].values[0]
+        neuron_spikes = np.array(ast.literal_eval(neuron_spikes_str))
         for _, fixation in session_fixations.iterrows():
             for aligned_to in ['start_time', 'end_time']:
                 event_time = float(fixation[aligned_to])
-                bins = np.arange(event_time - raster_pre_event_time,
-                                 event_time + raster_post_event_time,
-                                 raster_bin_size)
-                raster = generate_binary_raster(neuron_spikes, bins)
-                session_data = update_session_data(
-                    session_data, idx, raster, fixation,
-                    session_neurons, uuid, aligned_to)
+                window_start = event_time - raster_pre_event_time
+                window_end = event_time + raster_post_event_time
+                # Filter spikes within the window of interest
+                relevant_spikes = neuron_spikes[
+                    (neuron_spikes >= window_start) &
+                    (neuron_spikes < window_end)]
+                # Initialize binary raster
+                raster = np.zeros(num_bins, dtype=int)
+                # Update the raster with relevant spikes
+                for spike_time in relevant_spikes:
+                    bin_idx = int(
+                        (spike_time - window_start) / raster_bin_size)
+                    if bin_idx < num_bins:
+                        raster[bin_idx] = 1
+                session_data = update_session_data(session_data, idx, raster,
+                                                   fixation, session_neurons,
+                                                   uuid, aligned_to)
                 idx += 1
     return session_data
 

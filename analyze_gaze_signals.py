@@ -16,7 +16,7 @@ import plotter
 params = {}
 params.update({
     'is_cluster': True,
-    'use_parallel': False,
+    'use_parallel': True,
     'remake_labelled_gaze_pos': False,
     'remake_fixations': False,
     'remake_fixation_labels': False,
@@ -32,7 +32,7 @@ params.update({
     'offset_multiples_in_x_dir': 3,
     'offset_multiples_in_y_dir': 1.5,
     'bbox_expansion_factor': 1.3,
-    'raster_bin_size': 0.001,        # in seconds
+    'raster_bin_size': 0.001, # in seconds
     'raster_pre_event_time': 0.5,
     'raster_post_event_time': 0.5
 })
