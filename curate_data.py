@@ -26,22 +26,22 @@ import fix
 import pdb
 
 
-### Function to extract meta-information from session paths
-def extract_meta_info(params):
+### Function to extract meta-information and update params
+def extract_and_update_meta_info(params):
     """
-    Extracts meta-information from files in session paths.
+    Extracts meta-information from files in session paths and updates the params dictionary.
     Parameters:
-    - session_paths (list): List of paths to sessions.
+    - params (dict): Dictionary containing session paths and other parameters.
     Returns:
-    - meta_info_list (list): List of dictionaries containing meta-information 
-   for each session.
+    - params (dict): Updated dictionary with meta-information and dose arrays.
     """
     meta_info_list = []
     for session_path in params['session_paths']:
         dose_info = load_data.get_monkey_and_dose_data(session_path)
         if dose_info is not None:
-            meta_info = {'session_name':
-                         os.path.basename(os.path.normpath(session_path))}
+            meta_info = {
+                'session_name': os.path.basename(
+                    os.path.normpath(session_path))}
             meta_info.update(dose_info)
             runs_info = load_data.get_runs_data(session_path)
             meta_info.update(runs_info)
@@ -49,7 +49,13 @@ def extract_meta_info(params):
                 load_data.load_farplane_cal_and_get_bl_and_tr_roi_coords_m1(
                     session_path, params)
             meta_info_list.append(meta_info)
-    return meta_info_list
+    params['meta_info_list'] = meta_info_list
+    otnal_doses = np.array(
+        [[meta_info['OT_dose'], meta_info['NAL_dose']]
+         for meta_info in meta_info_list], dtype=np.float64)
+    params['otnal_doses'] = otnal_doses
+    return params
+
 
 
 ### Function to get unique doses
@@ -458,7 +464,7 @@ def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_
         else:
             run = None
             block = 'discard'
-    fix_roi = determine_roi(mean_fix_pos, bbox_corners)
+    fix_roi = determine_fix_roi(mean_fix_pos, bbox_corners)
     return run, block, fix_roi
 
 
