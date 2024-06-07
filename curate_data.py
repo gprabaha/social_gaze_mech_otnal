@@ -734,13 +734,11 @@ def extract_fixation_raster(labelled_fixations, labelled_spiketimes, params):
 def generate_session_raster(session, labelled_fixations, labelled_spiketimes, params):
     """
     Function to generate rasters for a single session.
-
     Parameters:
     session (str): The name of the session to process.
     labelled_fixations (pd.DataFrame): DataFrame containing fixation data.
     labelled_spiketimes (pd.DataFrame): DataFrame containing spiketimes data.
     params (dict): Dictionary containing parameters for raster generation.
-
     Returns:
     pd.DataFrame: DataFrame containing rasters and labels for the session.
     """
@@ -766,48 +764,77 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
     session_data = pd.DataFrame(index=np.arange(num_rasters), columns=columns)
     idx = 0  # Index for pre-allocated dataframe
     # Create a tqdm progress bar for unit processing within the session
-    for uuid in tqdm(
-            session_neurons['uuid'].unique(),
-            desc=f"Processing Units in Session {session}"):
-        neuron_spikes = session_neurons[
-            session_neurons['uuid'] == uuid]['spikeS']
+    # Create a tqdm progress bar for unit processing within the session
+    for uuid in tqdm(session_neurons['uuid'].unique(), desc=f"Processing Units in Session {session}"):
+        neuron_spikes = session_neurons[session_neurons['uuid'] == uuid]['spikeS']
         for _, fixation in session_fixations.iterrows():
             for aligned_to in ['start_time', 'end_time']:
                 event_time = fixation[aligned_to]
-                # Define bins for the histogram
-                bins = np.arange(event_time - raster_pre_event_time,
-                                 event_time + raster_post_event_time,
-                                 raster_bin_size)
-                # Generate binary raster
-                raster = np.histogram(neuron_spikes, bins=bins)[0]
-                raster = (raster > 0).astype(int)
-                # Update the pre-allocated DataFrame
-                session_data.at[idx, 'raster'] = raster
-                session_data.at[idx, 'category'] = fixation['category']
-                session_data.at[idx, 'session_name'] = fixation['session_name']
-                session_data.at[idx, 'run'] = fixation['run']
-                session_data.at[idx, 'block'] = fixation['block']
-                session_data.at[idx, 'fix_duration'] = fixation['fix_duration']
-                session_data.at[idx, 'mean_x_pos'] = fixation['mean_x_pos']
-                session_data.at[idx, 'mean_y_pos'] = fixation['mean_y_pos']
-                session_data.at[idx, 'fix_roi'] = fixation['fix_roi']
-                session_data.at[idx, 'agent'] = fixation['agent']
-                session_data.at[idx, 'channel'] = session_neurons[
-                    session_neurons['uuid'] == uuid]['channel'].values[0]
-                session_data.at[idx, 'channel_label'] = session_neurons[
-                    session_neurons['uuid'] == uuid]['channel_label'].values[0]
-                session_data.at[idx, 'unit_no_within_channel'] = session_neurons[
-                    session_neurons['uuid'] == uuid]['unit_no_within_channel'].values[0]
-                session_data.at[idx, 'unit_label'] = session_neurons[
-                    session_neurons['uuid'] == uuid]['unit_label'].values[0]
-                session_data.at[idx, 'uuid'] = uuid
-                session_data.at[idx, 'n_spikes'] = session_neurons[
-                    session_neurons['uuid'] == uuid]['n_spikes'].values[0]
-                session_data.at[idx, 'region'] = session_neurons[
-                    session_neurons['uuid'] == uuid]['region'].values[0]
-                session_data.at[idx, 'aligned_to'] = aligned_to
-                session_data.at[idx, 'behavior'] = 'fixation'
+                bins = np.arange(
+                    event_time - raster_pre_event_time,
+                    event_time + raster_post_event_time,
+                    raster_bin_size)
+                raster = generate_binary_raster(neuron_spikes, bins)
+                session_data = update_session_data(
+                    session_data, idx, raster, fixation,
+                    session_neurons, uuid, aligned_to)
                 idx += 1
+    return session_data
+
+
+def generate_binary_raster(neuron_spikes, bins):
+    """
+    Function to generate a binary raster for the given neuron spikes and bins.
+    Parameters:
+    neuron_spikes (np.ndarray): Array containing neuron spike times.
+    bins (np.ndarray): Array containing the bin edges.
+    Returns:
+    np.ndarray: Binary raster.
+    """
+    raster = np.histogram(neuron_spikes, bins=bins)[0]
+    raster = (raster > 0).astype(int)
+    return raster
+
+
+def update_session_data(session_data, idx, raster, fixation, session_neurons, uuid, aligned_to):
+    """
+    Function to update the session data DataFrame with raster and label information.
+    Parameters:
+    session_data (pd.DataFrame): DataFrame to be updated.
+    idx (int): Index to update.
+    raster (np.ndarray): Binary raster.
+    fixation (pd.Series): Series containing fixation information.
+    session_neurons (pd.DataFrame): DataFrame containing neuron information.
+    uuid (str): Unique identifier for the neuron.
+    aligned_to (str): Indicates whether the raster is aligned to start_time or end_time.
+    Returns:
+    pd.DataFrame: Updated session data DataFrame.
+    """
+    session_data.at[idx, 'raster'] = raster
+    session_data.at[idx, 'category'] = fixation['category']
+    session_data.at[idx, 'session_name'] = fixation['session_name']
+    session_data.at[idx, 'run'] = fixation['run']
+    session_data.at[idx, 'block'] = fixation['block']
+    session_data.at[idx, 'fix_duration'] = fixation['fix_duration']
+    session_data.at[idx, 'mean_x_pos'] = fixation['mean_x_pos']
+    session_data.at[idx, 'mean_y_pos'] = fixation['mean_y_pos']
+    session_data.at[idx, 'fix_roi'] = fixation['fix_roi']
+    session_data.at[idx, 'agent'] = fixation['agent']
+    session_data.at[idx, 'channel'] = session_neurons[
+        session_neurons['uuid'] == uuid]['channel'].values[0]
+    session_data.at[idx, 'channel_label'] = session_neurons[
+        session_neurons['uuid'] == uuid]['channel_label'].values[0]
+    session_data.at[idx, 'unit_no_within_channel'] = session_neurons[
+        session_neurons['uuid'] == uuid]['unit_no_within_channel'].values[0]
+    session_data.at[idx, 'unit_label'] = session_neurons[
+        session_neurons['uuid'] == uuid]['unit_label'].values[0]
+    session_data.at[idx, 'uuid'] = uuid
+    session_data.at[idx, 'n_spikes'] = session_neurons[
+        session_neurons['uuid'] == uuid]['n_spikes'].values[0]
+    session_data.at[idx, 'region'] = session_neurons[
+        session_neurons['uuid'] == uuid]['region'].values[0]
+    session_data.at[idx, 'aligned_to'] = aligned_to
+    session_data.at[idx, 'behavior'] = 'fixation'
     return session_data
 
 
