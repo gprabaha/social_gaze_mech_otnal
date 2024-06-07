@@ -6,12 +6,10 @@ Created on Tue Apr  9 10:25:48 2024
 @author: pg496
 """
 
-import matplotlib.pyplot as plt
-import numpy as np
 
-import load_data
 import util
 import curate_data
+import load_data
 import plotter
 
 
@@ -25,14 +23,17 @@ params.update({
     'remake_saccades': False,
     'remake_spikeTs': False,
     'make_plots': False,
-    'remap_source_coord_from_inverted_to_standard_y_axis': True, # !!Important
+    'remap_source_coord_from_inverted_to_standard_y_axis': True,  # !!Important
     'map_roi_coord_to_eyelink_space': False,
     'map_gaze_pos_coord_to_eyelink_space': True,
     'export_plots_to_local_folder': False,
     'inter_eye_dist_denom_for_eye_bbox_offset': 2,
     'offset_multiples_in_x_dir': 3,
     'offset_multiples_in_y_dir': 1.5,
-    'bbox_expansion_factor': 1.3
+    'bbox_expansion_factor': 1.3,
+    'raster_bin_size': 0.001,        # in seconds
+    'raster_pre_event_time': 0.5,
+    'raster_post_event_time': 0.5
 })
 
 """
@@ -61,14 +62,15 @@ if params.get('remake_labelled_gaze_pos'):
     labelled_gaze_positions_m1 = \
         curate_data.extract_labelled_gaze_positions_m1(params)
 else:
-    labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(params)
+    labelled_gaze_positions_m1 = \
+        load_data.load_labelled_gaze_positions(params)
 
 
 if params.get('remake_fixations') or params.get('remake_fixation_labels'):
-    all_fixation_labels = curate_data.extract_fixations_with_labels_parallel(
+    labelled_fixations = curate_data.extract_fixations_with_labels_parallel(
         labelled_gaze_positions_m1, params)  # The first file has funky session stop times
 else:
-    all_fixation_labels = load_data.load_m1_fixation_labels(params)
+    labelled_fixations = load_data.load_m1_fixation_labels(params)
 
 
 if params.get('remake_saccades'):
@@ -79,14 +81,18 @@ else:
 
 
 if params.get('remake_spikeTs'):
-    labelled_spiketimes = curate_data.extract_spiketimes_for_all_sessions(params)
+    labelled_spiketimes = \
+        curate_data.extract_spiketimes_for_all_sessions(params)
 else:
     labelled_spiketimes = load_data.load_processed_spiketimes(params)
+
 
 if params.get('make_plots'):
     plotter.plot_fixation_proportions_for_diff_conditions(params)
     plotter.plot_gaze_heatmaps(params)
     plotter.plot_fixation_heatmaps(params)
+
+
 
 
 

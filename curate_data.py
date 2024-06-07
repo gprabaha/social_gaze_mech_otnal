@@ -14,6 +14,7 @@ import multiprocessing
 from multiprocessing import Pool
 from joblib import Parallel, delayed
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import concurrent.futures
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -202,9 +203,9 @@ def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
     use_parallel = params.get('use_parallel', True)
     all_fix_timepos, fix_detection_results = extract_or_load_fixations(
         labelled_gaze_positions, params)
-    all_fixation_labels = generate_fixation_labels(
+    labelled_fixations = generate_fixation_labels(
         fix_detection_results, params, use_parallel)
-    return all_fixation_labels
+    return labelled_fixations
 
 
 def extract_or_load_fixations(labelled_gaze_positions, params):
@@ -254,7 +255,7 @@ def generate_fixation_labels(fix_detection_results, params, use_parallel):
     - params (dict): Dictionary of parameters.
     - use_parallel (bool): Whether to use parallel processing.
     Returns:
-    - all_fixation_labels (pd.DataFrame): DataFrame of labels for fixations.
+    - labelled_fixations (pd.DataFrame): DataFrame of labels for fixations.
     """
     processed_data_dir = params['processed_data_dir']
     flag_info = util.get_filename_flag_info(params)
@@ -262,20 +263,20 @@ def generate_fixation_labels(fix_detection_results, params, use_parallel):
         fixation_labels = parallel_generate_labels(
             fix_detection_results) if use_parallel \
             else serial_generate_labels(fix_detection_results)
-        all_fixation_labels = []
+        labelled_fixations = []
         for session_labels in fixation_labels:
-            all_fixation_labels.extend(session_labels)
+            labelled_fixations.extend(session_labels)
         col_names = ['start_time', 'end_time', 'category', 'session_name',
                      'run', 'block', 'fix_duration', 'mean_x_pos',
                      'mean_y_pos', 'fix_roi', 'agent']
-        all_fixation_labels = pd.DataFrame(all_fixation_labels,
-                                           columns=col_names)
+        labelled_fixations = pd.DataFrame(labelled_fixations,
+                                          columns=col_names)
         fixation_labels_file_name = f'fixation_labels_m1{flag_info}.csv'
-        all_fixation_labels.to_csv(os.path.join(
+        labelled_fixations.to_csv(os.path.join(
             processed_data_dir,fixation_labels_file_name), index=False)
     else:
-        all_fixation_labels = load_data.load_m1_fixation_labels(params)
-    return all_fixation_labels
+        labelled_fixations = load_data.load_m1_fixation_labels(params)
+    return labelled_fixations
 
 
 def parallel_generate_labels(fix_detection_results):
@@ -431,7 +432,8 @@ def add_labels_to_fixations(fix_detection_result):
 
 
 ### Function to detect run, block, and ROI for a fixation
-def detect_run_block_and_roi(start_stop, startS, stopS, sampling_rate, mean_fix_pos, bbox_corners):
+def detect_run_block_and_roi(start_stop, startS, stopS, 
+                            sampling_rate, mean_fix_pos, bbox_corners):
     """
     Detects run, block, and ROI for a fixation.
     Parameters:
@@ -524,7 +526,8 @@ def extract_saccades_with_labels(labelled_gaze_positions, params):
                         unit="session")]
     saccades = [s for session_saccades in results for s in session_saccades]
     columns = ["start_time", "end_time", "duration", "trajectory",
-               "start_roi", "end_roi", "session_name", "category", "run", "block"]
+               "start_roi", "end_roi", "session_name", "category",
+               "run", "block"]
     labelled_saccades = pd.DataFrame(saccades, columns=columns)
     save_saccade_labels(labelled_saccades, params)
     return labelled_saccades
@@ -607,8 +610,10 @@ def determine_roi_of_coord(position, bbox_corners):
     Returns:
     - roi (str): Detected ROI.
     """
-    bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
-    inside_roi = [util.is_inside_roi(position, bbox_corners[key]) for key in bounding_boxes]
+    bounding_boxes = ['eye_bbox', 'face_bbox',
+                      'left_obj_bbox', 'right_obj_bbox']
+    inside_roi = [util.is_inside_roi(position, bbox_corners[key])
+                  for key in bounding_boxes]
     if any(inside_roi):
         if inside_roi[0] and inside_roi[1]:
             return bounding_boxes[0]
@@ -648,7 +653,8 @@ def save_saccade_labels(labelled_saccades, params):
     flag_info = util.get_filename_flag_info(params)
     if not os.path.exists(processed_data_dir):
         os.makedirs(processed_data_dir)
-    file_path = os.path.join(processed_data_dir, f'labelled_saccades{flag_info}.csv')
+    file_path = os.path.join(
+        processed_data_dir, f'labelled_saccades{flag_info}.csv')
     labelled_saccades.to_csv(file_path, index=False)
     print(f"Saccade labels saved to {file_path}")
 
@@ -666,7 +672,8 @@ def extract_spiketimes_for_all_sessions(params):
             for session_path in tqdm(
                     session_paths, desc='Loading spiketimes'))
         # Iterate over results and concatenate
-        for labelled_spiketimes in tqdm(results, desc='concatenating results'):
+        for labelled_spiketimes in tqdm(
+                results, desc='concatenating results'):
             spikeTs_labels.append(labelled_spiketimes)
     else:
         # Process sessions sequentially
@@ -683,12 +690,146 @@ def extract_spiketimes_for_all_sessions(params):
     # Construct flag_info based on params
     flag_info = util.get_filename_flag_info(params)
     # Save outputs to root_data_dir with flag_info
-    labels_path = os.path.join(processed_data_dir, f'spike_labels{flag_info}.csv')
+    labels_path = os.path.join(
+        processed_data_dir, f'spike_labels{flag_info}.csv')
     # Save DataFrame
     all_labels.to_csv(labels_path, index=False)
     print(f"All labelled spiketimes saved to {labels_path}")
     return all_labels
 
+
+def extract_fixation_raster(labelled_fixations, labelled_spiketimes, params):
+    """
+    Main function to generate rasters for all sessions in parallel.
+
+    Parameters:
+    labelled_fixations (pd.DataFrame): DataFrame containing fixation data.
+    labelled_spiketimes (pd.DataFrame): DataFrame containing spiketimes data.
+    params (dict): Dictionary containing parameters for raster generation.
+    flag_info (str): Additional flag information to append to the filename.
+
+    Returns:
+    pd.DataFrame: DataFrame containing all generated rasters and labels.
+    """
+    # Extract unique session names
+    sessions = labelled_fixations['session_name'].unique()
+    results = []
+    # Create a tqdm progress bar for session processing
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Submit tasks for each session
+        futures = {executor.submit(
+            generate_session_raster, session, labelled_fixations,
+            labelled_spiketimes, params): session for session in sessions}
+        for future in tqdm(
+                concurrent.futures.as_completed(futures),
+                total=len(futures), desc="Processing Sessions"):
+            results.append(future.result())
+    # Concatenate all session DataFrames into a single DataFrame
+    labelled_fixation_rasters = pd.concat(results, ignore_index=True)
+    # Save the DataFrame
+    save_labelled_fixation_rasters(labelled_fixation_rasters, params)
+    return labelled_fixation_rasters
+
+
+def generate_session_raster(session, labelled_fixations, labelled_spiketimes, params):
+    """
+    Function to generate rasters for a single session.
+
+    Parameters:
+    session (str): The name of the session to process.
+    labelled_fixations (pd.DataFrame): DataFrame containing fixation data.
+    labelled_spiketimes (pd.DataFrame): DataFrame containing spiketimes data.
+    params (dict): Dictionary containing parameters for raster generation.
+
+    Returns:
+    pd.DataFrame: DataFrame containing rasters and labels for the session.
+    """
+    # Extract parameters
+    raster_bin_size = params['raster_bin_size']
+    raster_pre_event_time = params['raster_pre_event_time']
+    raster_post_event_time = params['raster_post_event_time']
+    # Filter data for the current session
+    session_fixations = labelled_fixations[
+        labelled_fixations['session_name'] == session]
+    session_neurons = labelled_spiketimes[
+        labelled_spiketimes['session_name'] == session]
+    # Pre-allocate memory for the dataframe
+    num_neurons = session_neurons['uuid'].nunique()
+    num_fixations = session_fixations.shape[0]
+    num_rasters = num_neurons * num_fixations * 2  # 2 for start_time and end_time
+    # Pre-initialize the DataFrame
+    columns = ['raster', 'category', 'session_name', 'run', 'block',
+               'fix_duration', 'mean_x_pos', 'mean_y_pos', 'fix_roi',
+               'agent', 'channel', 'channel_label', 'unit_no_within_channel',
+               'unit_label', 'uuid', 'n_spikes', 'region',
+               'aligned_to', 'behavior']
+    session_data = pd.DataFrame(index=np.arange(num_rasters), columns=columns)
+    idx = 0  # Index for pre-allocated dataframe
+    # Create a tqdm progress bar for unit processing within the session
+    for uuid in tqdm(
+            session_neurons['uuid'].unique(),
+            desc=f"Processing Units in Session {session}"):
+        neuron_spikes = session_neurons[
+            session_neurons['uuid'] == uuid]['spikeS']
+        for _, fixation in session_fixations.iterrows():
+            for aligned_to in ['start_time', 'end_time']:
+                event_time = fixation[aligned_to]
+                # Define bins for the histogram
+                bins = np.arange(event_time - raster_pre_event_time,
+                                 event_time + raster_post_event_time,
+                                 raster_bin_size)
+                # Generate binary raster
+                raster = np.histogram(neuron_spikes, bins=bins)[0]
+                raster = (raster > 0).astype(int)
+                # Update the pre-allocated DataFrame
+                session_data.at[idx, 'raster'] = raster
+                session_data.at[idx, 'category'] = fixation['category']
+                session_data.at[idx, 'session_name'] = fixation['session_name']
+                session_data.at[idx, 'run'] = fixation['run']
+                session_data.at[idx, 'block'] = fixation['block']
+                session_data.at[idx, 'fix_duration'] = fixation['fix_duration']
+                session_data.at[idx, 'mean_x_pos'] = fixation['mean_x_pos']
+                session_data.at[idx, 'mean_y_pos'] = fixation['mean_y_pos']
+                session_data.at[idx, 'fix_roi'] = fixation['fix_roi']
+                session_data.at[idx, 'agent'] = fixation['agent']
+                session_data.at[idx, 'channel'] = session_neurons[
+                    session_neurons['uuid'] == uuid]['channel'].values[0]
+                session_data.at[idx, 'channel_label'] = session_neurons[
+                    session_neurons['uuid'] == uuid]['channel_label'].values[0]
+                session_data.at[idx, 'unit_no_within_channel'] = session_neurons[
+                    session_neurons['uuid'] == uuid]['unit_no_within_channel'].values[0]
+                session_data.at[idx, 'unit_label'] = session_neurons[
+                    session_neurons['uuid'] == uuid]['unit_label'].values[0]
+                session_data.at[idx, 'uuid'] = uuid
+                session_data.at[idx, 'n_spikes'] = session_neurons[
+                    session_neurons['uuid'] == uuid]['n_spikes'].values[0]
+                session_data.at[idx, 'region'] = session_neurons[
+                    session_neurons['uuid'] == uuid]['region'].values[0]
+                session_data.at[idx, 'aligned_to'] = aligned_to
+                session_data.at[idx, 'behavior'] = 'fixation'
+                idx += 1
+    return session_data
+
+
+def save_labelled_fixation_rasters(labelled_fixation_rasters, params):
+    """
+    Function to save the labelled fixation rasters DataFrame to a specified directory.
+
+    Parameters:
+    labelled_fixation_rasters (pd.DataFrame): DataFrame containing all generated rasters and labels.
+    params (dict): Dictionary containing parameters including the directory to save the processed data.
+    flag_info (str): Additional flag information to append to the filename.
+    """
+    processed_data_dir = params['processed_data_dir']
+    # Create directory if it doesn't exist
+    os.makedirs(processed_data_dir, exist_ok=True)
+    # Construct the filename
+    flag_info = util.get_filename_flag_info(params)
+    filename = f"labelled_fixation_rasters{flag_info}.csv"
+    file_path = os.path.join(processed_data_dir, filename)
+    # Save the DataFrame to a CSV file
+    labelled_fixation_rasters.to_csv(file_path, index=False)
+    print(f"Data saved to {file_path}")
 
 
 

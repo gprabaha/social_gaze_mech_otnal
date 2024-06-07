@@ -47,6 +47,22 @@ def fetch_processed_data_dir(params):
     return processed_data_dir, params
 
 
+def get_filename_flag_info(params):
+    """
+    Constructs a filename flag based on specified parameters.
+    Parameters:
+    - params (dict): Dictionary containing parameters.
+    Returns:
+    - flag_info (str): Filename flag.
+    """
+    flag_info = ""
+    if params.get('map_roi_coord_to_eyelink_space', False):
+        flag_info += "_remapped_roi"
+    if params.get('map_gaze_pos_coord_to_eyelink_space', False):
+        flag_info += "_remapped_gaze"
+    return flag_info
+
+
 def fetch_session_subfolder_paths_from_source(params):
     """
     Retrieves subfolders within a given directory.
@@ -284,22 +300,6 @@ def construct_object_bounding_box(m1_landmarks, params, which_object):
     return remap_source_coords(bbox_dict, params, 'stretch_from_center_of_mass')
 
 
-def get_filename_flag_info(params):
-    """
-    Constructs a filename flag based on specified parameters.
-    Parameters:
-    - params (dict): Dictionary containing parameters.
-    Returns:
-    - flag_info (str): Filename flag.
-    """
-    flag_info = ""
-    if params.get('map_roi_coord_to_eyelink_space', False):
-        flag_info += "_remapped_roi"
-    if params.get('map_gaze_pos_coord_to_eyelink_space', False):
-        flag_info += "_remapped_gaze"
-    return flag_info
-
-
 def create_timevec(n_samples, sampling_rate):
     """
     Creates a time vector based on the number of samples and sampling rate.
@@ -392,7 +392,6 @@ def is_inside_roi(coord, bbox_corner_dict):
     else:
         # List of coordinates case
         return [is_inside_single(c[0], c[1]) for c in coord]
-
 
 
 def distance(point1, point2):
