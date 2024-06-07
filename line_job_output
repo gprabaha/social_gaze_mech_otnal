@@ -1,0 +1,4 @@
+Saccade labels loaded from /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/labelled_saccades_remapped_gaze.csv
+All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/spike_labels_remapped_gaze.csv
+Generating raster for session:   0%|          | 0/31 [00:00<?, ?it/s]
+Processing unit in session OTNAL_FV_121021:   0%|          | 0/10 [00:00<?, ?it/s][A

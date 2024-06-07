@@ -16,12 +16,13 @@ import plotter
 params = {}
 params.update({
     'is_cluster': True,
-    'use_parallel': True,
+    'use_parallel': False,
     'remake_labelled_gaze_pos': False,
     'remake_fixations': False,
     'remake_fixation_labels': False,
     'remake_saccades': False,
     'remake_spikeTs': False,
+    'remake_raster': True,
     'make_plots': False,
     'remap_source_coord_from_inverted_to_standard_y_axis': True,  # !!Important
     'map_roi_coord_to_eyelink_space': False,
@@ -86,6 +87,12 @@ if params.get('remake_spikeTs'):
 else:
     labelled_spiketimes = load_data.load_processed_spiketimes(params)
 
+
+if params.get('remake_raster'):
+    labeled_fixation_rasters = curate_data.extract_fixation_raster(
+        labelled_fixations, labelled_spiketimes, params)
+else:
+    labeled_fixation_rasters = load_data.load_labelled_fixation_rasters(params)
 
 if params.get('make_plots'):
     plotter.plot_fixation_proportions_for_diff_conditions(params)

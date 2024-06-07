@@ -18,6 +18,7 @@ import concurrent.futures
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
+import ast
 
 import util
 import load_data
@@ -700,35 +701,35 @@ def extract_spiketimes_for_all_sessions(params):
 
 def extract_fixation_raster(labelled_fixations, labelled_spiketimes, params):
     """
-    Main function to generate rasters for all sessions in parallel.
-
+    Main function to generate rasters for all sessions.
     Parameters:
     labelled_fixations (pd.DataFrame): DataFrame containing fixation data.
     labelled_spiketimes (pd.DataFrame): DataFrame containing spiketimes data.
     params (dict): Dictionary containing parameters for raster generation.
-    flag_info (str): Additional flag information to append to the filename.
-
     Returns:
     pd.DataFrame: DataFrame containing all generated rasters and labels.
     """
-    # Extract unique session names
     sessions = labelled_fixations['session_name'].unique()
     results = []
-    # Create a tqdm progress bar for session processing
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        # Submit tasks for each session
-        futures = {executor.submit(
-            generate_session_raster, session, labelled_fixations,
-            labelled_spiketimes, params): session for session in sessions}
-        for future in tqdm(
-                concurrent.futures.as_completed(futures),
-                total=len(futures), desc="Processing Sessions"):
-            results.append(future.result())
-    # Concatenate all session DataFrames into a single DataFrame
+    num_sessions = len(sessions)
+    num_cores = os.cpu_count()
+    num_processes = min(num_sessions, num_cores)
+    if params.get('use_parallel', False):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
+            futures = {executor.submit(
+                generate_session_raster, session, labelled_fixations,
+                labelled_spiketimes, params): session for session in sessions}
+            for future in tqdm(concurrent.futures.as_completed(futures),
+                               total=len(futures), desc="Generating raster for session"):
+                results.append(future.result())
+    else:
+        for session in tqdm(sessions, desc="Generating raster for session"):
+            results.append(generate_session_raster(
+                session, labelled_fixations, labelled_spiketimes, params))
     labelled_fixation_rasters = pd.concat(results, ignore_index=True)
-    # Save the DataFrame
     save_labelled_fixation_rasters(labelled_fixation_rasters, params)
     return labelled_fixation_rasters
+
 
 
 def generate_session_raster(session, labelled_fixations, labelled_spiketimes, params):
@@ -743,14 +744,12 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
     pd.DataFrame: DataFrame containing rasters and labels for the session.
     """
     # Extract parameters
-    raster_bin_size = params['raster_bin_size']
-    raster_pre_event_time = params['raster_pre_event_time']
-    raster_post_event_time = params['raster_post_event_time']
+    raster_bin_size = float(params['raster_bin_size'])
+    raster_pre_event_time = float(params['raster_pre_event_time'])
+    raster_post_event_time = float(params['raster_post_event_time'])
     # Filter data for the current session
-    session_fixations = labelled_fixations[
-        labelled_fixations['session_name'] == session]
-    session_neurons = labelled_spiketimes[
-        labelled_spiketimes['session_name'] == session]
+    session_fixations = labelled_fixations[labelled_fixations['session_name'] == session]
+    session_neurons = labelled_spiketimes[labelled_spiketimes['session_name'] == session]
     # Pre-allocate memory for the dataframe
     num_neurons = session_neurons['uuid'].nunique()
     num_fixations = session_fixations.shape[0]
@@ -764,16 +763,16 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
     session_data = pd.DataFrame(index=np.arange(num_rasters), columns=columns)
     idx = 0  # Index for pre-allocated dataframe
     # Create a tqdm progress bar for unit processing within the session
-    # Create a tqdm progress bar for unit processing within the session
-    for uuid in tqdm(session_neurons['uuid'].unique(), desc=f"Processing Units in Session {session}"):
-        neuron_spikes = session_neurons[session_neurons['uuid'] == uuid]['spikeS']
+    for uuid in tqdm(session_neurons['uuid'].unique(), 
+                     desc=f"Processing unit in session {session}"):
+        neuron_spikes_str = session_neurons[session_neurons['uuid'] == uuid]['spikeS'].values[0]
+        neuron_spikes = ast.literal_eval(neuron_spikes_str)
         for _, fixation in session_fixations.iterrows():
             for aligned_to in ['start_time', 'end_time']:
-                event_time = fixation[aligned_to]
-                bins = np.arange(
-                    event_time - raster_pre_event_time,
-                    event_time + raster_post_event_time,
-                    raster_bin_size)
+                event_time = float(fixation[aligned_to])
+                bins = np.arange(event_time - raster_pre_event_time,
+                                 event_time + raster_post_event_time,
+                                 raster_bin_size)
                 raster = generate_binary_raster(neuron_spikes, bins)
                 session_data = update_session_data(
                     session_data, idx, raster, fixation,

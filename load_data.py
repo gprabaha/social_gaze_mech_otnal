@@ -285,6 +285,43 @@ def load_processed_spiketimes(params):
         raise FileNotFoundError(f"No such file: {labels_path}")
 
 
+def load_labelled_fixation_rasters(params):
+    """
+    Function to load the labelled fixation rasters DataFrame from the specified directory.
+    Parameters:
+    params (dict): Dictionary containing parameters including the directory to load the processed data from.
+    Returns:
+    pd.DataFrame: DataFrame containing the loaded rasters and labels.
+    """
+    # Get flag_info
+    flag_info = util.get_file_flag_info(params)
+    processed_data_dir = params['processed_data_dir']
+    # Construct the filename
+    filename = f"labelled_fixation_rasters{flag_info}.csv"
+    file_path = os.path.join(processed_data_dir, filename)
+    # Load the DataFrame from the CSV file
+    labelled_fixation_rasters = pd.read_csv(file_path)
+    print(f"Data loaded from {file_path}")
+    return labelled_fixation_rasters
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
