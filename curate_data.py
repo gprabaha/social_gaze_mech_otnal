@@ -719,8 +719,7 @@ def extract_fixation_raster(labelled_fixations, labelled_spiketimes, params):
             futures = {executor.submit(
                 generate_session_raster, session, labelled_fixations,
                 labelled_spiketimes, params): session for session in sessions}
-            for future in tqdm(concurrent.futures.as_completed(futures),
-                               total=len(futures), desc="Generating raster for session"):
+            for future in concurrent.futures.as_completed(futures):
                 results.append(future.result())
     else:
         for session in tqdm(sessions, desc="Generating raster for session"):

@@ -1,17 +1,17 @@
 Saccade labels loaded from /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/labelled_saccades_remapped_gaze.csv
 All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/spike_labels_remapped_gaze.csv
 Processing unit in session OTNAL_FV_061721: 0it [00:00, ?it/s]Processing unit in session OTNAL_FV_061721: 0it [00:00, ?it/s]
-Processing unit in session OTNAL_FV_121021:   0%|          | 0/10 [00:00<?, ?it/s]
-Processing unit in session OTNAL_FV_030921:   0%|          | 0/74 [00:00<?, ?it/s][A
+Processing unit in session OTNAL_FV_030921:   0%|          | 0/74 [00:00<?, ?it/s]
+Processing unit in session OTNAL_FV_121021:   0%|          | 0/10 [00:00<?, ?it/s][A
 
 Processing unit in session OTNAL_FV_062722:   0%|          | 0/30 [00:00<?, ?it/s][A[A
 
 
-Processing unit in session OTNAL_FV_062822:   0%|          | 0/29 [00:00<?, ?it/s][A[A[A
+Processing unit in session OTNAL_FV_062222:   0%|          | 0/37 [00:00<?, ?it/s][A[A[A
 
 
 
-Processing unit in session OTNAL_FV_062322:   0%|          | 0/43 [00:00<?, ?it/s][A[A[A[A
+Processing unit in session OTNAL_FV_031521:   0%|          | 0/55 [00:00<?, ?it/s][A[A[A[A
 
 
 
@@ -22,14 +22,14 @@ All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/o
 
 
 
-Processing unit in session OTNAL_FV_120221: 0it [00:00, ?it/s][A[A[A[A[A[A
+Processing unit in session OTNAL_FV_070522:   0%|          | 0/26 [00:00<?, ?it/s][A[A[A[A[A[A
 
 
 
 
 
 
-Generating raster for session:   0%|          | 0/31 [00:00<?, ?it/s][A[A[A[A[A[A[A
+Processing unit in session OTNAL_FV_120221: 0it [00:00, ?it/s][A[A[A[A[A[A[A
 
 
 
@@ -37,7 +37,7 @@ All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/o
 
 
 
-Processing unit in session OTNAL_FV_062222:   0%|          | 0/37 [00:00<?, ?it/s][A[A[A[A[A[A[A[A
+Processing unit in session OTNAL_FV_061521:   0%|          | 0/19 [00:00<?, ?it/s][A[A[A[A[A[A[A[A
 
 
 
@@ -46,7 +46,7 @@ All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/o
 
 
 
-Processing unit in session OTNAL_FV_060221:   0%|          | 0/57 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_073021: 0it [00:01, ?it/s]
+Processing unit in session OTNAL_FV_032421:   0%|          | 0/79 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A
 
 
 
@@ -56,8 +56,8 @@ All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/o
 
 
 
+Processing unit in session OTNAL_FV_062322:   0%|          | 0/43 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A
 
-Processing unit in session OTNAL_FV_062921:   0%|          | 0/35 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -67,8 +67,8 @@ All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/o
 
 
 
+Processing unit in session OTNAL_FV_060221:   0%|          | 0/57 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A
 
-Processing unit in session OTNAL_FV_031521:   0%|          | 0/55 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -79,8 +79,8 @@ All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/o
 
 
 
+Processing unit in session OTNAL_FV_062822:   0%|          | 0/29 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A
 
-Processing unit in session OTNAL_FV_070522:   0%|          | 0/26 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -92,8 +92,8 @@ All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/o
 
 
 
+Processing unit in session OTNAL_FV_062921:   0%|          | 0/35 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A
 
-Processing unit in session OTNAL_FV_062922:   0%|          | 0/15 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -107,7 +107,44 @@ All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/o
 
 
 
-Processing unit in session OTNAL_FV_030321:   0%|          | 0/17 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A[A
+
+
+
+
+[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+
+
+
+
+
+
+
+
+
+
+
+
+
+Processing unit in session OTNAL_FV_070822:   0%|          | 0/66 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A[A
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -129,19 +166,6 @@ All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/o
 
 
 
-Generating raster for session:   6%|▋         | 2/31 [00:00<00:02, 12.30it/s][A[A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_061521:   0%|          | 0/19 [00:00<?, ?it/s][A[A[A[A[AProcessing unit in session OTNAL_FV_120221: 0it [00:00, ?it/s]
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:   0%|          | 0/79 [00:00<?, ?it/s][A[A[A[A[A[A
 
 
 
@@ -151,13 +175,7 @@ All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/o
 
 
 
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:   0%|          | 0/52 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+Processing unit in session OTNAL_FV_030321:   0%|          | 0/17 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -174,7 +192,7 @@ All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/o
 
 
 
-Processing unit in session OTNAL_FV_070822:   0%|          | 0/66 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+Processing unit in session OTNAL_FV_062922:   0%|          | 0/15 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
 
 
 
@@ -192,7 +210,21 @@ All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/o
 
 
 
-Processing unit in session OTNAL_FV_070622:   0%|          | 0/51 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+Processing unit in session OTNAL_FV_070722:   0%|          | 0/52 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
+
+
+
+
+Processing unit in session OTNAL_FV_070122:   0%|          | 0/80 [00:00<?, ?it/s][A[A[A[A[AProcessing unit in session OTNAL_FV_073021: 0it [00:02, ?it/s]
+
+
+
+
+
+
+
+Processing unit in session OTNAL_FV_120220:   0%|          | 0/18 [00:00<?, ?it/s][A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_120221: 0it [00:04, ?it/s]
+
 
 
 
@@ -212,220 +244,3 @@ All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/o
 
 
  ... (more hidden) ...[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-Generating raster for session:   6%|▋         | 2/31 [00:12<00:02, 12.30it/s][A[A[A[A[A[A[A
-Processing unit in session OTNAL_FV_030921:   1%|▏         | 1/74 [03:07<3:48:39, 187.94s/it][A
-Processing unit in session OTNAL_FV_030921:   3%|▎         | 2/74 [06:24<3:51:20, 192.78s/it][A
-Processing unit in session OTNAL_FV_030921:   4%|▍         | 3/74 [09:33<3:46:01, 191.01s/it][A
-Processing unit in session OTNAL_FV_030921:   5%|▌         | 4/74 [13:24<4:01:39, 207.14s/it][A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:   4%|▍         | 1/26 [13:18<5:32:37, 798.29s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062222:   3%|▎         | 1/37 [14:46<8:51:56, 886.58s/it][A[A[A[A[A[A[A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:   1%|▏         | 1/79 [15:05<19:36:57, 905.35s/it][A[A[A[A[A[A
-Processing unit in session OTNAL_FV_030921:   7%|▋         | 5/74 [16:23<3:46:23, 196.87s/it][A
-
-
-
-Processing unit in session OTNAL_FV_062322:   2%|▏         | 1/43 [16:33<11:35:06, 993.01s/it][A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:   2%|▏         | 1/52 [16:32<14:03:31, 992.39s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_062722:   3%|▎         | 1/30 [18:31<8:57:21, 1111.77s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062922:   7%|▋         | 1/15 [18:43<4:22:06, 1123.35s/it][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-Processing unit in session OTNAL_FV_062822:   3%|▎         | 1/29 [19:42<9:11:43, 1182.28s/it][A[A[A
-Processing unit in session OTNAL_FV_030921:   8%|▊         | 6/74 [19:53<3:47:58, 201.16s/it][A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_030321:   6%|▌         | 1/17 [20:29<5:27:51, 1229.46s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- ... (more hidden) ...[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-Processing unit in session OTNAL_FV_030921:   9%|▉         | 7/74 [22:50<3:35:50, 193.30s/it][A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:   2%|▏         | 1/51 [22:53<19:04:13, 1373.08s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:   2%|▏         | 1/66 [23:01<24:56:47, 1381.66s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:   3%|▎         | 1/35 [23:55<13:33:24, 1435.42s/it][A[A[A[A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_121021:  10%|█         | 1/10 [25:13<3:47:04, 1513.82s/it]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070121:   3%|▎         | 1/30 [25:25<12:17:12, 1525.26s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_031521:   2%|▏         | 1/55 [25:26<22:53:44, 1526.37s/it][A[A[A[A[A[A[A[A[A[A[A
-Processing unit in session OTNAL_FV_030921:  11%|█         | 8/74 [25:47<3:27:12, 188.37s/it][A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:   8%|▊         | 2/26 [27:07<5:26:30, 816.27s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_061521:   5%|▌         | 1/19 [27:40<8:18:03, 1660.21s/it][A[A[A[A[A
-Processing unit in session OTNAL_FV_030921:  12%|█▏        | 9/74 [28:51<3:22:18, 186.74s/it][A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:   2%|▏         | 1/57 [28:53<26:58:13, 1733.81s/it][A[A[A[A[A[A[A[A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:   3%|▎         | 2/79 [30:14<19:24:39, 907.53s/it][A[A[A[A[A[A
-Processing unit in session OTNAL_FV_030921:  14%|█▎        | 10/74 [31:55<3:18:24, 186.00s/it][Aslurmstepd: error: *** JOB 27008079 ON r811u32n02 CANCELLED AT 2024-06-07T14:41:35 ***
