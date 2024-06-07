@@ -8,7 +8,6 @@ Created on Wed Apr 10 11:50:13 2024
 
 import os
 import numpy as np
-from scipy.optimize import curve_fit
 from math import degrees, atan2, sqrt
 from datetime import datetime
 import itertools
@@ -440,54 +439,5 @@ def deg2px(deg, monitor_info=None):
 
 
 
-def identify_outliers(data, window_size=500, stride=250, threshold=None,
-                      degree=10):
-    num_points = data.shape[0]
-    outlier_indices = []
-    for i in range(0, num_points - window_size + 1, stride):
-        window_data = data[i:i+window_size]
-        curve_params = fit_curve(window_data[:, 0], window_data[:, 1], degree)
-        if threshold is None:
-            threshold = 10  # Default threshold in pixels
-        window_outliers = _identify_outliers(window_data[:, 0], window_data[:, 1], curve_params, threshold)
-        # Adjust outlier indices to global indices
-        window_outliers += i
-        # Remove outliers already identified in previous windows
-        window_outliers = [idx for idx in window_outliers if idx not in outlier_indices]
-        outlier_indices.extend(window_outliers)
-    return outlier_indices
 
-def _identify_outliers(x, y, curve_params, threshold):
-    distances = calculate_distances(x, y, curve_params)
-    outlier_indices = np.where(distances > threshold)[0]
-    return outlier_indices
-
-def fit_curve(x, y, degree):
-    # Initial guess for coefficients (all zeros)
-    initial_guess = [0.0] * (degree + 1)
-    # Fit curve to the data
-    coefficients, _ = curve_fit(polynomial_curve, x, y, p0=initial_guess)
-    return coefficients
-
-def polynomial_curve(x, *coefficients):
-    return np.polyval(coefficients, x)
-
-def calculate_distances(x, y, curve_params):
-    curve_y = polynomial_curve(x, *curve_params)
-    distances = np.abs(y - curve_y)
-    return distances
-
-def distance2p(x1, y1, x2, y2):
-    """
-    Calculate the distance between two points.
-    Args:
-    x1, y1: Coordinates of the first point.
-    x2, y2: Coordinates of the second point.
-    Returns:
-    The distance between the two points.
-    """
-    dx = x2 - x1
-    dy = y2 - y1
-    distance2p = np.sqrt(dx**2 + dy**2)
-    return distance2p
 

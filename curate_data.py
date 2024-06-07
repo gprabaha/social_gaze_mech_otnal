@@ -699,36 +699,56 @@ def extract_spiketimes_for_all_sessions(params):
     return all_labels
 
 
-def extract_fixation_raster(labelled_fixations, labelled_spiketimes, params):
+import pandas as pd
+import numpy as np
+import ast
+import os
+from concurrent.futures import ThreadPoolExecutor
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params):
     """
     Main function to generate rasters for all sessions.
     Parameters:
+    session_paths (list): List of session paths.
     labelled_fixations (pd.DataFrame): DataFrame containing fixation data.
     labelled_spiketimes (pd.DataFrame): DataFrame containing spiketimes data.
     params (dict): Dictionary containing parameters for raster generation.
     Returns:
     pd.DataFrame: DataFrame containing all generated rasters and labels.
     """
-    sessions = labelled_fixations['session_name'].unique()
     results = []
-    num_sessions = len(sessions)
-    num_cores = os.cpu_count()
-    num_processes = min(num_sessions, num_cores)
     if params.get('use_parallel', False):
-        with concurrent.futures.ThreadPoolExecutor(max_workers=num_processes) as executor:
+        with ThreadPoolExecutor() as executor:
             futures = {executor.submit(
                 generate_session_raster, session, labelled_fixations,
-                labelled_spiketimes, params): session for session in sessions}
-            for future in concurrent.futures.as_completed(futures):
-                results.append(future.result())
+                labelled_spiketimes, params): session for session in session_paths}
+            for future in futures:
+                try:
+                    result = future.result()
+                    if result is not None:
+                        results.append(result)
+                except Exception as e:
+                    logging.error(f"Error processing session {futures[future]}: {e}")
     else:
-        for session in tqdm(sessions, desc="Generating raster for session"):
-            results.append(generate_session_raster(
-                session, labelled_fixations, labelled_spiketimes, params))
+        for session in session_paths:
+            try:
+                result = generate_session_raster(session, labelled_fixations, labelled_spiketimes, params)
+                if result is not None:
+                    results.append(result)
+            except Exception as e:
+                logging.error(f"Error processing session {session}: {e}")
+
+    if not results:
+        logging.error("No results to concatenate.")
+        raise ValueError("No objects to concatenate")
+
     labelled_fixation_rasters = pd.concat(results, ignore_index=True)
     save_labelled_fixation_rasters(labelled_fixation_rasters, params)
     return labelled_fixation_rasters
-
 
 
 def generate_session_raster(session, labelled_fixations, labelled_spiketimes, params):
@@ -742,143 +762,134 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
     Returns:
     pd.DataFrame: DataFrame containing rasters and labels for the session.
     """
+    logging.debug(f"Processing session: {session}")
+    
     # Extract parameters
     raster_bin_size = float(params['raster_bin_size'])
     raster_pre_event_time = float(params['raster_pre_event_time'])
     raster_post_event_time = float(params['raster_post_event_time'])
-    num_bins = int(
-        (raster_pre_event_time + raster_post_event_time) / raster_bin_size)
+    num_bins = int((raster_pre_event_time + raster_post_event_time) / raster_bin_size)
+
     # Filter data for the current session
-    session_fixations = labelled_fixations[
-        labelled_fixations['session_name'] == session]
-    session_neurons = labelled_spiketimes[
-        labelled_spiketimes['session_name'] == session]
-    # Pre-allocate memory for the dataframe
-    num_neurons = session_neurons['uuid'].nunique()
-    num_fixations = session_fixations.shape[0]
-    num_rasters = num_neurons * num_fixations * 2  # 2 for start_time and end_time
-    # Pre-initialize the DataFrame
-    columns = ['raster', 'category', 'session_name', 'run', 'block',
-               'fix_duration', 'mean_x_pos', 'mean_y_pos', 'fix_roi',
-               'agent', 'channel', 'channel_label', 'unit_no_within_channel',
-               'unit_label', 'uuid', 'n_spikes', 'region',
-               'aligned_to', 'behavior']
-    session_data = pd.DataFrame(index=np.arange(num_rasters), columns=columns)
-    idx = 0  # Index for pre-allocated dataframe
-    # Create a tqdm progress bar for unit processing within the session
-    for uuid in tqdm(session_neurons['uuid'].unique(),
-                     desc=f"Processing unit in session {session}"):
-        neuron_spikes_str = session_neurons[
-            session_neurons['uuid'] == uuid]['spikeS'].values[0]
-        neuron_spikes = np.array(ast.literal_eval(neuron_spikes_str))
-        for _, fixation in session_fixations.iterrows():
-            for aligned_to in ['start_time', 'end_time']:
-                event_time = float(fixation[aligned_to])
-                window_start = event_time - raster_pre_event_time
-                window_end = event_time + raster_post_event_time
-                # Filter spikes within the window of interest
-                relevant_spikes = neuron_spikes[
-                    (neuron_spikes >= window_start) &
-                    (neuron_spikes < window_end)]
-                # Initialize binary raster
-                raster = np.zeros(num_bins, dtype=int)
-                # Update the raster with relevant spikes
-                for spike_time in relevant_spikes:
-                    bin_idx = int(
-                        (spike_time - window_start) / raster_bin_size)
-                    if bin_idx < num_bins:
-                        raster[bin_idx] = 1
-                session_data = update_session_data(session_data, idx, raster,
-                                                   fixation, session_neurons,
-                                                   uuid, aligned_to)
-                idx += 1
+    session_fixations = labelled_fixations[labelled_fixations['session_name'] == session]
+    session_neurons = labelled_spiketimes[labelled_spiketimes['session_name'] == session]
+    
+    if session_fixations.empty or session_neurons.empty:
+        logging.warning(f"No data found for session {session}.")
+        return None
+
+    results = []
+    with ThreadPoolExecutor() as executor:
+        futures = {executor.submit(
+            process_unit, uuid, session_fixations, session_neurons,
+            num_bins, raster_bin_size, raster_pre_event_time, raster_post_event_time): uuid for uuid in session_neurons['uuid'].unique()}
+        for future in futures:
+            try:
+                result = future.result()
+                if result is not None:
+                    results.append(result)
+            except Exception as e:
+                logging.error(f"Error processing unit {futures[future]}: {e}")
+
+    if not results:
+        logging.warning(f"No results for session {session}.")
+        return None
+
+    session_data = pd.concat(results, ignore_index=True)
     return session_data
 
 
-def generate_binary_raster(neuron_spikes, bins):
+def process_unit(uuid, session_fixations, session_neurons, num_bins, raster_bin_size, raster_pre_event_time, raster_post_event_time):
     """
-    Function to generate a binary raster for the given neuron spikes and bins.
+    Function to process a single unit within a session.
     Parameters:
-    neuron_spikes (np.ndarray): Array containing neuron spike times.
-    bins (np.ndarray): Array containing the bin edges.
+    uuid (str): Unique identifier for the neuron.
+    session_fixations (pd.DataFrame): DataFrame containing fixation data.
+    session_neurons (pd.DataFrame): DataFrame containing neuron data.
+    num_bins (int): Number of bins for the raster.
+    raster_bin_size (float): Size of each bin for the raster.
+    raster_pre_event_time (float): Time before the event to include in the raster.
+    raster_post_event_time (float): Time after the event to include in the raster.
     Returns:
-    np.ndarray: Binary raster.
+    pd.DataFrame: DataFrame containing rasters and labels for the unit.
     """
-    raster = np.histogram(neuron_spikes, bins=bins)[0]
-    raster = (raster > 0).astype(int)
-    return raster
+    logging.debug(f"Processing unit: {uuid}")
+    
+    neuron_spikes_str = session_neurons[session_neurons['uuid'] == uuid]['spikeS'].values[0]
+    neuron_spikes = np.array(ast.literal_eval(neuron_spikes_str))
+    bins = np.arange(-raster_pre_event_time, raster_post_event_time, raster_bin_size)
+    
+    results = []
+    for _, fixation in session_fixations.iterrows():
+        for aligned_to in ['start_time', 'end_time']:
+            event_time = float(fixation[aligned_to])
+            relevant_spikes = neuron_spikes[(neuron_spikes >= event_time - raster_pre_event_time) & (neuron_spikes < event_time + raster_post_event_time)]
+            spike_times = relevant_spikes - event_time
+
+            # Generate binary raster using numpy's histogram function
+            raster = np.histogram(spike_times, bins=bins)[0]
+            raster = (raster > 0).astype(int)
+
+            session_data = update_session_data(raster, fixation, session_neurons, uuid, aligned_to)
+            results.append(session_data)
+    
+    if not results:
+        logging.warning(f"No results for unit {uuid}.")
+        return None
+
+    return pd.DataFrame(results)
 
 
-def update_session_data(session_data, idx, raster, fixation, session_neurons, uuid, aligned_to):
+def update_session_data(raster, fixation, session_neurons, uuid, aligned_to):
     """
     Function to update the session data DataFrame with raster and label information.
     Parameters:
-    session_data (pd.DataFrame): DataFrame to be updated.
-    idx (int): Index to update.
     raster (np.ndarray): Binary raster.
     fixation (pd.Series): Series containing fixation information.
     session_neurons (pd.DataFrame): DataFrame containing neuron information.
     uuid (str): Unique identifier for the neuron.
     aligned_to (str): Indicates whether the raster is aligned to start_time or end_time.
     Returns:
-    pd.DataFrame: Updated session data DataFrame.
+    pd.Series: Series containing the raster and label information.
     """
-    session_data.at[idx, 'raster'] = raster
-    session_data.at[idx, 'category'] = fixation['category']
-    session_data.at[idx, 'session_name'] = fixation['session_name']
-    session_data.at[idx, 'run'] = fixation['run']
-    session_data.at[idx, 'block'] = fixation['block']
-    session_data.at[idx, 'fix_duration'] = fixation['fix_duration']
-    session_data.at[idx, 'mean_x_pos'] = fixation['mean_x_pos']
-    session_data.at[idx, 'mean_y_pos'] = fixation['mean_y_pos']
-    session_data.at[idx, 'fix_roi'] = fixation['fix_roi']
-    session_data.at[idx, 'agent'] = fixation['agent']
-    session_data.at[idx, 'channel'] = session_neurons[
-        session_neurons['uuid'] == uuid]['channel'].values[0]
-    session_data.at[idx, 'channel_label'] = session_neurons[
-        session_neurons['uuid'] == uuid]['channel_label'].values[0]
-    session_data.at[idx, 'unit_no_within_channel'] = session_neurons[
-        session_neurons['uuid'] == uuid]['unit_no_within_channel'].values[0]
-    session_data.at[idx, 'unit_label'] = session_neurons[
-        session_neurons['uuid'] == uuid]['unit_label'].values[0]
-    session_data.at[idx, 'uuid'] = uuid
-    session_data.at[idx, 'n_spikes'] = session_neurons[
-        session_neurons['uuid'] == uuid]['n_spikes'].values[0]
-    session_data.at[idx, 'region'] = session_neurons[
-        session_neurons['uuid'] == uuid]['region'].values[0]
-    session_data.at[idx, 'aligned_to'] = aligned_to
-    session_data.at[idx, 'behavior'] = 'fixation'
+    session_data = {
+        'raster': raster,
+        'category': fixation['category'],
+        'session_name': fixation['session_name'],
+        'run': fixation['run'],
+        'block': fixation['block'],
+        'fix_duration': fixation['fix_duration'],
+        'mean_x_pos': fixation['mean_x_pos'],
+        'mean_y_pos': fixation['mean_y_pos'],
+        'fix_roi': fixation['fix_roi'],
+        'agent': fixation['agent'],
+        'channel': session_neurons[session_neurons['uuid'] == uuid]['channel'].values[0],
+        'channel_label': session_neurons[session_neurons['uuid'] == uuid]['channel_label'].values[0],
+        'unit_no_within_channel': session_neurons[session_neurons['uuid'] == uuid]['unit_no_within_channel'].values[0],
+        'unit_label': session_neurons[session_neurons['uuid'] == uuid]['unit_label'].values[0],
+        'uuid': uuid,
+        'n_spikes': session_neurons[session_neurons['uuid'] == uuid]['n_spikes'].values[0],
+        'region': session_neurons[session_neurons['uuid'] == uuid]['region'].values[0],
+        'aligned_to': aligned_to,
+        'behavior': 'fixation'
+    }
     return session_data
 
 
 def save_labelled_fixation_rasters(labelled_fixation_rasters, params):
     """
     Function to save the labelled fixation rasters DataFrame to a specified directory.
-
     Parameters:
     labelled_fixation_rasters (pd.DataFrame): DataFrame containing all generated rasters and labels.
     params (dict): Dictionary containing parameters including the directory to save the processed data.
-    flag_info (str): Additional flag information to append to the filename.
     """
     processed_data_dir = params['processed_data_dir']
-    # Create directory if it doesn't exist
     os.makedirs(processed_data_dir, exist_ok=True)
-    # Construct the filename
     flag_info = util.get_filename_flag_info(params)
     filename = f"labelled_fixation_rasters{flag_info}.csv"
     file_path = os.path.join(processed_data_dir, filename)
-    # Save the DataFrame to a CSV file
     labelled_fixation_rasters.to_csv(file_path, index=False)
-    print(f"Data saved to {file_path}")
-
-
-
-
-
-
-
-
-
+    logging.info(f"Data saved to {file_path}")
 
 
 

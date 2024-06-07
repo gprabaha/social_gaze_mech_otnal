@@ -11,7 +11,13 @@ import util
 import curate_data
 import load_data
 import plotter
+import pandas as pd
+import argparse
+import os
+import logging
 
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 params = {}
 params.update({
@@ -24,7 +30,7 @@ params.update({
     'remake_spikeTs': False,
     'remake_raster': True,
     'make_plots': False,
-    'remap_source_coord_from_inverted_to_standard_y_axis': True,  # !!Important
+    'remap_source_coord_from_inverted_to_standard_y_axis': True,
     'map_roi_coord_to_eyelink_space': False,
     'map_gaze_pos_coord_to_eyelink_space': True,
     'export_plots_to_local_folder': False,
@@ -37,67 +43,87 @@ params.update({
     'raster_post_event_time': 0.5
 })
 
+def generate_slurm_script(session_ids):
+    job_script_content = f"""#!/bin/bash
+#SBATCH --partition=psych_day
+#SBATCH --time=02:00:00
+#SBATCH --cpus-per-task=12
+#SBATCH --mem=72G
+#SBATCH --mail-type=FAIL
+#SBATCH --job-name="raster_gen"
+#SBATCH --output="job_scripts/output_%A_%a.log"
+#SBATCH --array=0-{len(session_ids)-1}
+
+# Load required modules and activate the conda environment
+module load miniconda
+conda activate nn_gpu
+
+# Get the session ID from the job array index
+SESSION_ID=${{session_ids[$SLURM_ARRAY_TASK_ID]}}
+
+# Run the Python script with the session ID as an argument
+python analyze_gaze_signals.py --session $SESSION_ID
 """
+    os.makedirs('job_scripts', exist_ok=True)
+    with open('job_scripts/submit_raster_job_for_session.sh', 'w') as file:
+        file.write(job_script_content)
 
-- Use the start and end times of various ROI fixations to during the
-monitor-up and monitor down blocks as long as they are not discards. Then
-use the timepoints to go to the neural spiketimes for that session to compare
-firing rates corresponding to looks within for each of the bboxes between
-the monitor-up and monitor-down condition
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Process gaze signals for a specific session")
+    parser.add_argument('--session', type=int, help='Session ID to process')
+    args = parser.parse_args()
 
-- Start looking at CEBRA stuff
+    # Load necessary data and parameters
+    root_data_dir, params = util.fetch_root_data_dir(params)
+    data_source_dir, params = util.fetch_data_source_dir(params)
+    session_paths, params = util.fetch_session_subfolder_paths_from_source(params)
+    processed_data_dir, params = util.fetch_processed_data_dir(params)
 
-"""
+    if params.get('remake_labelled_gaze_pos'):
+        params = curate_data.extract_and_update_meta_info(params)
+        params = curate_data.get_unique_doses(params)
+        labelled_gaze_positions_m1 = curate_data.extract_labelled_gaze_positions_m1(params)
+    else:
+        labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(params)
+
+    if params.get('remake_fixations') or params.get('remake_fixation_labels'):
+        labelled_fixations = curate_data.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, params)
+    else:
+        labelled_fixations = load_data.load_m1_fixation_labels(params)
+
+    if params.get('remake_saccades'):
+        labelled_saccades_m1 = curate_data.extract_saccades_with_labels(labelled_gaze_positions_m1, params)
+    else:
+        labelled_saccades_m1 = load_data.load_saccade_labels(params)
+
+    if params.get('remake_spikeTs'):
+        labelled_spiketimes = curate_data.extract_spiketimes_for_all_sessions(params)
+    else:
+        labelled_spiketimes = load_data.load_processed_spiketimes(params)
+
+    if args.session is not None:
+        # Process a single session
+        curate_data.generate_session_raster(args.session, labelled_fixations, labelled_spiketimes, params)
+    else:
+        # Process all sessions
+        if params.get('remake_raster'):
+            labeled_fixation_rasters = curate_data.extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params)
+        else:
+            labeled_fixation_rasters = load_data.load_labelled_fixation_rasters(params)
+        
+        generate_slurm_script(session_paths)
+
+    if params.get('make_plots'):
+        plotter.plot_fixation_proportions_for_diff_conditions(params)
+        plotter.plot_gaze_heatmaps(params)
+        plotter.plot_fixation_heatmaps(params)
+
+    # Submit SLURM job script
+    if args.session is None:
+        os.system('sbatch job_scripts/submit_raster_job_for_session.sh')
 
 
-# Determine root data directory based on whether it's running on a cluster or not
-root_data_dir, params = util.fetch_root_data_dir(params)
-data_source_dir, params = util.fetch_data_source_dir(params)
-session_paths, params = util.fetch_session_subfolder_paths_from_source(params)
-processed_data_dir, params = util.fetch_processed_data_dir(params)
 
-
-if params.get('remake_labelled_gaze_pos'):
-    params = curate_data.extract_and_update_meta_info(params)
-    params = curate_data.get_unique_doses(params)
-    labelled_gaze_positions_m1 = \
-        curate_data.extract_labelled_gaze_positions_m1(params)
-else:
-    labelled_gaze_positions_m1 = \
-        load_data.load_labelled_gaze_positions(params)
-
-
-if params.get('remake_fixations') or params.get('remake_fixation_labels'):
-    labelled_fixations = curate_data.extract_fixations_with_labels_parallel(
-        labelled_gaze_positions_m1, params)  # The first file has funky session stop times
-else:
-    labelled_fixations = load_data.load_m1_fixation_labels(params)
-
-
-if params.get('remake_saccades'):
-    labelled_saccades_m1 = curate_data.extract_saccades_with_labels(
-        labelled_gaze_positions_m1, params)
-else:
-    labelled_saccades_m1 = load_data.load_saccade_labels(params)
-
-
-if params.get('remake_spikeTs'):
-    labelled_spiketimes = \
-        curate_data.extract_spiketimes_for_all_sessions(params)
-else:
-    labelled_spiketimes = load_data.load_processed_spiketimes(params)
-
-
-if params.get('remake_raster'):
-    labeled_fixation_rasters = curate_data.extract_fixation_raster(
-        labelled_fixations, labelled_spiketimes, params)
-else:
-    labeled_fixation_rasters = load_data.load_labelled_fixation_rasters(params)
-
-if params.get('make_plots'):
-    plotter.plot_fixation_proportions_for_diff_conditions(params)
-    plotter.plot_gaze_heatmaps(params)
-    plotter.plot_fixation_heatmaps(params)
 
 
 
