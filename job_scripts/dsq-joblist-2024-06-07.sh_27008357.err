@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'nvidia'
+dirname: missing operand
+Try 'dirname --help' for more information.
+dirname: missing operand
+Try 'dirname --help' for more information.
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'nvidia'
+dirname: missing operand
+Try 'dirname --help' for more information.
+Traceback (most recent call last):
+  File "/gpfs/milgram/apps/hpc.rhel7/software/dSQ/1.05/dSQBatch.py", line 74, in <module>
+    jid = int(os.environ.get("SLURM_ARRAY_JOB_ID"))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'

@@ -7,20 +7,17 @@ Created on Tue Apr  9 10:25:48 2024
 """
 
 
-import util
-import curate_data
-import load_data
-import plotter
+import os
 import pandas as pd
 import argparse
-import os
 import logging
+import subprocess
+import datetime
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-params = {}
-params.update({
+params = {
     'is_cluster': True,
     'use_parallel': True,
     'remake_labelled_gaze_pos': False,
@@ -38,42 +35,69 @@ params.update({
     'offset_multiples_in_x_dir': 3,
     'offset_multiples_in_y_dir': 1.5,
     'bbox_expansion_factor': 1.3,
-    'raster_bin_size': 0.001, # in seconds
+    'raster_bin_size': 0.001,  # in seconds
     'raster_pre_event_time': 0.5,
     'raster_post_event_time': 0.5
-})
+}
 
-def generate_slurm_script(session_ids):
-    job_script_content = f"""#!/bin/bash
-#SBATCH --partition=psych_day
-#SBATCH --time=02:00:00
-#SBATCH --cpus-per-task=12
-#SBATCH --mem=72G
-#SBATCH --mail-type=FAIL
-#SBATCH --job-name="raster_gen"
-#SBATCH --output="job_scripts/output_%A_%a.log"
-#SBATCH --array=0-{len(session_ids)-1}
-
-# Load required modules and activate the conda environment
-module load miniconda
-conda activate nn_gpu
-
-# Get the session ID from the job array index
-SESSION_ID=${{session_ids[$SLURM_ARRAY_TASK_ID]}}
-
-# Run the Python script with the session ID as an argument
-python analyze_gaze_signals.py --session $SESSION_ID
-"""
+def generate_job_file(session_paths):
+    job_file_path = 'job_scripts/joblist.txt'
     os.makedirs('job_scripts', exist_ok=True)
-    with open('job_scripts/submit_raster_job_for_session.sh', 'w') as file:
-        file.write(job_script_content)
+    with open(job_file_path, 'w') as file:
+        for session_path in session_paths:
+            command = f"module load miniconda && conda activate nn_gpu && python analyze_gaze_signals.py --session {session_path}"
+            file.write(command + "\n")
+    return job_file_path
+
+def submit_job_array(job_file_path):
+    try:
+        # Ensure the module load and dsq command are run in the same shell
+        subprocess.run(f'bash -c "module load dSQ && dsq --job-file {job_file_path} --mem-per-cpu 6g -t 02:00:00 --mail-type FAIL"', shell=True, check=True)
+        logging.info("Successfully generated the dSQ job script")
+
+        # Find the generated dSQ job script
+        today = datetime.date.today().strftime("%Y-%m-%d")
+        job_script_name = f'dsq-joblist-{today}.sh'
+        job_script_path = os.path.join('job_scripts', job_script_name)
+
+        # Move the generated script to the job_scripts directory
+        if not os.path.exists(job_script_name):
+            logging.error(f"Generated dSQ job script {job_script_name} not found.")
+            return
+
+        os.rename(job_script_name, job_script_path)
+        logging.info(f"Moved generated dSQ job script to {job_script_path}")
+
+        # Modify the dSQ-generated script to include environment setup
+        with open(job_script_path, 'r') as file:
+            lines = file.readlines()
+
+        lines.insert(1, 'module load miniconda\n')
+        lines.insert(2, 'conda activate nn_gpu\n')
+
+        with open(job_script_path, 'w') as file:
+            file.writelines(lines)
+
+        # Submit the job script with sbatch and ensure output is directed to the job_scripts directory
+        subprocess.run(f'sbatch --output=job_scripts/%x_%j.out --error=job_scripts/%x_%j.err {job_script_path}', shell=True, check=True)
+        logging.info(f"Successfully submitted jobs using sbatch for script {job_script_path}")
+
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Error during job submission process: {e}")
+        raise
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process gaze signals for a specific session")
-    parser.add_argument('--session', type=int, help='Session ID to process')
+    parser.add_argument('--session', type=str, help='Session ID to process')
+    parser.add_argument('--generate_jobs', action='store_true', help='Generate job file and submit job array')
     args = parser.parse_args()
 
     # Load necessary data and parameters
+    import util
+    import curate_data
+    import load_data
+    import plotter
+
     root_data_dir, params = util.fetch_root_data_dir(params)
     data_source_dir, params = util.fetch_data_source_dir(params)
     session_paths, params = util.fetch_session_subfolder_paths_from_source(params)
@@ -101,8 +125,19 @@ if __name__ == "__main__":
     else:
         labelled_spiketimes = load_data.load_processed_spiketimes(params)
 
-    if args.session is not None:
+    # Log shapes of the loaded data
+    logging.debug(f"First few rows of labelled fixations: \n{labelled_fixations.head()}")
+    logging.debug(f"First few rows of labelled spiketimes: \n{labelled_spiketimes.head()}")
+    logging.debug(f"Labelled fixations shape: {labelled_fixations.shape}")
+    logging.debug(f"Labelled spiketimes shape: {labelled_spiketimes.shape}")
+
+    if args.generate_jobs:
+        job_file_path = generate_job_file(session_paths)
+        submit_job_array(job_file_path)
+    elif args.session:
         # Process a single session
+        labelled_fixations = labelled_fixations[labelled_fixations['session_name'] == args.session]
+        labelled_spiketimes = labelled_spiketimes[labelled_spiketimes['session_name'] == args.session]
         curate_data.generate_session_raster(args.session, labelled_fixations, labelled_spiketimes, params)
     else:
         # Process all sessions
@@ -110,17 +145,27 @@ if __name__ == "__main__":
             labeled_fixation_rasters = curate_data.extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params)
         else:
             labeled_fixation_rasters = load_data.load_labelled_fixation_rasters(params)
-        
-        generate_slurm_script(session_paths)
 
     if params.get('make_plots'):
         plotter.plot_fixation_proportions_for_diff_conditions(params)
         plotter.plot_gaze_heatmaps(params)
         plotter.plot_fixation_heatmaps(params)
 
-    # Submit SLURM job script
-    if args.session is None:
-        os.system('sbatch job_scripts/submit_raster_job_for_session.sh')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

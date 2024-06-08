@@ -720,12 +720,19 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
     Returns:
     pd.DataFrame: DataFrame containing all generated rasters and labels.
     """
+    # Extract session names from paths and ensure consistent formatting
+    session_names = [os.path.basename(session_path).strip().lower() for session_path in session_paths]
+
+    logging.debug(f"Session names extracted from paths: {session_names}")
+    logging.debug(f"Unique session names in fixations: {labelled_fixations['session_name'].str.strip().str.lower().unique()}")
+    logging.debug(f"Unique session names in spiketimes: {labelled_spiketimes['session_name'].str.strip().str.lower().unique()}")
+
     results = []
     if params.get('use_parallel', False):
         with ThreadPoolExecutor() as executor:
             futures = {executor.submit(
                 generate_session_raster, session, labelled_fixations,
-                labelled_spiketimes, params): session for session in session_paths}
+                labelled_spiketimes, params): session for session in session_names}
             for future in futures:
                 try:
                     result = future.result()
@@ -734,7 +741,7 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
                 except Exception as e:
                     logging.error(f"Error processing session {futures[future]}: {e}")
     else:
-        for session in session_paths:
+        for session in session_names:
             try:
                 result = generate_session_raster(session, labelled_fixations, labelled_spiketimes, params)
                 if result is not None:
@@ -749,7 +756,6 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
     labelled_fixation_rasters = pd.concat(results, ignore_index=True)
     save_labelled_fixation_rasters(labelled_fixation_rasters, params)
     return labelled_fixation_rasters
-
 
 def generate_session_raster(session, labelled_fixations, labelled_spiketimes, params):
     """
@@ -771,9 +777,12 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
     num_bins = int((raster_pre_event_time + raster_post_event_time) / raster_bin_size)
 
     # Filter data for the current session
-    session_fixations = labelled_fixations[labelled_fixations['session_name'] == session]
-    session_neurons = labelled_spiketimes[labelled_spiketimes['session_name'] == session]
-    
+    session_fixations = labelled_fixations[labelled_fixations['session_name'].str.strip().str.lower() == session]
+    session_neurons = labelled_spiketimes[labelled_spiketimes['session_name'].str.strip().str.lower() == session]
+
+    logging.debug(f"Session fixations shape: {session_fixations.shape}")
+    logging.debug(f"Session neurons shape: {session_neurons.shape}")
+
     if session_fixations.empty or session_neurons.empty:
         logging.warning(f"No data found for session {session}.")
         return None
@@ -797,7 +806,6 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
 
     session_data = pd.concat(results, ignore_index=True)
     return session_data
-
 
 def process_unit(uuid, session_fixations, session_neurons, num_bins, raster_bin_size, raster_pre_event_time, raster_post_event_time):
     """
@@ -839,7 +847,6 @@ def process_unit(uuid, session_fixations, session_neurons, num_bins, raster_bin_
 
     return pd.DataFrame(results)
 
-
 def update_session_data(raster, fixation, session_neurons, uuid, aligned_to):
     """
     Function to update the session data DataFrame with raster and label information.
@@ -875,7 +882,6 @@ def update_session_data(raster, fixation, session_neurons, uuid, aligned_to):
     }
     return session_data
 
-
 def save_labelled_fixation_rasters(labelled_fixation_rasters, params):
     """
     Function to save the labelled fixation rasters DataFrame to a specified directory.
@@ -885,11 +891,10 @@ def save_labelled_fixation_rasters(labelled_fixation_rasters, params):
     """
     processed_data_dir = params['processed_data_dir']
     os.makedirs(processed_data_dir, exist_ok=True)
-    flag_info = util.get_filename_flag_info(params)
-    filename = f"labelled_fixation_rasters{flag_info}.csv"
-    file_path = os.path.join(processed_data_dir, filename)
+    file_path = os.path.join(processed_data_dir, 'labelled_fixation_rasters.csv')
     labelled_fixation_rasters.to_csv(file_path, index=False)
-    logging.info(f"Data saved to {file_path}")
+    logging.info(f"Saved labelled fixation rasters to {file_path}")
+
 
 
 
