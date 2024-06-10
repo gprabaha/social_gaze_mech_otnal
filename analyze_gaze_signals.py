@@ -9,10 +9,14 @@ Created on Tue Apr  9 10:25:48 2024
 
 import os
 import pandas as pd
+import glob
 import argparse
 import logging
 import subprocess
 import datetime
+
+
+import pdb
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -41,50 +45,45 @@ params = {
 }
 
 def generate_job_file(session_paths):
-    job_file_path = 'job_scripts/joblist.txt'
+    job_file_path = '/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/job_scripts/raster_joblist.txt'
     os.makedirs('job_scripts', exist_ok=True)
     with open(job_file_path, 'w') as file:
         for session_path in session_paths:
-            command = f"module load miniconda && conda activate nn_gpu && python analyze_gaze_signals.py --session {session_path}"
+            command = f"module load miniconda; conda init bash; conda activate nn_gpu; python analyze_gaze_signals.py --session {session_path}"
             file.write(command + "\n")
     return job_file_path
 
+
 def submit_job_array(job_file_path):
     try:
-        # Ensure the module load and dsq command are run in the same shell
-        subprocess.run(f'bash -c "module load dSQ && dsq --job-file {job_file_path} --mem-per-cpu 6g -t 02:00:00 --mail-type FAIL"', shell=True, check=True)
+        # Ensure the directory paths are correct and use absolute paths
+        output_dir = '/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/job_scripts/'
+        job_script_path = os.path.join(output_dir, 'dsq-joblist_raster.sh')
+
+        # Run the command to generate the job script
+        subprocess.run(
+            f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {output_dir} --status-dir {output_dir} --mem-per-cpu 6g -t 02:00:00 --mail-type FAIL',
+            shell=True, check=True, executable='/bin/bash'
+        )
         logging.info("Successfully generated the dSQ job script")
 
-        # Find the generated dSQ job script
-        today = datetime.date.today().strftime("%Y-%m-%d")
-        job_script_name = f'dsq-joblist-{today}.sh'
-        job_script_path = os.path.join('job_scripts', job_script_name)
-
-        # Move the generated script to the job_scripts directory
-        if not os.path.exists(job_script_name):
-            logging.error(f"Generated dSQ job script {job_script_name} not found.")
+        # Check if the job script file exists
+        if not os.path.isfile(job_script_path):
+            logging.error(f"No job script found at {job_script_path}.")
             return
 
-        os.rename(job_script_name, job_script_path)
-        logging.info(f"Moved generated dSQ job script to {job_script_path}")
-
-        # Modify the dSQ-generated script to include environment setup
-        with open(job_script_path, 'r') as file:
-            lines = file.readlines()
-
-        lines.insert(1, 'module load miniconda\n')
-        lines.insert(2, 'conda activate nn_gpu\n')
-
-        with open(job_script_path, 'w') as file:
-            file.writelines(lines)
+        logging.info(f"Using dSQ job script: {job_script_path}")
 
         # Submit the job script with sbatch and ensure output is directed to the job_scripts directory
-        subprocess.run(f'sbatch --output=job_scripts/%x_%j.out --error=job_scripts/%x_%j.err {job_script_path}', shell=True, check=True)
+        subprocess.run(
+            f'sbatch --output={output_dir}/%x_%j.out --error={output_dir}/%x_%j.err {job_script_path}',
+            shell=True, check=True, executable='/bin/bash'
+        )
         logging.info(f"Successfully submitted jobs using sbatch for script {job_script_path}")
-
     except subprocess.CalledProcessError as e:
         logging.error(f"Error during job submission process: {e}")
         raise
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process gaze signals for a specific session")
@@ -136,9 +135,10 @@ if __name__ == "__main__":
         submit_job_array(job_file_path)
     elif args.session:
         # Process a single session
-        labelled_fixations = labelled_fixations[labelled_fixations['session_name'] == args.session]
-        labelled_spiketimes = labelled_spiketimes[labelled_spiketimes['session_name'] == args.session]
-        curate_data.generate_session_raster(args.session, labelled_fixations, labelled_spiketimes, params)
+        session_name = os.path.basename(os.path.normpath(args.session))
+        labelled_fixations = labelled_fixations[labelled_fixations['session_name'] == session_name]
+        labelled_spiketimes = labelled_spiketimes[labelled_spiketimes['session_name'] == session_name]
+        curate_data.generate_session_raster(session_name, labelled_fixations, labelled_spiketimes, params)
     else:
         # Process all sessions
         if params.get('remake_raster'):

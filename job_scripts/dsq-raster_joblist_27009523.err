@@ -1,0 +1,68 @@
+
+CondaError: Run 'conda init' before 'conda deactivate'
+
+2024-06-10 14:05:00,518 - DEBUG - matplotlib data path: /gpfs/milgram/project/chang/pg496/conda_envs/nn_gpu/lib/python3.10/site-packages/matplotlib/mpl-data
+2024-06-10 14:05:00,523 - DEBUG - CONFIGDIR=/home/pg496/.config/matplotlib
+2024-06-10 14:05:00,524 - DEBUG - interactive is False
+2024-06-10 14:05:00,525 - DEBUG - platform is linux
+2024-06-10 14:05:00,575 - DEBUG - CACHEDIR=/home/pg496/.cache/matplotlib
+2024-06-10 14:05:00,576 - DEBUG - Using fontManager instance from /home/pg496/.cache/matplotlib/fontlist-v330.json
+2024-06-10 14:05:00,816 - DEBUG - Creating converter from 7 to 5
+2024-06-10 14:05:00,816 - DEBUG - Creating converter from 5 to 7
+2024-06-10 14:05:00,817 - DEBUG - Creating converter from 7 to 5
+2024-06-10 14:05:00,817 - DEBUG - Creating converter from 5 to 7
+2024-06-10 14:05:06,631 - DEBUG - First few rows of labelled fixations: 
+   start_time  end_time  category  ...   mean_y_pos     fix_roi  agent
+0       0.254     0.402       3.0  ...   203.120805  out_of_roi  Lynch
+1       0.407     0.558       3.0  ... -1188.157895  out_of_roi  Lynch
+2       0.584     0.769       3.0  ... -1226.191011  out_of_roi  Lynch
+3       0.775     0.947       3.0  ... -1221.121387  out_of_roi  Lynch
+4       0.973     1.098       3.0  ... -1155.447154  out_of_roi  Lynch
+
+[5 rows x 11 columns]
+2024-06-10 14:05:06,642 - DEBUG - First few rows of labelled spiketimes: 
+                                              spikeS  ... region
+0  [1.044075, 3.13865, 3.474675, 4.42465, 4.92632...  ...    BLA
+1  [20.752875, 56.052075, 127.98965, 130.049925, ...  ...    BLA
+2  [0.693575, 1.348825, 1.5314, 2.736025, 5.6675,...  ...    BLA
+3  [0.7346, 1.21215, 2.80735, 6.401425, 6.4468, 7...  ...    BLA
+4  [0.81235, 1.152825, 1.580025, 3.294225, 14.219...  ...    BLA
+
+[5 rows x 10 columns]
+2024-06-10 14:05:06,642 - DEBUG - Labelled fixations shape: (339972, 11)
+2024-06-10 14:05:06,642 - DEBUG - Labelled spiketimes shape: (1255, 10)
+2024-06-10 14:05:06,669 - DEBUG - Processing session: OTNAL_FV_070722
+2024-06-10 14:05:06,670 - DEBUG - Session fixations shape: (9931, 11)
+2024-06-10 14:05:06,671 - DEBUG - Session neurons shape: (52, 10)
+2024-06-10 14:05:06,671 - DEBUG - Processing unit: 70720220111
+2024-06-10 14:05:06,684 - DEBUG - Processing unit: 70720220112
+2024-06-10 14:05:06,716 - DEBUG - Processing unit: 70720220121
+2024-06-10 14:05:06,840 - DEBUG - Processing unit: 70720220141
+2024-06-10 14:05:07,101 - DEBUG - Processing unit: 70720220161
+2024-06-10 14:05:07,309 - DEBUG - Processing unit: 70720220171
+2024-06-10 14:05:07,407 - DEBUG - Processing unit: 70720220191
+2024-06-10 14:05:07,783 - DEBUG - Processing unit: 70720220192
+2024-06-10 14:05:08,062 - DEBUG - Processing unit: 70720220201
+2024-06-10 14:05:08,192 - DEBUG - Processing unit: 70720220211
+2024-06-10 14:05:08,314 - DEBUG - Processing unit: 70720220221
+2024-06-10 14:05:08,933 - DEBUG - Processing unit: 70720220231
+2024-06-10 14:05:09,401 - DEBUG - Processing unit: 70720220232
+2024-06-10 14:05:09,667 - DEBUG - Processing unit: 70720220241
+2024-06-10 14:05:09,957 - DEBUG - Processing unit: 70720220242
+2024-06-10 14:05:10,403 - DEBUG - Processing unit: 70720220251
+2024-06-10 14:05:10,772 - DEBUG - Processing unit: 70720220261
+2024-06-10 14:05:10,979 - DEBUG - Processing unit: 70720220271
+2024-06-10 14:05:11,751 - DEBUG - Processing unit: 70720220272
+2024-06-10 14:05:12,125 - DEBUG - Processing unit: 70720220273
+2024-06-10 14:05:12,492 - DEBUG - Processing unit: 70720220274
+2024-06-10 14:05:12,733 - DEBUG - Processing unit: 70720220281
+2024-06-10 14:05:13,340 - DEBUG - Processing unit: 70720220282
+2024-06-10 14:05:13,824 - DEBUG - Processing unit: 70720220283
+2024-06-10 14:05:14,043 - DEBUG - Processing unit: 70720220284
+2024-06-10 14:05:14,344 - DEBUG - Processing unit: 70720220291
+2024-06-10 14:05:15,159 - DEBUG - Processing unit: 70720220292
+2024-06-10 14:05:15,277 - DEBUG - Processing unit: 70720220293
+2024-06-10 14:05:16,054 - DEBUG - Processing unit: 70720220301
+2024-06-10 14:05:16,439 - DEBUG - Processing unit: 70720220302
+2024-06-10 14:05:17,119 - DEBUG - Processing unit: 70720220311
+2024-06-10 14:05:17,591 - DEBUG - Processing unit: 70720220312

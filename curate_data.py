@@ -777,8 +777,8 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
     num_bins = int((raster_pre_event_time + raster_post_event_time) / raster_bin_size)
 
     # Filter data for the current session
-    session_fixations = labelled_fixations[labelled_fixations['session_name'].str.strip().str.lower() == session]
-    session_neurons = labelled_spiketimes[labelled_spiketimes['session_name'].str.strip().str.lower() == session]
+    session_fixations = labelled_fixations[labelled_fixations['session_name'] == session]
+    session_neurons = labelled_spiketimes[labelled_spiketimes['session_name'] == session]
 
     logging.debug(f"Session fixations shape: {session_fixations.shape}")
     logging.debug(f"Session neurons shape: {session_neurons.shape}")
