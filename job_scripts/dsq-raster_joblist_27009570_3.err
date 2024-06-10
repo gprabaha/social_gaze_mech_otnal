@@ -1,0 +1,69 @@
+
+CondaError: Run 'conda init' before 'conda deactivate'
+
+2024-06-10 14:38:20,312 - DEBUG - matplotlib data path: /gpfs/milgram/project/chang/pg496/conda_envs/nn_gpu/lib/python3.10/site-packages/matplotlib/mpl-data
+2024-06-10 14:38:20,316 - DEBUG - CONFIGDIR=/home/pg496/.config/matplotlib
+2024-06-10 14:38:20,317 - DEBUG - interactive is False
+2024-06-10 14:38:20,318 - DEBUG - platform is linux
+2024-06-10 14:38:20,361 - DEBUG - CACHEDIR=/home/pg496/.cache/matplotlib
+2024-06-10 14:38:20,362 - DEBUG - Using fontManager instance from /home/pg496/.cache/matplotlib/fontlist-v330.json
+2024-06-10 14:38:20,567 - DEBUG - Creating converter from 7 to 5
+2024-06-10 14:38:20,567 - DEBUG - Creating converter from 5 to 7
+2024-06-10 14:38:20,568 - DEBUG - Creating converter from 7 to 5
+2024-06-10 14:38:20,568 - DEBUG - Creating converter from 5 to 7
+2024-06-10 14:38:25,751 - DEBUG - First few rows of labelled fixations: 
+   start_time  end_time  category  ...   mean_y_pos     fix_roi  agent
+0       0.254     0.402       3.0  ...   203.120805  out_of_roi  Lynch
+1       0.407     0.558       3.0  ... -1188.157895  out_of_roi  Lynch
+2       0.584     0.769       3.0  ... -1226.191011  out_of_roi  Lynch
+3       0.775     0.947       3.0  ... -1221.121387  out_of_roi  Lynch
+4       0.973     1.098       3.0  ... -1155.447154  out_of_roi  Lynch
+
+[5 rows x 11 columns]
+2024-06-10 14:38:25,760 - DEBUG - First few rows of labelled spiketimes: 
+                                              spikeS  ... region
+0  [1.044075, 3.13865, 3.474675, 4.42465, 4.92632...  ...    BLA
+1  [20.752875, 56.052075, 127.98965, 130.049925, ...  ...    BLA
+2  [0.693575, 1.348825, 1.5314, 2.736025, 5.6675,...  ...    BLA
+3  [0.7346, 1.21215, 2.80735, 6.401425, 6.4468, 7...  ...    BLA
+4  [0.81235, 1.152825, 1.580025, 3.294225, 14.219...  ...    BLA
+
+[5 rows x 10 columns]
+2024-06-10 14:38:25,760 - DEBUG - Labelled fixations shape: (339972, 11)
+2024-06-10 14:38:25,760 - DEBUG - Labelled spiketimes shape: (1255, 10)
+2024-06-10 14:38:25,786 - DEBUG - Processing session: OTNAL_FV_062322
+2024-06-10 14:38:25,787 - DEBUG - Session fixations shape: (9757, 11)
+2024-06-10 14:38:25,787 - DEBUG - Session neurons shape: (43, 10)
+2024-06-10 14:38:25,788 - DEBUG - Processing unit: 62320220021
+2024-06-10 14:38:25,801 - DEBUG - Processing unit: 62320220031
+2024-06-10 14:38:25,830 - DEBUG - Processing unit: 62320220032
+2024-06-10 14:38:25,899 - DEBUG - Processing unit: 62320220033
+2024-06-10 14:38:26,038 - DEBUG - Processing unit: 62320220041
+2024-06-10 14:38:26,104 - DEBUG - Processing unit: 62320220042
+2024-06-10 14:38:26,264 - DEBUG - Processing unit: 62320220051
+2024-06-10 14:38:26,352 - DEBUG - Processing unit: 62320220061
+2024-06-10 14:38:26,431 - DEBUG - Processing unit: 62320220062
+2024-06-10 14:38:26,550 - DEBUG - Processing unit: 62320220071
+2024-06-10 14:38:26,683 - DEBUG - Processing unit: 62320220072
+2024-06-10 14:38:26,809 - DEBUG - Processing unit: 62320220081
+2024-06-10 14:38:27,233 - DEBUG - Processing unit: 62320220082
+2024-06-10 14:38:27,537 - DEBUG - Processing unit: 62320220091
+2024-06-10 14:38:27,756 - DEBUG - Processing unit: 62320220201
+2024-06-10 14:38:28,010 - DEBUG - Processing unit: 62320220221
+2024-06-10 14:38:28,280 - DEBUG - Processing unit: 62320220222
+2024-06-10 14:38:28,658 - DEBUG - Processing unit: 62320220231
+2024-06-10 14:38:29,245 - DEBUG - Processing unit: 62320220232
+2024-06-10 14:38:29,581 - DEBUG - Processing unit: 62320220233
+2024-06-10 14:38:29,975 - DEBUG - Processing unit: 62320220234
+2024-06-10 14:38:30,265 - DEBUG - Processing unit: 62320220241
+2024-06-10 14:38:30,688 - DEBUG - Processing unit: 62320220251
+2024-06-10 14:38:31,312 - DEBUG - Processing unit: 62320220261
+2024-06-10 14:38:31,983 - DEBUG - Processing unit: 62320220262
+2024-06-10 14:38:32,481 - DEBUG - Processing unit: 62320220263
+2024-06-10 14:38:33,057 - DEBUG - Processing unit: 62320220271
+2024-06-10 14:38:33,464 - DEBUG - Processing unit: 62320220272
+2024-06-10 14:38:34,093 - DEBUG - Processing unit: 62320220281
+2024-06-10 14:38:34,304 - DEBUG - Processing unit: 62320220282
+2024-06-10 14:38:34,886 - DEBUG - Processing unit: 62320220291
+2024-06-10 14:38:35,446 - DEBUG - Processing unit: 62320220292
+slurmstepd: error: *** JOB 27009574 ON r812u15n01 CANCELLED AT 2024-06-10T14:40:46 ***

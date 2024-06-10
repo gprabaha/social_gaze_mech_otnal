@@ -1,0 +1,70 @@
+
+CondaError: Run 'conda init' before 'conda deactivate'
+
+2024-06-10 14:20:52,435 - DEBUG - matplotlib data path: /gpfs/milgram/project/chang/pg496/conda_envs/nn_gpu/lib/python3.10/site-packages/matplotlib/mpl-data
+2024-06-10 14:20:52,441 - DEBUG - CONFIGDIR=/home/pg496/.config/matplotlib
+2024-06-10 14:20:52,442 - DEBUG - interactive is False
+2024-06-10 14:20:52,442 - DEBUG - platform is linux
+2024-06-10 14:20:52,494 - DEBUG - CACHEDIR=/home/pg496/.cache/matplotlib
+2024-06-10 14:20:52,495 - DEBUG - Using fontManager instance from /home/pg496/.cache/matplotlib/fontlist-v330.json
+2024-06-10 14:20:52,741 - DEBUG - Creating converter from 7 to 5
+2024-06-10 14:20:52,741 - DEBUG - Creating converter from 5 to 7
+2024-06-10 14:20:52,741 - DEBUG - Creating converter from 7 to 5
+2024-06-10 14:20:52,741 - DEBUG - Creating converter from 5 to 7
+2024-06-10 14:20:58,566 - DEBUG - First few rows of labelled fixations: 
+   start_time  end_time  category  ...   mean_y_pos     fix_roi  agent
+0       0.254     0.402       3.0  ...   203.120805  out_of_roi  Lynch
+1       0.407     0.558       3.0  ... -1188.157895  out_of_roi  Lynch
+2       0.584     0.769       3.0  ... -1226.191011  out_of_roi  Lynch
+3       0.775     0.947       3.0  ... -1221.121387  out_of_roi  Lynch
+4       0.973     1.098       3.0  ... -1155.447154  out_of_roi  Lynch
+
+[5 rows x 11 columns]
+2024-06-10 14:20:58,577 - DEBUG - First few rows of labelled spiketimes: 
+                                              spikeS  ... region
+0  [1.044075, 3.13865, 3.474675, 4.42465, 4.92632...  ...    BLA
+1  [20.752875, 56.052075, 127.98965, 130.049925, ...  ...    BLA
+2  [0.693575, 1.348825, 1.5314, 2.736025, 5.6675,...  ...    BLA
+3  [0.7346, 1.21215, 2.80735, 6.401425, 6.4468, 7...  ...    BLA
+4  [0.81235, 1.152825, 1.580025, 3.294225, 14.219...  ...    BLA
+
+[5 rows x 10 columns]
+2024-06-10 14:20:58,577 - DEBUG - Labelled fixations shape: (339972, 11)
+2024-06-10 14:20:58,577 - DEBUG - Labelled spiketimes shape: (1255, 10)
+2024-06-10 14:20:58,604 - DEBUG - Processing session: OTNAL_FV_070722
+2024-06-10 14:20:58,606 - DEBUG - Session fixations shape: (9931, 11)
+2024-06-10 14:20:58,606 - DEBUG - Session neurons shape: (52, 10)
+2024-06-10 14:20:58,607 - DEBUG - Processing unit: 70720220111
+2024-06-10 14:20:58,619 - DEBUG - Processing unit: 70720220112
+2024-06-10 14:20:58,650 - DEBUG - Processing unit: 70720220121
+2024-06-10 14:20:58,774 - DEBUG - Processing unit: 70720220141
+2024-06-10 14:20:59,037 - DEBUG - Processing unit: 70720220161
+2024-06-10 14:20:59,236 - DEBUG - Processing unit: 70720220171
+2024-06-10 14:20:59,351 - DEBUG - Processing unit: 70720220191
+2024-06-10 14:20:59,703 - DEBUG - Processing unit: 70720220192
+2024-06-10 14:20:59,930 - DEBUG - Processing unit: 70720220201
+2024-06-10 14:21:00,065 - DEBUG - Processing unit: 70720220211
+2024-06-10 14:21:00,265 - DEBUG - Processing unit: 70720220221
+2024-06-10 14:21:00,884 - DEBUG - Processing unit: 70720220231
+2024-06-10 14:21:01,337 - DEBUG - Processing unit: 70720220232
+2024-06-10 14:21:01,694 - DEBUG - Processing unit: 70720220241
+2024-06-10 14:21:01,922 - DEBUG - Processing unit: 70720220242
+2024-06-10 14:21:02,270 - DEBUG - Processing unit: 70720220251
+2024-06-10 14:21:02,603 - DEBUG - Processing unit: 70720220261
+2024-06-10 14:21:02,946 - DEBUG - Processing unit: 70720220271
+2024-06-10 14:21:03,683 - DEBUG - Processing unit: 70720220272
+2024-06-10 14:21:04,090 - DEBUG - Processing unit: 70720220273
+2024-06-10 14:21:04,584 - DEBUG - Processing unit: 70720220274
+2024-06-10 14:21:04,789 - DEBUG - Processing unit: 70720220281
+2024-06-10 14:21:05,272 - DEBUG - Processing unit: 70720220282
+2024-06-10 14:21:05,705 - DEBUG - Processing unit: 70720220283
+2024-06-10 14:21:06,014 - DEBUG - Processing unit: 70720220284
+2024-06-10 14:21:06,395 - DEBUG - Processing unit: 70720220291
+2024-06-10 14:21:07,010 - DEBUG - Processing unit: 70720220292
+2024-06-10 14:21:07,387 - DEBUG - Processing unit: 70720220293
+2024-06-10 14:21:08,116 - DEBUG - Processing unit: 70720220301
+2024-06-10 14:21:08,525 - DEBUG - Processing unit: 70720220302
+2024-06-10 14:21:09,399 - DEBUG - Processing unit: 70720220311
+2024-06-10 14:21:09,799 - DEBUG - Processing unit: 70720220312
+/bin/sh: line 1: 3250976 Killed                  python analyze_gaze_signals.py --session /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070722
+slurmstepd: error: Detected 1 oom_kill event in StepId=27009555.batch. Some of the step tasks have been OOM Killed.

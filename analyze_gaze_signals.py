@@ -62,7 +62,7 @@ def submit_job_array(job_file_path):
 
         # Run the command to generate the job script
         subprocess.run(
-            f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {output_dir} --status-dir {output_dir} --mem-per-cpu 6g -t 02:00:00 --mail-type FAIL',
+            f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {output_dir} --status-dir {output_dir} --cpus-per-task 4 --mem-per-cpu 16g -t 02:00:00 --mail-type FAIL',
             shell=True, check=True, executable='/bin/bash'
         )
         logging.info("Successfully generated the dSQ job script")
@@ -76,7 +76,7 @@ def submit_job_array(job_file_path):
 
         # Submit the job script with sbatch and ensure output is directed to the job_scripts directory
         subprocess.run(
-            f'sbatch --output={output_dir}/%x_%j.out --error={output_dir}/%x_%j.err {job_script_path}',
+            f'sbatch --output={output_dir}/%x_%A_%a.out --error={output_dir}/%x_%A_%a.err {job_script_path}',
             shell=True, check=True, executable='/bin/bash'
         )
         logging.info(f"Successfully submitted jobs using sbatch for script {job_script_path}")

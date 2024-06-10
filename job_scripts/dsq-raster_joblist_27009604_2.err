@@ -1,0 +1,91 @@
+
+CondaError: Run 'conda init' before 'conda deactivate'
+
+2024-06-10 14:45:03,521 - DEBUG - matplotlib data path: /gpfs/milgram/project/chang/pg496/conda_envs/nn_gpu/lib/python3.10/site-packages/matplotlib/mpl-data
+2024-06-10 14:45:03,526 - DEBUG - CONFIGDIR=/home/pg496/.config/matplotlib
+2024-06-10 14:45:03,527 - DEBUG - interactive is False
+2024-06-10 14:45:03,527 - DEBUG - platform is linux
+2024-06-10 14:45:03,569 - DEBUG - CACHEDIR=/home/pg496/.cache/matplotlib
+2024-06-10 14:45:03,571 - DEBUG - Using fontManager instance from /home/pg496/.cache/matplotlib/fontlist-v330.json
+2024-06-10 14:45:03,765 - DEBUG - Creating converter from 7 to 5
+2024-06-10 14:45:03,765 - DEBUG - Creating converter from 5 to 7
+2024-06-10 14:45:03,765 - DEBUG - Creating converter from 7 to 5
+2024-06-10 14:45:03,765 - DEBUG - Creating converter from 5 to 7
+2024-06-10 14:45:08,945 - DEBUG - First few rows of labelled fixations: 
+   start_time  end_time  category  ...   mean_y_pos     fix_roi  agent
+0       0.254     0.402       3.0  ...   203.120805  out_of_roi  Lynch
+1       0.407     0.558       3.0  ... -1188.157895  out_of_roi  Lynch
+2       0.584     0.769       3.0  ... -1226.191011  out_of_roi  Lynch
+3       0.775     0.947       3.0  ... -1221.121387  out_of_roi  Lynch
+4       0.973     1.098       3.0  ... -1155.447154  out_of_roi  Lynch
+
+[5 rows x 11 columns]
+2024-06-10 14:45:08,953 - DEBUG - First few rows of labelled spiketimes: 
+                                              spikeS  ... region
+0  [1.044075, 3.13865, 3.474675, 4.42465, 4.92632...  ...    BLA
+1  [20.752875, 56.052075, 127.98965, 130.049925, ...  ...    BLA
+2  [0.693575, 1.348825, 1.5314, 2.736025, 5.6675,...  ...    BLA
+3  [0.7346, 1.21215, 2.80735, 6.401425, 6.4468, 7...  ...    BLA
+4  [0.81235, 1.152825, 1.580025, 3.294225, 14.219...  ...    BLA
+
+[5 rows x 10 columns]
+2024-06-10 14:45:08,953 - DEBUG - Labelled fixations shape: (339972, 11)
+2024-06-10 14:45:08,953 - DEBUG - Labelled spiketimes shape: (1255, 10)
+2024-06-10 14:45:08,978 - DEBUG - Processing session: OTNAL_FV_031521
+2024-06-10 14:45:08,980 - DEBUG - Session fixations shape: (11993, 11)
+2024-06-10 14:45:08,980 - DEBUG - Session neurons shape: (55, 10)
+2024-06-10 14:45:08,980 - DEBUG - Processing unit: 31520210011
+2024-06-10 14:45:09,048 - DEBUG - Processing unit: 31520210012
+2024-06-10 14:45:09,085 - DEBUG - Processing unit: 31520210013
+2024-06-10 14:45:09,121 - DEBUG - Processing unit: 31520210014
+2024-06-10 14:45:09,200 - DEBUG - Processing unit: 31520210021
+2024-06-10 14:45:09,209 - DEBUG - Processing unit: 31520210022
+2024-06-10 14:45:09,231 - DEBUG - Processing unit: 31520210031
+2024-06-10 14:45:09,262 - DEBUG - Processing unit: 31520210032
+2024-06-10 14:45:09,329 - DEBUG - Processing unit: 31520210041
+2024-06-10 14:45:09,330 - DEBUG - Processing unit: 31520210042
+2024-06-10 14:45:09,362 - DEBUG - Processing unit: 31520210043
+2024-06-10 14:45:09,379 - DEBUG - Processing unit: 31520210051
+2024-06-10 14:45:09,398 - DEBUG - Processing unit: 31520210061
+2024-06-10 14:45:09,404 - DEBUG - Processing unit: 31520210071
+2024-06-10 14:45:09,494 - DEBUG - Processing unit: 31520210072
+2024-06-10 14:45:09,506 - DEBUG - Processing unit: 31520210081
+2024-06-10 14:45:09,585 - DEBUG - Processing unit: 31520210082
+2024-06-10 14:45:09,610 - DEBUG - Processing unit: 31520210091
+2024-06-10 14:45:09,789 - DEBUG - Processing unit: 31520210101
+2024-06-10 14:45:09,988 - DEBUG - Processing unit: 31520210102
+2024-06-10 14:45:10,045 - DEBUG - Processing unit: 31520210103
+2024-06-10 14:45:10,161 - DEBUG - Processing unit: 31520210111
+2024-06-10 14:45:10,205 - DEBUG - Processing unit: 31520210121
+2024-06-10 14:45:10,225 - DEBUG - Processing unit: 31520210122
+2024-06-10 14:45:10,259 - DEBUG - Processing unit: 31520210131
+2024-06-10 14:45:10,290 - DEBUG - Processing unit: 31520210141
+2024-06-10 14:45:10,410 - DEBUG - Processing unit: 31520210151
+2024-06-10 14:45:10,476 - DEBUG - Processing unit: 31520210161
+2024-06-10 14:45:10,503 - DEBUG - Processing unit: 31520210171
+2024-06-10 14:45:10,640 - DEBUG - Processing unit: 31520210181
+2024-06-10 14:45:10,663 - DEBUG - Processing unit: 31520210191
+2024-06-10 14:45:10,748 - DEBUG - Processing unit: 31520210201
+2024-06-10 14:53:18,980 - DEBUG - Processing unit: 31520210202
+2024-06-10 14:53:19,288 - DEBUG - Processing unit: 31520210211
+2024-06-10 14:53:21,522 - DEBUG - Processing unit: 31520210221
+2024-06-10 14:53:35,694 - DEBUG - Processing unit: 31520210231
+2024-06-10 14:58:15,122 - DEBUG - Processing unit: 31520210241
+2024-06-10 14:58:24,504 - DEBUG - Processing unit: 31520210251
+2024-06-10 14:59:08,244 - DEBUG - Processing unit: 31520210261
+2024-06-10 14:59:13,641 - DEBUG - Processing unit: 31520210271
+2024-06-10 14:59:23,130 - DEBUG - Processing unit: 31520210272
+2024-06-10 14:59:25,557 - DEBUG - Processing unit: 31520210281
+2024-06-10 14:59:33,272 - DEBUG - Processing unit: 31520210282
+2024-06-10 14:59:41,771 - DEBUG - Processing unit: 31520210283
+2024-06-10 14:59:57,117 - DEBUG - Processing unit: 31520210284
+2024-06-10 15:00:00,098 - DEBUG - Processing unit: 31520210291
+2024-06-10 15:00:08,610 - DEBUG - Processing unit: 31520210292
+2024-06-10 15:00:38,941 - DEBUG - Processing unit: 31520210293
+2024-06-10 15:01:01,105 - DEBUG - Processing unit: 31520210301
+2024-06-10 15:01:24,002 - DEBUG - Processing unit: 31520210302
+2024-06-10 15:01:56,657 - DEBUG - Processing unit: 31520210303
+2024-06-10 15:04:29,806 - DEBUG - Processing unit: 31520210311
+2024-06-10 15:06:34,937 - DEBUG - Processing unit: 31520210312
+2024-06-10 15:08:15,701 - DEBUG - Processing unit: 31520210321
+2024-06-10 15:08:16,774 - DEBUG - Processing unit: 31520210322

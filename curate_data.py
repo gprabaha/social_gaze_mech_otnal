@@ -721,41 +721,52 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
     pd.DataFrame: DataFrame containing all generated rasters and labels.
     """
     # Extract session names from paths and ensure consistent formatting
-    session_names = [os.path.basename(session_path).strip().lower() for session_path in session_paths]
-
+    session_names = [os.path.basename(session_path) for session_path in session_paths]
     logging.debug(f"Session names extracted from paths: {session_names}")
-    logging.debug(f"Unique session names in fixations: {labelled_fixations['session_name'].str.strip().str.lower().unique()}")
-    logging.debug(f"Unique session names in spiketimes: {labelled_spiketimes['session_name'].str.strip().str.lower().unique()}")
-
+    logging.debug(f"Unique session names in fixations: {labelled_fixations['session_name'].unique()}")
+    logging.debug(f"Unique session names in spiketimes: {labelled_spiketimes['session_name'].unique()}")
     results = []
-    if params.get('use_parallel', False):
-        with ThreadPoolExecutor() as executor:
-            futures = {executor.submit(
-                generate_session_raster, session, labelled_fixations,
-                labelled_spiketimes, params): session for session in session_names}
-            for future in futures:
+    if params.get('remake_rasters', False):
+        if params.get('use_parallel', False):
+            with ThreadPoolExecutor() as executor:
+                futures = {executor.submit(
+                    generate_session_raster, session, labelled_fixations,
+                    labelled_spiketimes, params): session for session in session_names}
+                for future in futures:
+                    try:
+                        result = future.result()
+                        if result is not None:
+                            results.append(result)
+                    except Exception as e:
+                        logging.error(f"Error processing session {futures[future]}: {e}")
+        else:
+            for session in session_names:
                 try:
-                    result = future.result()
+                    result = generate_session_raster(session, labelled_fixations, labelled_spiketimes, params)
                     if result is not None:
                         results.append(result)
                 except Exception as e:
-                    logging.error(f"Error processing session {futures[future]}: {e}")
+                    logging.error(f"Error processing session {session}: {e}")
+        if not results:
+            logging.error("No results to concatenate.")
+            raise ValueError("No objects to concatenate")
+        labelled_fixation_rasters = pd.concat(results, ignore_index=True)
     else:
+        session_files = []
         for session in session_names:
-            try:
-                result = generate_session_raster(session, labelled_fixations, labelled_spiketimes, params)
-                if result is not None:
-                    results.append(result)
-            except Exception as e:
-                logging.error(f"Error processing session {session}: {e}")
-
-    if not results:
-        logging.error("No results to concatenate.")
-        raise ValueError("No objects to concatenate")
-
-    labelled_fixation_rasters = pd.concat(results, ignore_index=True)
+            session_file_path = os.path.join(params['processed_data_dir'], f"{session}_raster.csv")
+            if os.path.exists(session_file_path):
+                logging.info(f"Loading existing data for session {session} from {session_file_path}")
+                session_files.append(session_file_path)
+            else:
+                logging.error(f"File for session {session} not found: {session_file_path}")
+                raise FileNotFoundError(f"File for session {session} not found: {session_file_path}")
+        results = [pd.read_csv(file) for file in session_files]
+        labelled_fixation_rasters = pd.concat(results, ignore_index=True)
     save_labelled_fixation_rasters(labelled_fixation_rasters, params)
     return labelled_fixation_rasters
+
+
 
 def generate_session_raster(session, labelled_fixations, labelled_spiketimes, params):
     """
@@ -766,27 +777,22 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
     labelled_spiketimes (pd.DataFrame): DataFrame containing spiketimes data.
     params (dict): Dictionary containing parameters for raster generation.
     Returns:
-    pd.DataFrame: DataFrame containing rasters and labels for the session.
+    str: File path of the saved session data.
     """
     logging.debug(f"Processing session: {session}")
-    
     # Extract parameters
     raster_bin_size = float(params['raster_bin_size'])
     raster_pre_event_time = float(params['raster_pre_event_time'])
     raster_post_event_time = float(params['raster_post_event_time'])
     num_bins = int((raster_pre_event_time + raster_post_event_time) / raster_bin_size)
-
     # Filter data for the current session
     session_fixations = labelled_fixations[labelled_fixations['session_name'] == session]
     session_neurons = labelled_spiketimes[labelled_spiketimes['session_name'] == session]
-
     logging.debug(f"Session fixations shape: {session_fixations.shape}")
     logging.debug(f"Session neurons shape: {session_neurons.shape}")
-
     if session_fixations.empty or session_neurons.empty:
         logging.warning(f"No data found for session {session}.")
         return None
-
     results = []
     with ThreadPoolExecutor() as executor:
         futures = {executor.submit(
@@ -799,13 +805,16 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
                     results.append(result)
             except Exception as e:
                 logging.error(f"Error processing unit {futures[future]}: {e}")
-
     if not results:
         logging.warning(f"No results for session {session}.")
         return None
-
     session_data = pd.concat(results, ignore_index=True)
-    return session_data
+    session_file_path = os.path.join(params['processed_data_dir'], f"{session}_raster.csv")
+    session_data.to_csv(session_file_path, index=False)
+    logging.info(f"Saved session data for {session} to {session_file_path}")
+    return session_file_path
+
+
 
 def process_unit(uuid, session_fixations, session_neurons, num_bins, raster_bin_size, raster_pre_event_time, raster_post_event_time):
     """
