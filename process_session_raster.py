@@ -20,8 +20,13 @@ def main():
     parser = argparse.ArgumentParser(description='Process a single session to generate raster data.')
     parser.add_argument('--session', required=True, help='Path to the session to process')
     args = parser.parse_args()
-    params = util.get_params()
     session_name = os.path.basename(os.path.normpath(args.session))
+    
+    params = util.get_params()
+    root_data_dir, params = util.fetch_root_data_dir(params)
+    data_source_dir, params = util.fetch_data_source_dir(params)
+    session_paths, params = util.fetch_session_subfolder_paths_from_source(params)
+    processed_data_dir, params = util.fetch_processed_data_dir(params)
 
     # Load fixation and spiketimes data (assuming these functions are available and correct)
     labelled_fixations = load_data.load_m1_fixation_labels(params)

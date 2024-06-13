@@ -59,16 +59,21 @@ def track_job_progress(job_id):
     logging.info(f"Tracking progress of job array with ID: {job_id}")
     while True:
         result = subprocess.run(
-            f'squeue --job {job_id}',
+            f'squeue --job {job_id} -h -o %T',
             shell=True, capture_output=True, text=True, executable='/bin/bash'
         )
-        if 'Invalid job id specified' in result.stderr:
-            logging.error(f"Invalid job ID: {job_id}")
+        if result.returncode != 0:
+            logging.error(f"Error checking job status for job ID {job_id}: {result.stderr.strip()}")
             break
-        job_status = result.stdout.strip()
-        if not job_status:
+        job_statuses = result.stdout.strip().split()
+        if not job_statuses:
+            logging.info(f"Job array {job_id} has completed.")
+            break
+        running_jobs = [status for status in job_statuses if status in ('PENDING', 'RUNNING', 'CONFIGURING')]
+        if not running_jobs:
             logging.info(f"Job array {job_id} has completed.")
             break
         else:
-            logging.info(f"Job array {job_id} is still running. Checking again in 60 seconds...")
-            time.sleep(60)
+            logging.info(f"Job array {job_id} is still running. Checking again in 30 seconds...")
+            time.sleep(30)
+
