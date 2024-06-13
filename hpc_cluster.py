@@ -9,8 +9,9 @@ Created on Thu Jun 13 10:57:11 2024
 import os
 import subprocess
 import logging
-
 import time
+
+import pdb
 
 
 def generate_job_file(session_paths):
@@ -37,6 +38,7 @@ def submit_job_array(job_file_path):
             logging.error(f"No job script found at {job_script_path}.")
             return
         logging.info(f"Using dSQ job script: {job_script_path}")
+        pdb.set_trace()
         # Submit the job script with sbatch and ensure output is directed to the job_scripts directory
         result = subprocess.run(
             f'sbatch --output={output_dir}/%x_%A_%a.out --error={output_dir}/%x_%A_%a.err {job_script_path}',

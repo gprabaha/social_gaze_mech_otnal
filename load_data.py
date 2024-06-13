@@ -297,10 +297,10 @@ def load_labelled_fixation_rasters(params):
     flag_info = util.get_file_flag_info(params)
     processed_data_dir = params['processed_data_dir']
     # Construct the filename
-    filename = f"labelled_fixation_rasters{flag_info}.csv"
+    filename = f"labelled_fixation_rasters{flag_info}.h5"
     file_path = os.path.join(processed_data_dir, filename)
-    # Load the DataFrame from the CSV file
-    labelled_fixation_rasters = pd.read_csv(file_path)
+    # Load the DataFrame from the HDF5 file
+    labelled_fixation_rasters = pd.read_hdf(file_path)
     print(f"Data loaded from {file_path}")
     return labelled_fixation_rasters
 

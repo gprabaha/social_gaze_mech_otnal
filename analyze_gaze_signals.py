@@ -7,10 +7,6 @@ Created on Tue Apr  9 10:25:48 2024
 """
 
 
-import os
-import pandas as pd
-import glob
-import argparse
 import logging
 
 
@@ -20,43 +16,38 @@ import pdb
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-params = util.get_params()
-params.update({
-    'is_cluster': True,
-    'use_parallel': True,
-    'remake_labelled_gaze_pos': False,
-    'remake_fixations': False,
-    'remake_fixation_labels': False,
-    'remake_saccades': False,
-    'remake_spikeTs': False,
-    'remake_raster': True,
-    'make_plots': False,
-    'remap_source_coord_from_inverted_to_standard_y_axis': True,
-    'map_roi_coord_to_eyelink_space': False,
-    'map_gaze_pos_coord_to_eyelink_space': True,
-    'export_plots_to_local_folder': False,
-    'inter_eye_dist_denom_for_eye_bbox_offset': 2,
-    'offset_multiples_in_x_dir': 3,
-    'offset_multiples_in_y_dir': 1.5,
-    'bbox_expansion_factor': 1.3,
-    'raster_bin_size': 0.001,  # in seconds
-    'raster_pre_event_time': 0.5,
-    'raster_post_event_time': 0.5
-})
-
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Process gaze signals for a specific session")
-    parser.add_argument('--session', type=str, help='Session ID to process')
-    parser.add_argument('--generate_jobs', action='store_true', help='Generate job file and submit job array')
-    args = parser.parse_args()
 
     # Load necessary data and parameters
     import util
     import curate_data
     import load_data
     import plotter
-
+    
+    params = util.get_params()
+    params.update({
+        'is_cluster': True,
+        'use_parallel': True,
+        'remake_labelled_gaze_pos': False,
+        'remake_fixations': False,
+        'remake_fixation_labels': False,
+        'remake_saccades': False,
+        'remake_spikeTs': False,
+        'remake_raster': True,
+        'make_plots': False,
+        'remap_source_coord_from_inverted_to_standard_y_axis': True,
+        'map_roi_coord_to_eyelink_space': False,
+        'map_gaze_pos_coord_to_eyelink_space': True,
+        'export_plots_to_local_folder': False,
+        'inter_eye_dist_denom_for_eye_bbox_offset': 2,
+        'offset_multiples_in_x_dir': 3,
+        'offset_multiples_in_y_dir': 1.5,
+        'bbox_expansion_factor': 1.3,
+        'raster_bin_size': 0.001,  # in seconds
+        'raster_pre_event_time': 0.5,
+        'raster_post_event_time': 0.5
+    })
+    
     root_data_dir, params = util.fetch_root_data_dir(params)
     data_source_dir, params = util.fetch_data_source_dir(params)
     session_paths, params = util.fetch_session_subfolder_paths_from_source(params)
@@ -89,22 +80,6 @@ if __name__ == "__main__":
         labeled_fixation_rasters = curate_data.extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params)
     else:
         labeled_fixation_rasters = load_data.load_labelled_fixation_rasters(params)
-    
-    # Log shapes of the loaded data
-    logging.debug(f"First few rows of labelled fixations: \n{labelled_fixations.head()}")
-    logging.debug(f"First few rows of labelled spiketimes: \n{labelled_spiketimes.head()}")
-    logging.debug(f"Labelled fixations shape: {labelled_fixations.shape}")
-    logging.debug(f"Labelled spiketimes shape: {labelled_spiketimes.shape}")
-
-    if args.generate_jobs:
-        job_file_path = generate_job_file(session_paths)
-        submit_job_array(job_file_path)
-    elif args.session:
-        # Process a single session
-        session_name = os.path.basename(os.path.normpath(args.session))
-        labelled_fixations = labelled_fixations[labelled_fixations['session_name'] == session_name]
-        labelled_spiketimes = labelled_spiketimes[labelled_spiketimes['session_name'] == session_name]
-        curate_data.generate_session_raster(session_name, labelled_fixations, labelled_spiketimes, params)
         
 
     if params.get('make_plots'):

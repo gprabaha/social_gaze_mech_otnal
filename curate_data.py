@@ -710,7 +710,7 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
     session_names = [os.path.basename(session_path) for session_path in session_paths]
     logging.debug(f"Session names extracted from paths: {session_names}")
     results = []
-    if params.get('remake_rasters', False):
+    if params.get('remake_raster', False):
         if params.get('submit_separate_jobs_for_session_raster', True):
             job_file_path = hpc_cluster.generate_job_file(session_paths)
             hpc_cluster.submit_job_array(job_file_path)
