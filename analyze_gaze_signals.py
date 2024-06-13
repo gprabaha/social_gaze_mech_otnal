@@ -20,7 +20,8 @@ import pdb
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-params = {
+params = util.get_params()
+params.update({
     'is_cluster': True,
     'use_parallel': True,
     'remake_labelled_gaze_pos': False,
@@ -41,7 +42,7 @@ params = {
     'raster_bin_size': 0.001,  # in seconds
     'raster_pre_event_time': 0.5,
     'raster_post_event_time': 0.5
-}
+})
 
 
 if __name__ == "__main__":

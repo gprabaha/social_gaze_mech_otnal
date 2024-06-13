@@ -17,6 +17,31 @@ import defaults
 import pdb
 
 
+def get_params():
+    params = {
+        'is_cluster': True,
+        'use_parallel': True,
+        'remake_labelled_gaze_pos': False,
+        'remake_fixations': False,
+        'remake_fixation_labels': False,
+        'remake_saccades': False,
+        'remake_spikeTs': False,
+        'remake_raster': True,
+        'make_plots': False,
+        'remap_source_coord_from_inverted_to_standard_y_axis': True,
+        'map_roi_coord_to_eyelink_space': False,
+        'map_gaze_pos_coord_to_eyelink_space': True,
+        'export_plots_to_local_folder': False,
+        'inter_eye_dist_denom_for_eye_bbox_offset': 2,
+        'offset_multiples_in_x_dir': 3,
+        'offset_multiples_in_y_dir': 1.5,
+        'bbox_expansion_factor': 1.3,
+        'raster_bin_size': 0.001,  # in seconds
+        'raster_pre_event_time': 0.5,
+        'raster_post_event_time': 0.5
+    }
+    return params
+
 def fetch_root_data_dir(params):
     """
     Returns the root data directory based on whether it's running on a cluster or not.

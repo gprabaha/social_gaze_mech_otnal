@@ -20,6 +20,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import ast
 import logging
+import h5py
 
 import util
 import load_data
@@ -706,87 +707,47 @@ def extract_spiketimes_for_all_sessions(params):
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params):
-    """
-    Main function to generate rasters for all sessions.
-    Parameters:
-    session_paths (list): List of session paths.
-    labelled_fixations (pd.DataFrame): DataFrame containing fixation data.
-    labelled_spiketimes (pd.DataFrame): DataFrame containing spiketimes data.
-    params (dict): Dictionary containing parameters for raster generation.
-    Returns:
-    pd.DataFrame: DataFrame containing all generated rasters and labels.
-    """
-    # Extract session names from paths and ensure consistent formatting
     session_names = [os.path.basename(session_path) for session_path in session_paths]
     logging.debug(f"Session names extracted from paths: {session_names}")
-    logging.debug(f"Unique session names in fixations: {labelled_fixations['session_name'].unique()}")
-    logging.debug(f"Unique session names in spiketimes: {labelled_spiketimes['session_name'].unique()}")
     results = []
     if params.get('remake_rasters', False):
         if params.get('submit_separate_jobs_for_session_raster', True):
             job_file_path = hpc_cluster.generate_job_file(session_paths)
             hpc_cluster.submit_job_array(job_file_path)
-            
-            
-        if params.get('use_parallel', False):
-            with ThreadPoolExecutor() as executor:
-                futures = {executor.submit(
-                    generate_session_raster, session, labelled_fixations,
-                    labelled_spiketimes, params): session for session in session_names}
-                for future in futures:
-                    try:
-                        result = future.result()
-                        if result is not None:
-                            results.append(result)
-                    except Exception as e:
-                        logging.error(f"Error processing session {futures[future]}: {e}")
-        else:
-            for session in session_names:
-                try:
-                    result = generate_session_raster(session, labelled_fixations, labelled_spiketimes, params)
-                    if result is not None:
-                        results.append(result)
-                except Exception as e:
-                    logging.error(f"Error processing session {session}: {e}")
-        if not results:
-            logging.error("No results to concatenate.")
-            raise ValueError("No objects to concatenate")
-        labelled_fixation_rasters = pd.concat(results, ignore_index=True)
+            # Wait for job completion is handled within submit_job_array
+            session_files = [os.path.join(params['processed_data_dir'], f"{session}_raster.h5") for session in session_names]
+            for session_file in session_files:
+                if os.path.exists(session_file):
+                    results.append(pd.read_hdf(session_file))
+                else:
+                    logging.error(f"File for session {session_file} not found.")
+                    raise FileNotFoundError(f"File for session {session_file} not found.")
+            if not results:
+                logging.error("No results to concatenate.")
+                raise ValueError("No objects to concatenate")
+            labelled_fixation_rasters = pd.concat(results, ignore_index=True)
     else:
         session_files = []
         for session in session_names:
-            session_file_path = os.path.join(params['processed_data_dir'], f"{session}_raster.csv")
+            session_file_path = os.path.join(params['processed_data_dir'], f"{session}_raster.h5")
             if os.path.exists(session_file_path):
                 logging.info(f"Loading existing data for session {session} from {session_file_path}")
                 session_files.append(session_file_path)
             else:
                 logging.error(f"File for session {session} not found: {session_file_path}")
                 raise FileNotFoundError(f"File for session {session} not found: {session_file_path}")
-        results = [pd.read_csv(file) for file in session_files]
+        results = [pd.read_hdf(file) for file in session_files]
         labelled_fixation_rasters = pd.concat(results, ignore_index=True)
     save_labelled_fixation_rasters(labelled_fixation_rasters, params)
     return labelled_fixation_rasters
 
 
-
 def generate_session_raster(session, labelled_fixations, labelled_spiketimes, params):
-    """
-    Function to generate rasters for a single session.
-    Parameters:
-    session (str): The name of the session to process.
-    labelled_fixations (pd.DataFrame): DataFrame containing fixation data.
-    labelled_spiketimes (pd.DataFrame): DataFrame containing spiketimes data.
-    params (dict): Dictionary containing parameters for raster generation.
-    Returns:
-    str: File path of the saved session data.
-    """
     logging.debug(f"Processing session: {session}")
-    # Extract parameters
     raster_bin_size = float(params['raster_bin_size'])
     raster_pre_event_time = float(params['raster_pre_event_time'])
     raster_post_event_time = float(params['raster_post_event_time'])
     num_bins = int((raster_pre_event_time + raster_post_event_time) / raster_bin_size)
-    # Filter data for the current session
     session_fixations = labelled_fixations[labelled_fixations['session_name'] == session]
     session_neurons = labelled_spiketimes[labelled_spiketimes['session_name'] == session]
     logging.debug(f"Session fixations shape: {session_fixations.shape}")
@@ -810,65 +771,34 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
         logging.warning(f"No results for session {session}.")
         return None
     session_data = pd.concat(results, ignore_index=True)
-    session_file_path = os.path.join(params['processed_data_dir'], f"{session}_raster.csv")
-    session_data.to_csv(session_file_path, index=False)
+    session_file_path = os.path.join(params['processed_data_dir'], f"{session}_raster.h5")
+    save_to_hdf5(session_data, session_file_path)
     logging.info(f"Saved session data for {session} to {session_file_path}")
-    return session_file_path
-
+    return session_data
 
 
 def process_unit(uuid, session_fixations, session_neurons, num_bins, raster_bin_size, raster_pre_event_time, raster_post_event_time):
-    """
-    Function to process a single unit within a session.
-    Parameters:
-    uuid (str): Unique identifier for the neuron.
-    session_fixations (pd.DataFrame): DataFrame containing fixation data.
-    session_neurons (pd.DataFrame): DataFrame containing neuron data.
-    num_bins (int): Number of bins for the raster.
-    raster_bin_size (float): Size of each bin for the raster.
-    raster_pre_event_time (float): Time before the event to include in the raster.
-    raster_post_event_time (float): Time after the event to include in the raster.
-    Returns:
-    pd.DataFrame: DataFrame containing rasters and labels for the unit.
-    """
     logging.debug(f"Processing unit: {uuid}")
-    
     neuron_spikes_str = session_neurons[session_neurons['uuid'] == uuid]['spikeS'].values[0]
     neuron_spikes = np.array(ast.literal_eval(neuron_spikes_str))
     bins = np.arange(-raster_pre_event_time, raster_post_event_time, raster_bin_size)
-    
     results = []
     for _, fixation in session_fixations.iterrows():
         for aligned_to in ['start_time', 'end_time']:
             event_time = float(fixation[aligned_to])
             relevant_spikes = neuron_spikes[(neuron_spikes >= event_time - raster_pre_event_time) & (neuron_spikes < event_time + raster_post_event_time)]
             spike_times = relevant_spikes - event_time
-
-            # Generate binary raster using numpy's histogram function
             raster = np.histogram(spike_times, bins=bins)[0]
             raster = (raster > 0).astype(int)
-
             session_data = update_session_data(raster, fixation, session_neurons, uuid, aligned_to)
             results.append(session_data)
-    
     if not results:
         logging.warning(f"No results for unit {uuid}.")
         return None
-
     return pd.DataFrame(results)
 
+
 def update_session_data(raster, fixation, session_neurons, uuid, aligned_to):
-    """
-    Function to update the session data DataFrame with raster and label information.
-    Parameters:
-    raster (np.ndarray): Binary raster.
-    fixation (pd.Series): Series containing fixation information.
-    session_neurons (pd.DataFrame): DataFrame containing neuron information.
-    uuid (str): Unique identifier for the neuron.
-    aligned_to (str): Indicates whether the raster is aligned to start_time or end_time.
-    Returns:
-    pd.Series: Series containing the raster and label information.
-    """
     session_data = {
         'raster': raster,
         'category': fixation['category'],
@@ -892,18 +822,32 @@ def update_session_data(raster, fixation, session_neurons, uuid, aligned_to):
     }
     return session_data
 
+
 def save_labelled_fixation_rasters(labelled_fixation_rasters, params):
-    """
-    Function to save the labelled fixation rasters DataFrame to a specified directory.
-    Parameters:
-    labelled_fixation_rasters (pd.DataFrame): DataFrame containing all generated rasters and labels.
-    params (dict): Dictionary containing parameters including the directory to save the processed data.
-    """
     processed_data_dir = params['processed_data_dir']
     os.makedirs(processed_data_dir, exist_ok=True)
-    file_path = os.path.join(processed_data_dir, 'labelled_fixation_rasters.csv')
-    labelled_fixation_rasters.to_csv(file_path, index=False)
+    file_path = os.path.join(processed_data_dir, 'labelled_fixation_rasters.h5')
+    with h5py.File(file_path, 'w') as hf:
+        for i, row in labelled_fixation_rasters.iterrows():
+            group = hf.create_group(str(i))
+            for key, value in row.items():
+                if key == 'raster':
+                    group.create_dataset(key, data=value, compression="gzip")
+                else:
+                    group.attrs[key] = value
     logging.info(f"Saved labelled fixation rasters to {file_path}")
+
+
+def save_to_hdf5(dataframe, filename):
+    with h5py.File(filename, 'w') as hf:
+        for i, row in dataframe.iterrows():
+            group = hf.create_group(str(i))
+            for key, value in row.items():
+                if key == 'raster':
+                    group.create_dataset(key, data=value, compression="gzip")
+                else:
+                    group.attrs[key] = value
+
 
 
 
