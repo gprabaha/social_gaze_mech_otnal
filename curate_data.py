@@ -19,11 +19,13 @@ import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 import ast
+import logging
 
 import util
 import load_data
 import defaults
 import fix
+import hpc_cluster
 
 import pdb
 
@@ -699,12 +701,6 @@ def extract_spiketimes_for_all_sessions(params):
     return all_labels
 
 
-import pandas as pd
-import numpy as np
-import ast
-import os
-from concurrent.futures import ThreadPoolExecutor
-import logging
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -727,6 +723,11 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
     logging.debug(f"Unique session names in spiketimes: {labelled_spiketimes['session_name'].unique()}")
     results = []
     if params.get('remake_rasters', False):
+        if params.get('submit_separate_jobs_for_session_raster', True):
+            job_file_path = hpc_cluster.generate_job_file(session_paths)
+            hpc_cluster.submit_job_array(job_file_path)
+            
+            
         if params.get('use_parallel', False):
             with ThreadPoolExecutor() as executor:
                 futures = {executor.submit(

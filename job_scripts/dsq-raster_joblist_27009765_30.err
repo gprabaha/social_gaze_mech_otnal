@@ -1,0 +1,79 @@
+
+CondaError: Run 'conda init' before 'conda deactivate'
+
+2024-06-10 15:56:12,907 - DEBUG - matplotlib data path: /gpfs/milgram/project/chang/pg496/conda_envs/nn_gpu/lib/python3.10/site-packages/matplotlib/mpl-data
+2024-06-10 15:56:12,911 - DEBUG - CONFIGDIR=/home/pg496/.config/matplotlib
+2024-06-10 15:56:12,913 - DEBUG - interactive is False
+2024-06-10 15:56:12,913 - DEBUG - platform is linux
+2024-06-10 15:56:12,955 - DEBUG - CACHEDIR=/home/pg496/.cache/matplotlib
+2024-06-10 15:56:12,956 - DEBUG - Using fontManager instance from /home/pg496/.cache/matplotlib/fontlist-v330.json
+2024-06-10 15:56:13,148 - DEBUG - Creating converter from 7 to 5
+2024-06-10 15:56:13,149 - DEBUG - Creating converter from 5 to 7
+2024-06-10 15:56:13,149 - DEBUG - Creating converter from 7 to 5
+2024-06-10 15:56:13,149 - DEBUG - Creating converter from 5 to 7
+2024-06-10 15:56:18,236 - DEBUG - First few rows of labelled fixations: 
+   start_time  end_time  category  ...   mean_y_pos     fix_roi  agent
+0       0.254     0.402       3.0  ...   203.120805  out_of_roi  Lynch
+1       0.407     0.558       3.0  ... -1188.157895  out_of_roi  Lynch
+2       0.584     0.769       3.0  ... -1226.191011  out_of_roi  Lynch
+3       0.775     0.947       3.0  ... -1221.121387  out_of_roi  Lynch
+4       0.973     1.098       3.0  ... -1155.447154  out_of_roi  Lynch
+
+[5 rows x 11 columns]
+2024-06-10 15:56:18,245 - DEBUG - First few rows of labelled spiketimes: 
+                                              spikeS  ... region
+0  [1.044075, 3.13865, 3.474675, 4.42465, 4.92632...  ...    BLA
+1  [20.752875, 56.052075, 127.98965, 130.049925, ...  ...    BLA
+2  [0.693575, 1.348825, 1.5314, 2.736025, 5.6675,...  ...    BLA
+3  [0.7346, 1.21215, 2.80735, 6.401425, 6.4468, 7...  ...    BLA
+4  [0.81235, 1.152825, 1.580025, 3.294225, 14.219...  ...    BLA
+
+[5 rows x 10 columns]
+2024-06-10 15:56:18,245 - DEBUG - Labelled fixations shape: (339972, 11)
+2024-06-10 15:56:18,245 - DEBUG - Labelled spiketimes shape: (1255, 10)
+2024-06-10 15:56:18,265 - DEBUG - Processing session: OTNAL_FV_121621
+2024-06-10 15:56:18,266 - DEBUG - Session fixations shape: (12829, 11)
+2024-06-10 15:56:18,266 - DEBUG - Session neurons shape: (42, 10)
+2024-06-10 15:56:18,267 - DEBUG - Processing unit: 121620210021
+2024-06-10 15:56:18,277 - DEBUG - Processing unit: 121620210041
+2024-06-10 15:56:18,286 - DEBUG - Processing unit: 121620210042
+2024-06-10 15:56:18,327 - DEBUG - Processing unit: 121620210051
+2024-06-10 15:56:18,330 - DEBUG - Processing unit: 121620210052
+2024-06-10 15:56:18,348 - DEBUG - Processing unit: 121620210061
+2024-06-10 15:56:18,349 - DEBUG - Processing unit: 121620210071
+2024-06-10 15:56:18,363 - DEBUG - Processing unit: 121620210072
+2024-06-10 15:56:18,387 - DEBUG - Processing unit: 121620210081
+2024-06-10 15:56:18,417 - DEBUG - Processing unit: 121620210091
+2024-06-10 15:56:18,451 - DEBUG - Processing unit: 121620210101
+2024-06-10 15:56:18,453 - DEBUG - Processing unit: 121620210111
+2024-06-10 15:56:18,520 - DEBUG - Processing unit: 121620210131
+2024-06-10 15:56:18,569 - DEBUG - Processing unit: 121620210141
+2024-06-10 15:56:18,610 - DEBUG - Processing unit: 121620210151
+2024-06-10 15:56:18,625 - DEBUG - Processing unit: 121620210152
+2024-06-10 15:56:18,681 - DEBUG - Processing unit: 121620210161
+2024-06-10 15:56:18,726 - DEBUG - Processing unit: 121620210171
+2024-06-10 15:56:18,816 - DEBUG - Processing unit: 121620210181
+2024-06-10 15:56:18,986 - DEBUG - Processing unit: 121620210191
+2024-06-10 15:56:19,026 - DEBUG - Processing unit: 121620210201
+2024-06-10 15:56:19,046 - DEBUG - Processing unit: 121620210211
+2024-06-10 15:56:19,277 - DEBUG - Processing unit: 121620210221
+2024-06-10 15:56:19,298 - DEBUG - Processing unit: 121620210251
+2024-06-10 15:56:19,350 - DEBUG - Processing unit: 121620210252
+2024-06-10 15:56:19,447 - DEBUG - Processing unit: 121620210261
+2024-06-10 15:56:19,510 - DEBUG - Processing unit: 121620210262
+2024-06-10 15:56:19,576 - DEBUG - Processing unit: 121620210301
+2024-06-10 15:56:19,583 - DEBUG - Processing unit: 121620210302
+2024-06-10 15:56:19,694 - DEBUG - Processing unit: 121620210311
+2024-06-10 15:56:19,800 - DEBUG - Processing unit: 121620210312
+2024-06-10 15:56:19,833 - DEBUG - Processing unit: 121620210321
+2024-06-10 16:05:08,653 - DEBUG - Processing unit: 121620210322
+2024-06-10 16:05:16,508 - DEBUG - Processing unit: 121620210431
+2024-06-10 16:05:23,202 - DEBUG - Processing unit: 121620210441
+2024-06-10 16:06:51,617 - DEBUG - Processing unit: 121620210451
+2024-06-10 16:09:19,728 - DEBUG - Processing unit: 121620210461
+2024-06-10 16:09:51,948 - DEBUG - Processing unit: 121620210471
+2024-06-10 16:10:16,067 - DEBUG - Processing unit: 121620210481
+2024-06-10 16:10:26,578 - DEBUG - Processing unit: 121620210501
+2024-06-10 16:10:36,796 - DEBUG - Processing unit: 121620210511
+2024-06-10 16:10:44,585 - DEBUG - Processing unit: 121620210521
+2024-06-10 16:44:06,769 - INFO - Saved session data for OTNAL_FV_121621 to /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/OTNAL_FV_121621_raster.csv

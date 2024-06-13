@@ -1,0 +1,63 @@
+
+CondaError: Run 'conda init' before 'conda deactivate'
+
+2024-06-10 15:50:34,531 - DEBUG - matplotlib data path: /gpfs/milgram/project/chang/pg496/conda_envs/nn_gpu/lib/python3.10/site-packages/matplotlib/mpl-data
+2024-06-10 15:50:34,536 - DEBUG - CONFIGDIR=/home/pg496/.config/matplotlib
+2024-06-10 15:50:34,537 - DEBUG - interactive is False
+2024-06-10 15:50:34,537 - DEBUG - platform is linux
+2024-06-10 15:50:34,580 - DEBUG - CACHEDIR=/home/pg496/.cache/matplotlib
+2024-06-10 15:50:34,581 - DEBUG - Using fontManager instance from /home/pg496/.cache/matplotlib/fontlist-v330.json
+2024-06-10 15:50:34,781 - DEBUG - Creating converter from 7 to 5
+2024-06-10 15:50:34,781 - DEBUG - Creating converter from 5 to 7
+2024-06-10 15:50:34,781 - DEBUG - Creating converter from 7 to 5
+2024-06-10 15:50:34,781 - DEBUG - Creating converter from 5 to 7
+2024-06-10 15:50:39,848 - DEBUG - First few rows of labelled fixations: 
+   start_time  end_time  category  ...   mean_y_pos     fix_roi  agent
+0       0.254     0.402       3.0  ...   203.120805  out_of_roi  Lynch
+1       0.407     0.558       3.0  ... -1188.157895  out_of_roi  Lynch
+2       0.584     0.769       3.0  ... -1226.191011  out_of_roi  Lynch
+3       0.775     0.947       3.0  ... -1221.121387  out_of_roi  Lynch
+4       0.973     1.098       3.0  ... -1155.447154  out_of_roi  Lynch
+
+[5 rows x 11 columns]
+2024-06-10 15:50:39,856 - DEBUG - First few rows of labelled spiketimes: 
+                                              spikeS  ... region
+0  [1.044075, 3.13865, 3.474675, 4.42465, 4.92632...  ...    BLA
+1  [20.752875, 56.052075, 127.98965, 130.049925, ...  ...    BLA
+2  [0.693575, 1.348825, 1.5314, 2.736025, 5.6675,...  ...    BLA
+3  [0.7346, 1.21215, 2.80735, 6.401425, 6.4468, 7...  ...    BLA
+4  [0.81235, 1.152825, 1.580025, 3.294225, 14.219...  ...    BLA
+
+[5 rows x 10 columns]
+2024-06-10 15:50:39,856 - DEBUG - Labelled fixations shape: (339972, 11)
+2024-06-10 15:50:39,856 - DEBUG - Labelled spiketimes shape: (1255, 10)
+2024-06-10 15:50:39,876 - DEBUG - Processing session: OTNAL_FV_112320
+2024-06-10 15:50:39,878 - DEBUG - Session fixations shape: (13879, 11)
+2024-06-10 15:50:39,878 - DEBUG - Session neurons shape: (26, 10)
+2024-06-10 15:50:39,879 - DEBUG - Processing unit: 112320200011
+2024-06-10 15:50:39,967 - DEBUG - Processing unit: 112320200012
+2024-06-10 15:50:39,984 - DEBUG - Processing unit: 112320200021
+2024-06-10 15:50:40,004 - DEBUG - Processing unit: 112320200031
+2024-06-10 15:50:40,016 - DEBUG - Processing unit: 112320200032
+2024-06-10 15:50:40,034 - DEBUG - Processing unit: 112320200041
+2024-06-10 15:50:40,135 - DEBUG - Processing unit: 112320200051
+2024-06-10 15:50:40,167 - DEBUG - Processing unit: 112320200061
+2024-06-10 15:50:40,251 - DEBUG - Processing unit: 112320200062
+2024-06-10 15:50:40,279 - DEBUG - Processing unit: 112320200071
+2024-06-10 15:50:40,281 - DEBUG - Processing unit: 112320200072
+2024-06-10 15:50:40,320 - DEBUG - Processing unit: 112320200081
+2024-06-10 15:50:40,555 - DEBUG - Processing unit: 112320200082
+2024-06-10 15:50:40,896 - DEBUG - Processing unit: 112320200091
+2024-06-10 15:50:40,943 - DEBUG - Processing unit: 112320200092
+2024-06-10 15:50:40,983 - DEBUG - Processing unit: 112320200101
+2024-06-10 15:50:41,013 - DEBUG - Processing unit: 112320200111
+2024-06-10 15:50:41,045 - DEBUG - Processing unit: 112320200121
+2024-06-10 15:50:41,054 - DEBUG - Processing unit: 112320200131
+2024-06-10 15:50:41,062 - DEBUG - Processing unit: 112320200132
+2024-06-10 15:50:41,489 - DEBUG - Processing unit: 112320200141
+2024-06-10 15:50:41,495 - DEBUG - Processing unit: 112320200142
+2024-06-10 15:50:41,497 - DEBUG - Processing unit: 112320200143
+2024-06-10 15:50:41,965 - DEBUG - Processing unit: 112320200151
+2024-06-10 15:50:42,009 - DEBUG - Processing unit: 112320200152
+2024-06-10 15:50:42,016 - DEBUG - Processing unit: 112320200161
+2024-06-10 16:22:21,442 - INFO - Saved session data for OTNAL_FV_112320 to /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/OTNAL_FV_112320_raster.csv

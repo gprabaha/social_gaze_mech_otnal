@@ -53,3 +53,4 @@ CondaError: Run 'conda init' before 'conda deactivate'
 2024-06-10 15:25:46,350 - DEBUG - Processing unit: 61520210291
 2024-06-10 15:25:46,403 - DEBUG - Processing unit: 61520210301
 2024-06-10 15:25:46,418 - DEBUG - Processing unit: 61520210311
+2024-06-10 15:47:34,962 - INFO - Saved session data for OTNAL_FV_061521 to /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/OTNAL_FV_061521_raster.csv

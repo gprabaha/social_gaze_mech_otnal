@@ -12,14 +12,13 @@ import pandas as pd
 import glob
 import argparse
 import logging
-import subprocess
-import datetime
 
 
 import pdb
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 params = {
     'is_cluster': True,
@@ -43,46 +42,6 @@ params = {
     'raster_pre_event_time': 0.5,
     'raster_post_event_time': 0.5
 }
-
-def generate_job_file(session_paths):
-    job_file_path = '/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/job_scripts/raster_joblist.txt'
-    os.makedirs('job_scripts', exist_ok=True)
-    with open(job_file_path, 'w') as file:
-        for session_path in session_paths:
-            command = f"module load miniconda; conda init bash; conda activate nn_gpu; python analyze_gaze_signals.py --session {session_path}"
-            file.write(command + "\n")
-    return job_file_path
-
-
-def submit_job_array(job_file_path):
-    try:
-        # Ensure the directory paths are correct and use absolute paths
-        output_dir = '/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/job_scripts/'
-        job_script_path = os.path.join(output_dir, 'dsq-joblist_raster.sh')
-
-        # Run the command to generate the job script
-        subprocess.run(
-            f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {output_dir} --status-dir {output_dir} --cpus-per-task 4 --mem-per-cpu 16g -t 02:00:00 --mail-type FAIL',
-            shell=True, check=True, executable='/bin/bash'
-        )
-        logging.info("Successfully generated the dSQ job script")
-
-        # Check if the job script file exists
-        if not os.path.isfile(job_script_path):
-            logging.error(f"No job script found at {job_script_path}.")
-            return
-
-        logging.info(f"Using dSQ job script: {job_script_path}")
-
-        # Submit the job script with sbatch and ensure output is directed to the job_scripts directory
-        subprocess.run(
-            f'sbatch --output={output_dir}/%x_%A_%a.out --error={output_dir}/%x_%A_%a.err {job_script_path}',
-            shell=True, check=True, executable='/bin/bash'
-        )
-        logging.info(f"Successfully submitted jobs using sbatch for script {job_script_path}")
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Error during job submission process: {e}")
-        raise
 
 
 if __name__ == "__main__":
@@ -124,6 +83,12 @@ if __name__ == "__main__":
     else:
         labelled_spiketimes = load_data.load_processed_spiketimes(params)
 
+    # Process all sessions
+    if params.get('remake_raster'):
+        labeled_fixation_rasters = curate_data.extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params)
+    else:
+        labeled_fixation_rasters = load_data.load_labelled_fixation_rasters(params)
+    
     # Log shapes of the loaded data
     logging.debug(f"First few rows of labelled fixations: \n{labelled_fixations.head()}")
     logging.debug(f"First few rows of labelled spiketimes: \n{labelled_spiketimes.head()}")
@@ -139,12 +104,7 @@ if __name__ == "__main__":
         labelled_fixations = labelled_fixations[labelled_fixations['session_name'] == session_name]
         labelled_spiketimes = labelled_spiketimes[labelled_spiketimes['session_name'] == session_name]
         curate_data.generate_session_raster(session_name, labelled_fixations, labelled_spiketimes, params)
-    else:
-        # Process all sessions
-        if params.get('remake_raster'):
-            labeled_fixation_rasters = curate_data.extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params)
-        else:
-            labeled_fixation_rasters = load_data.load_labelled_fixation_rasters(params)
+        
 
     if params.get('make_plots'):
         plotter.plot_fixation_proportions_for_diff_conditions(params)

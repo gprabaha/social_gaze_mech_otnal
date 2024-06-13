@@ -66,3 +66,24 @@ CondaError: Run 'conda init' before 'conda deactivate'
 2024-06-10 15:25:48,997 - DEBUG - Processing unit: 70720220302
 2024-06-10 15:25:49,137 - DEBUG - Processing unit: 70720220311
 2024-06-10 15:25:49,166 - DEBUG - Processing unit: 70720220312
+2024-06-10 15:30:38,627 - DEBUG - Processing unit: 70720220321
+2024-06-10 15:30:58,798 - DEBUG - Processing unit: 70720220322
+2024-06-10 15:34:30,692 - DEBUG - Processing unit: 70720220323
+2024-06-10 15:34:37,500 - DEBUG - Processing unit: 70720220351
+2024-06-10 15:34:54,133 - DEBUG - Processing unit: 70720220441
+2024-06-10 15:35:07,011 - DEBUG - Processing unit: 70720220471
+2024-06-10 15:35:12,211 - DEBUG - Processing unit: 70720220481
+2024-06-10 15:35:23,711 - DEBUG - Processing unit: 70720220541
+2024-06-10 15:36:18,687 - DEBUG - Processing unit: 70720220542
+2024-06-10 15:37:10,771 - DEBUG - Processing unit: 70720220551
+2024-06-10 15:38:02,989 - DEBUG - Processing unit: 70720220552
+2024-06-10 15:38:47,651 - DEBUG - Processing unit: 70720220581
+2024-06-10 15:40:39,138 - DEBUG - Processing unit: 70720220591
+2024-06-10 15:41:45,313 - DEBUG - Processing unit: 70720220592
+2024-06-10 15:43:38,979 - DEBUG - Processing unit: 70720220593
+2024-06-10 15:43:59,371 - DEBUG - Processing unit: 70720220601
+2024-06-10 15:44:16,030 - DEBUG - Processing unit: 70720220611
+2024-06-10 15:44:52,423 - DEBUG - Processing unit: 70720220621
+2024-06-10 15:44:59,327 - DEBUG - Processing unit: 70720220631
+2024-06-10 15:45:46,616 - DEBUG - Processing unit: 70720220641
+2024-06-10 16:11:58,840 - INFO - Saved session data for OTNAL_FV_070722 to /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/OTNAL_FV_070722_raster.csv
