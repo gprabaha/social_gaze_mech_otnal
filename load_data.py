@@ -275,14 +275,26 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
 def load_processed_spiketimes(params):
     processed_data_dir = params.get('processed_data_dir')
     flag_info = util.get_filename_flag_info(params)
-    labels_path = os.path.join(
-        processed_data_dir, f'spike_labels{flag_info}.csv')
-    if os.path.exists(labels_path):
-        labelled_spiketimes = pd.read_csv(labels_path)
-        print(f"All labelled spiketimes loaded from {labels_path}")
+    h5_file_path = os.path.join(processed_data_dir, f'spike_labels{flag_info}.h5')
+    if os.path.exists(h5_file_path):
+        with h5py.File(h5_file_path, 'r') as hf:
+            spikeS_group = hf['spikeS']
+            spikeMs_group = hf['spikeMs']
+            labels_group = hf['labels']
+            # Read variable-length datasets for spikeS and spikeMs
+            spikeS_data = [spikeS_group[str(i)][:] for i in range(len(spikeS_group))]
+            spikeMs_data = [spikeMs_group[str(i)][:] for i in range(len(spikeMs_group))]
+            # Read labels
+            labels_data = {key: labels_group[key][:] for key in labels_group.keys()}
+            labels_data['spikeS'] = spikeS_data
+            labels_data['spikeMs'] = spikeMs_data
+            # Create DataFrame from labels_data
+            labelled_spiketimes = pd.DataFrame(labels_data)
+        print(f"All labelled spiketimes loaded from {h5_file_path}")
         return labelled_spiketimes
     else:
-        raise FileNotFoundError(f"No such file: {labels_path}")
+        raise FileNotFoundError(f"No such file: {h5_file_path}")
+
 
 
 def load_labelled_fixation_rasters(params):

@@ -668,38 +668,64 @@ def extract_spiketimes_for_all_sessions(params):
     session_paths = params.get('session_paths')
     is_parallel = params.get('use_parallel', True)
     spikeTs_labels = []
+
     if is_parallel:
         # Process sessions in parallel with tqdm progress bar
         results = Parallel(n_jobs=-1)(delayed(
             load_data.get_spiketimes_and_labels_for_one_session)(
                 session_path, processed_data_dir)
             for session_path in tqdm(
-                    session_paths, desc='Loading spiketimes'))
+                session_paths, desc='Loading spiketimes'))
         # Iterate over results and concatenate
-        for labelled_spiketimes in tqdm(
-                results, desc='concatenating results'):
+        for labelled_spiketimes in tqdm(results, desc='Concatenating results'):
             spikeTs_labels.append(labelled_spiketimes)
     else:
         # Process sessions sequentially
         for session_path in session_paths:
-            labelled_spiketimes = \
-                load_data.get_spiketimes_and_labels_for_one_session(
-                    session_path, processed_data_dir)
+            labelled_spiketimes = load_data.get_spiketimes_and_labels_for_one_session(
+                session_path, processed_data_dir)
             spikeTs_labels.append(labelled_spiketimes)
+
     # Concatenate label dataframes
     if spikeTs_labels:
         all_labels = pd.concat(spikeTs_labels, ignore_index=True)
     else:
         all_labels = pd.DataFrame()
+
     # Construct flag_info based on params
     flag_info = util.get_filename_flag_info(params)
-    # Save outputs to root_data_dir with flag_info
-    labels_path = os.path.join(
-        processed_data_dir, f'spike_labels{flag_info}.csv')
-    # Save DataFrame
-    all_labels.to_csv(labels_path, index=False)
-    print(f"All labelled spiketimes saved to {labels_path}")
+    
+    # Define the HDF5 file path
+    h5_file_path = os.path.join(processed_data_dir, f'spike_labels{flag_info}.h5')
+
+    # Save DataFrame to HDF5
+    save_spiketimes_to_hdf5(all_labels, h5_file_path)
+    print(f"All labelled spiketimes saved to {h5_file_path}")
+
     return all_labels
+
+def save_spiketimes_to_hdf5(df, file_path):
+    """
+    Save the dataframe to an HDF5 file with `spikeS` and `spikeMs` as variable-length datasets.
+    Parameters:
+    df (pd.DataFrame): The dataframe containing the data.
+    file_path (str): The file path to save the HDF5 file.
+    """
+    with h5py.File(file_path, 'w') as hf:
+        spikeS_group = hf.create_group('spikeS')
+        spikeMs_group = hf.create_group('spikeMs')
+        labels_group = hf.create_group('labels')
+        for index, row in df.iterrows():
+            spikeS_data = row['spikeS']
+            spikeMs_data = row['spikeMs']
+            # Create variable-length datasets for spikeS and spikeMs
+            spikeS_group.create_dataset(str(index), data=spikeS_data, dtype=h5py.vlen_dtype(float))
+            spikeMs_group.create_dataset(str(index), data=spikeMs_data, dtype=h5py.vlen_dtype(float))
+        # Save the remaining columns (labels)
+        for column in df.columns:
+            if column not in ['spikeS', 'spikeMs']:
+                labels_group.create_dataset(column, data=df[column].values)
+    logging.info(f"Data successfully saved to {file_path}")
 
 
 
@@ -780,6 +806,11 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
 def process_unit(uuid, session_fixations, session_neurons, num_bins, raster_bin_size, raster_pre_event_time, raster_post_event_time):
     logging.debug(f"Processing unit: {uuid}")
     neuron_spikes_str = session_neurons[session_neurons['uuid'] == uuid]['spikeS'].values[0]
+    
+    """
+    Spiketimes are no longer stored as strings. Update the next line accordingly
+    """
+    
     neuron_spikes = np.array(ast.literal_eval(neuron_spikes_str))
     bins = np.arange(-raster_pre_event_time, raster_post_event_time, raster_bin_size)
     results = []

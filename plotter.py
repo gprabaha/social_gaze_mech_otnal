@@ -195,6 +195,131 @@ def plot_fixation_heatmap_for_one_session(session_fixations, roi_bb_corners,
     plt.close()
 
 
+from scipy.stats import ttest_ind
+import seaborn as sns
+from datetime import datetime
+
+def plot_roi_response_of_each_unit(labelled_fixation_rasters, params):
+    """
+    Function to plot the mean ROI response of each unit.
+    Parameters:
+    labelled_fixation_rasters (pd.DataFrame): DataFrame containing all generated rasters and labels.
+    params (dict): Dictionary containing parameters for plotting.
+    """
+    # Parameters
+    pre_event_time = params.get('raster_pre_event_time', 0.5)
+    post_event_time = params.get('raster_post_event_time', 0.5)
+    raster_bin_size = params.get('raster_bin_size', 0.01)
+    bins_pre = int(pre_event_time / raster_bin_size)
+    bins_post = int(post_event_time / raster_bin_size)
+    
+    # Filter for start_time aligned rasters
+    start_time_rasters = labelled_fixation_rasters[labelled_fixation_rasters['aligned_to'] == 'start_time']
+    
+    # List of ROIs
+    rois = start_time_rasters['fix_roi'].unique()
+    # List of units
+    units = start_time_rasters['uuid'].unique()
+
+    # Track differentiating neurons for ACC and BLA regions
+    acc_diff_neurons = {roi: 0 for roi in rois}
+    bla_diff_neurons = {roi: 0 for roi in rois}
+    acc_total_neurons = 0
+    bla_total_neurons = 0
+
+    # Create directory for plots
+    root_data_dir = params['root_data_dir']
+    date_label = datetime.now().strftime('%Y-%m-%d')
+    plot_dir = os.path.join(root_data_dir, 'plots', 'spike_count_comparison', date_label)
+    os.makedirs(plot_dir, exist_ok=True)
+
+    # Plotting
+    for unit in units:
+        unit_data = start_time_rasters[start_time_rasters['uuid'] == unit]
+        session_name = unit_data.iloc[0]['session_name']
+        region = unit_data.iloc[0]['region']
+        fig, axes = plt.subplots(len(rois), 1, figsize=(10, len(rois) * 5))
+        fig.suptitle(f'Unit {unit} (Session: {session_name}, Region: {region}) ROI Response')
+
+        for i, roi in enumerate(rois):
+            roi_data = unit_data[unit_data['fix_roi'] == roi]
+            mon_up = roi_data[roi_data['category'] == 'mon_up']
+            mon_down = roi_data[roi_data['category'] == 'mon_down']
+
+            pre_up = np.array([raster[:bins_pre] for raster in mon_up['raster']])
+            post_up = np.array([raster[bins_pre:bins_pre + bins_post] for raster in mon_up['raster']])
+            pre_down = np.array([raster[:bins_pre] for raster in mon_down['raster']])
+            post_down = np.array([raster[bins_pre:bins_pre + bins_post] for raster in mon_down['raster']])
+
+            mean_pre_up = np.mean(pre_up, axis=0)
+            mean_post_up = np.mean(post_up, axis=0)
+            mean_pre_down = np.mean(pre_down, axis=0)
+            mean_post_down = np.mean(post_down, axis=0)
+
+            t_pre, p_pre = ttest_ind(pre_up.flatten(), pre_down.flatten())
+            t_post, p_post = ttest_ind(post_up.flatten(), post_down.flatten())
+
+            significant_pre = p_pre < 0.05
+            significant_post = p_post < 0.05
+
+            if significant_pre or significant_post:
+                if region == 'ACC':
+                    acc_diff_neurons[roi] += 1
+                    acc_total_neurons += 1
+                elif region == 'BLA':
+                    bla_diff_neurons[roi] += 1
+                    bla_total_neurons += 1
+
+            ax = axes[i]
+            sns.barplot(data=[mean_pre_up, mean_post_up], ax=ax, label='mon_up', color='blue')
+            sns.barplot(data=[mean_pre_down, mean_post_down], ax=ax, label='mon_down', color='red')
+            ax.set_title(f'ROI: {roi}')
+            ax.set_xlabel('Time')
+            ax.set_ylabel('Mean Spike Count')
+            if significant_pre:
+                ax.annotate('*', xy=(0, max(mean_pre_up.max(), mean_pre_down.max())), fontsize=20, color='black')
+            if significant_post:
+                ax.annotate('*', xy=(1, max(mean_post_up.max(), mean_post_down.max())), fontsize=20, color='black')
+            ax.legend()
+
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        plot_path = os.path.join(plot_dir, f'unit_{unit}_session_{session_name}_region_{region}_roi_response.png')
+        plt.savefig(plot_path)
+        plt.close(fig)
+
+    # Pie charts for ACC and BLA neurons
+    fig, axes = plt.subplots(1, len(rois), figsize=(len(rois) * 5, 5))
+    fig.suptitle('Differentiating Neurons by ROI (ACC)')
+
+    for i, roi in enumerate(rois):
+        ax = axes[i]
+        acc_count = acc_diff_neurons[roi]
+        ax.pie([acc_count, acc_total_neurons - acc_count],
+               labels=['Differentiating', 'Non-Differentiating'],
+               autopct='%1.1f%%', startangle=140)
+        ax.set_title(f'ROI: {roi}')
+
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    pie_chart_path = os.path.join(plot_dir, 'acc_roi_differentiating_neurons.png')
+    plt.savefig(pie_chart_path)
+    plt.close(fig)
+
+    fig, axes = plt.subplots(1, len(rois), figsize=(len(rois) * 5, 5))
+    fig.suptitle('Differentiating Neurons by ROI (BLA)')
+
+    for i, roi in enumerate(rois):
+        ax = axes[i]
+        bla_count = bla_diff_neurons[roi]
+        ax.pie([bla_count, bla_total_neurons - bla_count],
+               labels=['Differentiating', 'Non-Differentiating'],
+               autopct='%1.1f%%', startangle=140)
+        ax.set_title(f'ROI: {roi}')
+
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    pie_chart_path = os.path.join(plot_dir, 'bla_roi_differentiating_neurons.png')
+    plt.savefig(pie_chart_path)
+    plt.close(fig)
+
 
 
 
