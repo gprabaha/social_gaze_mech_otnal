@@ -80,8 +80,6 @@ if __name__ == "__main__":
         labelled_fixation_rasters = curate_data.extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params)
     else:
         labelled_fixation_rasters = load_data.load_labelled_fixation_rasters(params)
-        
-    
     
 
     if params.get('make_plots'):

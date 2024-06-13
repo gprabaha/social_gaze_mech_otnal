@@ -858,26 +858,21 @@ def save_labelled_fixation_rasters(labelled_fixation_rasters, params):
     processed_data_dir = params['processed_data_dir']
     os.makedirs(processed_data_dir, exist_ok=True)
     file_path = os.path.join(processed_data_dir, 'labelled_fixation_rasters.h5')
-    with h5py.File(file_path, 'w') as hf:
-        for i, row in labelled_fixation_rasters.iterrows():
-            group = hf.create_group(str(i))
-            for key, value in row.items():
-                if key == 'raster':
-                    group.create_dataset(key, data=value, compression="gzip")
-                else:
-                    group.attrs[key] = value
+    # Save DataFrame to HDF5 using pandas with compression
+    labelled_fixation_rasters.to_hdf(file_path, key='df', mode='w', format='table', complevel=9, complib='blosc')
     logging.info(f"Saved labelled fixation rasters to {file_path}")
 
 
 def save_to_hdf5(dataframe, filename):
-    with h5py.File(filename, 'w') as hf:
-        for i, row in dataframe.iterrows():
-            group = hf.create_group(str(i))
-            for key, value in row.items():
-                if key == 'raster':
-                    group.create_dataset(key, data=value, compression="gzip")
-                else:
-                    group.attrs[key] = value
+    """
+    Function to save the DataFrame to an HDF5 file.
+    Parameters:
+    dataframe (pd.DataFrame): DataFrame containing the data to be saved.
+    filename (str): Path to the file where data should be saved.
+    """
+    dataframe.to_hdf(filename, key='df', mode='w', format='table', complevel=9, complib='blosc')
+    logging.info(f"Data saved to {filename}")
+
 
 
 

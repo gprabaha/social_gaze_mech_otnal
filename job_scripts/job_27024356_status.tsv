@@ -1,0 +1,2 @@
+6	0	r812u15n04.milgram.ycrc.yale.edu	2024-06-13 16:44:54	2024-06-13 16:45:08	13.95	module load miniconda; conda init bash; conda activate nn_gpu; python process_session_raster.py --session /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061721
+7	0	r811u15n03.milgram.ycrc.yale.edu	2024-06-13 16:44:55	2024-06-13 16:45:09	14.38	module load miniconda; conda init bash; conda activate nn_gpu; python process_session_raster.py --session /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_060321

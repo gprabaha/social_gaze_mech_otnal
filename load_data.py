@@ -13,6 +13,9 @@ import mat73
 import numpy as np
 import pandas as pd
 import pickle
+import h5py
+
+import logging
 
 import util
 
@@ -272,6 +275,21 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
         return pd.DataFrame(columns=label_cols)
 
 
+
+
+def load_processed_spiketimes(params):
+    processed_data_dir = params.get('processed_data_dir')
+    flag_info = util.get_filename_flag_info(params)
+    labels_path = os.path.join(
+        processed_data_dir, f'spike_labels{flag_info}.csv')
+    if os.path.exists(labels_path):
+        labelled_spiketimes = pd.read_csv(labels_path)
+        print(f"All labelled spiketimes loaded from {labels_path}")
+        return labelled_spiketimes
+    else:
+        raise FileNotFoundError(f"No such file: {labels_path}")
+
+"""
 def load_processed_spiketimes(params):
     processed_data_dir = params.get('processed_data_dir')
     flag_info = util.get_filename_flag_info(params)
@@ -294,8 +312,7 @@ def load_processed_spiketimes(params):
         return labelled_spiketimes
     else:
         raise FileNotFoundError(f"No such file: {h5_file_path}")
-
-
+"""
 
 def load_labelled_fixation_rasters(params):
     """
@@ -306,14 +323,14 @@ def load_labelled_fixation_rasters(params):
     pd.DataFrame: DataFrame containing the loaded rasters and labels.
     """
     # Get flag_info
-    flag_info = util.get_file_flag_info(params)
+    flag_info = util.get_filename_flag_info(params)
     processed_data_dir = params['processed_data_dir']
     # Construct the filename
     filename = f"labelled_fixation_rasters{flag_info}.h5"
     file_path = os.path.join(processed_data_dir, filename)
     # Load the DataFrame from the HDF5 file
-    labelled_fixation_rasters = pd.read_hdf(file_path)
-    print(f"Data loaded from {file_path}")
+    labelled_fixation_rasters = pd.read_hdf(file_path, key='df')
+    logging.info(f"Data loaded from {file_path}")
     return labelled_fixation_rasters
 
 
