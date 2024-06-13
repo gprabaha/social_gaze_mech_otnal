@@ -9,8 +9,6 @@ Created on Thu Jun 13 11:22:45 2024
 # process_session.py
 import os
 import argparse
-import pandas as pd
-import logging
 
 import util
 import load_data
@@ -35,14 +33,7 @@ def main():
     # Filter data for the specific session
     labelled_fixations = labelled_fixations[labelled_fixations['session_name'] == session_name]
     labelled_spiketimes = labelled_spiketimes[labelled_spiketimes['session_name'] == session_name]
-
-    # Load parameters (assuming this function or equivalent is available)
-
-    # Generate raster data for the session
-    raster_data = curate_data.generate_session_raster(session_name, labelled_fixations, labelled_spiketimes, params)
-    
-    # Save the generated raster data
-    curate_data.save_labelled_fixation_rasters(raster_data, params)
+    curate_data.generate_session_raster(session_name, labelled_fixations, labelled_spiketimes, params)
 
 if __name__ == '__main__':
     main()
