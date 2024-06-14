@@ -14,6 +14,7 @@ import multiprocessing
 from multiprocessing import Pool
 from joblib import Parallel, delayed
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor
 import concurrent.futures
 import pickle
 import pandas as pd
@@ -732,38 +733,70 @@ def save_spiketimes_to_hdf5(df, file_path):
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
+def process_sessions_serial(session_paths, params):
+    results = []
+    for session_path in session_paths:
+        session_raster = generate_session_raster(session_path, params)
+        results.append(session_raster)
+    return results
+
+def process_sessions_parallel(session_paths, params):
+    results = []
+    with ProcessPoolExecutor() as executor:
+        future_to_session = {executor.submit(generate_session_raster, path, params): path for path in session_paths}
+        for future in as_completed(future_to_session):
+            try:
+                result = future.result()
+                results.append(result)
+            except Exception as exc:
+                session_path = future_to_session[future]
+                logging.error(f"Session {session_path} generated an exception: {exc}")
+    return results
+
 def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params):
     session_names = [os.path.basename(session_path) for session_path in session_paths]
     logging.debug(f"Session names extracted from paths: {session_names}")
     results = []
+    
     if params.get('remake_raster', False):
         if params.get('submit_separate_jobs_for_session_raster', True):
             job_file_path = hpc_cluster.generate_job_file(session_paths)
             hpc_cluster.submit_job_array(job_file_path)
             # Wait for job completion is handled within submit_job_array
-            session_files = [os.path.join(params['processed_data_dir'], f"{session}_raster.h5") for session in session_names]
+            session_files = [os.path.join(params['processed_data_dir'], f"{session}_raster.pkl") for session in session_names]
             for session_file in session_files:
-                if os.path.exists(session_file):
-                    results.append(pd.read_hdf(session_file))
-                else:
-                    logging.error(f"File for session {session_file} not found.")
-                    raise FileNotFoundError(f"File for session {session_file} not found.")
+                try:
+                    results.append(load_data.load_session_raster_data(session_file))
+                except FileNotFoundError as e:
+                    logging.error(e)
+                    raise
             if not results:
                 logging.error("No results to concatenate.")
                 raise ValueError("No objects to concatenate")
             labelled_fixation_rasters = pd.concat(results, ignore_index=True)
+        else:
+            if params.get('use_parallel', False):
+                results = process_sessions_parallel(session_paths, params)
+            else:
+                results = process_sessions_serial(session_paths, params)
+            
+            if not results:
+                logging.error("No results to concatenate.")
+                raise ValueError("No objects to concatenate")
+            
+            labelled_fixation_rasters = pd.concat(results, ignore_index=True)
     else:
         session_files = []
         for session in session_names:
-            session_file_path = os.path.join(params['processed_data_dir'], f"{session}_raster.h5")
-            if os.path.exists(session_file_path):
+            session_file_path = os.path.join(params['processed_data_dir'], f"{session}_raster.pkl")
+            try:
                 logging.info(f"Loading existing data for session {session} from {session_file_path}")
-                session_files.append(session_file_path)
-            else:
-                logging.error(f"File for session {session} not found: {session_file_path}")
-                raise FileNotFoundError(f"File for session {session} not found: {session_file_path}")
-        results = [pd.read_hdf(file) for file in session_files]
-        labelled_fixation_rasters = pd.concat(results, ignore_index=True)
+                session_files.append(load_data.load_session_raster_data(session_file_path))
+            except FileNotFoundError as e:
+                logging.error(e)
+                raise
+        labelled_fixation_rasters = pd.concat(session_files, ignore_index=True)
+    
     save_labelled_fixation_rasters(labelled_fixation_rasters, params)
     return labelled_fixation_rasters
 
@@ -797,8 +830,8 @@ def generate_session_raster(session, labelled_fixations, labelled_spiketimes, pa
         logging.warning(f"No results for session {session}.")
         return None
     session_data = pd.concat(results, ignore_index=True)
-    session_file_path = os.path.join(params['processed_data_dir'], f"{session}_raster.h5")
-    save_to_hdf5(session_data, session_file_path)
+    session_file_path = os.path.join(params['processed_data_dir'], f"{session}_raster.pkl")
+    save_to_pickle(session_data, session_file_path)
     logging.info(f"Saved session data for {session} to {session_file_path}")
     return session_data
 
@@ -807,10 +840,7 @@ def process_unit(uuid, session_fixations, session_neurons, num_bins, raster_bin_
     logging.debug(f"Processing unit: {uuid}")
     neuron_spikes_str = session_neurons[session_neurons['uuid'] == uuid]['spikeS'].values[0]
     
-    """
-    Spiketimes are no longer stored as strings. Update the next line accordingly
-    """
-    
+    # Update to use stored numpy arrays or lists directly
     neuron_spikes = np.array(ast.literal_eval(neuron_spikes_str))
     bins = np.arange(-raster_pre_event_time, raster_post_event_time, raster_bin_size)
     results = []
@@ -831,7 +861,7 @@ def process_unit(uuid, session_fixations, session_neurons, num_bins, raster_bin_
 
 def update_session_data(raster, fixation, session_neurons, uuid, aligned_to):
     session_data = {
-        'raster': raster,
+        'raster': raster,  # Keep raster as a numpy array
         'category': fixation['category'],
         'session_name': fixation['session_name'],
         'run': fixation['run'],
@@ -854,24 +884,25 @@ def update_session_data(raster, fixation, session_neurons, uuid, aligned_to):
     return session_data
 
 
-def save_labelled_fixation_rasters(labelled_fixation_rasters, params):
-    processed_data_dir = params['processed_data_dir']
-    os.makedirs(processed_data_dir, exist_ok=True)
-    file_path = os.path.join(processed_data_dir, 'labelled_fixation_rasters.h5')
-    # Save DataFrame to HDF5 using pandas with compression
-    labelled_fixation_rasters.to_hdf(file_path, key='df', mode='w', format='table', complevel=9, complib='blosc')
-    logging.info(f"Saved labelled fixation rasters to {file_path}")
-
-
-def save_to_hdf5(dataframe, filename):
+def save_to_pickle(dataframe, filename):
     """
-    Function to save the DataFrame to an HDF5 file.
+    Function to save the DataFrame to a pickle file.
     Parameters:
     dataframe (pd.DataFrame): DataFrame containing the data to be saved.
     filename (str): Path to the file where data should be saved.
     """
-    dataframe.to_hdf(filename, key='df', mode='w', format='table', complevel=9, complib='blosc')
+    with open(filename, 'wb') as f:
+        pickle.dump(dataframe, f, protocol=pickle.HIGHEST_PROTOCOL)
     logging.info(f"Data saved to {filename}")
+
+
+def save_labelled_fixation_rasters(labelled_fixation_rasters, params):
+    processed_data_dir = params['processed_data_dir']
+    os.makedirs(processed_data_dir, exist_ok=True)
+    file_path = os.path.join(processed_data_dir, 'labelled_fixation_rasters.pkl')
+    # Save DataFrame to a pickle file
+    save_to_pickle(labelled_fixation_rasters, file_path)
+    logging.info(f"Saved labelled fixation rasters to {file_path}")
 
 
 

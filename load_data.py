@@ -314,6 +314,21 @@ def load_processed_spiketimes(params):
         raise FileNotFoundError(f"No such file: {h5_file_path}")
 """
 
+def load_session_raster_data(session_file_path):
+    """
+    Function to load session data from a pickle file.
+    Parameters:
+    session_file_path (str): Path to the pickle file where session data is stored.
+    Returns:
+    pd.DataFrame: Loaded DataFrame.
+    """
+    if not os.path.exists(session_file_path):
+        raise FileNotFoundError(f"File {session_file_path} not found.")
+    with open(session_file_path, 'rb') as f:
+        dataframe = pickle.load(f)
+    return dataframe
+
+
 def load_labelled_fixation_rasters(params):
     """
     Function to load the labelled fixation rasters DataFrame from the specified directory.

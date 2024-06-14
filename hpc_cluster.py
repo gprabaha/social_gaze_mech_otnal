@@ -30,7 +30,7 @@ def submit_job_array(job_file_path):
         job_script_path = os.path.join(output_dir, 'dsq-joblist_raster.sh')
         # Run the command to generate the job script
         subprocess.run(
-            f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {output_dir} --status-dir {output_dir} --cpus-per-task 8 --mem-per-cpu 6g -t 02:00:00 --mail-type FAIL',
+            f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {output_dir} --status-dir {output_dir} --partition psych_day --cpus-per-task 8 --mem-per-cpu 6g -t 02:00:00 --mail-type FAIL',
             shell=True, check=True, executable='/bin/bash'
         )
         logging.info("Successfully generated the dSQ job script")

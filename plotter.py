@@ -6,12 +6,14 @@ Created on Wed May 22 11:35:03 2024
 @author: pg496
 """
 
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon, Rectangle
+from matplotlib.patches import Rectangle
 from tqdm import tqdm
 import os
+from scipy.stats import ttest_ind
+import seaborn as sns
+from datetime import datetime
 
 import util
 import load_data
@@ -194,10 +196,6 @@ def plot_fixation_heatmap_for_one_session(session_fixations, roi_bb_corners,
     plt.savefig(os.path.join(plots_dir, plot_filename))
     plt.close()
 
-
-from scipy.stats import ttest_ind
-import seaborn as sns
-from datetime import datetime
 
 def plot_roi_response_of_each_unit(labelled_fixation_rasters, params):
     """
