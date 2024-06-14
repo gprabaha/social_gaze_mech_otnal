@@ -83,9 +83,9 @@ if __name__ == "__main__":
     
 
     if params.get('make_plots'):
-        plotter.plot_fixation_proportions_for_diff_conditions(params)
-        plotter.plot_gaze_heatmaps(params)
-        plotter.plot_fixation_heatmaps(params)
+        # plotter.plot_fixation_proportions_for_diff_conditions(params)
+        # plotter.plot_gaze_heatmaps(params)
+        # plotter.plot_fixation_heatmaps(params)
         plotter.plot_roi_response_of_each_unit(labelled_fixation_rasters, params)
 
 
