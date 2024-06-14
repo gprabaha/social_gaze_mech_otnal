@@ -740,6 +740,7 @@ def process_sessions_serial(session_paths, params):
         results.append(session_raster)
     return results
 
+
 def process_sessions_parallel(session_paths, params):
     results = []
     with ProcessPoolExecutor() as executor:
@@ -753,6 +754,7 @@ def process_sessions_parallel(session_paths, params):
                 logging.error(f"Session {session_path} generated an exception: {exc}")
     return results
 
+
 def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params):
     session_names = [os.path.basename(session_path) for session_path in session_paths]
     logging.debug(f"Session names extracted from paths: {session_names}")
@@ -760,16 +762,17 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
     
     if params.get('remake_raster', False):
         if params.get('submit_separate_jobs_for_session_raster', True):
-            job_file_path = hpc_cluster.generate_job_file(session_paths)
-            hpc_cluster.submit_job_array(job_file_path)
+            #job_file_path = hpc_cluster.generate_job_file(session_paths)
+            #hpc_cluster.submit_job_array(job_file_path)
             # Wait for job completion is handled within submit_job_array
             session_files = [os.path.join(params['processed_data_dir'], f"{session}_raster.pkl") for session in session_names]
             for session_file in session_files:
                 try:
-                    results.append(load_data.load_session_raster_data(session_file))
+                    session_data = load_data.load_session_raster_data(session_file)
+                    results.append(session_data)
                 except FileNotFoundError as e:
                     logging.error(e)
-                    raise
+                    continue
             if not results:
                 logging.error("No results to concatenate.")
                 raise ValueError("No objects to concatenate")
@@ -791,14 +794,19 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
             session_file_path = os.path.join(params['processed_data_dir'], f"{session}_raster.pkl")
             try:
                 logging.info(f"Loading existing data for session {session} from {session_file_path}")
-                session_files.append(load_data.load_session_raster_data(session_file_path))
+                session_data = load_data.load_session_raster_data(session_file_path)
+                session_files.append(session_data)
             except FileNotFoundError as e:
                 logging.error(e)
-                raise
+                continue
+        if not session_files:
+            logging.error("No files to concatenate.")
+            raise ValueError("No objects to concatenate")
         labelled_fixation_rasters = pd.concat(session_files, ignore_index=True)
     
     save_labelled_fixation_rasters(labelled_fixation_rasters, params)
     return labelled_fixation_rasters
+
 
 
 def generate_session_raster(session, labelled_fixations, labelled_spiketimes, params):
