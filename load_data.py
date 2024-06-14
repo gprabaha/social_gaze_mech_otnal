@@ -337,15 +337,19 @@ def load_labelled_fixation_rasters(params):
     Returns:
     pd.DataFrame: DataFrame containing the loaded rasters and labels.
     """
-
     processed_data_dir = params['processed_data_dir']
     # Construct the filename
-    filename = f"labelled_fixation_rasters.h5"
+    filename = f"labelled_fixation_rasters.pkl"
     file_path = os.path.join(processed_data_dir, filename)
-    # Load the DataFrame from the HDF5 file
-    labelled_fixation_rasters = pd.read_hdf(file_path, key='df')
-    logging.info(f"Data loaded from {file_path}")
-    return labelled_fixation_rasters
+    # Load the DataFrame from the pickle file
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as f:
+            labelled_fixation_rasters = pickle.load(f)
+        logging.info(f"Data loaded from {file_path}")
+        return labelled_fixation_rasters
+    else:
+        logging.error(f"File not found: {file_path}")
+        raise FileNotFoundError(f"File not found: {file_path}")
 
 
 

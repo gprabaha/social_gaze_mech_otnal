@@ -14,6 +14,7 @@ import os
 from scipy.stats import ttest_ind
 import seaborn as sns
 from datetime import datetime
+import logging
 
 import util
 import load_data
@@ -197,15 +198,6 @@ def plot_fixation_heatmap_for_one_session(session_fixations, roi_bb_corners,
     plt.close()
 
 
-import os
-import numpy as np
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-from datetime import datetime
-from scipy.stats import ttest_ind
-import logging
-
 def plot_roi_response_of_each_unit(labelled_fixation_rasters, params):
     """
     Function to plot the mean ROI response of each unit.
@@ -328,7 +320,8 @@ def plot_roi_response_of_each_unit(labelled_fixation_rasters, params):
                        autopct='%1.1f%%', startangle=140)
                 ax.set_title(f'ROI: {roi}')
             plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-            pie_chart_path = os.path.join(plot_dir, f'{region.lower()}_roi_differentiating_neurons.png')
+            pie_chart_path = os.path.join(
+                plot_dir, f'{region.lower()}_roi_differentiating_neurons.png')
             plt.savefig(pie_chart_path)
             plt.close(fig)
         except Exception as e:
@@ -337,5 +330,43 @@ def plot_roi_response_of_each_unit(labelled_fixation_rasters, params):
 
 
 
+def plot_unit_response_to_rois(unit, rois, pre_means, post_means, pre_errors, post_errors, significant_pre, significant_post, output_dir):
+    def add_significance_lines(ax, x_positions, data_means, significant_matrix, y_offset=1.05):
+        """
+        Add lines and asterisks to denote significance between bars.
+        """
+        for i in range(len(x_positions)):
+            for j in range(i + 1, len(x_positions)):
+                if significant_matrix[i, j]:
+                    x1, x2 = x_positions[i], x_positions[j]
+                    y = max(data_means[i], data_means[j]) * y_offset
+                    ax.plot([x1, x1, x2, x2], [data_means[i], y, y, data_means[j]], color='black')
+                    ax.text((x1 + x2) * 0.5, y, '*', ha='center')
 
+    fig, axes = plt.subplots(2, 1, figsize=(10, 8))
+
+    x_pos = np.arange(len(rois))
+
+    # Pre-fixation plot
+    axes[0].bar(x_pos, pre_means, yerr=pre_errors, capsize=5, color='b', alpha=0.7)
+    axes[0].set_title(f'Pre-Fixation Spike Count for Unit {unit}')
+    axes[0].set_xticks(x_pos)
+    axes[0].set_xticklabels(rois)
+    axes[0].set_ylabel('Mean Spike Count')
+
+    add_significance_lines(axes[0], x_pos, pre_means, significant_pre)
+
+    # Post-fixation plot
+    axes[1].bar(x_pos, post_means, yerr=post_errors, capsize=5, color='r', alpha=0.7)
+    axes[1].set_title(f'Post-Fixation Spike Count for Unit {unit}')
+    axes[1].set_xticks(x_pos)
+    axes[1].set_xticklabels(rois)
+    axes[1].set_ylabel('Mean Spike Count')
+
+    add_significance_lines(axes[1], x_pos, post_means, significant_post)
+
+    fig.tight_layout()
+    plt_path = os.path.join(output_dir, f'pre_and_post_fixation_response_to_roi_for_unit_{unit}.png')
+    plt.savefig(plt_path)
+    plt.close()
 

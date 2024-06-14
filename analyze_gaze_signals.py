@@ -9,7 +9,6 @@ Created on Tue Apr  9 10:25:48 2024
 
 import logging
 
-
 import pdb
 
 # Set up logging
@@ -23,6 +22,7 @@ if __name__ == "__main__":
     import curate_data
     import load_data
     import plotter
+    import response_comp
     
     params = util.get_params()
     params.update({
@@ -33,7 +33,7 @@ if __name__ == "__main__":
         'remake_fixation_labels': False,
         'remake_saccades': False,
         'remake_spikeTs': False,
-        'remake_raster': True,
+        'remake_raster': False,
         'make_plots': False,
         'remap_source_coord_from_inverted_to_standard_y_axis': True,
         'map_roi_coord_to_eyelink_space': False,
@@ -81,6 +81,8 @@ if __name__ == "__main__":
     else:
         labelled_fixation_rasters = load_data.load_labelled_fixation_rasters(params)
     
+    response_comp.compute_pre_and_post_fixation_response_to_roi_for_each_unit(
+        labelled_fixation_rasters, params)
 
     if params.get('make_plots'):
         # plotter.plot_fixation_proportions_for_diff_conditions(params)
