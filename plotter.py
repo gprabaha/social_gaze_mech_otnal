@@ -330,43 +330,65 @@ def plot_roi_response_of_each_unit(labelled_fixation_rasters, params):
 
 
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Disable interactive mode
+plt.ioff()
+
 def plot_unit_response_to_rois(unit, rois, pre_means, post_means, pre_errors, post_errors, significant_pre, significant_post, output_dir):
-    def add_significance_lines(ax, x_positions, data_means, significant_matrix, y_offset=1.05):
-        """
-        Add lines and asterisks to denote significance between bars.
-        """
-        for i in range(len(x_positions)):
-            for j in range(i + 1, len(x_positions)):
-                if significant_matrix[i, j]:
-                    x1, x2 = x_positions[i], x_positions[j]
-                    y = max(data_means[i], data_means[j]) * y_offset
-                    ax.plot([x1, x1, x2, x2], [data_means[i], y, y, data_means[j]], color='black')
-                    ax.text((x1 + x2) * 0.5, y, '*', ha='center')
+    try:
+        def add_significance_lines(ax, x_positions, data_means, significant_matrix, y_offset=1.05):
+            """
+            Add lines and asterisks to denote significance between bars.
+            """
+            for i in range(len(x_positions)):
+                for j in range(i + 1, len(x_positions)):
+                    if significant_matrix[i, j]:
+                        x1, x2 = x_positions[i], x_positions[j]
+                        y = max(data_means[i], data_means[j]) * y_offset
+                        ax.plot([x1, x1, x2, x2], [data_means[i], y, y, data_means[j]], color='black')
+                        ax.text((x1 + x2) * 0.5, y, '*', ha='center')
 
-    fig, axes = plt.subplots(2, 1, figsize=(10, 8))
+        fig, axes = plt.subplots(2, 1, figsize=(10, 8))
 
-    x_pos = np.arange(len(rois))
+        x_pos = np.arange(len(rois))
 
-    # Pre-fixation plot
-    axes[0].bar(x_pos, pre_means, yerr=pre_errors, capsize=5, color='b', alpha=0.7)
-    axes[0].set_title(f'Pre-Fixation Spike Count for Unit {unit}')
-    axes[0].set_xticks(x_pos)
-    axes[0].set_xticklabels(rois)
-    axes[0].set_ylabel('Mean Spike Count')
+        # Pre-fixation plot
+        try:
+            axes[0].bar(x_pos, pre_means, yerr=pre_errors, capsize=5, color='b', alpha=0.7)
+            axes[0].set_title(f'Pre-Fixation Spike Count for Unit {unit}')
+            axes[0].set_xticks(x_pos)
+            axes[0].set_xticklabels(rois)
+            axes[0].set_ylabel('Mean Spike Count')
 
-    add_significance_lines(axes[0], x_pos, pre_means, significant_pre)
+            add_significance_lines(axes[0], x_pos, pre_means, significant_pre)
+        except Exception as e:
+            logger.error(f"Error plotting pre-fixation data for unit {unit}: {e}")
 
-    # Post-fixation plot
-    axes[1].bar(x_pos, post_means, yerr=post_errors, capsize=5, color='r', alpha=0.7)
-    axes[1].set_title(f'Post-Fixation Spike Count for Unit {unit}')
-    axes[1].set_xticks(x_pos)
-    axes[1].set_xticklabels(rois)
-    axes[1].set_ylabel('Mean Spike Count')
+        # Post-fixation plot
+        try:
+            axes[1].bar(x_pos, post_means, yerr=post_errors, capsize=5, color='r', alpha=0.7)
+            axes[1].set_title(f'Post-Fixation Spike Count for Unit {unit}')
+            axes[1].set_xticks(x_pos)
+            axes[1].set_xticklabels(rois)
+            axes[1].set_ylabel('Mean Spike Count')
 
-    add_significance_lines(axes[1], x_pos, post_means, significant_post)
+            add_significance_lines(axes[1], x_pos, post_means, significant_post)
+        except Exception as e:
+            logger.error(f"Error plotting post-fixation data for unit {unit}: {e}")
 
-    fig.tight_layout()
-    plt_path = os.path.join(output_dir, f'pre_and_post_fixation_response_to_roi_for_unit_{unit}.png')
-    plt.savefig(plt_path)
-    plt.close()
+        fig.tight_layout()
+        plt_path = os.path.join(output_dir, f'pre_and_post_fixation_response_to_roi_for_unit_{unit}.png')
+        plt.savefig(plt_path)
+        plt.close(fig) 
+
+    except Exception as e:
+        logger.error(f"Error in plot_unit_response_to_rois for unit {unit}: {e}")
+
+
+
+
+
 
