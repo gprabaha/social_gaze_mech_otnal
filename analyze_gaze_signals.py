@@ -23,7 +23,7 @@ if __name__ == "__main__":
     import load_data
     import plotter
     import response_comp
-    
+
     params = util.get_params()
     params.update({
         'is_cluster': True,
@@ -35,6 +35,8 @@ if __name__ == "__main__":
         'remake_spikeTs': False,
         'remake_raster': False,
         'make_plots': False,
+        'recalculate_unit_ROI_responses': False,
+        'replot_face/eye_vs_obj_violins': True,
         'remap_source_coord_from_inverted_to_standard_y_axis': True,
         'map_roi_coord_to_eyelink_space': False,
         'map_gaze_pos_coord_to_eyelink_space': True,
@@ -47,7 +49,7 @@ if __name__ == "__main__":
         'raster_pre_event_time': 0.5,
         'raster_post_event_time': 0.5
     })
-    
+
     root_data_dir, params = util.fetch_root_data_dir(params)
     data_source_dir, params = util.fetch_data_source_dir(params)
     session_paths, params = util.fetch_session_subfolder_paths_from_source(params)
@@ -80,9 +82,14 @@ if __name__ == "__main__":
         labelled_fixation_rasters = curate_data.extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params)
     else:
         labelled_fixation_rasters = load_data.load_labelled_fixation_rasters(params)
-    
-    response_comp.compute_pre_and_post_fixation_response_to_roi_for_each_unit(
-        labelled_fixation_rasters, params)
+
+    if params.get('recalculate_unit_ROI_responses'):
+        response_comp.compute_pre_and_post_fixation_response_to_roi_for_each_unit(
+            labelled_fixation_rasters, params)
+
+    if params.get('replot_face/eye_vs_obj_violins'):
+        response_comp.compare_roi_responses_for_all_units(
+            labelled_fixation_rasters, params)
 
     if params.get('make_plots'):
         # plotter.plot_fixation_proportions_for_diff_conditions(params)

@@ -182,7 +182,6 @@ def extract_spiketimes_for_all_sessions(params):
     session_paths = params.get('session_paths')
     is_parallel = params.get('use_parallel', True)
     spikeTs_labels = []
-
     if is_parallel:
         # Process sessions in parallel with tqdm progress bar
         results = Parallel(n_jobs=-1)(delayed(
@@ -199,7 +198,6 @@ def extract_spiketimes_for_all_sessions(params):
             labelled_spiketimes = load_data.get_spiketimes_and_labels_for_one_session(
                 session_path, processed_data_dir)
             spikeTs_labels.append(labelled_spiketimes)
-
     # Concatenate label dataframes
     if spikeTs_labels:
         all_labels = pd.concat(spikeTs_labels, ignore_index=True)

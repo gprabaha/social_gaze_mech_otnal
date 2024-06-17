@@ -389,6 +389,48 @@ def plot_unit_response_to_rois(unit, rois, pre_means, post_means, pre_errors, po
 
 
 
+def plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir):
+    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+    fig.suptitle(f'Unit {unit} - Region {region}')
+    comparisons = [
+        ('eye_bbox', 'left_obj_bbox'),
+        ('eye_bbox', 'right_obj_bbox'),
+        ('eye_bbox', 'left_right_combined'),
+        ('face_bbox', 'left_obj_bbox'),
+        ('face_bbox', 'right_obj_bbox'),
+        ('face_bbox', 'left_right_combined')
+    ] 
+    for i, (roi1, roi2) in enumerate(comparisons):
+        row, col = divmod(i, 3)
+        ax = axes[row, col]
+        if roi2 == 'left_right_combined':
+            pre_data_combined = np.concatenate((pre_data['left_obj_bbox'], pre_data['right_obj_bbox']), axis=0)
+            post_data_combined = np.concatenate((post_data['left_obj_bbox'], post_data['right_obj_bbox']), axis=0)
+        else:
+            pre_data_combined = pre_data[roi2]
+            post_data_combined = post_data[roi2]
+        sns.violinplot(data=[
+            pre_data[roi1].mean(axis=1), post_data[roi1].mean(axis=1),
+            pre_data_combined.mean(axis=1), post_data_combined.mean(axis=1)
+        ], ax=ax)
+        sns.stripplot(data=[
+            pre_data[roi1].mean(axis=1), post_data[roi1].mean(axis=1),
+            pre_data_combined.mean(axis=1), post_data_combined.mean(axis=1)
+        ], ax=ax, color='k', size=3, jitter=True)
+        _, p_val_pre = ttest_ind(pre_data[roi1].mean(axis=1), pre_data_combined.mean(axis=1))
+        _, p_val_post = ttest_ind(post_data[roi1].mean(axis=1), post_data_combined.mean(axis=1))
+        if p_val_pre < 0.05:
+            ax.annotate('*', xy=(0.5, max(pre_data[roi1].mean())), xytext=(0.5, max(pre_data[roi1].mean()) + 0.1),
+                        textcoords='axes fraction', ha='center', va='bottom', fontsize=14, color='red')
+        if p_val_post < 0.05:
+            ax.annotate('*', xy=(2.5, max(post_data[roi1].mean())), xytext=(2.5, max(post_data[roi1].mean()) + 0.1),
+                        textcoords='axes fraction', ha='center', va='bottom', fontsize=14, color='red')
+        ax.set_title(f'{roi1} vs {roi2}')
+        ax.set_xticks([0, 1, 2, 3])
+        ax.set_xticklabels(['Pre ' + roi1, 'Post ' + roi1, 'Pre ' + roi2, 'Post ' + roi2])
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.savefig(os.path.join(output_dir, f'unit_{unit}_roi_comparison.png'))
+    plt.close(fig)
 
 
 
