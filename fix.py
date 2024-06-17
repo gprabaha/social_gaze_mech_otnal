@@ -22,6 +22,7 @@ import load_data
 import pdb  # Import the Python debugger if needed
 
 
+###
 def extract_or_load_fixations(labelled_gaze_positions, params):
     """
     Extract or load fixations based on parameters.
@@ -61,6 +62,7 @@ def load_existing_fixations(params):
     return all_fix_timepos_df, fix_detection_results
 
 
+###
 def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, params):
     """
     Extracts fixations from labelled gaze positions.
@@ -193,6 +195,7 @@ def is_fixation(pos, time, session_name, t1=None, t2=None, minDur=None, maxDur=N
     return fix_list_df, fix_vector
 
 
+###
 def fixation_detection(data, t1, t2, minDur, maxDur, session_name):
     """
     Detect fixations based on position and time data.
@@ -332,3 +335,155 @@ def min_duration(fixation_list, minDur):
 
 def max_duration(fixation_list, maxDur):
     return [fix for fix in fixation_list if fix[6] <= maxDur]
+
+
+###
+def generate_fixation_labels(fix_detection_results, params, use_parallel):
+    """
+    Generate fixation labels based on detection results.
+    Parameters:
+    - fix_detection_results (list): List of fixation detection results.
+    - params (dict): Dictionary of parameters.
+    - use_parallel (bool): Whether to use parallel processing.
+    Returns:
+    - labelled_fixations (pd.DataFrame): DataFrame of labels for fixations.
+    """
+    processed_data_dir = params['processed_data_dir']
+    flag_info = util.get_filename_flag_info(params)
+    if params.get('remake_fixation_labels', False):
+        fixation_labels = parallel_generate_labels(
+            fix_detection_results) if use_parallel \
+            else serial_generate_labels(fix_detection_results)
+        labelled_fixations = []
+        for session_labels in fixation_labels:
+            labelled_fixations.extend(session_labels)
+        col_names = ['start_time', 'end_time', 'category', 'session_name',
+                     'run', 'block', 'fix_duration', 'mean_x_pos',
+                     'mean_y_pos', 'fix_roi', 'agent']
+        labelled_fixations = pd.DataFrame(labelled_fixations,
+                                          columns=col_names)
+        fixation_labels_file_name = f'fixation_labels_m1{flag_info}.csv'
+        labelled_fixations.to_csv(os.path.join(
+            processed_data_dir,fixation_labels_file_name), index=False)
+    else:
+        labelled_fixations = load_data.load_m1_fixation_labels(params)
+    return labelled_fixations
+
+
+def parallel_generate_labels(fix_detection_results):
+    """
+    Generate fixation labels in parallel.
+    Parameters:
+    - fix_detection_results (list): List of fixation detection results.
+    Returns:
+    - fixation_labels (list): List of generated labels.
+    """
+    print("\nGenerating fixation labels in parallel")
+    num_cores = multiprocessing.cpu_count()
+    num_processes = min(num_cores, len(fix_detection_results))
+    with Pool(num_processes) as pool:
+        fixation_labels = pool.map(
+            add_labels_to_fixations, fix_detection_results)
+    return fixation_labels
+
+
+def serial_generate_labels(fix_detection_results):
+    """
+    Generate fixation labels serially.
+    Parameters:
+    - fix_detection_results (list): List of fixation detection results.
+    Returns:
+    - fixation_labels (list): List of generated labels.
+    """
+    print("\nGenerating fixation labels serially")
+    return [add_labels_to_fixations(result)
+            for result in fix_detection_results]
+
+
+###
+def add_labels_to_fixations(fix_detection_result):
+    """
+    Generates fixation labels for each session.
+    Parameters:
+    - fix_detection_result (tuple): Tuple containing fixation detection results
+    and session information.
+    Returns:
+    - fixation_labels (list): List of fixation labels.
+    """
+    session_timepos_df, info = fix_detection_result
+    fixation_labels = []
+    for _, row in tqdm(session_timepos_df.iterrows(), desc=f"{info['session_name']}: n fixations labelled"):
+        fix_x = row['fix_x']
+        fix_y = row['fix_y']
+        start_time = row['start_time']
+        end_time = row['end_time']
+        fix_duration = row['duration']
+        mean_fix_pos = [fix_x, fix_y]
+        run, block, fix_roi = detect_run_block_and_roi(
+            [start_time, end_time], info['startS'], info['stopS'],
+            info['sampling_rate'], mean_fix_pos, info['roi_bb_corners'])
+        fixation_info = [start_time, end_time, info['category'],
+                         info['session_name'], run, block, fix_duration,
+                         mean_fix_pos[0], mean_fix_pos[1], fix_roi,
+                         info['monkey_1']]
+        fixation_labels.append(fixation_info)
+    return fixation_labels
+
+
+### Function to detect run, block, and ROI for a fixation
+def detect_run_block_and_roi(start_stop, startS, stopS, 
+                            sampling_rate, mean_fix_pos, bbox_corners):
+    """
+    Detects run, block, and ROI for a fixation.
+    Parameters:
+    - start_stop (tuple): Start and stop indices of fixation.
+    - startS (list): List of start indices of runs.
+    - stopS (list): List of stop indices of runs.
+    - sampling_rate (float): Sampling rate.
+    - mean_fix_pos (ndarray): Mean position of fixation.
+    - bbox_corners (dict): Dictionary containing bounding boxes of ROIs.
+    Returns:
+    - run (int or None): Detected run number.
+    - block (str): Detected block.
+    - fix_roi (str): Detected ROI.
+    """
+    start, stop = start_stop
+    # Check if fixation is before the first start time or after the last stop time
+    if start < startS[0] or stop > stopS[-1]:
+        run = None
+        block = 'discard'
+    else:
+        for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
+            if start >= run_start and stop <= run_stop:
+                run = i
+                block = 'mon_down'
+                break
+            elif i < len(startS) and stop <= startS[i]:
+                run = None
+                block = 'mon_up'
+                break
+        else:
+            run = None
+            block = 'discard'
+    fix_roi = determine_fix_roi(mean_fix_pos, bbox_corners)
+    return run, block, fix_roi
+
+
+def determine_fix_roi(mean_fix_pos, bbox_corners):
+    """
+    Determines the fixation ROI based on mean position and bounding box corners.
+    Parameters:
+    - mean_fix_pos (ndarray): Mean position of fixation.
+    - bbox_corners (dict): Dictionary containing bounding boxes of ROIs.
+    Returns:
+    - fix_roi (str): Detected ROI.
+    """
+    bounding_boxes = ['eye_bbox', 'face_bbox',
+                      'left_obj_bbox', 'right_obj_bbox']
+    inside_roi = [util.is_inside_roi(mean_fix_pos, bbox_corners[key])
+                  for key in bounding_boxes]
+    if any(inside_roi):
+        if inside_roi[0] and inside_roi[1]:
+            return bounding_boxes[0]
+        return bounding_boxes[inside_roi.index(True)]
+    return 'out_of_roi'
