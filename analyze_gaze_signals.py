@@ -27,7 +27,7 @@ if __name__ == "__main__":
     params = util.get_params()
     params.update({
         'is_cluster': True,
-        'use_parallel': True,
+        'use_parallel': False,
         'remake_labelled_gaze_pos': False,
         'remake_fixations': False,
         'remake_fixation_labels': False,

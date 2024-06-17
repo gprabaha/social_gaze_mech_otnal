@@ -13,8 +13,144 @@ import numpy as np
 import util  # Import utility functions here
 from tqdm import tqdm
 import pandas as pd
+import os
+import multiprocessing
+from multiprocessing import Pool
+
+import load_data
 
 import pdb  # Import the Python debugger if needed
+
+
+def extract_or_load_fixations(labelled_gaze_positions, params):
+    """
+    Extract or load fixations based on parameters.
+    Parameters:
+    - labelled_gaze_positions (list): List of tuples containing gaze positions
+    and associated metadata.
+    - params (dict): Dictionary of parameters.
+    Returns:
+    - all_fix_timepos (pd.DataFrame): DataFrame of fixation time positions.
+    - fix_detection_results (list): List of fixation detection results.
+    """
+    processed_data_dir = params['processed_data_dir']
+    flag_info = util.get_filename_flag_info(params)
+    if params.get('remake_fixations', False):
+        return extract_all_fixations_from_labelled_gaze_positions(
+            labelled_gaze_positions, params)
+    else:
+        results_file_name = f'fixation_session_results_m1{flag_info}.npz'
+        if os.path.exists(os.path.join(processed_data_dir, results_file_name)):
+            return load_existing_fixations(params)
+        else:
+            return extract_all_fixations_from_labelled_gaze_positions(
+                labelled_gaze_positions, params)
+
+
+def load_existing_fixations(params):
+    """
+    Load existing fixations from files.
+    Parameters:
+    - params (dict): Dictionary of parameters.
+    Returns:
+    - all_fix_timepos (pd.DataFrame): DataFrame of fixation time positions.
+    - fix_detection_results (list): List of fixation detection results.
+    """
+    all_fix_timepos_df = load_data.load_m1_fixations(params)
+    fix_detection_results = load_data.load_fix_detection_results(params)
+    return all_fix_timepos_df, fix_detection_results
+
+
+def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, params):
+    """
+    Extracts fixations from labelled gaze positions.
+    Parameters:
+    - labelled_gaze_positions (list): List of labelled gaze positions.
+    - params (dict): Dictionary of parameters.
+    Returns:
+    - all_fix_timepos (pd.DataFrame): DataFrame of fixation time positions.
+    - fix_detection_results (list): List of fixation detection results.
+    """
+    processed_data_dir = params['processed_data_dir']
+    use_parallel = params.get('use_parallel', True)
+    sessions_data = [(session_data[0], session_data[1], params)
+                     for session_data in labelled_gaze_positions]
+    fix_detection_results = extract_fixations(sessions_data, use_parallel)
+    all_fix_timepos = process_fixation_results(fix_detection_results)
+    save_fixation_results(processed_data_dir, all_fix_timepos, params)
+    return all_fix_timepos, fix_detection_results
+
+
+def extract_fixations(sessions_data, use_parallel):
+    """
+    Extracts fixations from session data.
+    Parameters:
+    - sessions_data (list): List of session data tuples.
+    - use_parallel (bool): Flag to determine if parallel processing should be used.
+    Returns:
+    - fix_detection_results (list): List of fixation detection results.
+    """
+    if use_parallel:
+        print("\nExtracting fixations in parallel")
+        num_cores = multiprocessing.cpu_count()
+        num_processes = min(num_cores, len(sessions_data))
+        with Pool(num_processes) as pool:
+            fix_detection_results = pool.map(
+                get_session_fixations, sessions_data)
+    else:
+        print("\nExtracting fixations serially")
+        fix_detection_results = [get_session_fixations(session_data)
+                                 for session_data in sessions_data]
+    return fix_detection_results
+
+
+def get_session_fixations(session_data):
+    """
+    Extracts fixations for a session.
+    Parameters:
+    - session_data (tuple): Tuple containing session identifier, positions,
+    and metadata.
+    Returns:
+    - fix_timepos_df (pd.DataFrame): DataFrame of fixation time positions.
+    - info (dict): Metadata information for the session.
+    """
+    positions, info, params = session_data
+    session_name = info['session_name']
+    sampling_rate = info['sampling_rate']
+    n_samples = positions.shape[0]
+    time_vec = util.create_timevec(n_samples, sampling_rate)
+    fix_timepos_df, fix_vec_entire_session = is_fixation(
+        positions, time_vec, session_name, sampling_rate=sampling_rate)
+    return fix_timepos_df, info
+
+
+def process_fixation_results(fix_detection_results):
+    """
+    Processes the results from fixation detection.
+    Parameters:
+    - fix_detection_results (list): List of fixation detection results.
+    Returns:
+    - all_fix_timepos (pd.DataFrame): DataFrame of fixation time positions.
+    """
+    all_fix_timepos = pd.DataFrame()
+    for session_timepos_df, _ in fix_detection_results:
+        all_fix_timepos = pd.concat(
+            [all_fix_timepos, session_timepos_df], ignore_index=True)
+    return all_fix_timepos
+
+
+def save_fixation_results(processed_data_dir, all_fix_timepos, params):
+    """
+    Saves fixation results to files.
+    Parameters:
+    - processed_data_dir (str): Directory to save processed data.
+    - all_fix_timepos (pd.DataFrame): DataFrame of fixation time positions.
+    - params (dict): Dictionary of parameters.
+    """
+    flag_info = util.get_filename_flag_info(params)
+    timepos_file_name = f'fix_timepos_m1{flag_info}.csv'
+    all_fix_timepos.to_csv(os.path.join(
+        processed_data_dir, timepos_file_name), index=False)
 
 
 def is_fixation(pos, time, session_name, t1=None, t2=None, minDur=None, maxDur=None, sampling_rate=None):

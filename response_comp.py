@@ -110,7 +110,6 @@ def calculate_roi_response_for_unit(unit, filtered_data, output_base_dir):
 def compute_pre_and_post_fixation_response_to_roi_for_each_unit(labelled_fixation_rasters, params):
     root_dir = params['root_data_dir']
     use_parallel = params.get('use_parallel', False)
-    max_workers = os.cpu_count()  # Determine the number of CPUs available
     output_base_dir = add_date_dir_to_path(os.path.join(root_dir, 'plots', 'roi_fr_response'))
 
     # Filter the data for 'mon_down' blocks and rasters aligned to 'start_time'
