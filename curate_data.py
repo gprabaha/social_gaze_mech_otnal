@@ -17,7 +17,7 @@ import h5py
 
 import util
 import load_data
-import process_eyelink
+import eyelink
 import defaults
 import fix
 import saccade
@@ -106,9 +106,9 @@ def extract_labelled_gaze_positions_m1(params):
     dose_index_pairs = [(dose, idx) for dose, indices_list
                         in zip(unique_doses, dose_inds)
                         for idx in indices_list]
-    labelled_gaze_positions_m1 = process_eyelink.process_gaze_positions(
+    labelled_gaze_positions_m1 = eyelink.process_gaze_positions(
         dose_index_pairs, use_parallel, process_index)
-    process_eyelink.save_labelled_gaze_positions(
+    eyelink.save_labelled_gaze_positions(
         processed_data_dir, labelled_gaze_positions_m1, params)
     return labelled_gaze_positions_m1
 
