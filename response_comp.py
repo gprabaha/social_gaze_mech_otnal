@@ -21,7 +21,6 @@ import plotter
 import pdb
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
