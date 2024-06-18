@@ -12,18 +12,13 @@ from scipy.stats import ttest_ind
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
-
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-
+from collections import defaultdict
 
 import util  # Import the date function
 import plotter
 
 
-from util import add_date_dir_to_path
-from plotter import plot_unit_response_to_rois
+import pdb
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -92,52 +87,45 @@ def calculate_roi_response_for_unit(unit, filtered_data, output_base_dir):
                 if p_val_post < 0.05:
                     significant_post[i, j] = True
         # Call the plotting function from the other script
-        plot_unit_response_to_rois(unit, rois, pre_means, post_means, pre_errors, post_errors, significant_pre, significant_post, output_dir)
+        plotter.plot_unit_response_to_rois(unit, rois, pre_means, post_means, pre_errors, post_errors, significant_pre, significant_post, output_dir)
     except Exception as e:
         logger.error(f"Error processing unit {unit}: {e}")
+
+
+
+
+
+
 
 
 def compute_pre_and_post_fixation_response_to_roi_for_each_unit(labelled_fixation_rasters, params):
     root_dir = params['root_data_dir']
     use_parallel = params.get('use_parallel', False)
-    output_base_dir = add_date_dir_to_path(os.path.join(root_dir, 'plots', 'roi_fr_response'))
+    output_base_dir = util.add_date_dir_to_path(os.path.join(
+        root_dir, 'plots', 'roi_response_comparison_each_unit'))
     # Filter the data for 'mon_down' blocks and rasters aligned to 'start_time'
     filtered_data = labelled_fixation_rasters[
         (labelled_fixation_rasters['block'] == 'mon_down') &
         (labelled_fixation_rasters['aligned_to'] == 'start_time')]
     unique_units = filtered_data['uuid'].unique()
+    results = defaultdict(lambda: defaultdict(lambda: {'pre': 0, 'post': 0, 'either': 0}))
     if use_parallel:
         with ThreadPoolExecutor(max_workers=16) as executor:
-            futures = {executor.submit(calculate_roi_response_for_unit, unit, filtered_data, output_base_dir): unit for unit in unique_units}
-            for future in tqdm(as_completed(futures), total=len(futures), desc="ROI response computed for unit"):
-                future.result()
-    else:
-        for unit in tqdm(unique_units, desc="ROI response computed for unit"):
-            calculate_roi_response_for_unit(unit, filtered_data, output_base_dir)
-
-
-def compare_roi_responses_for_all_units(labelled_fixation_rasters, params):
-    root_dir = params['root_data_dir']
-    use_parallel = params.get('use_parallel', False)
-    output_base_dir = add_date_dir_to_path(os.path.join(root_dir, 'plots', 'roi_response_comparison_each_unit'))
-    
-    # Filter the data for 'mon_down' blocks and rasters aligned to 'start_time'
-    filtered_data = labelled_fixation_rasters[
-        (labelled_fixation_rasters['block'] == 'mon_down') &
-        (labelled_fixation_rasters['aligned_to'] == 'start_time')]
-    
-    unique_units = filtered_data['uuid'].unique()
-    if use_parallel:
-        with ThreadPoolExecutor(max_workers=16) as executor:
-            futures = {executor.submit(compare_roi_responses_for_unit, unit, filtered_data, output_base_dir): unit for unit in unique_units}
+            futures = {executor.submit(analyze_and_plot_unit, unit, filtered_data, output_base_dir, results): unit for unit in unique_units}
             for future in tqdm(as_completed(futures), total=len(futures), desc="ROI response comparison computed for unit"):
                 future.result()
     else:
         for unit in tqdm(unique_units, desc="ROI response comparison computed for unit"):
-            compare_roi_responses_for_unit(unit, filtered_data, output_base_dir)
+            analyze_and_plot_unit(unit, filtered_data, output_base_dir, results)
+    # Generate summary plots for each region
+    for region in results.keys():
+        output_dir = os.path.join(output_base_dir, region)
+        os.makedirs(output_dir, exist_ok=True)
+        plotter.plot_pie_chart(region, results[region]['pre'], results[region]['post'], results[region]['either'], output_dir)
+        plotter.plot_venn_diagram(region, results[region]['pre'], results[region]['post'], results[region]['either'], output_dir)
 
 
-def compare_roi_responses_for_unit(unit, filtered_data, output_base_dir):
+def analyze_and_plot_unit(unit, filtered_data, output_base_dir, results):
     try:
         unit_data = filtered_data[filtered_data['uuid'] == unit]
         if unit_data.empty:
@@ -155,16 +143,55 @@ def compare_roi_responses_for_unit(unit, filtered_data, output_base_dir):
                 logger.info(f"No data for unit {unit} in ROI {roi}, skipping ROI.")
                 continue
             pre_data[roi] = np.array([raster[:500] for raster in roi_data['raster']])
-            post_data[roi] = np.array([raster[500:1000] for raster in roi_data['raster']])
+            post_data[roi] = np.array([raster[500:] for raster in roi_data['raster']])
         if not pre_data or not post_data:
             logger.info(f"No valid data to plot for unit {unit}, skipping.")
             return
+        significant_pre, significant_post, significant_either = \
+            analyze_significant_differences(unit, region, pre_data, post_data)
+        # Update results
+        for comp in significant_pre.keys():
+            results[region]['pre'][comp] += significant_pre[comp]
+            results[region]['post'][comp] += significant_post[comp]
+            results[region]['either'][comp] += significant_either[comp]
         plotter.plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir)
     except Exception as e:
         logger.error(f"Error processing unit {unit}: {e}")
 
 
-
+# Step 1: Statistical Analysis Function
+def analyze_significant_differences(unit, region, pre_data, post_data):
+    comparisons = [
+        ('eye_bbox', 'left_obj_bbox'),
+        ('eye_bbox', 'right_obj_bbox'),
+        ('eye_bbox', 'left_right_combined'),
+        ('face_bbox', 'left_obj_bbox'),
+        ('face_bbox', 'right_obj_bbox'),
+        ('face_bbox', 'left_right_combined')
+    ]
+    significant_pre = defaultdict(int)
+    significant_post = defaultdict(int)
+    significant_either = defaultdict(int)
+    for roi1, roi2 in comparisons:
+        if roi2 == 'left_right_combined':
+            pre_data_combined = np.concatenate((pre_data['left_obj_bbox'], pre_data['right_obj_bbox']), axis=0)
+            post_data_combined = np.concatenate((post_data['left_obj_bbox'], post_data['right_obj_bbox']), axis=0)
+        else:
+            pre_data_combined = pre_data[roi2]
+            post_data_combined = post_data[roi2]
+        data = [
+            pre_data[roi1].mean(axis=1).astype(float), pre_data_combined.mean(axis=1).astype(float),
+            post_data[roi1].mean(axis=1).astype(float), post_data_combined.mean(axis=1).astype(float)
+        ]
+        _, p_val_pre = ttest_ind(data[0], data[1])
+        _, p_val_post = ttest_ind(data[2], data[3])
+        if p_val_pre < 0.05:
+            significant_pre[roi1 + " vs " + roi2] += 1
+        if p_val_post < 0.05:
+            significant_post[roi1 + " vs " + roi2] += 1
+        if p_val_pre < 0.05 or p_val_post < 0.05:
+            significant_either[roi1 + " vs " + roi2] += 1
+    return significant_pre, significant_post, significant_either
 
 
 

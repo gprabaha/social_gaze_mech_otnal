@@ -15,6 +15,7 @@ from scipy.stats import ttest_ind
 import seaborn as sns
 from datetime import datetime
 import logging
+from matplotlib_venn import venn3
 
 import util
 import load_data
@@ -254,41 +255,34 @@ def plot_roi_response_of_each_unit(labelled_fixation_rasters, params):
                 post_up = np.array([raster[bins_pre:bins_pre + bins_post] for raster in mon_up['raster']])
                 pre_down = np.array([raster[:bins_pre] for raster in mon_down['raster']])
                 post_down = np.array([raster[bins_pre:bins_pre + bins_post] for raster in mon_down['raster']])
-                
                 mean_pre_up = np.mean(pre_up, axis=1)
                 mean_post_up = np.mean(post_up, axis=1)
                 mean_pre_down = np.mean(pre_down, axis=1)
                 mean_post_down = np.mean(post_down, axis=1)
-                
                 mean_mean_pre_up = np.mean(mean_pre_up)
                 mean_mean_post_up = np.mean(mean_post_up)
                 mean_mean_pre_down = np.mean(mean_pre_down)
                 mean_mean_post_down = np.mean(mean_post_down)
-                
                 sem_pre_up = np.std(mean_pre_up) / np.sqrt(len(mean_pre_up))
                 sem_post_up = np.std(mean_post_up) / np.sqrt(len(mean_post_up))
                 sem_pre_down = np.std(mean_pre_down) / np.sqrt(len(mean_pre_down))
                 sem_post_down = np.std(mean_post_down) / np.sqrt(len(mean_post_down))
-                
                 t_pre, p_pre = ttest_ind(mean_pre_up, mean_pre_down)
                 t_post, p_post = ttest_ind(mean_post_up, mean_post_down)
                 significant_pre = p_pre < 0.05
                 significant_post = p_post < 0.05
                 significant = significant_pre or significant_post
-                
                 if significant:
                     if region == 'ACC':
                         acc_diff_neurons[roi] += 1
                     elif region == 'BLA':
                         bla_diff_neurons[roi] += 1
-                
                 ax = axes[i]
                 bar_width = 0.35
                 bars = ax.bar(['Pre Up', 'Pre Down', 'Post Up', 'Post Down'], 
                               [mean_mean_pre_up, mean_mean_pre_down, mean_mean_post_up, mean_mean_post_down],
                               yerr=[sem_pre_up, sem_pre_down, sem_post_up, sem_post_down], 
                               capsize=5, color=['blue', 'red', 'blue', 'red'])
-                
                 ax.set_title(f'ROI: {roi}')
                 ax.set_xlabel('Condition')
                 ax.set_ylabel('Mean Spike Count')
@@ -350,11 +344,8 @@ def plot_unit_response_to_rois(unit, rois, pre_means, post_means, pre_errors, po
                         y = max(data_means[i], data_means[j]) * y_offset
                         ax.plot([x1, x1, x2, x2], [data_means[i], y, y, data_means[j]], color='black')
                         ax.text((x1 + x2) * 0.5, y, '*', ha='center')
-
         fig, axes = plt.subplots(2, 1, figsize=(10, 8))
-
         x_pos = np.arange(len(rois))
-
         # Pre-fixation plot
         try:
             axes[0].bar(x_pos, pre_means, yerr=pre_errors, capsize=5, color='b', alpha=0.7)
@@ -362,11 +353,9 @@ def plot_unit_response_to_rois(unit, rois, pre_means, post_means, pre_errors, po
             axes[0].set_xticks(x_pos)
             axes[0].set_xticklabels(rois)
             axes[0].set_ylabel('Mean Spike Count')
-
             add_significance_lines(axes[0], x_pos, pre_means, significant_pre)
         except Exception as e:
             logger.error(f"Error plotting pre-fixation data for unit {unit}: {e}")
-
         # Post-fixation plot
         try:
             axes[1].bar(x_pos, post_means, yerr=post_errors, capsize=5, color='r', alpha=0.7)
@@ -374,16 +363,13 @@ def plot_unit_response_to_rois(unit, rois, pre_means, post_means, pre_errors, po
             axes[1].set_xticks(x_pos)
             axes[1].set_xticklabels(rois)
             axes[1].set_ylabel('Mean Spike Count')
-
             add_significance_lines(axes[1], x_pos, post_means, significant_post)
         except Exception as e:
             logger.error(f"Error plotting post-fixation data for unit {unit}: {e}")
-
         fig.tight_layout()
         plt_path = os.path.join(output_dir, f'pre_and_post_fixation_response_to_roi_for_unit_{unit}.png')
         plt.savefig(plt_path)
         plt.close(fig) 
-
     except Exception as e:
         logger.error(f"Error in plot_unit_response_to_rois for unit {unit}: {e}")
 
@@ -411,29 +397,42 @@ def plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir)
             pre_data_combined = pre_data[roi2]
             post_data_combined = post_data[roi2]
         data = [
-            pre_data[roi1].mean(axis=1), pre_data_combined.mean(axis=1),
-            post_data[roi1].mean(axis=1), post_data_combined.mean(axis=1)
+            pre_data[roi1].mean(axis=1).astype(float), pre_data_combined.mean(axis=1).astype(float),
+            post_data[roi1].mean(axis=1).astype(float), post_data_combined.mean(axis=1).astype(float)
         ]
         labels = [
             'Pre ' + roi1, 'Pre ' + roi2, 'Post ' + roi1, 'Post ' + roi2
         ]
         sns.violinplot(data=data, ax=ax, palette=[colors[0], colors[0], colors[1], colors[1]])
         sns.stripplot(data=data, ax=ax, color='k', size=3, jitter=True)
-        _, p_val_pre = ttest_ind(pre_data[roi1].mean(axis=1), pre_data_combined.mean(axis=1))
-        _, p_val_post = ttest_ind(post_data[roi1].mean(axis=1), post_data_combined.mean(axis=1))
-        if p_val_pre < 0.05:
-            ax.annotate('*', xy=(0.5, max(pre_data[roi1].mean())), xytext=(0.5, max(pre_data[roi1].mean()) + 0.1),
-                        textcoords='axes fraction', ha='center', va='bottom', fontsize=14, color='red')
-        if p_val_post < 0.05:
-            ax.annotate('*', xy=(2.5, max(post_data[roi1].mean())), xytext=(2.5, max(post_data[roi1].mean()) + 0.1),
-                        textcoords='axes fraction', ha='center', va='bottom', fontsize=14, color='red')
         ax.set_title(f'{roi1} vs {roi2}')
         ax.set_xticks([0, 1, 2, 3])
         ax.set_xticklabels(labels)
         ax.set_ylabel("Mean Spike Count")
-    plt.tight_layout(rect=[0, 0, 1, 0.95])
     plt.savefig(os.path.join(output_dir, f'unit_{unit}_roi_comparison.png'))
     plt.close(fig)
 
+
+def plot_pie_chart(region, significant_pre, significant_post, significant_either, output_dir):
+    labels = ['Pre', 'Post', 'Either']
+    sizes = [sum(significant_pre.values()), sum(significant_post.values()), sum(significant_either.values())]
+    colors = sns.color_palette("Set2", 3)
+    fig, ax = plt.subplots()
+    ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
+    ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    plt.title(f'Significant Differences in {region}')
+    plt.savefig(os.path.join(output_dir, f'{region}_significant_pie_chart.png'))
+    plt.close(fig)
+
+
+def plot_venn_diagram(region, significant_pre, significant_post, significant_either, output_dir):
+    pre_only = len(set(significant_pre.keys()) - set(significant_post.keys()))
+    post_only = len(set(significant_post.keys()) - set(significant_pre.keys()))
+    both = len(set(significant_pre.keys()).intersection(set(significant_post.keys())))
+    fig, ax = plt.subplots()
+    venn3(subsets=(pre_only, post_only, both), set_labels=('Pre', 'Post', 'Both'))
+    plt.title(f'Significant Differences in {region}')
+    plt.savefig(os.path.join(output_dir, f'{region}_significant_venn_diagram.png'))
+    plt.close(fig)
 
 
