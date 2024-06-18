@@ -324,8 +324,7 @@ def plot_roi_response_of_each_unit(labelled_fixation_rasters, params):
 
 
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+
 logger = logging.getLogger(__name__)
 
 # Disable interactive mode
@@ -375,6 +374,23 @@ def plot_unit_response_to_rois(unit, rois, pre_means, post_means, pre_errors, po
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir):
     fig, axes = plt.subplots(2, 3, figsize=(18, 12))
     fig.suptitle(f'Unit {unit} - Region {region}')
@@ -414,11 +430,12 @@ def plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir)
 
 
 def plot_pie_chart(region, significant_pre, significant_post, significant_either, output_dir):
+    total_units = sum(significant_either.values())
     labels = ['Pre', 'Post', 'Either']
     sizes = [sum(significant_pre.values()), sum(significant_post.values()), sum(significant_either.values())]
     colors = sns.color_palette("Set2", 3)
     fig, ax = plt.subplots()
-    ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
+    ax.pie(sizes, labels=labels, colors=colors, autopct=lambda p: f'{p:.1f}% ({int(p * total_units / 100)})', startangle=90)
     ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
     plt.title(f'Significant Differences in {region}')
     plt.savefig(os.path.join(output_dir, f'{region}_significant_pie_chart.png'))
@@ -429,10 +446,11 @@ def plot_venn_diagram(region, significant_pre, significant_post, significant_eit
     pre_only = len(set(significant_pre.keys()) - set(significant_post.keys()))
     post_only = len(set(significant_post.keys()) - set(significant_pre.keys()))
     both = len(set(significant_pre.keys()).intersection(set(significant_post.keys())))
+    total_units = pre_only + post_only + both
     fig, ax = plt.subplots()
     venn3(subsets=(pre_only, post_only, both), set_labels=('Pre', 'Post', 'Both'))
     plt.title(f'Significant Differences in {region}')
+    plt.annotate(f'Total units considered: {total_units}', xy=(0.5, -0.1), xycoords='axes fraction', ha='center', fontsize=12)
     plt.savefig(os.path.join(output_dir, f'{region}_significant_venn_diagram.png'))
     plt.close(fig)
-
 

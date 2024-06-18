@@ -178,12 +178,16 @@ def analyze_significant_differences(unit, region, pre_data, post_data):
         else:
             pre_data_combined = pre_data[roi2]
             post_data_combined = post_data[roi2]
+        if pre_data[roi1].size == 0 or pre_data_combined.size == 0 or post_data[roi1].size == 0 or post_data_combined.size == 0:
+            continue  # Skip if any of the data arrays are empty
         data = [
             pre_data[roi1].mean(axis=1).astype(float), pre_data_combined.mean(axis=1).astype(float),
             post_data[roi1].mean(axis=1).astype(float), post_data_combined.mean(axis=1).astype(float)
         ]
-        _, p_val_pre = ttest_ind(data[0], data[1])
-        _, p_val_post = ttest_ind(data[2], data[3])
+        if np.isnan(data[0]).all() or np.isnan(data[1]).all() or np.isnan(data[2]).all() or np.isnan(data[3]).all():
+            continue  # Skip if any of the data arrays contain only NaNs
+        _, p_val_pre = ttest_ind(data[0], data[1], nan_policy='omit')
+        _, p_val_post = ttest_ind(data[2], data[3], nan_policy='omit')
         if p_val_pre < 0.05:
             significant_pre[roi1 + " vs " + roi2] += 1
         if p_val_post < 0.05:

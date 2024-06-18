@@ -19,17 +19,28 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-
 import util
 import curate_data
 import load_data
 import response_comp
 
-
 def flush_variable(variable_name, globals_dict):
     if variable_name in globals_dict:
         del globals_dict[variable_name]
 
+def get_or_load_variable(variable_name, load_function, compute_function, params, globals_dict):
+    if params.get('use_existing_variables', False) and variable_name in globals_dict:
+        logger.info(f"Using existing variable: {variable_name}")
+        return globals_dict[variable_name]
+    else:
+        if params.get('flush_before_reload'):
+            flush_variable(variable_name, globals_dict)
+        if params.get(f'remake_{variable_name}'):
+            logger.info(f"Recomputing variable: {variable_name}")
+            return compute_function(params)
+        else:
+            logger.info(f"Loading variable: {variable_name}")
+            return load_function(params)
 
 if __name__ == "__main__":
     # Load necessary data and parameters
@@ -57,7 +68,8 @@ if __name__ == "__main__":
         'raster_bin_size': 0.001,  # in seconds
         'raster_pre_event_time': 0.5,
         'raster_post_event_time': 0.5,
-        'flush_before_reload': True
+        'flush_before_reload': False,
+        'use_existing_variables': True  # New flag to use existing variables
     })
 
     root_data_dir, params = util.fetch_root_data_dir(params)
@@ -65,46 +77,54 @@ if __name__ == "__main__":
     session_paths, params = util.fetch_session_subfolder_paths_from_source(params)
     processed_data_dir, params = util.fetch_processed_data_dir(params)
 
-    if params.get('flush_before_reload'):
-        flush_variable('labelled_gaze_positions_m1', globals())
-    if params.get('remake_labelled_gaze_pos'):
-        params = curate_data.extract_and_update_meta_info(params)
-        params = curate_data.get_unique_doses(params)
-        labelled_gaze_positions_m1 = curate_data.extract_labelled_gaze_positions_m1(params)
-    else:
-        labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(params)
+    # Labelled Gaze Positions
+    labelled_gaze_positions_m1 = get_or_load_variable(
+        'labelled_gaze_positions_m1',
+        load_data.load_labelled_gaze_positions,
+        lambda p: curate_data.extract_labelled_gaze_positions_m1(curate_data.get_unique_doses(curate_data.extract_and_update_meta_info(p))),
+        params,
+        globals()
+    )
 
-    if params.get('flush_before_reload'):
-        flush_variable('labelled_fixations', globals())
-    if params.get('remake_fixations') or params.get('remake_fixation_labels'):
-        labelled_fixations = curate_data.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, params)
-    else:
-        labelled_fixations = load_data.load_m1_fixation_labels(params)
+    # Labelled Fixations
+    labelled_fixations = get_or_load_variable(
+        'labelled_fixations',
+        load_data.load_m1_fixation_labels,
+        lambda p: curate_data.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, p),
+        params,
+        globals()
+    )
 
-    if params.get('flush_before_reload'):
-        flush_variable('labelled_saccades_m1', globals())
-    if params.get('remake_saccades'):
-        labelled_saccades_m1 = curate_data.extract_saccades_with_labels(labelled_gaze_positions_m1, params)
-    else:
-        labelled_saccades_m1 = load_data.load_saccade_labels(params)
+    # Labelled Saccades
+    labelled_saccades_m1 = get_or_load_variable(
+        'labelled_saccades_m1',
+        load_data.load_saccade_labels,
+        lambda p: curate_data.extract_saccades_with_labels(labelled_gaze_positions_m1, p),
+        params,
+        globals()
+    )
 
-    if params.get('flush_before_reload'):
-        flush_variable('labelled_spiketimes', globals())
-    if params.get('remake_spikeTs'):
-        labelled_spiketimes = curate_data.extract_spiketimes_for_all_sessions(params)
-    else:
-        labelled_spiketimes = load_data.load_processed_spiketimes(params)
+    # Labelled Spiketimes
+    labelled_spiketimes = get_or_load_variable(
+        'labelled_spiketimes',
+        load_data.load_processed_spiketimes,
+        curate_data.extract_spiketimes_for_all_sessions,
+        params,
+        globals()
+    )
 
-    if params.get('flush_before_reload'):
-        flush_variable('labelled_fixation_rasters', globals())
-    if params.get('remake_raster'):
-        labelled_fixation_rasters = curate_data.extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params)
-    else:
-        labelled_fixation_rasters = load_data.load_labelled_fixation_rasters(params)
+    # Labelled Fixation Rasters
+    labelled_fixation_rasters = get_or_load_variable(
+        'labelled_fixation_rasters',
+        load_data.load_labelled_fixation_rasters,
+        lambda p: curate_data.extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, p),
+        params,
+        globals()
+    )
 
     if params.get('replot_face/eye_vs_obj_violins'):
-        response_comp.compute_pre_and_post_fixation_response_to_roi_for_each_unit(
-            labelled_fixation_rasters, params)
+        response_comp.compute_pre_and_post_fixation_response_to_roi_for_each_unit(labelled_fixation_rasters, params)
+
 
 
 
