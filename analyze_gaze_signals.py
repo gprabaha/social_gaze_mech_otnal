@@ -91,11 +91,6 @@ if __name__ == "__main__":
         response_comp.compare_roi_responses_for_all_units(
             labelled_fixation_rasters, params)
 
-    if params.get('make_plots'):
-        # plotter.plot_fixation_proportions_for_diff_conditions(params)
-        # plotter.plot_gaze_heatmaps(params)
-        # plotter.plot_fixation_heatmaps(params)
-        plotter.plot_roi_response_of_each_unit(labelled_fixation_rasters, params)
 
 
 
@@ -120,45 +115,3 @@ if __name__ == "__main__":
 
 
 
-
-"""
-from keras.preprocessing.sequence import pad_sequences
-from keras.utils import to_categorical
-
-max_length = max(len(seq) for seq in saccades)
-padded_saccades = pad_sequences(saccades, maxlen=max_length, padding='post', dtype='float32')
-
-# Convert saccade_labels to one-hot encoding
-one_hot_labels = [to_categorical(label[0], num_classes=4) for label in saccade_labels]
-
-import tensorflow as tf
-from keras.models import Sequential
-from keras.layers import LSTM, Dense
-from keras.layers import Dropout, BatchNormalization
-import multiprocessing
-
-# Set TensorFlow to use all available CPU cores
-num_cores = multiprocessing.cpu_count()
-config = tf.compat.v1.ConfigProto(
-    intra_op_parallelism_threads=num_cores,
-    inter_op_parallelism_threads=num_cores,
-    allow_soft_placement=True,
-    device_count={'CPU': num_cores})
-session = tf.compat.v1.Session(config=config)
-tf.compat.v1.keras.backend.set_session(session)
-
-# Define LSTM model with dropout and renormalization layer
-model = Sequential()
-model.add(LSTM(units=64, input_shape=(max_length, 2), return_sequences=True))
-model.add(Dropout(0.3))  # Add dropout layer with 30% dropout rate
-model.add(LSTM(units=64))  # Add another LSTM layer
-model.add(Dropout(0.3))  # Add dropout layer with 30% dropout rate
-model.add(BatchNormalization())  # Add renormalization layer
-model.add(Dense(4, activation='softmax'))  # Output layer with 4 classes
-
-# Compile the model
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-
-# Train the model
-model.fit(padded_saccades, np.array(one_hot_labels), epochs=10, batch_size=32, validation_split=0.2)
-"""

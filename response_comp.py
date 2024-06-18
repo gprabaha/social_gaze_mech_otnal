@@ -116,9 +116,6 @@ def compute_pre_and_post_fixation_response_to_roi_for_each_unit(labelled_fixatio
             calculate_roi_response_for_unit(unit, filtered_data, output_base_dir)
 
 
-
-
-
 def compare_roi_responses_for_all_units(labelled_fixation_rasters, params):
     root_dir = params['root_data_dir']
     use_parallel = params.get('use_parallel', False)

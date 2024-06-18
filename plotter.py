@@ -399,7 +399,8 @@ def plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir)
         ('face_bbox', 'left_obj_bbox'),
         ('face_bbox', 'right_obj_bbox'),
         ('face_bbox', 'left_right_combined')
-    ] 
+    ]
+    colors = sns.color_palette("Set2", 2)
     for i, (roi1, roi2) in enumerate(comparisons):
         row, col = divmod(i, 3)
         ax = axes[row, col]
@@ -409,14 +410,15 @@ def plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir)
         else:
             pre_data_combined = pre_data[roi2]
             post_data_combined = post_data[roi2]
-        sns.violinplot(data=[
-            pre_data[roi1].mean(axis=1), post_data[roi1].mean(axis=1),
-            pre_data_combined.mean(axis=1), post_data_combined.mean(axis=1)
-        ], ax=ax)
-        sns.stripplot(data=[
-            pre_data[roi1].mean(axis=1), post_data[roi1].mean(axis=1),
-            pre_data_combined.mean(axis=1), post_data_combined.mean(axis=1)
-        ], ax=ax, color='k', size=3, jitter=True)
+        data = [
+            pre_data[roi1].mean(axis=1), pre_data_combined.mean(axis=1),
+            post_data[roi1].mean(axis=1), post_data_combined.mean(axis=1)
+        ]
+        labels = [
+            'Pre ' + roi1, 'Pre ' + roi2, 'Post ' + roi1, 'Post ' + roi2
+        ]
+        sns.violinplot(data=data, ax=ax, palette=[colors[0], colors[0], colors[1], colors[1]])
+        sns.stripplot(data=data, ax=ax, color='k', size=3, jitter=True)
         _, p_val_pre = ttest_ind(pre_data[roi1].mean(axis=1), pre_data_combined.mean(axis=1))
         _, p_val_post = ttest_ind(post_data[roi1].mean(axis=1), post_data_combined.mean(axis=1))
         if p_val_pre < 0.05:
@@ -427,7 +429,8 @@ def plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir)
                         textcoords='axes fraction', ha='center', va='bottom', fontsize=14, color='red')
         ax.set_title(f'{roi1} vs {roi2}')
         ax.set_xticks([0, 1, 2, 3])
-        ax.set_xticklabels(['Pre ' + roi1, 'Post ' + roi1, 'Pre ' + roi2, 'Post ' + roi2])
+        ax.set_xticklabels(labels)
+        ax.set_ylabel("Mean Spike Count")
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     plt.savefig(os.path.join(output_dir, f'unit_{unit}_roi_comparison.png'))
     plt.close(fig)
