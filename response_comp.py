@@ -6,13 +6,25 @@ Created on Fri Jun 14 14:13:07 2024
 @author: pg496
 """
 
+
 import os
 import numpy as np
 from scipy.stats import ttest_ind
-from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 from collections import defaultdict
+import pickle
+
+
+try:
+    # Check if running in a Jupyter notebook
+    from IPython import get_ipython
+    if 'IPKernelApp' not in get_ipython().config:
+        raise ImportError("Not in a notebook")
+    from tqdm.autonotebook import tqdm
+except (ImportError, ModuleNotFoundError):
+    from tqdm import tqdm
+
 
 import util  # Import the date function
 import plotter
@@ -97,31 +109,43 @@ def calculate_roi_response_for_unit(unit, filtered_data, output_base_dir):
 
 
 
+
+
 def compute_pre_and_post_fixation_response_to_roi_for_each_unit(labelled_fixation_rasters, params):
-    root_dir = params['root_data_dir']
+    processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', False)
-    output_base_dir = util.add_date_dir_to_path(os.path.join(
-        root_dir, 'plots', 'roi_response_comparison_each_unit'))
-    # Filter the data for 'mon_down' blocks and rasters aligned to 'start_time'
-    filtered_data = labelled_fixation_rasters[
-        (labelled_fixation_rasters['block'] == 'mon_down') &
-        (labelled_fixation_rasters['aligned_to'] == 'start_time')]
-    unique_units = filtered_data['uuid'].unique()
-    results = defaultdict(lambda: defaultdict(lambda: {'pre': 0, 'post': 0, 'either': 0}))
-    if use_parallel:
-        with ThreadPoolExecutor(max_workers=16) as executor:
-            futures = {executor.submit(analyze_and_plot_unit, unit, filtered_data, output_base_dir, results): unit for unit in unique_units}
-            for future in tqdm(as_completed(futures), total=len(futures), desc="ROI response comparison computed for unit"):
-                future.result()
+    output_base_dir = processed_data_dir
+    results_file = os.path.join(processed_data_dir, 'roi_spike_count_comparison_for_each_unit.pkl')
+    # Check if we should load existing results
+    if not params.get('recalculate_unit_ROI_responses') and os.path.exists(results_file):
+        with open(results_file, 'rb') as f:
+            results = pickle.load(f)
+        logger.info("Loaded existing results from file.")
     else:
-        for unit in tqdm(unique_units, desc="ROI response comparison computed for unit"):
-            analyze_and_plot_unit(unit, filtered_data, output_base_dir, results)
+        filtered_data = labelled_fixation_rasters[
+            (labelled_fixation_rasters['block'] == 'mon_down') &
+            (labelled_fixation_rasters['aligned_to'] == 'start_time')]
+        unique_units = filtered_data['uuid'].unique()
+        results = defaultdict(lambda: defaultdict(lambda: {'pre': 0, 'post': 0, 'either': 0}))
+        if use_parallel:
+            with ThreadPoolExecutor(max_workers=16) as executor:
+                futures = {executor.submit(analyze_and_plot_unit, unit, filtered_data, output_base_dir, results): unit for unit in unique_units}
+                for future in tqdm(as_completed(futures), total=len(futures), desc="ROI response comparison computed for unit"):
+                    future.result()
+        else:
+            for unit in tqdm(unique_units, desc="ROI response comparison computed for unit"):
+                analyze_and_plot_unit(unit, filtered_data, output_base_dir, results)
+        # Save results to file
+        with open(results_file, 'wb') as f:
+            pickle.dump(results, f)
+        logger.info("Saved results to file.")
     # Generate summary plots for each region
     for region in results.keys():
         output_dir = os.path.join(output_base_dir, region)
         os.makedirs(output_dir, exist_ok=True)
         plotter.plot_pie_chart(region, results[region]['pre'], results[region]['post'], results[region]['either'], output_dir)
         plotter.plot_venn_diagram(region, results[region]['pre'], results[region]['post'], results[region]['either'], output_dir)
+
 
 
 def analyze_and_plot_unit(unit, filtered_data, output_base_dir, results):
@@ -158,7 +182,6 @@ def analyze_and_plot_unit(unit, filtered_data, output_base_dir, results):
         logger.error(f"Error processing unit {unit}: {e}")
 
 
-# Step 1: Statistical Analysis Function
 def analyze_significant_differences(unit, region, pre_data, post_data):
     comparisons = [
         ('eye_bbox', 'left_obj_bbox'),

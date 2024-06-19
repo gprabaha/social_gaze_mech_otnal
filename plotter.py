@@ -9,13 +9,21 @@ Created on Wed May 22 11:35:03 2024
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
-from tqdm import tqdm
 import os
 from scipy.stats import ttest_ind
 import seaborn as sns
 from datetime import datetime
 import logging
 from matplotlib_venn import venn3
+
+try:
+    # Check if running in a Jupyter notebook
+    from IPython import get_ipython
+    if 'IPKernelApp' not in get_ipython().config:
+        raise ImportError("Not in a notebook")
+    from tqdm.autonotebook import tqdm
+except (ImportError, ModuleNotFoundError):
+    from tqdm import tqdm
 
 import util
 import load_data
@@ -430,16 +438,31 @@ def plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir)
 
 
 def plot_pie_chart(region, significant_pre, significant_post, significant_either, output_dir):
+    # Calculate the total units and sizes
     total_units = sum(significant_either.values())
-    labels = ['Pre', 'Post', 'Either']
     sizes = [sum(significant_pre.values()), sum(significant_post.values()), sum(significant_either.values())]
+
+    # Debug prints to inspect values
+    print(f"Region: {region}")
+    print(f"Total units: {total_units}")
+    print(f"Sizes: {sizes}")
+
+    # Check for NaNs or invalid values
+    if total_units == 0 or any(np.isnan(size) or size <= 0 for size in sizes):
+        print(f"Invalid data for region {region}: {sizes}")
+        return  # Skip plotting if the data is invalid
+
+    labels = ['Pre', 'Post', 'Either']
     colors = sns.color_palette("Set2", 3)
+    
     fig, ax = plt.subplots()
     ax.pie(sizes, labels=labels, colors=colors, autopct=lambda p: f'{p:.1f}% ({int(p * total_units / 100)})', startangle=90)
     ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    
     plt.title(f'Significant Differences in {region}')
     plt.savefig(os.path.join(output_dir, f'{region}_significant_pie_chart.png'))
     plt.close(fig)
+
 
 
 def plot_venn_diagram(region, significant_pre, significant_post, significant_either, output_dir):

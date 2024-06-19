@@ -8,43 +8,58 @@ Created on Tue Apr  9 10:25:48 2024
 
 
 import logging
-import pdb
 
-logger = logging.getLogger()
-logger.setLevel(logging.WARNING)  # Only show warnings and errors
-# Set up logging
-handler = logging.StreamHandler()
-handler.setLevel(logging.WARNING)  # Only show warnings and errors
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+def main():
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)  # Show debug information
+    # Set up logging
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.DEBUG)  # Show debug information
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')  # Corrected typo
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
-import util
-import curate_data
-import load_data
-import response_comp
+    import util
+    import curate_data
+    import load_data
+    import response_comp
 
-def flush_variable(variable_name, globals_dict):
-    if variable_name in globals_dict:
-        del globals_dict[variable_name]
+    def flush_variable(variable_name, global_vars):
+        if variable_name in global_vars:
+            del global_vars[variable_name]
+            logger.info(f"Flushed variable: {variable_name}")
 
-def get_or_load_variable(variable_name, load_function, compute_function, params, globals_dict):
-    if params.get('use_existing_variables', False) and variable_name in globals_dict:
-        logger.info(f"Using existing variable: {variable_name}")
-        return globals_dict[variable_name]
-    else:
-        if params.get('flush_before_reload'):
-            flush_variable(variable_name, globals_dict)
-        if params.get(f'remake_{variable_name}'):
-            logger.info(f"Recomputing variable: {variable_name}")
-            return compute_function(params)
+    def get_or_load_variable(variable_name, load_function, compute_function, params, global_vars):
+        # Detailed debug information
+        variable_exists = variable_name in global_vars and global_vars[variable_name] is not None
+
+        if variable_exists:
+            logger.info(f"Variable '{variable_name}' found in globals and is not None.")
         else:
-            logger.info(f"Loading variable: {variable_name}")
-            return load_function(params)
+            logger.info(f"Variable '{variable_name}' NOT found in globals or is None.")
 
-if __name__ == "__main__":
+        if params.get('use_existing_variables', False) and variable_exists:
+            logger.info(f"Using existing variable: {variable_name}")
+            return global_vars[variable_name]
+
+        if params.get('flush_before_reload'):
+            flush_variable(variable_name, global_vars)
+
+        if params.get(f'remake_{variable_name}', False) or not variable_exists:
+            if params.get(f'remake_{variable_name}', False):
+                logger.info(f"Recomputing variable: {variable_name}")
+                global_vars[variable_name] = compute_function(params)
+            else:
+                logger.info(f"Loading variable: {variable_name}")
+                global_vars[variable_name] = load_function(params)
+
+        logger.info(f"Variable '{variable_name}' set in globals.")
+        return global_vars[variable_name]
+
+    global_vars = globals()
+
     # Load necessary data and parameters
-    params = util.get_params()
+    params = global_vars.get('params', util.get_params())
     params.update({
         'is_cluster': True,
         'use_parallel': False,
@@ -69,7 +84,8 @@ if __name__ == "__main__":
         'raster_pre_event_time': 0.5,
         'raster_post_event_time': 0.5,
         'flush_before_reload': False,
-        'use_existing_variables': True  # New flag to use existing variables
+        'use_existing_variables': True,  # New flag to use existing variables
+        'reload_existing_unit_roi_comp_stats': True  # New flag to reload existing stats
     })
 
     root_data_dir, params = util.fetch_root_data_dir(params)
@@ -78,52 +94,66 @@ if __name__ == "__main__":
     processed_data_dir, params = util.fetch_processed_data_dir(params)
 
     # Labelled Gaze Positions
+    logger.debug("Loading or computing labelled_gaze_positions_m1")
     labelled_gaze_positions_m1 = get_or_load_variable(
         'labelled_gaze_positions_m1',
         load_data.load_labelled_gaze_positions,
         lambda p: curate_data.extract_labelled_gaze_positions_m1(curate_data.get_unique_doses(curate_data.extract_and_update_meta_info(p))),
         params,
-        globals()
+        global_vars
     )
+    logger.info("Loaded or set labelled_gaze_positions_m1")
 
     # Labelled Fixations
+    logger.debug("Loading or computing labelled_fixations")
     labelled_fixations = get_or_load_variable(
         'labelled_fixations',
         load_data.load_m1_fixation_labels,
         lambda p: curate_data.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, p),
         params,
-        globals()
+        global_vars
     )
+    logger.info("Loaded or set labelled_fixations")
 
     # Labelled Saccades
+    logger.debug("Loading or computing labelled_saccades_m1")
     labelled_saccades_m1 = get_or_load_variable(
         'labelled_saccades_m1',
         load_data.load_saccade_labels,
         lambda p: curate_data.extract_saccades_with_labels(labelled_gaze_positions_m1, p),
         params,
-        globals()
+        global_vars
     )
+    logger.info("Loaded or set labelled_saccades_m1")
 
     # Labelled Spiketimes
+    logger.debug("Loading or computing labelled_spiketimes")
     labelled_spiketimes = get_or_load_variable(
         'labelled_spiketimes',
         load_data.load_processed_spiketimes,
         curate_data.extract_spiketimes_for_all_sessions,
         params,
-        globals()
+        global_vars
     )
+    logger.info("Loaded or set labelled_spiketimes")
 
     # Labelled Fixation Rasters
+    logger.debug("Loading or computing labelled_fixation_rasters")
     labelled_fixation_rasters = get_or_load_variable(
         'labelled_fixation_rasters',
         load_data.load_labelled_fixation_rasters,
         lambda p: curate_data.extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, p),
         params,
-        globals()
+        global_vars
     )
+    logger.info("Loaded or set labelled_fixation_rasters")
 
     if params.get('replot_face/eye_vs_obj_violins'):
         response_comp.compute_pre_and_post_fixation_response_to_roi_for_each_unit(labelled_fixation_rasters, params)
+
+
+if __name__ == "__main__":
+    main()
 
 
 
