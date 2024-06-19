@@ -16,14 +16,7 @@ from datetime import datetime
 import logging
 from matplotlib_venn import venn3
 
-try:
-    # Check if running in a Jupyter notebook
-    from IPython import get_ipython
-    if 'IPKernelApp' not in get_ipython().config:
-        raise ImportError("Not in a notebook")
-    from tqdm.autonotebook import tqdm
-except (ImportError, ModuleNotFoundError):
-    from tqdm import tqdm
+from tqdm import tqdm
 
 import util
 import load_data
@@ -331,13 +324,6 @@ def plot_roi_response_of_each_unit(labelled_fixation_rasters, params):
             continue
 
 
-
-
-logger = logging.getLogger(__name__)
-
-# Disable interactive mode
-plt.ioff()
-
 def plot_unit_response_to_rois(unit, rois, pre_means, post_means, pre_errors, post_errors, significant_pre, significant_post, output_dir):
     try:
         def add_significance_lines(ax, x_positions, data_means, significant_matrix, y_offset=1.05):
@@ -394,12 +380,8 @@ def plot_unit_response_to_rois(unit, rois, pre_means, post_means, pre_errors, po
 
 
 
-
-
-
-
-
 def plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir):
+    plt.ioff()
     fig, axes = plt.subplots(2, 3, figsize=(18, 12))
     fig.suptitle(f'Unit {unit} - Region {region}')
     comparisons = [
@@ -436,44 +418,67 @@ def plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir)
     plt.savefig(os.path.join(output_dir, f'unit_{unit}_roi_comparison.png'))
     plt.close(fig)
 
+def plot_pie_charts(region, results, output_dir):
+    for comparison in results['either'].keys():
+        total_units = results['either'][comparison]
+        significant_pre = results['pre'][comparison]
+        significant_post = results['post'][comparison]
+        significant_both = results['either'][comparison] - (significant_pre + significant_post)
 
-def plot_pie_chart(region, significant_pre, significant_post, significant_either, output_dir):
-    # Calculate the total units and sizes
-    total_units = sum(significant_either.values())
-    sizes = [sum(significant_pre.values()), sum(significant_post.values()), sum(significant_either.values())]
+        sizes = [
+            total_units - (significant_pre + significant_post + significant_both),
+            significant_pre,
+            significant_post,
+            significant_both
+        ]
+        labels = ['Neither', 'Just Pre', 'Just Post', 'Both Pre and Post']
+        colors = sns.color_palette("Set2", 4)
 
-    # Debug prints to inspect values
-    print(f"Region: {region}")
-    print(f"Total units: {total_units}")
-    print(f"Sizes: {sizes}")
+        fig, ax = plt.subplots()
+        ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
+        ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+        plt.title(f'Significant Differences in {region} - {comparison}')
+        plt.savefig(os.path.join(output_dir, f'{region}_{comparison}_significant_pie_chart.png'))
+        plt.close(fig)
 
-    # Check for NaNs or invalid values
-    if total_units == 0 or any(np.isnan(size) or size <= 0 for size in sizes):
-        print(f"Invalid data for region {region}: {sizes}")
-        return  # Skip plotting if the data is invalid
+def plot_venn_diagrams(region, results, output_dir):
+    comparisons = [
+        ('eye_bbox', 'left_obj_bbox'),
+        ('eye_bbox', 'right_obj_bbox'),
+        ('eye_bbox', 'left_right_combined'),
+        ('face_bbox', 'left_obj_bbox'),
+        ('face_bbox', 'right_obj_bbox'),
+        ('face_bbox', 'left_right_combined')
+    ]
 
-    labels = ['Pre', 'Post', 'Either']
-    colors = sns.color_palette("Set2", 3)
-    
-    fig, ax = plt.subplots()
-    ax.pie(sizes, labels=labels, colors=colors, autopct=lambda p: f'{p:.1f}% ({int(p * total_units / 100)})', startangle=90)
-    ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-    
-    plt.title(f'Significant Differences in {region}')
-    plt.savefig(os.path.join(output_dir, f'{region}_significant_pie_chart.png'))
-    plt.close(fig)
+    for roi1, roi2 in comparisons:
+        comparison = roi1 + " vs " + roi2
+        pre_only = results['pre'][comparison]
+        post_only = results['post'][comparison]
+        both = results['either'][comparison] - (pre_only + post_only)
+        total_units = pre_only + post_only + both
+        neither = total_units - (pre_only + post_only + both)
+
+        fig, ax = plt.subplots()
+        venn3(subsets=(neither, pre_only, both, post_only), set_labels=('Neither', 'Just Pre', 'Both', 'Just Post'))
+        plt.title(f'Significant Differences in {region} - {comparison}')
+        plt.annotate(f'Total units considered: {total_units}', xy=(0.5, -0.1), xycoords='axes fraction', ha='center', fontsize=12)
+        plt.savefig(os.path.join(output_dir, f'{region}_{comparison}_significant_venn_diagram.png'))
+        plt.close(fig)
 
 
 
-def plot_venn_diagram(region, significant_pre, significant_post, significant_either, output_dir):
-    pre_only = len(set(significant_pre.keys()) - set(significant_post.keys()))
-    post_only = len(set(significant_post.keys()) - set(significant_pre.keys()))
-    both = len(set(significant_pre.keys()).intersection(set(significant_post.keys())))
-    total_units = pre_only + post_only + both
-    fig, ax = plt.subplots()
-    venn3(subsets=(pre_only, post_only, both), set_labels=('Pre', 'Post', 'Both'))
-    plt.title(f'Significant Differences in {region}')
-    plt.annotate(f'Total units considered: {total_units}', xy=(0.5, -0.1), xycoords='axes fraction', ha='center', fontsize=12)
-    plt.savefig(os.path.join(output_dir, f'{region}_significant_venn_diagram.png'))
-    plt.close(fig)
+
+
+
+
+
+
+
+
+
+
+
+
+
 

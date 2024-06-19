@@ -16,14 +16,7 @@ from collections import defaultdict
 import pickle
 
 
-try:
-    # Check if running in a Jupyter notebook
-    from IPython import get_ipython
-    if 'IPKernelApp' not in get_ipython().config:
-        raise ImportError("Not in a notebook")
-    from tqdm.autonotebook import tqdm
-except (ImportError, ModuleNotFoundError):
-    from tqdm import tqdm
+from tqdm import tqdm
 
 
 import util  # Import the date function
@@ -107,26 +100,28 @@ def calculate_roi_response_for_unit(unit, filtered_data, output_base_dir):
 
 
 
-
-
-
+def default_dict_function():
+    return {'pre': defaultdict(int), 'post': defaultdict(int), 'either': defaultdict(int)}
 
 def compute_pre_and_post_fixation_response_to_roi_for_each_unit(labelled_fixation_rasters, params):
-    processed_data_dir = params['processed_data_dir']
+    root_dir = params['root_data_dir']
     use_parallel = params.get('use_parallel', False)
-    output_base_dir = processed_data_dir
-    results_file = os.path.join(processed_data_dir, 'roi_spike_count_comparison_for_each_unit.pkl')
-    # Check if we should load existing results
-    if not params.get('recalculate_unit_ROI_responses') and os.path.exists(results_file):
-        with open(results_file, 'rb') as f:
+    output_base_dir = util.add_date_dir_to_path(os.path.join(
+        root_dir, 'plots', 'roi_response_comparison_each_unit'))
+    processed_data_file = os.path.join(root_dir, 'processed_data', 'roi_spike_count_comparison_for_each_unit.pkl')
+
+    # Filter the data for 'mon_down' blocks and rasters aligned to 'start_time'
+    filtered_data = labelled_fixation_rasters[
+        (labelled_fixation_rasters['block'] == 'mon_down') &
+        (labelled_fixation_rasters['aligned_to'] == 'start_time')]
+    unique_units = filtered_data['uuid'].unique()
+    results = defaultdict(default_dict_function)
+
+    if params.get('reload_existing_unit_roi_comp_stats') and os.path.exists(processed_data_file):
+        with open(processed_data_file, 'rb') as f:
             results = pickle.load(f)
-        logger.info("Loaded existing results from file.")
+        logger.info(f"Loaded existing results from {processed_data_file}")
     else:
-        filtered_data = labelled_fixation_rasters[
-            (labelled_fixation_rasters['block'] == 'mon_down') &
-            (labelled_fixation_rasters['aligned_to'] == 'start_time')]
-        unique_units = filtered_data['uuid'].unique()
-        results = defaultdict(lambda: defaultdict(lambda: {'pre': 0, 'post': 0, 'either': 0}))
         if use_parallel:
             with ThreadPoolExecutor(max_workers=16) as executor:
                 futures = {executor.submit(analyze_and_plot_unit, unit, filtered_data, output_base_dir, results): unit for unit in unique_units}
@@ -135,18 +130,17 @@ def compute_pre_and_post_fixation_response_to_roi_for_each_unit(labelled_fixatio
         else:
             for unit in tqdm(unique_units, desc="ROI response comparison computed for unit"):
                 analyze_and_plot_unit(unit, filtered_data, output_base_dir, results)
-        # Save results to file
-        with open(results_file, 'wb') as f:
+        
+        with open(processed_data_file, 'wb') as f:
             pickle.dump(results, f)
-        logger.info("Saved results to file.")
+            logger.info(f"Saved results to {processed_data_file}")
+
     # Generate summary plots for each region
     for region in results.keys():
         output_dir = os.path.join(output_base_dir, region)
         os.makedirs(output_dir, exist_ok=True)
-        plotter.plot_pie_chart(region, results[region]['pre'], results[region]['post'], results[region]['either'], output_dir)
-        plotter.plot_venn_diagram(region, results[region]['pre'], results[region]['post'], results[region]['either'], output_dir)
-
-
+        plotter.plot_pie_charts(region, results[region], output_dir)
+        plotter.plot_venn_diagrams(region, results[region], output_dir)
 
 def analyze_and_plot_unit(unit, filtered_data, output_base_dir, results):
     try:
@@ -180,7 +174,6 @@ def analyze_and_plot_unit(unit, filtered_data, output_base_dir, results):
         plotter.plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir)
     except Exception as e:
         logger.error(f"Error processing unit {unit}: {e}")
-
 
 def analyze_significant_differences(unit, region, pre_data, post_data):
     comparisons = [
@@ -218,6 +211,9 @@ def analyze_significant_differences(unit, region, pre_data, post_data):
         if p_val_pre < 0.05 or p_val_post < 0.05:
             significant_either[roi1 + " vs " + roi2] += 1
     return significant_pre, significant_post, significant_either
+
+
+
 
 
 
