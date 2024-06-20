@@ -419,14 +419,15 @@ def plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir)
     plt.close(fig)
 
 def plot_pie_charts(region, results, output_dir):
-    for comparison in results['either'].keys():
-        total_units = results['either'][comparison]
-        significant_pre = results['pre'][comparison]
-        significant_post = results['post'][comparison]
-        significant_both = results['either'][comparison] - (significant_pre + significant_post)
+    for comparison in results['both'].keys():
+        total_units = len(set(results['pre'][comparison]) | set(results['post'][comparison]) | set(results['both'][comparison]) | set(results['neither'][comparison]))
+        significant_pre = len(results['pre'][comparison])
+        significant_post = len(results['post'][comparison])
+        significant_both = len(results['both'][comparison])
+        significant_neither = len(results['neither'][comparison])
 
         sizes = [
-            total_units - (significant_pre + significant_post + significant_both),
+            significant_neither,
             significant_pre,
             significant_post,
             significant_both
@@ -453,11 +454,12 @@ def plot_venn_diagrams(region, results, output_dir):
 
     for roi1, roi2 in comparisons:
         comparison = roi1 + " vs " + roi2
-        pre_only = results['pre'][comparison]
-        post_only = results['post'][comparison]
-        both = results['either'][comparison] - (pre_only + post_only)
-        total_units = pre_only + post_only + both
-        neither = total_units - (pre_only + post_only + both)
+        pre_only = len(results['pre'][comparison])
+        post_only = len(results['post'][comparison])
+        both = len(results['both'][comparison])
+        either = len(results['either'][comparison])
+        total_units = len(set(results['pre'][comparison]) | set(results['post'][comparison]) | set(results['both'][comparison]) | set(results['neither'][comparison]))
+        neither = total_units - either
 
         fig, ax = plt.subplots()
         venn3(subsets=(neither, pre_only, both, post_only), set_labels=('Neither', 'Just Pre', 'Both', 'Just Post'))

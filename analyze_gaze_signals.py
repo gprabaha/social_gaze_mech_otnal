@@ -45,7 +45,7 @@ def get_or_load_variable(variable_name, load_function, compute_function, params,
     logger.info(f"Variable '{variable_name}' set in globals.")
     return global_vars[variable_name]
 
-def main(params, labelled_gaze_positions_m1=None, labelled_fixations=None, labelled_saccades_m1=None, labelled_spiketimes=None, labelled_fixation_rasters=None):
+def main(params):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.ERROR)  # Set the logging level to ERROR
     handler = logging.StreamHandler()
@@ -81,8 +81,8 @@ def main(params, labelled_gaze_positions_m1=None, labelled_fixations=None, label
         'raster_pre_event_time': 0.5,
         'raster_post_event_time': 0.5,
         'flush_before_reload': False,
-        'use_existing_variables': True,
-        'reload_existing_unit_roi_comp_stats': False  # New flag to reload existing stats
+        'use_existing_variables': False,
+        'reload_existing_unit_roi_comp_stats': True  # New flag to reload existing stats
     })
 
     root_data_dir, params = util.fetch_root_data_dir(params)
@@ -155,16 +155,9 @@ def main(params, labelled_gaze_positions_m1=None, labelled_fixations=None, label
 
 
 
-global params, labelled_gaze_positions_m1, labelled_fixations, labelled_saccades_m1, labelled_spiketimes, labelled_fixation_rasters
 
 params = util.get_params()
-labelled_gaze_positions_m1 = labelled_gaze_positions_m1 if 'labelled_gaze_positions_m1' in globals() else None
-labelled_fixations = labelled_fixations if 'labelled_fixations' in globals() else None
-labelled_saccades_m1 = labelled_saccades_m1 if 'labelled_saccades_m1' in globals() else None
-labelled_spiketimes = labelled_spiketimes if 'labelled_spiketimes' in globals() else None
-labelled_fixation_rasters = labelled_fixation_rasters if 'labelled_fixation_rasters' in globals() else None
-
-main(params, labelled_gaze_positions_m1, labelled_fixations, labelled_saccades_m1, labelled_spiketimes, labelled_fixation_rasters)
+main(params)
 
 
 

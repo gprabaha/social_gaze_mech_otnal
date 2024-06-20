@@ -27,6 +27,7 @@ import pdb
 
 # Configure logging
 logger = logging.getLogger(__name__)
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 
 def calculate_roi_response_for_unit(unit, filtered_data, output_base_dir):
@@ -175,7 +176,7 @@ def analyze_and_plot_unit(unit, filtered_data, output_base_dir, results):
     except Exception as e:
         logger.error(f"Error processing unit {unit}: {e}")
 
-def analyze_significant_differences(unit, region, pre_data, post_data):
+def analyze_significant_differences(unit, region, pre_data, post_data, output_dir):
     comparisons = [
         ('eye_bbox', 'left_obj_bbox'),
         ('eye_bbox', 'right_obj_bbox'),
@@ -184,9 +185,12 @@ def analyze_significant_differences(unit, region, pre_data, post_data):
         ('face_bbox', 'right_obj_bbox'),
         ('face_bbox', 'left_right_combined')
     ]
-    significant_pre = defaultdict(int)
-    significant_post = defaultdict(int)
-    significant_either = defaultdict(int)
+    significant_pre = defaultdict(list)
+    significant_post = defaultdict(list)
+    significant_both = defaultdict(list)
+    significant_neither = defaultdict(list)
+    significant_either = defaultdict(list)
+
     for roi1, roi2 in comparisons:
         if roi2 == 'left_right_combined':
             pre_data_combined = np.concatenate((pre_data['left_obj_bbox'], pre_data['right_obj_bbox']), axis=0)
@@ -194,23 +198,48 @@ def analyze_significant_differences(unit, region, pre_data, post_data):
         else:
             pre_data_combined = pre_data[roi2]
             post_data_combined = post_data[roi2]
+        
         if pre_data[roi1].size == 0 or pre_data_combined.size == 0 or post_data[roi1].size == 0 or post_data_combined.size == 0:
             continue  # Skip if any of the data arrays are empty
+        
         data = [
             pre_data[roi1].mean(axis=1).astype(float), pre_data_combined.mean(axis=1).astype(float),
             post_data[roi1].mean(axis=1).astype(float), post_data_combined.mean(axis=1).astype(float)
         ]
+        
         if np.isnan(data[0]).all() or np.isnan(data[1]).all() or np.isnan(data[2]).all() or np.isnan(data[3]).all():
             continue  # Skip if any of the data arrays contain only NaNs
+        
         _, p_val_pre = ttest_ind(data[0], data[1], nan_policy='omit')
         _, p_val_post = ttest_ind(data[2], data[3], nan_policy='omit')
-        if p_val_pre < 0.05:
-            significant_pre[roi1 + " vs " + roi2] += 1
-        if p_val_post < 0.05:
-            significant_post[roi1 + " vs " + roi2] += 1
+
+        comparison_key = roi1 + " vs " + roi2
+
+        if p_val_pre < 0.05 and p_val_post < 0.05:
+            significant_both[comparison_key].append(unit)
+        elif p_val_pre < 0.05 and p_val_post >= 0.05:
+            significant_pre[comparison_key].append(unit)
+        elif p_val_pre >= 0.05 and p_val_post < 0.05:
+            significant_post[comparison_key].append(unit)
+        else:
+            significant_neither[comparison_key].append(unit)
+        
         if p_val_pre < 0.05 or p_val_post < 0.05:
-            significant_either[roi1 + " vs " + roi2] += 1
-    return significant_pre, significant_post, significant_either
+            significant_either[comparison_key].append(unit)
+    
+    results = {
+        'pre': significant_pre,
+        'post': significant_post,
+        'both': significant_both,
+        'neither': significant_neither,
+        'either': significant_either
+    }
+
+    # Save the results dictionary
+    with open(os.path.join(output_dir, f'{region}_significant_units.pkl'), 'wb') as f:
+        pickle.dump(results, f)
+    
+    return results
 
 
 
