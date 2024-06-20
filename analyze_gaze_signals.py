@@ -16,27 +16,33 @@ import response_comp
 class DataManager:
     def __init__(self, params):
         self.params = params
-        self.local_vars = {}
-        self.logger = self.setup_logger()
+        self.setup_logger()
+        self.initialize_variables()
 
     def setup_logger(self):
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.ERROR)
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.ERROR)
         handler = logging.StreamHandler()
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
-        logger.addHandler(handler)
-        return logger
+        self.logger.addHandler(handler)
+
+    def initialize_variables(self):
+        self.labelled_gaze_positions_m1 = None
+        self.labelled_fixations = None
+        self.labelled_saccades_m1 = None
+        self.labelled_spiketimes = None
+        self.labelled_fixation_rasters = None
 
     def get_or_load_variable(self, variable_name, load_function, compute_function):
-        if self.params.get(f'remake_{variable_name}', False) or self.local_vars.get(variable_name) is None:
+        if self.params.get(f'remake_{variable_name}', False) or getattr(self, variable_name) is None:
             if self.params.get(f'remake_{variable_name}', False):
                 self.logger.info(f"Recomputing variable: {variable_name}")
-                self.local_vars[variable_name] = compute_function(self.params)
+                setattr(self, variable_name, compute_function(self.params))
             else:
                 self.logger.info(f"Loading variable: {variable_name}")
-                self.local_vars[variable_name] = load_function(self.params)
-        return self.local_vars[variable_name]
+                setattr(self, variable_name, load_function(self.params))
+        return getattr(self, variable_name)
 
     def run(self):
         root_data_dir, self.params = util.fetch_root_data_dir(self.params)
@@ -44,38 +50,38 @@ class DataManager:
         session_paths, self.params = util.fetch_session_subfolder_paths_from_source(self.params)
         processed_data_dir, self.params = util.fetch_processed_data_dir(self.params)
 
-        labelled_gaze_positions_m1 = self.get_or_load_variable(
+        self.labelled_gaze_positions_m1 = self.get_or_load_variable(
             'labelled_gaze_positions_m1',
             load_data.load_labelled_gaze_positions,
             lambda p: curate_data.extract_labelled_gaze_positions_m1(curate_data.get_unique_doses(curate_data.extract_and_update_meta_info(p)))
         )
 
-        labelled_fixations = self.get_or_load_variable(
+        self.labelled_fixations = self.get_or_load_variable(
             'labelled_fixations',
             load_data.load_m1_fixation_labels,
-            lambda p: curate_data.extract_fixations_with_labels_parallel(labelled_gaze_positions_m1, p)
+            lambda p: curate_data.extract_fixations_with_labels_parallel(self.labelled_gaze_positions_m1, p)
         )
 
-        labelled_saccades_m1 = self.get_or_load_variable(
+        self.labelled_saccades_m1 = self.get_or_load_variable(
             'labelled_saccades_m1',
             load_data.load_saccade_labels,
-            lambda p: curate_data.extract_saccades_with_labels(labelled_gaze_positions_m1, p)
+            lambda p: curate_data.extract_saccades_with_labels(self.labelled_gaze_positions_m1, p)
         )
 
-        labelled_spiketimes = self.get_or_load_variable(
+        self.labelled_spiketimes = self.get_or_load_variable(
             'labelled_spiketimes',
             load_data.load_processed_spiketimes,
             curate_data.extract_spiketimes_for_all_sessions
         )
 
-        labelled_fixation_rasters = self.get_or_load_variable(
+        self.labelled_fixation_rasters = self.get_or_load_variable(
             'labelled_fixation_rasters',
             load_data.load_labelled_fixation_rasters,
-            lambda p: curate_data.extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, p)
+            lambda p: curate_data.extract_fixation_raster(session_paths, self.labelled_fixations, self.labelled_spiketimes, p)
         )
 
         if self.params.get('replot_face/eye_vs_obj_violins'):
-            response_comp.compute_pre_and_post_fixation_response_to_roi_for_each_unit(labelled_fixation_rasters, self.params)
+            response_comp.compute_pre_and_post_fixation_response_to_roi_for_each_unit(self.labelled_fixation_rasters, self.params)
 
 def main():
     params = util.get_params()
@@ -112,8 +118,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 
 
 
