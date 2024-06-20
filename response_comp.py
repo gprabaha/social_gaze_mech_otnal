@@ -100,9 +100,22 @@ def calculate_roi_response_for_unit(unit, filtered_data, output_base_dir):
 
 
 
+# Assuming the existence of util and plotter modules and a logger
 
 def default_dict_function():
-    return {'pre': defaultdict(int), 'post': defaultdict(int), 'either': defaultdict(int)}
+    return {
+        'pre': defaultdict(list), 
+        'post': defaultdict(list), 
+        'both': defaultdict(list), 
+        'neither': defaultdict(list),
+        'either': defaultdict(list)
+    }
+
+def merge_results(main_results, new_results):
+    for region, region_data in new_results.items():
+        for key in region_data:
+            for comp, units in region_data[key].items():
+                main_results[region][key][comp].extend(units)
 
 def compute_pre_and_post_fixation_response_to_roi_for_each_unit(labelled_fixation_rasters, params):
     root_dir = params['root_data_dir']
@@ -125,34 +138,36 @@ def compute_pre_and_post_fixation_response_to_roi_for_each_unit(labelled_fixatio
     else:
         if use_parallel:
             with ThreadPoolExecutor(max_workers=16) as executor:
-                futures = {executor.submit(analyze_and_plot_unit, unit, filtered_data, output_base_dir, results): unit for unit in unique_units}
+                futures = {executor.submit(analyze_and_plot_unit, unit, filtered_data, output_base_dir): unit for unit in unique_units}
                 for future in tqdm(as_completed(futures), total=len(futures), desc="ROI response comparison computed for unit"):
-                    future.result()
+                    unit_results = future.result()
+                    merge_results(results, unit_results)
         else:
             for unit in tqdm(unique_units, desc="ROI response comparison computed for unit"):
-                analyze_and_plot_unit(unit, filtered_data, output_base_dir, results)
+                unit_results = analyze_and_plot_unit(unit, filtered_data, output_base_dir)
+                merge_results(results, unit_results)
         
         with open(processed_data_file, 'wb') as f:
             pickle.dump(results, f)
             logger.info(f"Saved results to {processed_data_file}")
 
     # Generate summary plots for each region
+    summary_output_dir = output_base_dir  # Date-labelled directory for summary plots
     for region in results.keys():
-        output_dir = os.path.join(output_base_dir, region)
-        os.makedirs(output_dir, exist_ok=True)
-        plotter.plot_pie_charts(region, results[region], output_dir)
-        plotter.plot_venn_diagrams(region, results[region], output_dir)
+        plotter.plot_pie_charts(region, results[region], summary_output_dir)
+        plotter.plot_venn_diagrams(region, results[region], summary_output_dir)
 
-def analyze_and_plot_unit(unit, filtered_data, output_base_dir, results):
+def analyze_and_plot_unit(unit, filtered_data, output_base_dir):
+    unit_results = defaultdict(default_dict_function)
     try:
         unit_data = filtered_data[filtered_data['uuid'] == unit]
         if unit_data.empty:
             logger.info(f"No data for unit {unit}, skipping.")
-            return
+            return unit_results
         rois = ['eye_bbox', 'left_obj_bbox', 'right_obj_bbox', 'face_bbox']
         region = unit_data['region'].iloc[0]  # Assuming region is consistent for a unit
-        output_dir = os.path.join(output_base_dir, region)
-        os.makedirs(output_dir, exist_ok=True)
+        unit_output_dir = os.path.join(output_base_dir, region)
+        os.makedirs(unit_output_dir, exist_ok=True)
         pre_data = {}
         post_data = {}
         for roi in rois:
@@ -164,17 +179,20 @@ def analyze_and_plot_unit(unit, filtered_data, output_base_dir, results):
             post_data[roi] = np.array([raster[500:] for raster in roi_data['raster']])
         if not pre_data or not post_data:
             logger.info(f"No valid data to plot for unit {unit}, skipping.")
-            return
-        significant_pre, significant_post, significant_either = \
-            analyze_significant_differences(unit, region, pre_data, post_data)
-        # Update results
+            return unit_results
+        significant_pre, significant_post, significant_both, significant_neither, significant_either = \
+            analyze_significant_differences(unit, region, pre_data, post_data, output_base_dir)
+        # Update unit_results
         for comp in significant_pre.keys():
-            results[region]['pre'][comp] += significant_pre[comp]
-            results[region]['post'][comp] += significant_post[comp]
-            results[region]['either'][comp] += significant_either[comp]
-        plotter.plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir)
+            unit_results[region]['pre'][comp].extend(significant_pre[comp])
+            unit_results[region]['post'][comp].extend(significant_post[comp])
+            unit_results[region]['both'][comp].extend(significant_both[comp])
+            unit_results[region]['neither'][comp].extend(significant_neither[comp])
+            unit_results[region]['either'][comp].extend(significant_either[comp])
+        plotter.plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, unit_output_dir)
     except Exception as e:
         logger.error(f"Error processing unit {unit}: {e}")
+    return unit_results
 
 def analyze_significant_differences(unit, region, pre_data, post_data, output_dir):
     comparisons = [
@@ -239,7 +257,15 @@ def analyze_significant_differences(unit, region, pre_data, post_data, output_di
     with open(os.path.join(output_dir, f'{region}_significant_units.pkl'), 'wb') as f:
         pickle.dump(results, f)
     
-    return results
+    return significant_pre, significant_post, significant_both, significant_neither, significant_either
+
+
+
+
+
+
+
+
 
 
 

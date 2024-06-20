@@ -418,13 +418,15 @@ def plot_roi_comparisons_for_unit(unit, region, pre_data, post_data, output_dir)
     plt.savefig(os.path.join(output_dir, f'unit_{unit}_roi_comparison.png'))
     plt.close(fig)
 
-def plot_pie_charts(region, results, output_dir):
+
+
+def plot_pie_charts(region, results, output_base_dir):
     for comparison in results['both'].keys():
         total_units = len(set(results['pre'][comparison]) | set(results['post'][comparison]) | set(results['both'][comparison]) | set(results['neither'][comparison]))
-        significant_pre = len(results['pre'][comparison])
-        significant_post = len(results['post'][comparison])
-        significant_both = len(results['both'][comparison])
-        significant_neither = len(results['neither'][comparison])
+        significant_pre = len(set(results['pre'][comparison]))
+        significant_post = len(set(results['post'][comparison]))
+        significant_both = len(set(results['both'][comparison]))
+        significant_neither = len(set(results['neither'][comparison]))
 
         sizes = [
             significant_neither,
@@ -439,10 +441,10 @@ def plot_pie_charts(region, results, output_dir):
         ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
         ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
         plt.title(f'Significant Differences in {region} - {comparison}')
-        plt.savefig(os.path.join(output_dir, f'{region}_{comparison}_significant_pie_chart.png'))
+        plt.savefig(os.path.join(output_base_dir, f'{region}_{comparison}_significant_pie_chart.png'))
         plt.close(fig)
 
-def plot_venn_diagrams(region, results, output_dir):
+def plot_venn_diagrams(region, results, output_base_dir):
     comparisons = [
         ('eye_bbox', 'left_obj_bbox'),
         ('eye_bbox', 'right_obj_bbox'),
@@ -454,19 +456,29 @@ def plot_venn_diagrams(region, results, output_dir):
 
     for roi1, roi2 in comparisons:
         comparison = roi1 + " vs " + roi2
-        pre_only = len(results['pre'][comparison])
-        post_only = len(results['post'][comparison])
-        both = len(results['both'][comparison])
-        either = len(results['either'][comparison])
-        total_units = len(set(results['pre'][comparison]) | set(results['post'][comparison]) | set(results['both'][comparison]) | set(results['neither'][comparison]))
-        neither = total_units - either
+        pre_only = set(results['pre'][comparison])
+        post_only = set(results['post'][comparison])
+        both = set(results['both'][comparison])
+        either = set(results['either'][comparison])
+        neither = set(results['neither'][comparison])
+        total_units = len(pre_only | post_only | both | neither)
 
         fig, ax = plt.subplots()
-        venn3(subsets=(neither, pre_only, both, post_only), set_labels=('Neither', 'Just Pre', 'Both', 'Just Post'))
+        venn3(subsets=(
+                len(neither),  # A: Neither
+                len(pre_only) - len(pre_only & post_only),  # B: Just Pre
+                len(pre_only & post_only),  # AB: Both
+                len(post_only) - len(pre_only & post_only),  # C: Just Post
+                len(pre_only & neither),  # AC: Pre & Neither
+                len(post_only & neither),  # BC: Post & Neither
+                len(pre_only & post_only & neither)  # ABC: Pre, Post & Neither
+            ), set_labels=('Neither', 'Just Pre', 'Just Post'))
+
         plt.title(f'Significant Differences in {region} - {comparison}')
         plt.annotate(f'Total units considered: {total_units}', xy=(0.5, -0.1), xycoords='axes fraction', ha='center', fontsize=12)
-        plt.savefig(os.path.join(output_dir, f'{region}_{comparison}_significant_venn_diagram.png'))
+        plt.savefig(os.path.join(output_base_dir, f'{region}_{comparison}_significant_venn_diagram.png'))
         plt.close(fig)
+
 
 
 
