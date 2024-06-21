@@ -18,11 +18,12 @@ import multiprocessing
 from multiprocessing import Pool
 
 import load_data
+from cluster_fix import cluster_fix  # Import the new cluster_fix function
 
 import pdb  # Import the Python debugger if needed
 
 
-###
+
 def extract_or_load_fixations(labelled_gaze_positions, params):
     """
     Extract or load fixations based on parameters.
@@ -37,15 +38,13 @@ def extract_or_load_fixations(labelled_gaze_positions, params):
     processed_data_dir = params['processed_data_dir']
     flag_info = util.get_filename_flag_info(params)
     if params.get('remake_fixations', False):
-        return extract_all_fixations_from_labelled_gaze_positions(
-            labelled_gaze_positions, params)
+        return extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, params)
     else:
         results_file_name = f'fixation_session_results_m1{flag_info}.npz'
         if os.path.exists(os.path.join(processed_data_dir, results_file_name)):
             return load_existing_fixations(params)
         else:
-            return extract_all_fixations_from_labelled_gaze_positions(
-                labelled_gaze_positions, params)
+            return extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, params)
 
 
 def load_existing_fixations(params):
@@ -62,7 +61,6 @@ def load_existing_fixations(params):
     return all_fix_timepos_df, fix_detection_results
 
 
-###
 def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, params):
     """
     Extracts fixations from labelled gaze positions.
@@ -75,8 +73,7 @@ def extract_all_fixations_from_labelled_gaze_positions(labelled_gaze_positions, 
     """
     processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', True)
-    sessions_data = [(session_data[0], session_data[1], params)
-                     for session_data in labelled_gaze_positions]
+    sessions_data = [(session_data[0], session_data[1], params) for session_data in labelled_gaze_positions]
     fix_detection_results = extract_fixations(sessions_data, use_parallel)
     all_fix_timepos = process_fixation_results(fix_detection_results)
     save_fixation_results(processed_data_dir, all_fix_timepos, params)
@@ -97,12 +94,10 @@ def extract_fixations(sessions_data, use_parallel):
         num_cores = multiprocessing.cpu_count()
         num_processes = min(num_cores, len(sessions_data))
         with Pool(num_processes) as pool:
-            fix_detection_results = pool.map(
-                get_session_fixations, sessions_data)
+            fix_detection_results = pool.map(get_session_fixations, sessions_data)
     else:
         print("\nExtracting fixations serially")
-        fix_detection_results = [get_session_fixations(session_data)
-                                 for session_data in sessions_data]
+        fix_detection_results = [get_session_fixations(session_data) for session_data in sessions_data]
     return fix_detection_results
 
 
@@ -121,8 +116,23 @@ def get_session_fixations(session_data):
     sampling_rate = info['sampling_rate']
     n_samples = positions.shape[0]
     time_vec = util.create_timevec(n_samples, sampling_rate)
-    fix_timepos_df, fix_vec_entire_session = is_fixation(
-        positions, time_vec, session_name, sampling_rate=sampling_rate)
+
+    if params.get('fixation_detection_method', 'default') == 'cluster_fix':
+        fix_stats = cluster_fix([positions.T], samprate=1/sampling_rate)
+        fixationtimes = fix_stats[0]['fixationtimes']
+        fixations = fix_stats[0]['fixations']
+        fix_timepos_df = pd.DataFrame({
+            'start_time': fixationtimes[0],
+            'end_time': fixationtimes[1],
+            'fix_x': fixations[0],
+            'fix_y': fixations[1]
+        })
+        fix_vec_entire_session = np.zeros(n_samples)
+        for t_range in fixationtimes.T:
+            fix_vec_entire_session[t_range[0]:t_range[1] + 1] = 1
+    else:
+        fix_timepos_df, fix_vec_entire_session = is_fixation(positions, time_vec, session_name, sampling_rate=sampling_rate)
+
     return fix_timepos_df, info
 
 
@@ -136,8 +146,7 @@ def process_fixation_results(fix_detection_results):
     """
     all_fix_timepos = pd.DataFrame()
     for session_timepos_df, _ in fix_detection_results:
-        all_fix_timepos = pd.concat(
-            [all_fix_timepos, session_timepos_df], ignore_index=True)
+        all_fix_timepos = pd.concat([all_fix_timepos, session_timepos_df], ignore_index=True)
     return all_fix_timepos
 
 
@@ -151,8 +160,7 @@ def save_fixation_results(processed_data_dir, all_fix_timepos, params):
     """
     flag_info = util.get_filename_flag_info(params)
     timepos_file_name = f'fix_timepos_m1{flag_info}.csv'
-    all_fix_timepos.to_csv(os.path.join(
-        processed_data_dir, timepos_file_name), index=False)
+    all_fix_timepos.to_csv(os.path.join(processed_data_dir, timepos_file_name), index=False)
 
 
 def is_fixation(pos, time, session_name, t1=None, t2=None, minDur=None, maxDur=None, sampling_rate=None):
@@ -195,7 +203,6 @@ def is_fixation(pos, time, session_name, t1=None, t2=None, minDur=None, maxDur=N
     return fix_list_df, fix_vector
 
 
-###
 def fixation_detection(data, t1, t2, minDur, maxDur, session_name):
     """
     Detect fixations based on position and time data.
@@ -217,8 +224,7 @@ def fixation_detection(data, t1, t2, minDur, maxDur, session_name):
     fixations = get_t1_filtered_fixations(n, x, y, t, t1, session_name)
     number_fixations = fixations[-1, 3]
     fixation_list = []
-    for i in tqdm(range(1, int(number_fixations) + 1),
-                  desc=f"{session_name}: n fixations t2 filtered"):
+    for i in tqdm(range(1, int(number_fixations) + 1), desc=f"{session_name}: n fixations t2 filtered"):
         fixation_list.append(filter_fixations_t2(i, fixations, t2))
     # Duration thresholding
     fixation_list = min_duration(fixation_list, minDur)
@@ -229,8 +235,7 @@ def fixation_detection(data, t1, t2, minDur, maxDur, session_name):
         s_ind = np.where(data[:, 2] == fix[4])[0][0]
         e_ind = np.where(data[:, 2] == fix[5])[0][-1]
         fix_ranges.append([s_ind, e_ind])
-    col_names = ['fix_x', 'fix_y', 'threshold_1', 'threshold_2',
-                 'start_time', 'end_time', 'duration']
+    col_names = ['fix_x', 'fix_y', 'threshold_1', 'threshold_2', 'start_time', 'end_time', 'duration']
     return pd.DataFrame(fixation_list, columns=col_names), fix_ranges
 
 
@@ -249,8 +254,7 @@ def get_t1_filtered_fixations(n, x, y, t, t1, session_name):
     fixations = np.zeros((n, 4))
     fixid = 0
     fixpointer = 0
-    for i in tqdm(range(n),
-                  desc='{}: n data points t1 filtered'.format(session_name)):
+    for i in tqdm(range(n), desc='{}: n data points t1 filtered'.format(session_name)):
         if not np.any(x[fixpointer:i+1]) or not np.any(y[fixpointer:i+1]):
             fixations = update_fixations(i, x, y, t, fixations, fixid)
         else:
@@ -333,8 +337,10 @@ def min_duration(fixation_list, minDur):
     """
     return [fix for fix in fixation_list if fix[6] >= minDur]
 
+
 def max_duration(fixation_list, maxDur):
     return [fix for fix in fixation_list if fix[6] <= maxDur]
+
 
 
 ###

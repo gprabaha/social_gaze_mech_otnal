@@ -13,6 +13,8 @@ import curate_data
 import load_data
 import response_comp
 
+import pdb
+
 class DataManager:
     def __init__(self, params):
         self.params = params
@@ -73,7 +75,8 @@ class DataManager:
             load_data.load_processed_spiketimes,
             curate_data.extract_spiketimes_for_all_sessions
         )
-
+        
+        pdb.set_trace()
         self.labelled_fixation_rasters = self.get_or_load_variable(
             'labelled_fixation_rasters',
             load_data.load_labelled_fixation_rasters,
