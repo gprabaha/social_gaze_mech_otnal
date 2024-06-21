@@ -21,8 +21,9 @@ import eyelink
 import defaults
 import fix
 import saccade
-import hpc_cluster
-import raster
+
+from raster import RasterManager
+from hpc_cluster import HPCCluster
 
 import pdb
 
@@ -206,38 +207,35 @@ def extract_spiketimes_for_all_sessions(params):
     # Construct flag_info based on params
     flag_info = util.get_filename_flag_info(params)
     # Define the HDF5 file path
-    h5_file_path = os.path.join(processed_data_dir, f'spike_labels{flag_info}.h5')
+    h5_file_path = os.path.join(processed_data_dir, f'labelled_spiketimes{flag_info}.h5')
     # Save DataFrame to HDF5
     save_spiketimes_to_hdf5(all_labels, h5_file_path)
     print(f"All labelled spiketimes saved to {h5_file_path}")
     return all_labels
 
 
-def save_spiketimes_to_hdf5(df, file_path):
-    """
-    Save the dataframe to an HDF5 file with `spikeS` and `spikeMs` as variable-length datasets.
-    Parameters:
-    df (pd.DataFrame): The dataframe containing the data.
-    file_path (str): The file path to save the HDF5 file.
-    """
+import h5py
+import numpy as np
+
+def save_spiketimes_to_hdf5(labelled_spiketimes, file_path):
     with h5py.File(file_path, 'w') as hf:
         spikeS_group = hf.create_group('spikeS')
         spikeMs_group = hf.create_group('spikeMs')
         labels_group = hf.create_group('labels')
-        for index, row in df.iterrows():
-            spikeS_data = row['spikeS']
-            spikeMs_data = row['spikeMs']
-            # Create variable-length datasets for spikeS and spikeMs
-            spikeS_group.create_dataset(str(index), data=spikeS_data, dtype=h5py.vlen_dtype(float))
-            spikeMs_group.create_dataset(str(index), data=spikeMs_data, dtype=h5py.vlen_dtype(float))
-        # Save the remaining columns (labels)
-        for column in df.columns:
-            if column not in ['spikeS', 'spikeMs']:
-                labels_group.create_dataset(column, data=df[column].values)
-    logging.info(f"Data successfully saved to {file_path}")
+        
+        for index, row in labelled_spiketimes.iterrows():
+            spikeS_data = np.array(row['spikeS'], dtype=float).tolist()
+            spikeMs_data = np.array(row['spikeMs'], dtype=float).tolist()
+            spikeS_group.create_dataset(str(index), data=spikeS_data)
+            spikeMs_group.create_dataset(str(index), data=spikeMs_data)
+        
+        for label in ['session_name', 'channel', 'channel_label', 'unit_no_within_channel', 'unit_label', 'uuid', 'n_spikes', 'region']:
+            # Convert strings to bytes
+            data_as_bytes = [str(item).encode('utf-8') for item in labelled_spiketimes[label]]
+            labels_group.create_dataset(label, data=np.array(data_as_bytes))
 
 
-# Set up logging
+
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params):
     session_names = [os.path.basename(session_path) for session_path in session_paths]
@@ -245,9 +243,9 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
     results = []
     if params.get('remake_raster', False):
         if params.get('submit_separate_jobs_for_session_raster', True):
+            hpc_cluster = HPCCluster(params)
             job_file_path = hpc_cluster.generate_job_file(session_paths)
             hpc_cluster.submit_job_array(job_file_path)
-            # Wait for job completion is handled within submit_job_array
             session_files = [os.path.join(params['processed_data_dir'], f"{session}_raster.pkl") for session in session_names]
             for session_file in session_files:
                 try:
@@ -261,10 +259,11 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
                 raise ValueError("No objects to concatenate")
             labelled_fixation_rasters = pd.concat(results, ignore_index=True)
         else:
+            raster_manager = RasterManager(params)
             if params.get('use_parallel', False):
-                results = raster.make_session_rasters_parallel(session_paths, params)
+                results = raster_manager.make_session_rasters_parallel(session_paths)
             else:
-                results = raster.make_session_rasters_serial(session_paths, params)
+                results = raster_manager.make_session_rasters_serial(session_paths)
             if not results:
                 logging.error("No results to concatenate.")
                 raise ValueError("No objects to concatenate")
@@ -284,7 +283,7 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
             logging.error("No files to concatenate.")
             raise ValueError("No objects to concatenate")
         labelled_fixation_rasters = pd.concat(session_files, ignore_index=True)
-    raster.save_labelled_fixation_rasters(labelled_fixation_rasters, params)
+    raster_manager.save_labelled_fixation_rasters(labelled_fixation_rasters, params)
     return labelled_fixation_rasters
 
 

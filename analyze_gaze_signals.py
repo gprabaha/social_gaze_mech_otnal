@@ -37,8 +37,9 @@ class DataManager:
         self.labelled_fixation_rasters = None
 
     def get_or_load_variable(self, variable_name, load_function, compute_function):
-        if self.params.get(f'remake_{variable_name}', False) or getattr(self, variable_name) is None:
-            if self.params.get(f'remake_{variable_name}', False):
+        flag_name = f'remake_{variable_name}'
+        if self.params.get(flag_name, False) or getattr(self, variable_name) is None:
+            if self.params.get(flag_name, False):
                 self.logger.info(f"Recomputing variable: {variable_name}")
                 setattr(self, variable_name, compute_function(self.params))
             else:
@@ -92,13 +93,13 @@ def main():
     params.update({
         'is_cluster': True,
         'use_parallel': False,
-        'remake_labelled_gaze_pos': False,
-        'remake_fixations': False,
+        'remake_labelled_gaze_positions_m1': False,
+        'remake_labelled_fixations': False,
         'fixation_detection_method': 'eye_mvm',
-        'remake_fixation_labels': False,
-        'remake_saccades': False,
-        'remake_spikeTs': False,
-        'remake_labelled_fixation_rasters': False,
+        'remake_labelled_fixations': False,
+        'remake_labelled_saccades_m1': False,
+        'remake_labelled_spiketimes': True,
+        'remake_labelled_fixation_rasters': True,
         'make_plots': False,
         'recalculate_unit_ROI_responses': True,
         'replot_face/eye_vs_obj_violins': True,

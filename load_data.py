@@ -238,6 +238,9 @@ def load_saccade_labels(params):
         return None
 
 
+
+from scipy.io import loadmat
+
 def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
     """
     Extracts spike times and labels from a session.
@@ -253,8 +256,12 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
     if len(file_list_spikeTs) != 1:
         print(f"\nWarning: No spikeTs or more than one spikeTs found in folder: {session_path}.")
         return pd.DataFrame(columns=label_cols)
+    
+    file_path = file_list_spikeTs[0]
+    
     try:
-        data_spikeTs = mat73.loadmat(file_list_spikeTs[0])
+        # Try loading with mat73 first
+        data_spikeTs = mat73.loadmat(file_path)
         spikeTs_struct = data_spikeTs['spikeTs']
         spikeS = [np.squeeze(spikeS).tolist() for spikeS in spikeTs_struct['spikeS']]
         spikeMs = [np.squeeze(spikeMs).tolist() for spikeMs in spikeTs_struct['spikeMs']]
@@ -265,18 +272,35 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
         uuid = spikeTs_struct['UUID']
         n_spikes = spikeTs_struct['spikeN']
         region = spikeTs_struct['region']
-        # Combine all lists into a single DataFrame
-        session_spikeTs_labels = list(zip(spikeS, spikeMs, [session_name]*len(spikeS), chan, chan_label,
-                                          unit_no_in_channel, unit_label, uuid, n_spikes, region))
-        labelled_spiketimes = pd.DataFrame(session_spikeTs_labels, columns=label_cols)
-        return labelled_spiketimes
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return pd.DataFrame(columns=label_cols)
+        print(f"mat73 failed to load {file_path}, falling back to scipy.io.loadmat. Error: {e}")
+        try:
+            # Fallback to scipy.io.loadmat
+            data_spikeTs = loadmat(file_path)
+            spikeTs_struct = data_spikeTs['spikeTs']
+            spikeS = [np.squeeze(spikeS).tolist() for spikeS in spikeTs_struct['spikeS'][0]]
+            spikeMs = [np.squeeze(spikeMs).tolist() for spikeMs in spikeTs_struct['spikeMs'][0]]
+            chan = spikeTs_struct['chan'][0]
+            chan_label = spikeTs_struct['chanStr'][0]
+            unit_no_in_channel = spikeTs_struct['unit'][0]
+            unit_label = spikeTs_struct['unitStr'][0]
+            uuid = spikeTs_struct['UUID'][0]
+            n_spikes = spikeTs_struct['spikeN'][0]
+            region = spikeTs_struct['region'][0]
+        except Exception as e:
+            print(f"Both mat73 and scipy.io.loadmat failed to load {file_path}. Error: {e}")
+            return pd.DataFrame(columns=label_cols)
+    
+    # Combine all lists into a single DataFrame
+    session_spikeTs_labels = list(zip(spikeS, spikeMs, [session_name]*len(spikeS), chan, chan_label,
+                                      unit_no_in_channel, unit_label, uuid, n_spikes, region))
+    labelled_spiketimes = pd.DataFrame(session_spikeTs_labels, columns=label_cols)
+    return labelled_spiketimes
 
 
 
 
+'''
 def load_processed_spiketimes(params):
     processed_data_dir = params.get('processed_data_dir')
     flag_info = util.get_filename_flag_info(params)
@@ -288,22 +312,32 @@ def load_processed_spiketimes(params):
         return labelled_spiketimes
     else:
         raise FileNotFoundError(f"No such file: {labels_path}")
+'''
 
-"""
+
+import os
+import h5py
+import pandas as pd
+
 def load_processed_spiketimes(params):
     processed_data_dir = params.get('processed_data_dir')
     flag_info = util.get_filename_flag_info(params)
-    h5_file_path = os.path.join(processed_data_dir, f'spike_labels{flag_info}.h5')
+    h5_file_path = os.path.join(processed_data_dir, f'labelled_spiketimes{flag_info}.h5')
     if os.path.exists(h5_file_path):
         with h5py.File(h5_file_path, 'r') as hf:
             spikeS_group = hf['spikeS']
             spikeMs_group = hf['spikeMs']
             labels_group = hf['labels']
             # Read variable-length datasets for spikeS and spikeMs
-            spikeS_data = [spikeS_group[str(i)][:] for i in range(len(spikeS_group))]
-            spikeMs_data = [spikeMs_group[str(i)][:] for i in range(len(spikeMs_group))]
-            # Read labels
-            labels_data = {key: labels_group[key][:] for key in labels_group.keys()}
+            spikeS_data = [spikeS_group[str(i)][:].tolist() for i in range(len(spikeS_group))]
+            spikeMs_data = [spikeMs_group[str(i)][:].tolist() for i in range(len(spikeMs_group))]
+            # Read labels and decode byte strings
+            labels_data = {}
+            for key in labels_group.keys():
+                data = labels_group[key][:]
+                if data.dtype.char == 'S':  # Check if byte string
+                    data = [x.decode('utf-8') for x in data]
+                labels_data[key] = data
             labels_data['spikeS'] = spikeS_data
             labels_data['spikeMs'] = spikeMs_data
             # Create DataFrame from labels_data
@@ -312,7 +346,8 @@ def load_processed_spiketimes(params):
         return labelled_spiketimes
     else:
         raise FileNotFoundError(f"No such file: {h5_file_path}")
-"""
+
+
 
 def load_session_raster_data(session_file_path):
     """
