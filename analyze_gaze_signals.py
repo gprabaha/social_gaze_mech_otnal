@@ -63,25 +63,26 @@ class DataManager:
             load_data.load_m1_fixation_labels,
             lambda p: curate_data.extract_fixations_with_labels_parallel(self.labelled_gaze_positions_m1, p)
         )
-
+        
         self.labelled_saccades_m1 = self.get_or_load_variable(
             'labelled_saccades_m1',
             load_data.load_saccade_labels,
             lambda p: curate_data.extract_saccades_with_labels(self.labelled_gaze_positions_m1, p)
         )
-
+        
         self.labelled_spiketimes = self.get_or_load_variable(
             'labelled_spiketimes',
             load_data.load_processed_spiketimes,
-            curate_data.extract_spiketimes_for_all_sessions
+            lambda p: curate_data.extract_spiketimes_for_all_sessions(p)
         )
         
-        pdb.set_trace()
+
         self.labelled_fixation_rasters = self.get_or_load_variable(
             'labelled_fixation_rasters',
             load_data.load_labelled_fixation_rasters,
             lambda p: curate_data.extract_fixation_raster(session_paths, self.labelled_fixations, self.labelled_spiketimes, p)
         )
+
 
         if self.params.get('replot_face/eye_vs_obj_violins'):
             response_comp.compute_pre_and_post_fixation_response_to_roi_for_each_unit(self.labelled_fixation_rasters, self.params)
@@ -93,10 +94,11 @@ def main():
         'use_parallel': False,
         'remake_labelled_gaze_pos': False,
         'remake_fixations': False,
+        'fixation_detection_method': 'eye_mvm',
         'remake_fixation_labels': False,
         'remake_saccades': False,
         'remake_spikeTs': False,
-        'remake_raster': False,
+        'remake_labelled_fixation_rasters': False,
         'make_plots': False,
         'recalculate_unit_ROI_responses': True,
         'replot_face/eye_vs_obj_violins': True,

@@ -23,6 +23,8 @@ import load_data
 
 import pdb
 
+logger = logging.getLogger(__name__)
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 def plot_fixation_proportions_for_diff_conditions(params):
     """

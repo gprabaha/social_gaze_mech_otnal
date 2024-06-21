@@ -88,7 +88,7 @@ def process_unit(uuid, session_fixations, session_neurons, num_bins, raster_bin_
             relevant_spikes = neuron_spikes[(neuron_spikes >= event_time - raster_pre_event_time) & (neuron_spikes < event_time + raster_post_event_time)]
             spike_times = relevant_spikes - event_time
             raster = np.histogram(spike_times, bins=bins)[0]
-            raster = (raster > 0).astype(int)
+            raster = raster.astype(int)
             session_data = update_session_data(raster, fixation, session_neurons, uuid, aligned_to)
             results.append(session_data)
     if not results:

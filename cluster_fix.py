@@ -11,6 +11,7 @@ import scipy.signal as signal
 from scipy.interpolate import interp1d
 from sklearn.cluster import KMeans
 
+
 def cluster_fix(eyedat, samprate=5/1000):
     if not eyedat:
         raise ValueError("No data file found")

@@ -196,6 +196,9 @@ def is_fixation(pos, time, session_name, t1=None, t2=None, minDur=None, maxDur=N
     Implement a proper outlier detection code here. The curve fit should
     account for a situation where t_n is (x_a, y_a) and t_m is (x_a, y_b), so
     the same x will have 2 y values, which can get complicated for polyfit
+    
+    
+    smooth it with a lowpass filter/gaussian
     '''
     fix_list_df, fix_t_inds = fixation_detection(data, t1, t2, minDur, maxDur, session_name)
     for t_range in fix_t_inds:
