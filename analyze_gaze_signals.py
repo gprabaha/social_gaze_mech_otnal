@@ -77,7 +77,6 @@ class DataManager:
             lambda p: curate_data.extract_spiketimes_for_all_sessions(p)
         )
         
-
         self.labelled_fixation_rasters = self.get_or_load_variable(
             'labelled_fixation_rasters',
             load_data.load_labelled_fixation_rasters,
@@ -98,7 +97,7 @@ def main():
         'fixation_detection_method': 'eye_mvm',
         'remake_labelled_fixations': False,
         'remake_labelled_saccades_m1': False,
-        'remake_labelled_spiketimes': True,
+        'remake_labelled_spiketimes': False,
         'remake_labelled_fixation_rasters': True,
         'make_plots': False,
         'recalculate_unit_ROI_responses': True,
@@ -116,7 +115,8 @@ def main():
         'raster_post_event_time': 0.5,
         'flush_before_reload': False,
         'use_existing_variables': False,
-        'reload_existing_unit_roi_comp_stats': False
+        'reload_existing_unit_roi_comp_stats': False,
+        'submit_separate_jobs_for_session_raster': True
     })
 
     data_manager = DataManager(params)

@@ -115,66 +115,30 @@ def extract_labelled_gaze_positions_m1(params):
 
 
 ###
-def extract_fixations_with_labels_parallel(labelled_gaze_positions, params):
+def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     """
-    Extracts fixations with labels, possibly in parallel.
+    Extracts fixations and saccades with labels, possibly in parallel.
     Parameters:
     - labelled_gaze_positions (list): List of tuples containing gaze positions
     and associated metadata.
     - params (dict): Dictionary of parameters.
     Returns:
-    - all_fixation_labels (pd.DataFrame): DataFrame of labels for fixations.
+    - labelled_fixations (pd.DataFrame): DataFrame of labels for fixations.
+    - labelled_saccades (pd.DataFrame): DataFrame containing saccade information with labels.
     """
-    print("\nStarting to extract fixations:")
+    print("\nStarting to extract fixations and saccades:")
     use_parallel = params.get('use_parallel', True)
-    all_fix_timepos, fix_detection_results = fix.extract_or_load_fixations(
-        labelled_gaze_positions, params)
-    labelled_fixations = fix.generate_fixation_labels(
-        fix_detection_results, params, use_parallel)
-    return labelled_fixations
 
+    # Extract fixations and saccades
+    all_fix_timepos, fix_detection_results, saccade_detection_results = fix.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
+    labelled_fixations = fix.generate_fixation_labels(fix_detection_results, params, use_parallel)
 
-### Function to extract saccades with labels
-def extract_saccades_with_labels(labelled_gaze_positions, params):
-    """
-    Extracts saccades with labels.
-    Parameters:
-    - labelled_gaze_positions (list): List of tuples containing gaze positions and associated metadata.
-    - params (dict): Dictionary containing parameters including parallel processing options.
-    Returns:
-    - labelled_saccades (DataFrame): DataFrame containing saccade information with labels.
-    """
-    saccade_params = defaults.fetch_default_saccade_pars()
-    vel_thresh = saccade_params['vel_thresh']
-    min_samples = saccade_params['min_samples']
-    smooth_func = saccade_params['smooth_func']
-    use_parallel = params.get('use_parallel', False)
-    num_sessions = len(labelled_gaze_positions)
-    available_cpus = os.cpu_count()
-    n_jobs = min(available_cpus, num_sessions)
-    sessions_data = [(session_data[0], session_data[1],
-                      vel_thresh, min_samples, smooth_func)
-                     for session_data in labelled_gaze_positions]
-    if use_parallel:
-        with tqdm_joblib(tqdm(
-                desc="Extracting saccades in parallel",
-                total=num_sessions, unit="session")):
-            results = Parallel(n_jobs=n_jobs)(
-                delayed(saccade.extract_saccades_for_session)(session_data)
-                for session_data in sessions_data)
-    else:
-        results = [saccade.extract_saccades_for_session(session_data)
-                   for session_data in
-                   tqdm(sessions_data,
-                        desc="Extracting saccades",
-                        unit="session")]
-    saccades = [s for session_saccades in results for s in session_saccades]
-    columns = ["start_time", "end_time", "duration", "trajectory",
-               "start_roi", "end_roi", "session_name", "category",
-               "run", "block"]
+    saccades = [s for session_saccades in saccade_detection_results for s in session_saccades]
+    columns = ["start_time", "end_time", "duration", "trajectory", "start_roi", "end_roi", "session_name", "category", "run", "block"]
     labelled_saccades = pd.DataFrame(saccades, columns=columns)
-    saccade.save_saccade_labels(labelled_saccades, params)
-    return labelled_saccades
+    fix.save_saccade_labels(labelled_saccades, params)
+
+    return labelled_fixations, labelled_saccades
 
 
 ###
@@ -214,8 +178,6 @@ def extract_spiketimes_for_all_sessions(params):
     return all_labels
 
 
-import h5py
-import numpy as np
 
 def save_spiketimes_to_hdf5(labelled_spiketimes, file_path):
     with h5py.File(file_path, 'w') as hf:
@@ -237,10 +199,13 @@ def save_spiketimes_to_hdf5(labelled_spiketimes, file_path):
 
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params):
     session_names = [os.path.basename(session_path) for session_path in session_paths]
     logging.debug(f"Session names extracted from paths: {session_names}")
     results = []
+    raster_manager = RasterManager(params)
+    
     if params.get('remake_raster', False):
         if params.get('submit_separate_jobs_for_session_raster', True):
             hpc_cluster = HPCCluster(params)
@@ -259,11 +224,10 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
                 raise ValueError("No objects to concatenate")
             labelled_fixation_rasters = pd.concat(results, ignore_index=True)
         else:
-            raster_manager = RasterManager(params)
             if params.get('use_parallel', False):
-                results = raster_manager.make_session_rasters_parallel(session_paths)
+                results = raster_manager.make_session_rasters_parallel(session_paths, labelled_fixations, labelled_spiketimes)
             else:
-                results = raster_manager.make_session_rasters_serial(session_paths)
+                results = raster_manager.make_session_rasters_serial(session_paths, labelled_fixations, labelled_spiketimes)
             if not results:
                 logging.error("No results to concatenate.")
                 raise ValueError("No objects to concatenate")
@@ -283,8 +247,10 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
             logging.error("No files to concatenate.")
             raise ValueError("No objects to concatenate")
         labelled_fixation_rasters = pd.concat(session_files, ignore_index=True)
-    raster_manager.save_labelled_fixation_rasters(labelled_fixation_rasters, params)
+    
+    raster_manager.save_labelled_fixation_rasters(labelled_fixation_rasters)
     return labelled_fixation_rasters
+
 
 
 

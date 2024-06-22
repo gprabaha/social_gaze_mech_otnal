@@ -290,7 +290,6 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
         except Exception as e:
             print(f"Both mat73 and scipy.io.loadmat failed to load {file_path}. Error: {e}")
             return pd.DataFrame(columns=label_cols)
-    
     # Combine all lists into a single DataFrame
     session_spikeTs_labels = list(zip(spikeS, spikeMs, [session_name]*len(spikeS), chan, chan_label,
                                       unit_no_in_channel, unit_label, uuid, n_spikes, region))

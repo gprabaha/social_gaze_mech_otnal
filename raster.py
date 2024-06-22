@@ -16,10 +16,9 @@ import numpy as np
 import ast
 import pickle
 
-import pdb
-
-
 import util
+
+import pdb
 
 class RasterManager:
     def __init__(self, params):
@@ -34,18 +33,18 @@ class RasterManager:
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
-    def make_session_rasters_serial(self, session_paths):
+    def make_session_rasters_serial(self, session_paths, labelled_fixations, labelled_spiketimes):
         results = []
         for session_path in session_paths:
-            session_raster = self.generate_session_raster(session_path)
+            session_raster = self.generate_session_raster(session_path, labelled_fixations, labelled_spiketimes)
             if session_raster is not None:
                 results.append(session_raster)
         return results
 
-    def make_session_rasters_parallel(self, session_paths):
+    def make_session_rasters_parallel(self, session_paths, labelled_fixations, labelled_spiketimes):
         results = []
         with ProcessPoolExecutor() as executor:
-            future_to_session = {executor.submit(self.generate_session_raster, path): path for path in session_paths}
+            future_to_session = {executor.submit(self.generate_session_raster, path, labelled_fixations, labelled_spiketimes): path for path in session_paths}
             for future in as_completed(future_to_session):
                 try:
                     result = future.result()
@@ -56,19 +55,16 @@ class RasterManager:
                     self.logger.error(f"Session {session_path} generated an exception: {exc}")
         return results
 
-    def generate_session_raster(self, session):
+    def generate_session_raster(self, session, labelled_fixations, labelled_spiketimes):
         self.logger.debug(f"Processing session: {session}")
         params = self.params
         raster_bin_size = float(params['raster_bin_size'])
         raster_pre_event_time = float(params['raster_pre_event_time'])
         raster_post_event_time = float(params['raster_post_event_time'])
         num_bins = int((raster_pre_event_time + raster_post_event_time) / raster_bin_size)
-        
-        labelled_fixations = params['labelled_fixations']
-        labelled_spiketimes = params['labelled_spiketimes']
-
-        session_fixations = labelled_fixations[labelled_fixations['session_name'] == session]
-        session_neurons = labelled_spiketimes[labelled_spiketimes['session_name'] == session]
+        session_name = os.path.basename(session) 
+        session_fixations = labelled_fixations[labelled_fixations['session_name'] == session_name]
+        session_neurons = labelled_spiketimes[labelled_spiketimes['session_name'] == session_name]
 
         self.logger.debug(f"Session fixations shape: {session_fixations.shape}")
         self.logger.debug(f"Session neurons shape: {session_neurons.shape}")
@@ -103,9 +99,7 @@ class RasterManager:
     def process_unit(self, uuid, session_fixations, session_neurons, num_bins, raster_bin_size, raster_pre_event_time, raster_post_event_time):
         self.logger.debug(f"Processing unit: {uuid}")
         neuron_spikes_str = session_neurons[session_neurons['uuid'] == uuid]['spikeS'].values[0]
-        pdb.set_trace()
-        # Update to use stored numpy arrays or lists directly
-        neuron_spikes = np.array(ast.literal_eval(neuron_spikes_str))
+        neuron_spikes = np.array(neuron_spikes_str)
         bins = np.arange(-raster_pre_event_time, raster_post_event_time, raster_bin_size)
         results = []
         for _, fixation in session_fixations.iterrows():
@@ -165,17 +159,18 @@ def main():
         'raster_bin_size': 0.001,
         'raster_pre_event_time': 0.5,
         'raster_post_event_time': 0.5,
-        'labelled_fixations': pd.DataFrame(),  # Replace with actual data
-        'labelled_spiketimes': pd.DataFrame()  # Replace with actual data
     })
+    
+    labelled_fixations = pd.DataFrame()  # Replace with actual data
+    labelled_spiketimes = pd.DataFrame()  # Replace with actual data
     
     raster_manager = RasterManager(params)
     session_paths = ['session1', 'session2']  # Replace with actual session paths
     
     if params.get('use_parallel', False):
-        rasters = raster_manager.make_session_rasters_parallel(session_paths)
+        rasters = raster_manager.make_session_rasters_parallel(session_paths, labelled_fixations, labelled_spiketimes)
     else:
-        rasters = raster_manager.make_session_rasters_serial(session_paths)
+        rasters = raster_manager.make_session_rasters_serial(session_paths, labelled_fixations, labelled_spiketimes)
 
     raster_manager.save_labelled_fixation_rasters(rasters)
 
