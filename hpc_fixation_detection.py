@@ -25,6 +25,14 @@ class HPCFixationDetection:
             for idx in range(len(labelled_gaze_positions)):
                 command = f"module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index {idx}"
                 file.write(command + "\n")
+                
+        # Check the contents of the job file for debugging
+        with open(job_file_path, 'r') as file:
+            job_commands = file.readlines()
+            logging.info(f"Job commands in the job list: {len(job_commands)}")
+            for command in job_commands:
+                logging.debug(command.strip())
+                
         return job_file_path
 
     def submit_job_array(self, job_file_path):
@@ -39,8 +47,9 @@ class HPCFixationDetection:
                 logging.error(f"No job script found at {job_script_path}.")
                 return
             logging.info(f"Using dSQ job script: {job_script_path}")
+            
             result = subprocess.run(
-                f'sbatch --output={self.output_dir}/fixation_session_%a.out --error={self.output_dir}/fixation_session_%a.err {job_script_path}',
+                f'sbatch --job-name=fixation_jobs_dsq --output={self.output_dir}/fixation_session_%a.out --error={self.output_dir}/fixation_session_%a.err {job_script_path}',
                 shell=True, check=True, capture_output=True, text=True, executable='/bin/bash'
             )
             logging.info(f"Successfully submitted jobs using sbatch for script {job_script_path}")
@@ -72,4 +81,8 @@ class HPCFixationDetection:
             else:
                 logging.info(f"Job array {job_id} is still running. Checking again in 30 seconds...")
                 time.sleep(30)
+
+
+
+
 
