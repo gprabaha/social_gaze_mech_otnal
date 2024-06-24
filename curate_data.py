@@ -20,7 +20,6 @@ import load_data
 import eyelink
 import defaults
 import fix
-import saccade
 
 from raster import RasterManager
 from hpc_cluster import HPCCluster

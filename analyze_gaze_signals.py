@@ -56,20 +56,20 @@ class DataManager:
         self.labelled_gaze_positions_m1 = self.get_or_load_variable(
             'labelled_gaze_positions_m1',
             load_data.load_labelled_gaze_positions,
-            lambda p: curate_data.extract_labelled_gaze_positions_m1(curate_data.get_unique_doses(curate_data.extract_and_update_meta_info(p)))
+            lambda p: curate_data.extract_labelled_gaze_positions_m1(p)
         )
 
         self.labelled_fixations = self.get_or_load_variable(
             'labelled_fixations',
             load_data.load_m1_fixation_labels,
-            lambda p: curate_data.extract_fixations_with_labels_parallel(self.labelled_gaze_positions_m1, p)
+            lambda p: curate_data.extract_fixations_and_saccades_with_labels(self.labelled_gaze_positions_m1, p)
         )
         
-        self.labelled_saccades_m1 = self.get_or_load_variable(
-            'labelled_saccades_m1',
-            load_data.load_saccade_labels,
-            lambda p: curate_data.extract_saccades_with_labels(self.labelled_gaze_positions_m1, p)
-        )
+        # self.labelled_saccades_m1 = self.get_or_load_variable(
+        #     'labelled_saccades_m1',
+        #     load_data.load_saccade_labels,
+        #     lambda p: curate_data.extract_saccades_with_labels(self.labelled_gaze_positions_m1, p)
+        # )
         
         self.labelled_spiketimes = self.get_or_load_variable(
             'labelled_spiketimes',
@@ -93,9 +93,8 @@ def main():
         'is_cluster': True,
         'use_parallel': False,
         'remake_labelled_gaze_positions_m1': False,
-        'remake_labelled_fixations': False,
-        'fixation_detection_method': 'eye_mvm',
-        'remake_labelled_fixations': False,
+        'fixation_detection_method': 'cluster_fix',
+        'remake_labelled_fixations': True,
         'remake_labelled_saccades_m1': False,
         'remake_labelled_spiketimes': False,
         'remake_labelled_fixation_rasters': True,

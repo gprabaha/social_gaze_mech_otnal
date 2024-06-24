@@ -17,6 +17,8 @@ import os
 import multiprocessing
 from multiprocessing import Pool
 
+import pdb
+
 import load_data
 from cluster_fix import ClusterFixationDetector  # Import the new ClusterFixationDetector class
 from eye_mvm_fix import EyeMVMFixationDetector  # Import the new EyeMVMFixationDetector class
@@ -122,8 +124,12 @@ def get_session_fixations_and_saccades(session_data):
     time_vec = util.create_timevec(n_samples, sampling_rate)
 
     if params.get('fixation_detection_method', 'default') == 'cluster_fix':
-        detector = ClusterFixationDetector(samprate=1/sampling_rate)
-        fix_stats = detector.detect_fixations([positions.T])
+        detector = ClusterFixationDetector(samprate=sampling_rate)
+        x_coords = positions[:, 0]
+        y_coords = positions[:, 1]
+        # Transform into the expected format
+        eyedat = [(x_coords, y_coords)]
+        fix_stats = detector.detect_fixations(eyedat)
         fixationtimes = fix_stats[0]['fixationtimes']
         fixations = fix_stats[0]['fixations']
         saccadetimes = fix_stats[0]['saccadetimes']
@@ -140,7 +146,7 @@ def get_session_fixations_and_saccades(session_data):
         'fix_x': fixations[0],
         'fix_y': fixations[1]
     })
-
+    pdb.set_trace()
     return fix_timepos_df, info, saccades
 
 
