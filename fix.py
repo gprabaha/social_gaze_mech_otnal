@@ -16,13 +16,14 @@ import pandas as pd
 import os
 import multiprocessing
 from multiprocessing import Pool
-
+import logging
 import pdb
 
 import load_data
 from cluster_fix import ClusterFixationDetector  # Import the new ClusterFixationDetector class
 from eye_mvm_fix import EyeMVMFixationDetector  # Import the new EyeMVMFixationDetector class
 from eye_mvm_saccade import EyeMVMSaccadeDetector  # Import the new EyeMVMSaccadeDetector class
+from hpc_fixation_detection import HPCFixationDetection  # Import the new HPCFixationDetection class
 
 def extract_or_load_fixations_and_saccades(labelled_gaze_positions, params):
     """
@@ -76,10 +77,32 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
     """
     processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', True)
-    sessions_data = [(session_data[0], session_data[1], params) for session_data in labelled_gaze_positions]
-    fix_detection_results, saccade_detection_results = extract_fixations_and_saccades(sessions_data, use_parallel)
-    all_fix_timepos = process_fixation_results(fix_detection_results)
-    save_fixation_and_saccade_results(processed_data_dir, all_fix_timepos, fix_detection_results, saccade_detection_results, params)
+    submit_separate_jobs = params.get('submit_separate_jobs_for_session_raster', True)
+
+    if submit_separate_jobs:
+        hpc_fixation_detection = HPCFixationDetection(params)
+        job_file_path = hpc_fixation_detection.generate_fixation_job_file(labelled_gaze_positions)
+        hpc_fixation_detection.submit_job_array(job_file_path)
+        session_files = [os.path.join(params['processed_data_dir'], f"{i}_fixations.pkl") for i in range(len(labelled_gaze_positions))]
+        results = []
+        for session_file in session_files:
+            try:
+                with open(session_file, 'rb') as f:
+                    session_data = pickle.load(f)
+                results.append(session_data)
+            except FileNotFoundError as e:
+                logging.error(e)
+                continue
+        if not results:
+            logging.error("No results to concatenate.")
+            raise ValueError("No objects to concatenate")
+        all_fix_timepos, fix_detection_results, saccade_detection_results = zip(*results)
+    else:
+        sessions_data = [(session_data[0], session_data[1], params) for session_data in labelled_gaze_positions]
+        fix_detection_results, saccade_detection_results = extract_fixations_and_saccades(sessions_data, use_parallel)
+        all_fix_timepos = process_fixation_results(fix_detection_results)
+        save_fixation_and_saccade_results(processed_data_dir, all_fix_timepos, fix_detection_results, saccade_detection_results, params)
+
     return all_fix_timepos, fix_detection_results, saccade_detection_results
 
 
@@ -222,4 +245,5 @@ def determine_block(start_time, end_time, startS, stopS):
         elif i < len(startS) and end_time <= startS[i]:
             return 'mon_up'
     return 'discard'
+
 
