@@ -25,6 +25,7 @@ from eye_mvm_fix import EyeMVMFixationDetector  # Import the new EyeMVMFixationD
 from eye_mvm_saccade import EyeMVMSaccadeDetector  # Import the new EyeMVMSaccadeDetector class
 from hpc_fixation_detection import HPCFixationDetection  # Import the new HPCFixationDetection class
 
+
 def extract_or_load_fixations_and_saccades(labelled_gaze_positions, params):
     """
     Extract or load fixations and saccades based on parameters.
@@ -64,6 +65,7 @@ def load_existing_fixations_and_saccades(params):
     return all_fix_timepos_df, fix_detection_results, saccade_detection_results
 
 
+
 def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaze_positions, params):
     """
     Extracts fixations and saccades from labelled gaze positions.
@@ -77,13 +79,13 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
     """
     processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', True)
-    submit_separate_jobs = params.get('submit_separate_jobs_for_sessions', True)
+    submit_separate_jobs = params.get('submit_separate_jobs_for_session_raster', True)
 
     if submit_separate_jobs:
         hpc_fixation_detection = HPCFixationDetection(params)
         job_file_path = hpc_fixation_detection.generate_fixation_job_file(labelled_gaze_positions)
         hpc_fixation_detection.submit_job_array(job_file_path)
-        session_files = [os.path.join(params['processed_data_dir'], f"{i}_fixations.pkl") for i in range(len(labelled_gaze_positions))]
+        session_files = [os.path.join(processed_data_dir, f"{i}_fixations.pkl") for i in range(len(labelled_gaze_positions))]
         results = []
         for session_file in session_files:
             try:
@@ -104,6 +106,7 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
         save_fixation_and_saccade_results(processed_data_dir, all_fix_timepos, fix_detection_results, saccade_detection_results, params)
 
     return all_fix_timepos, fix_detection_results, saccade_detection_results
+
 
 
 def extract_fixations_and_saccades(sessions_data, use_parallel):

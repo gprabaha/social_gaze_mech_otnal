@@ -1,0 +1,1 @@
+0	1	r811u34n04.milgram.ycrc.yale.edu	2024-06-24 13:31:35	2024-06-24 13:31:46	11.31	module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 0

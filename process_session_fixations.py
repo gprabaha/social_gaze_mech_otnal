@@ -11,7 +11,7 @@ import logging
 import pickle
 import os
 import pandas as pd
-from fix import extract_or_load_fixations_and_saccades
+from fix import get_session_fixations_and_saccades
 import load_data
 import util
 
@@ -58,24 +58,28 @@ def main(session_index):
     # Load labelled gaze positions
     labelled_gaze_positions = load_data.load_labelled_gaze_positions(params)
 
+    # Prepare session data for the specific index
     session_data = labelled_gaze_positions[session_index]
+    session_data = (session_data[0], session_data[1], params)  # Prepare session data as needed by the function
 
-    # Extract fixations and saccades
-    all_fix_timepos, fix_detection_results, saccade_detection_results = extract_or_load_fixations_and_saccades([session_data], params)
-    
+    # Extract fixations and saccades using get_session_fixations_and_saccades
+    fix_timepos_df, info, saccades = get_session_fixations_and_saccades(session_data)
+
     # Save results
     output_dir = params['processed_data_dir']
     fixations_file = os.path.join(output_dir, f"{session_index}_fixations.pkl")
-    
+
     with open(fixations_file, 'wb') as f:
-        pickle.dump((all_fix_timepos, fix_detection_results, saccade_detection_results), f)
-    
+        pickle.dump((fix_timepos_df, info, saccades), f)
+
     logging.info(f"Fixation detection completed for session index: {session_index}")
     logging.info(f"Results saved to: {fixations_file}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process session fixation detection")
     parser.add_argument('--session_index', type=int, required=True, help='Index of the session in labelled gaze positions list')
-    
+
     args = parser.parse_args()
     main(args.session_index)
+
+

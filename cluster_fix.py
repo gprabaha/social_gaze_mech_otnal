@@ -44,7 +44,6 @@ class ClusterFixationDetector:
     def process_eyedat(self, data):
         if len(data[0]) > int(500 / (self.samprate * 1000)):
             x, y = self.preprocess_data(data)
-            pdb.set_trace()
             vel, accel, angle, dist, rot = self.extract_parameters(x, y)
             points = self.normalize_parameters(dist, vel, accel, rot)
 
