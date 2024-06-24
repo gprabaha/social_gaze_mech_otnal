@@ -11,11 +11,11 @@ Script for fixation detection
 
 import numpy as np
 import util  # Import utility functions here
-from tqdm import tqdm
+import pickle
 import pandas as pd
 import os
 import multiprocessing
-from multiprocessing import Pool
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import logging
 import pdb
 
@@ -77,7 +77,7 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
     """
     processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', True)
-    submit_separate_jobs = params.get('submit_separate_jobs_for_session_raster', True)
+    submit_separate_jobs = params.get('submit_separate_jobs_for_sessions', True)
 
     if submit_separate_jobs:
         hpc_fixation_detection = HPCFixationDetection(params)
@@ -120,14 +120,24 @@ def extract_fixations_and_saccades(sessions_data, use_parallel):
         print("\nExtracting fixations and saccades in parallel")
         num_cores = multiprocessing.cpu_count()
         num_processes = min(num_cores, len(sessions_data))
-        with Pool(num_processes) as pool:
-            results = pool.map(get_session_fixations_and_saccades, sessions_data)
+        
+        with ProcessPoolExecutor(max_workers=num_processes) as executor:
+            futures = {executor.submit(get_session_fixations_and_saccades, session_data): session_data for session_data in sessions_data}
+            results = []
+            for future in as_completed(futures):
+                try:
+                    result = future.result()
+                    results.append(result)
+                except Exception as e:
+                    logging.error(f"Error processing session data: {e}")
+                    continue
     else:
         print("\nExtracting fixations and saccades serially")
         results = [get_session_fixations_and_saccades(session_data) for session_data in sessions_data]
-    
+
     fix_detection_results, saccade_detection_results = zip(*results)
     return fix_detection_results, saccade_detection_results
+
 
 
 def get_session_fixations_and_saccades(session_data):

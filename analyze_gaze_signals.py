@@ -71,17 +71,17 @@ class DataManager:
         #     lambda p: curate_data.extract_saccades_with_labels(self.labelled_gaze_positions_m1, p)
         # )
         
-        self.labelled_spiketimes = self.get_or_load_variable(
-            'labelled_spiketimes',
-            load_data.load_processed_spiketimes,
-            lambda p: curate_data.extract_spiketimes_for_all_sessions(p)
-        )
+        # self.labelled_spiketimes = self.get_or_load_variable(
+        #     'labelled_spiketimes',
+        #     load_data.load_processed_spiketimes,
+        #     lambda p: curate_data.extract_spiketimes_for_all_sessions(p)
+        # )
         
-        self.labelled_fixation_rasters = self.get_or_load_variable(
-            'labelled_fixation_rasters',
-            load_data.load_labelled_fixation_rasters,
-            lambda p: curate_data.extract_fixation_raster(session_paths, self.labelled_fixations, self.labelled_spiketimes, p)
-        )
+        # self.labelled_fixation_rasters = self.get_or_load_variable(
+        #     'labelled_fixation_rasters',
+        #     load_data.load_labelled_fixation_rasters,
+        #     lambda p: curate_data.extract_fixation_raster(session_paths, self.labelled_fixations, self.labelled_spiketimes, p)
+        # )
 
 
         if self.params.get('replot_face/eye_vs_obj_violins'):
@@ -115,7 +115,7 @@ def main():
         'flush_before_reload': False,
         'use_existing_variables': False,
         'reload_existing_unit_roi_comp_stats': False,
-        'submit_separate_jobs_for_session_raster': True
+        'submit_separate_jobs_for_sessions': True
     })
 
     data_manager = DataManager(params)

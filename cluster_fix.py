@@ -47,12 +47,10 @@ class ClusterFixationDetector:
             pdb.set_trace()
             vel, accel, angle, dist, rot = self.extract_parameters(x, y)
             points = self.normalize_parameters(dist, vel, accel, rot)
-            pdb.set_trace()
 
             T, meanvalues, stdvalues = self.global_clustering(points)
             fixationcluster, fixationcluster2 = self.find_fixation_clusters(meanvalues, stdvalues)
             T = self.classify_fixations(T, fixationcluster, fixationcluster2)
-            pdb.set_trace()
 
             fixationindexes, fixationtimes = self.behavioral_index(T, 1)
             fixationtimes = self.apply_duration_threshold(fixationtimes, 25)
@@ -60,7 +58,6 @@ class ClusterFixationDetector:
             notfixations = self.local_reclustering(fixationtimes, points)
             fixationindexes = self.remove_not_fixations(fixationindexes, notfixations)
             saccadeindexes, saccadetimes = self.classify_saccades(fixationindexes, points)
-            pdb.set_trace()
 
             fixationtimes, saccadetimes = self.round_times(fixationtimes, saccadetimes)
 

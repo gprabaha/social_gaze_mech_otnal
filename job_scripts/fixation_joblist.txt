@@ -1,0 +1,1 @@
+module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 0

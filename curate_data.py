@@ -206,7 +206,7 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
     raster_manager = RasterManager(params)
     
     if params.get('remake_raster', False):
-        if params.get('submit_separate_jobs_for_session_raster', True):
+        if params.get('submit_separate_jobs_for_sessions', True):
             hpc_cluster = HPCCluster(params)
             job_file_path = hpc_cluster.generate_job_file(session_paths)
             hpc_cluster.submit_job_array(job_file_path)
