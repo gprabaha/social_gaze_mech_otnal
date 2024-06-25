@@ -7,23 +7,23 @@ Author: pg496
 """
 
 import os
-import threadpoolctl
+import multiprocessing
+from multiprocessing import Pool, cpu_count
 
 # Set environment variables to control OpenMP
 os.environ['OMP_NUM_THREADS'] = '1'
 os.environ['KMP_INIT_AT_FORK'] = 'FALSE'
 
-# Apply threadpool limits
-with threadpoolctl.threadpool_limits(limits=1):
-    import numpy as np
-    import scipy.signal as signal
-    from scipy.interpolate import interp1d
-    from sklearn.cluster import KMeans
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-    import pdb
+import numpy as np
+import scipy.signal as signal
+from scipy.interpolate import interp1d
+from sklearn.cluster import KMeans
+from tqdm import tqdm
+import pdb
 
-# Check threadpool information
-print(threadpoolctl.threadpool_info())
+# Check number of available CPUs
+num_cpus = cpu_count()
+print(f"Number of available CPUs: {num_cpus}")
 
 class ClusterFixationDetector:
     def __init__(self, samprate=1/1000, use_parallel=False):
@@ -42,13 +42,8 @@ class ClusterFixationDetector:
             raise ValueError("No data file found")
 
         results = []
-        with ThreadPoolExecutor() as executor:
-            futures = []
-            for cndlop in range(len(eyedat)):
-                futures.append(executor.submit(self.process_eyedat, eyedat[cndlop]))
-
-            for future in as_completed(futures):
-                results.append(future.result())
+        with Pool(processes=num_cpus) as pool:
+            results = pool.map(self.process_eyedat, eyedat)
 
         self.fixationstats = results
         return self.fixationstats
@@ -149,22 +144,16 @@ class ClusterFixationDetector:
 
     def global_clustering(self, points):
         if self.use_parallel:
-            with threadpoolctl.threadpool_limits(limits=1):
-                with ThreadPoolExecutor() as executor:
-                    futures = []
-                    for numclusts in range(2, 6):
-                        futures.append(executor.submit(self.cluster_and_silhouette, points, numclusts))
-
-                    sil = np.zeros(5)
-                    for future in as_completed(futures):
-                        numclusts, score = future.result()
-                        sil[numclusts - 2] = score
-
+            with Pool(processes=num_cpus) as pool:
+                futures = [pool.apply_async(self.cluster_and_silhouette, (points, numclusts)) for numclusts in range(2, 6)]
+                sil = np.zeros(5)
+                for future in tqdm(futures, desc="Global Clustering Progress"):
+                    numclusts, score = future.get()
+                    sil[numclusts - 2] = score
         else:
             sil = np.zeros(5)
-            for numclusts in range(2, 6):
+            for numclusts in tqdm(range(2, 6), desc="Global Clustering Progress"):
                 sil[numclusts - 2] = self.cluster_and_silhouette(points, numclusts)[1]
-
         numclusters = np.argmax(sil) + 2
         T = KMeans(n_clusters=numclusters, n_init=5).fit(points)
         labels = T.labels()
@@ -211,22 +200,16 @@ class ClusterFixationDetector:
         return times[:, np.diff(times, axis=0)[0] >= threshold]
 
     def local_reclustering(self, fixationtimes, points):
+        notfixations = []
         if self.use_parallel:
-            with threadpoolctl.threadpool_limits(limits=1):
-                with ThreadPoolExecutor() as executor:
-                    futures = []
-                    for fix in fixationtimes.T:
-                        futures.append(executor.submit(self.process_local_reclustering, fix, points))
-
-                    notfixations = []
-                    for future in as_completed(futures):
-                        notfixations.extend(future.result())
-
+            with Pool(processes=num_cpus) as pool:
+                futures = [pool.apply_async(self.process_local_reclustering, (fix, points)) for fix in fixationtimes.T]
+                for future in tqdm(futures, desc="Local Clustering Progress"):
+                    notfixations.extend(future.get())
         else:
-            notfixations = []
-            for fix in fixationtimes.T:
+            for fix in tqdm(fixationtimes.T, desc="Local Clustering Progress"):
                 notfixations.extend(self.process_local_reclustering(fix, points))
-
+    
         return np.array(notfixations)
 
     def process_local_reclustering(self, fix, points):

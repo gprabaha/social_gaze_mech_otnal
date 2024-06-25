@@ -3,17 +3,25 @@
 """
 Created on Mon Jun 24 12:37:42 2024
 
-@author: pg496
+Author: pg496
 """
 
-import argparse
-import logging
-import pickle
 import os
-import pandas as pd
-from fix import get_session_fixations_and_saccades
-import load_data
-import util
+import threadpoolctl
+
+# Set environment variables to control OpenMP
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['KMP_INIT_AT_FORK'] = 'FALSE'
+
+# Apply threadpool limits
+with threadpoolctl.threadpool_limits(limits=1):
+    import argparse
+    import logging
+    import pickle
+    import pandas as pd
+    from fix import get_session_fixations_and_saccades
+    import load_data
+    import util
 
 def main(session_index):
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -81,5 +89,3 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     main(args.session_index)
-
-
