@@ -25,6 +25,14 @@ from eye_mvm_fix import EyeMVMFixationDetector  # Import the new EyeMVMFixationD
 from eye_mvm_saccade import EyeMVMSaccadeDetector  # Import the new EyeMVMSaccadeDetector class
 from hpc_fixation_detection import HPCFixationDetection  # Import the new HPCFixationDetection class
 
+import threadpoolctl
+
+# Set environment variables to control OpenMP
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['KMP_INIT_AT_FORK'] = 'FALSE'
+
+# Check loaded threadpool information
+print(threadpoolctl.threadpool_info())
 
 def extract_or_load_fixations_and_saccades(labelled_gaze_positions, params):
     """
@@ -182,7 +190,6 @@ def get_session_fixations_and_saccades(session_data):
         'fix_x': fixations[0],
         'fix_y': fixations[1]
     })
-    pdb.set_trace()
     return fix_timepos_df, info, saccades
 
 
@@ -260,3 +267,5 @@ def determine_block(start_time, end_time, startS, stopS):
     return 'discard'
 
 
+# Check loaded threadpool information again
+print(threadpoolctl.threadpool_info())

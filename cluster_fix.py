@@ -3,15 +3,27 @@
 """
 Created on Fri Jun 21 13:28:25 2024
 
-@author: pg496
+Author: pg496
 """
 
-import numpy as np
-import scipy.signal as signal
-from scipy.interpolate import interp1d
-from sklearn.cluster import KMeans
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import pdb
+import os
+import threadpoolctl
+
+# Set environment variables to control OpenMP
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['KMP_INIT_AT_FORK'] = 'FALSE'
+
+# Apply threadpool limits
+with threadpoolctl.threadpool_limits(limits=1):
+    import numpy as np
+    import scipy.signal as signal
+    from scipy.interpolate import interp1d
+    from sklearn.cluster import KMeans
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    import pdb
+
+# Check threadpool information
+print(threadpoolctl.threadpool_info())
 
 class ClusterFixationDetector:
     def __init__(self, samprate=1/1000, use_parallel=False):
@@ -137,15 +149,16 @@ class ClusterFixationDetector:
 
     def global_clustering(self, points):
         if self.use_parallel:
-            with ThreadPoolExecutor() as executor:
-                futures = []
-                for numclusts in range(2, 6):
-                    futures.append(executor.submit(self.cluster_and_silhouette, points, numclusts))
+            with threadpoolctl.threadpool_limits(limits=1):
+                with ThreadPoolExecutor() as executor:
+                    futures = []
+                    for numclusts in range(2, 6):
+                        futures.append(executor.submit(self.cluster_and_silhouette, points, numclusts))
 
-                sil = np.zeros(5)
-                for future in as_completed(futures):
-                    numclusts, score = future.result()
-                    sil[numclusts - 2] = score
+                    sil = np.zeros(5)
+                    for future in as_completed(futures):
+                        numclusts, score = future.result()
+                        sil[numclusts - 2] = score
 
         else:
             sil = np.zeros(5)
@@ -199,14 +212,15 @@ class ClusterFixationDetector:
 
     def local_reclustering(self, fixationtimes, points):
         if self.use_parallel:
-            with ThreadPoolExecutor() as executor:
-                futures = []
-                for fix in fixationtimes.T:
-                    futures.append(executor.submit(self.process_local_reclustering, fix, points))
+            with threadpoolctl.threadpool_limits(limits=1):
+                with ThreadPoolExecutor() as executor:
+                    futures = []
+                    for fix in fixationtimes.T:
+                        futures.append(executor.submit(self.process_local_reclustering, fix, points))
 
-                notfixations = []
-                for future in as_completed(futures):
-                    notfixations.extend(future.result())
+                    notfixations = []
+                    for future in as_completed(futures):
+                        notfixations.extend(future.result())
 
         else:
             notfixations = []
@@ -309,10 +323,8 @@ class ClusterFixationDetector:
         return silh
 
 
-
 # Example usage
 if __name__ == "__main__":
     eyedat = [...]  # Your input data
     detector = ClusterFixationDetector()
     fixationstats = detector.detect_fixations(eyedat)
-

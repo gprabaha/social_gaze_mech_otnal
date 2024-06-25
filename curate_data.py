@@ -19,7 +19,17 @@ import util
 import load_data
 import eyelink
 import defaults
-import fix
+
+import os
+import threadpoolctl
+
+# Set environment variables to control OpenMP
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['KMP_INIT_AT_FORK'] = 'FALSE'
+
+# Apply threadpool limits
+with threadpoolctl.threadpool_limits(limits=1):
+    import fix
 
 from raster import RasterManager
 from hpc_cluster import HPCCluster

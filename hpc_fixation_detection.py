@@ -3,7 +3,7 @@
 """
 Created on Mon Jun 24 12:06:29 2024
 
-@author: pg496
+Author: pg496
 """
 
 import os
@@ -23,7 +23,14 @@ class HPCFixationDetection:
         
         with open(job_file_path, 'w') as file:
             for idx in range(len(labelled_gaze_positions)):
-                command = f"module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index {idx}"
+                command = (
+                    "module load miniconda; "
+                    "conda init bash; "
+                    "conda activate nn_gpu; "
+                    "export OMP_NUM_THREADS=1; "
+                    "export KMP_INIT_AT_FORK=FALSE; "
+                    f"python process_session_fixations.py --session_index {idx}"
+                )
                 file.write(command + "\n")
                 
         # Check the contents of the job file for debugging
@@ -39,7 +46,7 @@ class HPCFixationDetection:
         try:
             job_script_path = os.path.join(self.output_dir, 'dsq-joblist_fixations.sh')
             subprocess.run(
-                f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {self.output_dir} --status-dir {self.output_dir} --partition psych_day --cpus-per-task 8 --mem-per-cpu 6g -t 02:00:00 --mail-type FAIL',
+                f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {self.output_dir} --status-dir {self.output_dir} --partition psych_day --cpus-per-task 8 --mem-per-cpu 8g -t 04:00:00 --mail-type FAIL',
                 shell=True, check=True, executable='/bin/bash'
             )
             logging.info("Successfully generated the dSQ job script")
@@ -74,15 +81,10 @@ class HPCFixationDetection:
             if not job_statuses:
                 logging.info(f"Job array {job_id} has completed.")
                 break
-            running_jobs = [status for status in job_statuses if status in ('PENDING', 'RUNNING', 'CONFIGURING')]
+            running_jobs = [status for status in ('PENDING', 'RUNNING', 'CONFIGURING') if status in job_statuses]
             if not running_jobs:
                 logging.info(f"Job array {job_id} has completed.")
                 break
             else:
                 logging.info(f"Job array {job_id} is still running. Checking again in 30 seconds...")
                 time.sleep(30)
-
-
-
-
-

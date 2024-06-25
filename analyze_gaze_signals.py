@@ -7,9 +7,19 @@ Created on Tue Apr  9 10:25:48 2024
 """
 
 
+import os
+import threadpoolctl
+
+# Set environment variables to control OpenMP
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['KMP_INIT_AT_FORK'] = 'FALSE'
+
+# Apply threadpool limits
+with threadpoolctl.threadpool_limits(limits=1):
+    import curate_data
+
 import logging
 import util
-import curate_data
 import load_data
 import response_comp
 
@@ -91,7 +101,7 @@ def main():
     params = util.get_params()
     params.update({
         'is_cluster': True,
-        'use_parallel': False,
+        'use_parallel': True,
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
         'remake_labelled_fixations': True,
