@@ -6,24 +6,21 @@ Created on Fri Jun 21 13:28:25 2024
 Author: pg496
 """
 
-import os
-import multiprocessing
-from multiprocessing import Pool, cpu_count
 
-# Set environment variables to control OpenMP
-os.environ['OMP_NUM_THREADS'] = '1'
-os.environ['KMP_INIT_AT_FORK'] = 'FALSE'
-
+from multiprocessing import cpu_count
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import numpy as np
 import scipy.signal as signal
 from scipy.interpolate import interp1d
 from sklearn.cluster import KMeans
 from tqdm import tqdm
+
 import pdb
 
 # Check number of available CPUs
 num_cpus = cpu_count()
 print(f"Number of available CPUs: {num_cpus}")
+
 
 class ClusterFixationDetector:
     def __init__(self, samprate=1/1000, use_parallel=False):
@@ -37,16 +34,13 @@ class ClusterFixationDetector:
         self.buffer = int(100 / (self.samprate * 1000))
         self.fixationstats = []
 
+
     def detect_fixations(self, eyedat):
         if not eyedat:
             raise ValueError("No data file found")
-
-        results = []
-        with Pool(processes=num_cpus) as pool:
-            results = pool.map(self.process_eyedat, eyedat)
-
-        self.fixationstats = results
+        self.fixationstats = self.process_eyedat(eyedat)
         return self.fixationstats
+
 
     def process_eyedat(self, data):
         if len(data[0]) > int(500 / (self.samprate * 1000)):
@@ -93,6 +87,7 @@ class ClusterFixationDetector:
                 'variables': self.variables
             }
 
+
     def preprocess_data(self, eyedat):
         x = np.pad(eyedat[0], (self.buffer, self.buffer), 'reflect')
         y = np.pad(eyedat[1], (self.buffer, self.buffer), 'reflect')
@@ -104,6 +99,7 @@ class ClusterFixationDetector:
         y = y[100:-100]
         return x, y
 
+
     def resample_data(self, data):
         t_old = np.linspace(0, len(data) - 1, len(data))
         resample_factor = self.samprate * 1000
@@ -114,8 +110,10 @@ class ClusterFixationDetector:
         f = interp1d(t_old, data, kind='linear')
         return f(t_new)
 
+
     def apply_filter(self, data):
         return signal.filtfilt(self.flt, 1, data)
+
 
     def extract_parameters(self, x, y):
         velx = np.diff(x)
@@ -133,6 +131,7 @@ class ClusterFixationDetector:
         rot = 360 - rot
         return vel, accel, angle, dist, rot
 
+
     def normalize_parameters(self, dist, vel, accel, rot):
         points = np.stack([dist, vel, accel, rot], axis=1)
         for ii in range(points.shape[1]):
@@ -142,35 +141,48 @@ class ClusterFixationDetector:
             points[:, ii] = points[:, ii] / np.max(points[:, ii])
         return points
 
-    def global_clustering(self, points):
+
+    def global_clustering(self, points, num_cpus=None):
         if self.use_parallel:
-            with Pool(processes=num_cpus) as pool:
-                futures = [pool.apply_async(self.cluster_and_silhouette, (points, numclusts)) for numclusts in range(2, 6)]
+            with ProcessPoolExecutor(max_workers=num_cpus) as executor:
+                futures = {
+                    executor.submit(self.cluster_and_silhouette, points, numclusts):
+                        numclusts for numclusts in range(2, 6)
+                }
                 sil = np.zeros(5)
-                for future in tqdm(futures, desc="Global Clustering Progress"):
-                    numclusts, score = future.get()
-                    sil[numclusts - 2] = score
+                for future in tqdm(as_completed(futures), total=len(futures), desc="Global Clustering Progress"):
+                    try:
+                        numclusts, score = future.result()
+                        sil[numclusts - 2] = score
+                    except Exception as e:
+                        print(f"Error processing numclusts {futures[future]}: {e}")
         else:
             sil = np.zeros(5)
             for numclusts in tqdm(range(2, 6), desc="Global Clustering Progress"):
-                sil[numclusts - 2] = self.cluster_and_silhouette(points, numclusts)[1]
+                try:
+                    sil[numclusts - 2] = self.cluster_and_silhouette(points, numclusts)[1]
+                except Exception as e:
+                    print(f"Error processing numclusts {numclusts}: {e}")
         numclusters = np.argmax(sil) + 2
         T = KMeans(n_clusters=numclusters, n_init=5).fit(points)
-        labels = T.labels()
+        labels = T.labels_
         meanvalues = np.array([np.mean(points[labels == i], axis=0) for i in range(numclusters)])
         stdvalues = np.array([np.std(points[labels == i], axis=0) for i in range(numclusters)])
         return labels, meanvalues, stdvalues
+
 
     def cluster_and_silhouette(self, points, numclusts):
         T = KMeans(n_clusters=numclusts, n_init=5).fit(points[::10, 1:4])
         silh = self.inter_vs_intra_dist(points[::10, 1:4], T.labels_)
         return numclusts, np.mean(silh)
 
+
     def find_fixation_clusters(self, meanvalues, stdvalues):
         fixationcluster = np.argmin(np.sum(meanvalues[:, 1:3], axis=1))
         fixationcluster2 = np.where(meanvalues[:, 1] < meanvalues[fixationcluster, 1] + 3 * stdvalues[fixationcluster, 1])[0]
         fixationcluster2 = fixationcluster2[fixationcluster2 != fixationcluster]
         return fixationcluster, fixationcluster2
+
 
     def classify_fixations(self, T, fixationcluster, fixationcluster2):
         T[T == fixationcluster] = 100
@@ -180,9 +192,11 @@ class ClusterFixationDetector:
         T[T == 100] = 1
         return T
 
+
     def behavioral_index(self, T, label):
         indexes = np.where(T == label)[0]
         return indexes, self.find_behavioral_times(indexes)
+
 
     def find_behavioral_times(self, indexes):
         dind = np.diff(indexes)
@@ -196,21 +210,32 @@ class ClusterFixationDetector:
             behaviortime[:, i] = [ind[0], ind[-1]]
         return behaviortime
 
+
     def apply_duration_threshold(self, times, threshold):
         return times[:, np.diff(times, axis=0)[0] >= threshold]
 
-    def local_reclustering(self, fixationtimes, points):
+
+    def local_reclustering(self, fixationtimes, points, num_cpus=None):
         notfixations = []
         if self.use_parallel:
-            with Pool(processes=num_cpus) as pool:
-                futures = [pool.apply_async(self.process_local_reclustering, (fix, points)) for fix in fixationtimes.T]
-                for future in tqdm(futures, desc="Local Clustering Progress"):
-                    notfixations.extend(future.get())
+            with ProcessPoolExecutor(max_workers=num_cpus) as executor:
+                futures = {
+                    executor.submit(self.process_local_reclustering, fix, points): fix for fix in fixationtimes.T
+                }
+                for future in tqdm(as_completed(futures), total=len(futures), desc="Local Clustering Progress"):
+                    try:
+                        result = future.result()
+                        notfixations.extend(result)
+                    except Exception as e:
+                        print(f"Error processing fixation {futures[future]}: {e}")
         else:
             for fix in tqdm(fixationtimes.T, desc="Local Clustering Progress"):
-                notfixations.extend(self.process_local_reclustering(fix, points))
-    
+                try:
+                    notfixations.extend(self.process_local_reclustering(fix, points))
+                except Exception as e:
+                    print(f"Error processing fixation {fix}: {e}")
         return np.array(notfixations)
+
 
     def process_local_reclustering(self, fix, points):
         altind = np.arange(fix[0] - 50, fix[1] + 50)

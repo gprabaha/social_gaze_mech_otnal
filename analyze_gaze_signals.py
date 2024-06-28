@@ -7,18 +7,9 @@ Created on Tue Apr  9 10:25:48 2024
 """
 
 
-import os
-import threadpoolctl
-
-# Set environment variables to control OpenMP
-os.environ['OMP_NUM_THREADS'] = '1'
-os.environ['KMP_INIT_AT_FORK'] = 'FALSE'
-
-# Apply threadpool limits
-with threadpoolctl.threadpool_limits(limits=1):
-    import curate_data
-
 import logging
+
+import curate_data
 import util
 import load_data
 import response_comp

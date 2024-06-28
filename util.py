@@ -428,7 +428,6 @@ def distance(point1, point2):
     - dist (float): Euclidean distance.
     """
     x1, y1 = point1
-    x2, y1 = point1
     x2, y2 = point2
     return sqrt((x2 - x1)**2 + (y2 - y1)**2)
 

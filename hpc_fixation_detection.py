@@ -27,8 +27,6 @@ class HPCFixationDetection:
                     "module load miniconda; "
                     "conda init bash; "
                     "conda activate nn_gpu; "
-                    "export OMP_NUM_THREADS=1; "
-                    "export KMP_INIT_AT_FORK=FALSE; "
                     f"python process_session_fixations.py --session_index {idx}"
                 )
                 file.write(command + "\n")
@@ -46,7 +44,7 @@ class HPCFixationDetection:
         try:
             job_script_path = os.path.join(self.output_dir, 'dsq-joblist_fixations.sh')
             subprocess.run(
-                f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {self.output_dir} --status-dir {self.output_dir} --partition psych_day --cpus-per-task 8 --mem-per-cpu 8g -t 04:00:00 --mail-type FAIL',
+                f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {self.output_dir} --status-dir {self.output_dir} --partition psych_day --cpus-per-task 6 --mem-per-cpu 4g -t 06:00:00 --mail-type FAIL',
                 shell=True, check=True, executable='/bin/bash'
             )
             logging.info("Successfully generated the dSQ job script")

@@ -5,19 +5,16 @@ Created on Tue Apr 30 15:34:44 2024
 
 @author: pg496
 """
-"""
-Script for fixation detection
-"""
+
 
 import numpy as np
 import util  # Import utility functions here
 import pickle
 import pandas as pd
 import os
+import logging
 import multiprocessing
 from concurrent.futures import ProcessPoolExecutor, as_completed
-import logging
-import pdb
 
 import load_data
 from cluster_fix import ClusterFixationDetector  # Import the new ClusterFixationDetector class
@@ -25,14 +22,8 @@ from eye_mvm_fix import EyeMVMFixationDetector  # Import the new EyeMVMFixationD
 from eye_mvm_saccade import EyeMVMSaccadeDetector  # Import the new EyeMVMSaccadeDetector class
 from hpc_fixation_detection import HPCFixationDetection  # Import the new HPCFixationDetection class
 
-import threadpoolctl
+import pdb
 
-# Set environment variables to control OpenMP
-os.environ['OMP_NUM_THREADS'] = '1'
-os.environ['KMP_INIT_AT_FORK'] = 'FALSE'
-
-# Check loaded threadpool information
-print(threadpoolctl.threadpool_info())
 
 def extract_or_load_fixations_and_saccades(labelled_gaze_positions, params):
     """
@@ -87,7 +78,7 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
     """
     processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', True)
-    submit_separate_jobs = params.get('submit_separate_jobs_for_session_raster', True)
+    submit_separate_jobs = params.get('submit_separate_jobs_for_sessions', True)
 
     if submit_separate_jobs:
         hpc_fixation_detection = HPCFixationDetection(params)
@@ -172,7 +163,7 @@ def get_session_fixations_and_saccades(session_data):
         x_coords = positions[:, 0]
         y_coords = positions[:, 1]
         # Transform into the expected format
-        eyedat = [(x_coords, y_coords)]
+        eyedat = (x_coords, y_coords)
         fix_stats = detector.detect_fixations(eyedat)
         fixationtimes = fix_stats[0]['fixationtimes']
         fixations = fix_stats[0]['fixations']
@@ -267,5 +258,3 @@ def determine_block(start_time, end_time, startS, stopS):
     return 'discard'
 
 
-# Check loaded threadpool information again
-print(threadpoolctl.threadpool_info())

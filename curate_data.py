@@ -8,29 +8,16 @@ Created on Wed Apr 10 12:36:36 2024
 
 import numpy as np
 from tqdm import tqdm
-from tqdm_joblib import tqdm_joblib
 import os
-from joblib import Parallel, delayed
 import pandas as pd
 import logging
 import h5py
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import util
 import load_data
 import eyelink
-import defaults
-
-import os
-import threadpoolctl
-
-# Set environment variables to control OpenMP
-os.environ['OMP_NUM_THREADS'] = '1'
-os.environ['KMP_INIT_AT_FORK'] = 'FALSE'
-
-# Apply threadpool limits
-with threadpoolctl.threadpool_limits(limits=1):
-    import fix
-
+import fix_and_saccades
 from raster import RasterManager
 from hpc_cluster import HPCCluster
 
@@ -139,13 +126,13 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     use_parallel = params.get('use_parallel', True)
 
     # Extract fixations and saccades
-    all_fix_timepos, fix_detection_results, saccade_detection_results = fix.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
-    labelled_fixations = fix.generate_fixation_labels(fix_detection_results, params, use_parallel)
+    all_fix_timepos, fix_detection_results, saccade_detection_results = fix_and_saccades.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
+    labelled_fixations = fix_and_saccades.generate_fixation_labels(fix_detection_results, params, use_parallel)
 
     saccades = [s for session_saccades in saccade_detection_results for s in session_saccades]
     columns = ["start_time", "end_time", "duration", "trajectory", "start_roi", "end_roi", "session_name", "category", "run", "block"]
     labelled_saccades = pd.DataFrame(saccades, columns=columns)
-    fix.save_saccade_labels(labelled_saccades, params)
+    fix_and_saccades.save_saccade_labels(labelled_saccades, params)
 
     return labelled_fixations, labelled_saccades
 
@@ -157,15 +144,23 @@ def extract_spiketimes_for_all_sessions(params):
     is_parallel = params.get('use_parallel', True)
     spikeTs_labels = []
     if is_parallel:
-        # Process sessions in parallel with tqdm progress bar
-        results = Parallel(n_jobs=-1)(delayed(
-            load_data.get_spiketimes_and_labels_for_one_session)(
-                session_path, processed_data_dir)
-            for session_path in tqdm(
-                session_paths, desc='Loading spiketimes'))
-        # Iterate over results and concatenate
-        for labelled_spiketimes in tqdm(results, desc='Concatenating results'):
-            spikeTs_labels.append(labelled_spiketimes)
+        # Use ThreadPoolExecutor for parallel processing
+        with ThreadPoolExecutor() as executor:
+            # Submit tasks and collect futures
+            futures = {
+                executor.submit(
+                    load_data.get_spiketimes_and_labels_for_one_session, 
+                    session_path, 
+                    processed_data_dir
+                ): session_path for session_path in session_paths
+            }
+            # Process futures as they complete with tqdm progress bar
+            for future in tqdm(as_completed(futures), total=len(futures), desc='Loading spiketimes'):
+                try:
+                    result = future.result()
+                    spikeTs_labels.append(result)
+                except Exception as e:
+                    print(f"Error processing {futures[future]}: {e}")
     else:
         # Process sessions sequentially
         for session_path in session_paths:
@@ -193,13 +188,11 @@ def save_spiketimes_to_hdf5(labelled_spiketimes, file_path):
         spikeS_group = hf.create_group('spikeS')
         spikeMs_group = hf.create_group('spikeMs')
         labels_group = hf.create_group('labels')
-        
         for index, row in labelled_spiketimes.iterrows():
             spikeS_data = np.array(row['spikeS'], dtype=float).tolist()
             spikeMs_data = np.array(row['spikeMs'], dtype=float).tolist()
             spikeS_group.create_dataset(str(index), data=spikeS_data)
             spikeMs_group.create_dataset(str(index), data=spikeMs_data)
-        
         for label in ['session_name', 'channel', 'channel_label', 'unit_no_within_channel', 'unit_label', 'uuid', 'n_spikes', 'region']:
             # Convert strings to bytes
             data_as_bytes = [str(item).encode('utf-8') for item in labelled_spiketimes[label]]
