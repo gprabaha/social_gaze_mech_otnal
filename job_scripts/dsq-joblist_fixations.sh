@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --output /gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/job_scripts/
+#SBATCH --output ./job_scripts/
 #SBATCH --array 0-30
 #SBATCH --job-name dsq-fixation_joblist
 #SBATCH --partition psych_day --cpus-per-task 6 --mem-per-cpu 4g -t 06:00:00 --mail-type FAIL
