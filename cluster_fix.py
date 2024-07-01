@@ -8,7 +8,7 @@ Author: pg496
 
 
 from multiprocessing import cpu_count
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import numpy as np
 import scipy.signal as signal
 from scipy.interpolate import interp1d
@@ -142,25 +142,25 @@ class ClusterFixationDetector:
         return points
 
 
-
-    def global_clustering(self, points, num_cpus=None):
+    def global_clustering(self, points):
         print("Starting global_clustering...")
-        
+
+        max_workers = min(num_cpus, 4)  # Limiting to 4 parallel jobs
         if self.use_parallel:
-            print("Using parallel processing with ThreadPoolExecutor")
-            with ThreadPoolExecutor(max_workers=num_cpus) as executor:
-                futures = {
-                    executor.submit(self.cluster_and_silhouette, points, numclusts): numclusts
-                    for numclusts in range(2, 6)
-                }
+            print("Using parallel processing with ProcessPoolExecutor")
+            with ProcessPoolExecutor(max_workers=max_workers) as executor:
+                numclusts_range = list(range(2, 6))
+                futures = {executor.submit(self.cluster_and_silhouette, points, numclusts): numclusts for numclusts in numclusts_range}
+                
                 sil = np.zeros(5)
                 for future in tqdm(as_completed(futures), total=len(futures), desc="Global Clustering Progress"):
+                    numclusts = futures[future]
                     try:
-                        numclusts, score = future.result()
+                        score = future.result()
                         sil[numclusts - 2] = score
                         print(f"Processed numclusts {numclusts}: Silhouette score = {score}")
                     except Exception as e:
-                        print(f"Error processing numclusts {futures[future]}: {e}")
+                        print(f"Error processing numclusts {numclusts}: {e}")
         else:
             print("Using serial processing")
             sil = np.zeros(5)
@@ -171,18 +171,17 @@ class ClusterFixationDetector:
                     print(f"Processed numclusts {numclusts}: Silhouette score = {score}")
                 except Exception as e:
                     print(f"Error processing numclusts {numclusts}: {e}")
-    
+
         numclusters = np.argmax(sil) + 2
         print(f"Optimal number of clusters: {numclusters}")
-        
+
         T = KMeans(n_clusters=numclusters, n_init=5).fit(points)
         labels = T.labels_
         meanvalues = np.array([np.mean(points[labels == i], axis=0) for i in range(numclusters)])
         stdvalues = np.array([np.std(points[labels == i], axis=0) for i in range(numclusters)])
-        
+
         print("Clustering completed successfully")
         return labels, meanvalues, stdvalues
-
 
 
     def cluster_and_silhouette(self, points, numclusts):
@@ -190,7 +189,7 @@ class ClusterFixationDetector:
         T = KMeans(n_clusters=numclusts, n_init=5).fit(points[::10, 1:4])
         silh = self.inter_vs_intra_dist(points[::10, 1:4], T.labels_)
         print(f'kMeans for {numclusts} clusters done')
-        return numclusts, np.mean(silh)
+        return np.mean(silh)
 
 
     def find_fixation_clusters(self, meanvalues, stdvalues):
@@ -231,19 +230,20 @@ class ClusterFixationDetector:
         return times[:, np.diff(times, axis=0)[0] >= threshold]
 
 
-    def local_reclustering(self, fixationtimes, points, num_cpus=None):
+    def local_reclustering(self, fixationtimes, points):
         notfixations = []
+        max_workers = min(num_cpus, len(fixationtimes.T))
         if self.use_parallel:
-            with ThreadPoolExecutor(max_workers=num_cpus) as executor:
-                futures = {
-                    executor.submit(self.process_local_reclustering, fix, points): fix for fix in fixationtimes.T
-                }
+            print("Using parallel processing with ProcessPoolExecutor")
+            with ProcessPoolExecutor(max_workers=max_workers) as executor:
+                futures = {executor.submit(self.process_local_reclustering, fix, points): fix for fix in fixationtimes.T}
+                
                 for future in tqdm(as_completed(futures), total=len(futures), desc="Local Clustering Progress"):
                     try:
                         result = future.result()
                         notfixations.extend(result)
                     except Exception as e:
-                        print(f"Error processing fixation {futures[future]}: {e}")
+                        print(f"Error processing fixation: {e}")
         else:
             for fix in tqdm(fixationtimes.T, desc="Local Clustering Progress"):
                 try:
