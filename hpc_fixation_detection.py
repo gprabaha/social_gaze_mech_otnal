@@ -11,15 +11,25 @@ import subprocess
 import logging
 import time
 import pickle
+import json
+
 
 class HPCFixationDetection:
     def __init__(self, params):
         self.params = params
-        self.output_dir = '/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/job_scripts/'
+        self.job_script_out_dir = './job_scripts/'
+
+    def serialize_params(self, filepath):
+        with open(filepath, 'w') as f:
+            json.dump(self.params, f)
 
     def generate_fixation_job_file(self, labelled_gaze_positions):
-        job_file_path = os.path.join(self.output_dir, 'fixation_joblist.txt')
-        os.makedirs(self.output_dir, exist_ok=True)
+        job_file_path = os.path.join(self.job_script_out_dir, 'fixation_joblist.txt')
+        os.makedirs(self.job_script_out_dir, exist_ok=True)
+
+        # Use params['processed_data_dir'] for saving the parameters
+        params_file_path = os.path.join(self.params['processed_data_dir'], 'params.json')
+        self.serialize_params(params_file_path)
         
         with open(job_file_path, 'w') as file:
             for idx in range(len(labelled_gaze_positions)):
@@ -27,7 +37,7 @@ class HPCFixationDetection:
                     "module load miniconda; "
                     "conda init bash; "
                     "conda activate nn_gpu; "
-                    f"python process_session_fixations.py --session_index {idx}"
+                    f"python process_session_fixations.py --session_index {idx} --params_file {params_file_path}"
                 )
                 file.write(command + "\n")
                 
@@ -42,9 +52,9 @@ class HPCFixationDetection:
 
     def submit_job_array(self, job_file_path):
         try:
-            job_script_path = os.path.join(self.output_dir, 'dsq-joblist_fixations.sh')
+            job_script_path = os.path.join(self.job_script_out_dir, 'dsq-joblist_fixations.sh')
             subprocess.run(
-                f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {self.output_dir} --status-dir {self.output_dir} --partition psych_day --cpus-per-task 6 --mem-per-cpu 4g -t 06:00:00 --mail-type FAIL',
+                f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {self.job_script_out_dir} --status-dir {self.job_script_out_dir} --partition psych_day --cpus-per-task 6 --mem-per-cpu 4g -t 06:00:00 --mail-type FAIL',
                 shell=True, check=True, executable='/bin/bash'
             )
             logging.info("Successfully generated the dSQ job script")
@@ -54,7 +64,7 @@ class HPCFixationDetection:
             logging.info(f"Using dSQ job script: {job_script_path}")
             
             result = subprocess.run(
-                f'sbatch --job-name=fixation_jobs_dsq --output={self.output_dir}/fixation_session_%a.out --error={self.output_dir}/fixation_session_%a.err {job_script_path}',
+                f'sbatch --job-name=fixation_jobs_dsq --output={self.job_script_out_dir}/fixation_session_%a.out --error={self.job_script_out_dir}/fixation_session_%a.err {job_script_path}',
                 shell=True, check=True, capture_output=True, text=True, executable='/bin/bash'
             )
             logging.info(f"Successfully submitted jobs using sbatch for script {job_script_path}")
@@ -86,3 +96,4 @@ class HPCFixationDetection:
             else:
                 logging.info(f"Job array {job_id} is still running. Checking again in 30 seconds...")
                 time.sleep(30)
+

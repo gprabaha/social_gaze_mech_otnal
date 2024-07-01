@@ -8,7 +8,7 @@ Author: pg496
 
 
 from multiprocessing import cpu_count
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 import numpy as np
 import scipy.signal as signal
 from scipy.interpolate import interp1d
@@ -23,7 +23,7 @@ print(f"Number of available CPUs: {num_cpus}")
 
 
 class ClusterFixationDetector:
-    def __init__(self, samprate=1/1000, use_parallel=False):
+    def __init__(self, samprate=1/1000, use_parallel=True):
         self.samprate = samprate
         self.use_parallel = use_parallel
         self.variables = ['Dist', 'Vel', 'Accel', 'Angular Velocity']
@@ -142,38 +142,54 @@ class ClusterFixationDetector:
         return points
 
 
+
     def global_clustering(self, points, num_cpus=None):
+        print("Starting global_clustering...")
+        
         if self.use_parallel:
-            with ProcessPoolExecutor(max_workers=num_cpus) as executor:
+            print("Using parallel processing with ThreadPoolExecutor")
+            with ThreadPoolExecutor(max_workers=num_cpus) as executor:
                 futures = {
-                    executor.submit(self.cluster_and_silhouette, points, numclusts):
-                        numclusts for numclusts in range(2, 6)
+                    executor.submit(self.cluster_and_silhouette, points, numclusts): numclusts
+                    for numclusts in range(2, 6)
                 }
                 sil = np.zeros(5)
                 for future in tqdm(as_completed(futures), total=len(futures), desc="Global Clustering Progress"):
                     try:
                         numclusts, score = future.result()
                         sil[numclusts - 2] = score
+                        print(f"Processed numclusts {numclusts}: Silhouette score = {score}")
                     except Exception as e:
                         print(f"Error processing numclusts {futures[future]}: {e}")
         else:
+            print("Using serial processing")
             sil = np.zeros(5)
             for numclusts in tqdm(range(2, 6), desc="Global Clustering Progress"):
                 try:
-                    sil[numclusts - 2] = self.cluster_and_silhouette(points, numclusts)[1]
+                    numclusts, score = self.cluster_and_silhouette(points, numclusts)
+                    sil[numclusts - 2] = score
+                    print(f"Processed numclusts {numclusts}: Silhouette score = {score}")
                 except Exception as e:
                     print(f"Error processing numclusts {numclusts}: {e}")
+    
         numclusters = np.argmax(sil) + 2
+        print(f"Optimal number of clusters: {numclusters}")
+        
         T = KMeans(n_clusters=numclusters, n_init=5).fit(points)
         labels = T.labels_
         meanvalues = np.array([np.mean(points[labels == i], axis=0) for i in range(numclusters)])
         stdvalues = np.array([np.std(points[labels == i], axis=0) for i in range(numclusters)])
+        
+        print("Clustering completed successfully")
         return labels, meanvalues, stdvalues
 
 
+
     def cluster_and_silhouette(self, points, numclusts):
+        print(f'Doing kMeans for {numclusts} clusters now')
         T = KMeans(n_clusters=numclusts, n_init=5).fit(points[::10, 1:4])
         silh = self.inter_vs_intra_dist(points[::10, 1:4], T.labels_)
+        print(f'kMeans for {numclusts} clusters done')
         return numclusts, np.mean(silh)
 
 
@@ -218,7 +234,7 @@ class ClusterFixationDetector:
     def local_reclustering(self, fixationtimes, points, num_cpus=None):
         notfixations = []
         if self.use_parallel:
-            with ProcessPoolExecutor(max_workers=num_cpus) as executor:
+            with ThreadPoolExecutor(max_workers=num_cpus) as executor:
                 futures = {
                     executor.submit(self.process_local_reclustering, fix, points): fix for fix in fixationtimes.T
                 }
