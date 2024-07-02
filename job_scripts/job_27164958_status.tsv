@@ -1,0 +1,1 @@
+14	137	r811u34n02.milgram.ycrc.yale.edu	2024-07-01 16:07:49	2024-07-01 19:41:03	12794.22	module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 14 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json

@@ -54,7 +54,7 @@ class HPCFixationDetection:
         try:
             job_script_path = os.path.join(self.job_script_out_dir, 'dsq-joblist_fixations.sh')
             subprocess.run(
-                f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {self.job_script_out_dir} --status-dir {self.job_script_out_dir} --partition psych_day --cpus-per-task 4 --mem-per-cpu 1g -t 06:00:00 --mail-type FAIL',
+                f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {self.job_script_out_dir} --status-dir {self.job_script_out_dir} --partition psych_day --cpus-per-task 8 --mem-per-cpu 256 -t 16:00:00 --mail-type FAIL',
                 shell=True, check=True, executable='/bin/bash'
             )
             logging.info("Successfully generated the dSQ job script")
