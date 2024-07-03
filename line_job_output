@@ -1,82 +1,82 @@
-2024-07-03 10:24:21,826 - DEBUG - matplotlib data path: /gpfs/milgram/project/chang/pg496/conda_envs/nn_gpu/lib/python3.10/site-packages/matplotlib/mpl-data
-2024-07-03 10:24:21,838 - DEBUG - CONFIGDIR=/home/pg496/.config/matplotlib
-2024-07-03 10:24:21,839 - DEBUG - interactive is False
-2024-07-03 10:24:21,840 - DEBUG - platform is linux
-2024-07-03 10:24:22,124 - DEBUG - CACHEDIR=/home/pg496/.cache/matplotlib
-2024-07-03 10:24:22,145 - DEBUG - Using fontManager instance from /home/pg496/.cache/matplotlib/fontlist-v330.json
-2024-07-03 10:24:29,506 - INFO - Job commands in the job list: 31
-2024-07-03 10:24:29,506 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 0 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 1 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 2 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 3 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 4 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 5 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 6 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 7 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 8 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 9 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 10 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 11 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 12 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 13 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 14 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 15 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 16 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 17 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 18 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 19 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 20 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 21 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 22 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 23 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 24 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 25 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 26 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 27 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 28 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 29 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
-2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 30 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:00,703 - DEBUG - matplotlib data path: /gpfs/milgram/project/chang/pg496/conda_envs/nn_gpu/lib/python3.10/site-packages/matplotlib/mpl-data
+2024-07-03 10:37:00,730 - DEBUG - CONFIGDIR=/home/pg496/.config/matplotlib
+2024-07-03 10:37:00,731 - DEBUG - interactive is False
+2024-07-03 10:37:00,731 - DEBUG - platform is linux
+2024-07-03 10:37:01,062 - DEBUG - CACHEDIR=/home/pg496/.cache/matplotlib
+2024-07-03 10:37:01,083 - DEBUG - Using fontManager instance from /home/pg496/.cache/matplotlib/fontlist-v330.json
+2024-07-03 10:37:08,397 - INFO - Job commands in the job list: 31
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 0 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 1 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 2 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 3 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 4 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 5 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 6 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 7 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 8 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 9 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 10 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 11 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 12 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,398 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 13 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,400 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 14 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,400 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 15 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,400 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 16 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,400 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 17 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,400 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 18 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,400 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 19 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,400 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 20 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,400 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 21 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,400 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 22 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,400 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 23 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,400 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 24 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,401 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 25 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,401 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 26 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,401 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 27 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,401 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 28 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,401 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 29 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:37:08,401 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 30 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
 Batch script generated. To submit your jobs, run:
  sbatch ./job_scripts/dsq-joblist_fixations.sh
-2024-07-03 10:24:30,261 - INFO - Successfully generated the dSQ job script
-2024-07-03 10:24:30,261 - INFO - Using dSQ job script: ./job_scripts/dsq-joblist_fixations.sh
-2024-07-03 10:24:30,274 - INFO - Successfully submitted jobs using sbatch for script ./job_scripts/dsq-joblist_fixations.sh
-2024-07-03 10:24:30,274 - INFO - Submitted job array with ID: 27165775
-2024-07-03 10:24:30,274 - INFO - Tracking progress of job array with ID: 27165775
-2024-07-03 10:24:30,285 - INFO - Job array 27165775 is still running. Checking again in 30 seconds...
-2024-07-03 10:25:00,327 - INFO - Job array 27165775 has completed.
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/0_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/1_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/2_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/3_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/4_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/5_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/6_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/7_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/8_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/9_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/10_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/11_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/12_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/13_fixations.pkl'
-2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/14_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/15_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/16_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/17_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/18_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/19_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/20_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/21_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/22_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/23_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/24_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/25_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/26_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/27_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/28_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/29_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/30_fixations.pkl'
-2024-07-03 10:25:00,328 - ERROR - No results to concatenate.
+2024-07-03 10:37:09,147 - INFO - Successfully generated the dSQ job script
+2024-07-03 10:37:09,147 - INFO - Using dSQ job script: ./job_scripts/dsq-joblist_fixations.sh
+2024-07-03 10:37:09,160 - INFO - Successfully submitted jobs using sbatch for script ./job_scripts/dsq-joblist_fixations.sh
+2024-07-03 10:37:09,160 - INFO - Submitted job array with ID: 27165816
+2024-07-03 10:37:09,160 - INFO - Tracking progress of job array with ID: 27165816
+2024-07-03 10:37:09,171 - INFO - Job array 27165816 is still running. Checking again in 30 seconds...
+2024-07-03 10:37:39,228 - INFO - Job array 27165816 has completed.
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/0_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/1_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/2_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/3_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/4_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/5_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/6_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/7_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/8_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/9_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/10_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/11_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/12_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/13_fixations.pkl'
+2024-07-03 10:37:39,229 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/14_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/15_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/16_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/17_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/18_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/19_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/20_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/21_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/22_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/23_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/24_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/25_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/26_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/27_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/28_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/29_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/30_fixations.pkl'
+2024-07-03 10:37:39,230 - ERROR - No results to concatenate.
 Number of available CPUs: 48
 
 Starting to extract fixations and saccades:

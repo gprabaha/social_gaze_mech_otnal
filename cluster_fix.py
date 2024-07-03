@@ -146,12 +146,12 @@ class ClusterFixationDetector:
     def global_clustering(self, points):
         print("Starting global_clustering...")
         numclusts_range = list(range(2, 6))
-        max_workers = min(len(numclusts_range), 4)  # Limiting to 4 parallel jobs
+        max_workers = min(len(numclusts_range), self.num_cpus)  # Limiting to 4 parallel jobs
         sil = np.zeros(5)
         if self.use_parallel:
             print("Using parallel processing with ProcessPoolExecutor")
             with ProcessPoolExecutor(max_workers=max_workers) as executor:
-                results = list(tqdm(executor.map(cluster_and_silhouette, [(points, numclusts) for numclusts in numclusts_range]), total=len(numclusts_range), desc="Global Clustering Progress"))
+                results = list(tqdm(executor.map(self.cluster_and_silhouette, [(points, numclusts) for numclusts in numclusts_range]), total=len(numclusts_range), desc="Global Clustering Progress"))
             for numclusts, score in results:
                 sil[numclusts - 2] = score
                 print(f"Processed numclusts {numclusts}: Silhouette score = {score}")
@@ -159,7 +159,7 @@ class ClusterFixationDetector:
             print("Using serial processing")
             for numclusts in tqdm(range(2, 6), desc="Global Clustering Progress"):
                 try:
-                    numclusts, score = cluster_and_silhouette((points, numclusts))
+                    numclusts, score = self.cluster_and_silhouette((points, numclusts))
                     sil[numclusts - 2] = score
                     print(f"Processed numclusts {numclusts}: Silhouette score = {score}")
                 except Exception as e:
@@ -181,6 +181,7 @@ class ClusterFixationDetector:
         silh = self.inter_vs_intra_dist(points[::10, 1:4], T.labels_)
         print(f'kMeans for {numclusts} clusters done')
         return numclusts, np.mean(silh)
+
 
     def find_fixation_clusters(self, meanvalues, stdvalues):
         fixationcluster = np.argmin(np.sum(meanvalues[:, 1:3], axis=1))
@@ -226,7 +227,10 @@ class ClusterFixationDetector:
         altind = altind[(altind >= 0) & (altind < len(points))]
         POINTS = points[altind]
         with ProcessPoolExecutor() as executor:
-            sil_results = list(executor.map(compute_sil, range(1, 6), POINTS))
+            sil_results = list(tqdm(executor.map(self.compute_sil,
+                                                 [(numclusts, POINTS) for numclusts in range(1, 6)]),
+                                                 total=5,
+                                                 desc="Local Reclustering Progress"))
         sil = np.zeros(5)
         for mean_sil, numclusts in sil_results:
             sil[numclusts - 1] = mean_sil
@@ -241,13 +245,14 @@ class ClusterFixationDetector:
                                     3 * np.std(POINTS[T.labels_ == fixationcluster][:, 2])))[0]
         fixationcluster2 = fixationcluster2[fixationcluster2 != fixationcluster]
         for cluster in fixationcluster2:
-            T.labels_[T.labels_ == cluster] = 100
+            T.labels_[T.labels_ == cluster] = 100 
         T.labels_[T.labels_ != 100] = 2
         T.labels_[T.labels_ == 100] = 1
         return altind[T.labels_ == 2]
-    
-    
-    def compute_sil(self, numclusts, POINTS):
+
+
+    def compute_sil(self, data):
+        numclusts, POINTS = data
         T = KMeans(n_clusters=numclusts, n_init=5).fit(POINTS[::5])
         silh = self.inter_vs_intra_dist(POINTS[::5], T.labels_)
         return np.mean(silh), numclusts
