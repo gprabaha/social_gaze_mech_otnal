@@ -93,7 +93,7 @@ def main():
     params = util.get_params()
     params.update({
         'is_cluster': True,
-        'use_parallel': False,
+        'use_parallel': True,
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
         'remake_labelled_fixations': True,
@@ -117,7 +117,7 @@ def main():
         'flush_before_reload': False,
         'use_existing_variables': False,
         'reload_existing_unit_roi_comp_stats': False,
-        'submit_separate_jobs_for_sessions': False
+        'submit_separate_jobs_for_sessions': True
     })
 
     data_manager = DataManager(params)
