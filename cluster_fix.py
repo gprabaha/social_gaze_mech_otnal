@@ -141,19 +141,10 @@ class ClusterFixationDetector:
             points[:, ii] = points[:, ii] - np.min(points[:, ii])
             points[:, ii] = points[:, ii] / np.max(points[:, ii])
         return points
-
-
+    
+    
     def global_clustering(self, points):
         print("Starting global_clustering...")
-
-        def cluster_and_silhouette(data):
-            points, numclusts = data
-            print(f'Doing kMeans for {numclusts} clusters now')
-            T = KMeans(n_clusters=numclusts, n_init=5).fit(points[::10, 1:4])
-            silh = self.inter_vs_intra_dist(points[::10, 1:4], T.labels_)
-            print(f'kMeans for {numclusts} clusters done')
-            return numclusts, np.mean(silh)
-
         numclusts_range = list(range(2, 6))
         max_workers = min(len(numclusts_range), 4)  # Limiting to 4 parallel jobs
         sil = np.zeros(5)
@@ -182,6 +173,14 @@ class ClusterFixationDetector:
         print("Clustering completed successfully")
         return labels, meanvalues, stdvalues
 
+
+    def cluster_and_silhouette(self, data):
+        points, numclusts = data
+        print(f'Doing kMeans for {numclusts} clusters now')
+        T = KMeans(n_clusters=numclusts, n_init=5).fit(points[::10, 1:4])
+        silh = self.inter_vs_intra_dist(points[::10, 1:4], T.labels_)
+        print(f'kMeans for {numclusts} clusters done')
+        return numclusts, np.mean(silh)
 
     def find_fixation_clusters(self, meanvalues, stdvalues):
         fixationcluster = np.argmin(np.sum(meanvalues[:, 1:3], axis=1))
@@ -219,21 +218,15 @@ class ClusterFixationDetector:
 
     def apply_duration_threshold(self, times, threshold):
         return times[:, np.diff(times, axis=0)[0] >= threshold]
-
+    
 
     def local_reclustering(self, data):
         fix, points = data
         altind = np.arange(fix[0] - 50, fix[1] + 50)
         altind = altind[(altind >= 0) & (altind < len(points))]
         POINTS = points[altind]
-
-        def compute_sil(numclusts):
-            T = KMeans(n_clusters=numclusts, n_init=5).fit(POINTS[::5])
-            silh = self.inter_vs_intra_dist(POINTS[::5], T.labels_)
-            return np.mean(silh), numclusts
-
         with ProcessPoolExecutor() as executor:
-            sil_results = list(executor.map(compute_sil, range(1, 6)))
+            sil_results = list(executor.map(compute_sil, range(1, 6), POINTS))
         sil = np.zeros(5)
         for mean_sil, numclusts in sil_results:
             sil[numclusts - 1] = mean_sil
@@ -252,16 +245,24 @@ class ClusterFixationDetector:
         T.labels_[T.labels_ != 100] = 2
         T.labels_[T.labels_ == 100] = 1
         return altind[T.labels_ == 2]
+    
+    
+    def compute_sil(self, numclusts, POINTS):
+        T = KMeans(n_clusters=numclusts, n_init=5).fit(POINTS[::5])
+        silh = self.inter_vs_intra_dist(POINTS[::5], T.labels_)
+        return np.mean(silh), numclusts
 
-
+    
     def remove_not_fixations(self, fixationindexes, notfixations):
         fixationindexes = np.setdiff1d(fixationindexes, notfixations)
         return fixationindexes
+
 
     def classify_saccades(self, fixationindexes, points):
         saccadeindexes = np.setdiff1d(np.arange(len(points)), fixationindexes)
         saccadetimes = self.find_behavioral_times(saccadeindexes)
         return saccadeindexes, saccadetimes
+
 
     def round_times(self, fixationtimes, saccadetimes):
         round5 = np.mod(fixationtimes, self.samprate * 1000)
@@ -269,13 +270,11 @@ class ClusterFixationDetector:
         round5[1] = -round5[1]
         fixationtimes = np.round((fixationtimes + round5) / (self.samprate * 1000)).astype(int)
         fixationtimes[fixationtimes < 1] = 1
-
         round5 = np.mod(saccadetimes, self.samprate * 1000)
         round5[0] = -round5[0]
         round5[1, round5[1] > 0] = self.samprate * 1000 - round5[1, round5[1] > 0]
         saccadetimes = np.round((saccadetimes + round5) / (self.samprate * 1000)).astype(int)
         saccadetimes[saccadetimes < 1] = 1
-
         return fixationtimes, saccadetimes
 
     def calculate_cluster_values(self, fixationtimes, saccadetimes, eyedat):
@@ -287,11 +286,13 @@ class ClusterFixationDetector:
         recalc_stdvalues = [np.nanstd(pointfix, axis=0), np.nanstd(pointsac, axis=0)]
         return pointfix, pointsac, recalc_meanvalues, recalc_stdvalues
 
+
     def extract_fixations(self, fixationtimes, eyedat):
         x = eyedat[0]
         y = eyedat[1]
         fixations = [np.mean([x[fix[0]:fix[1]], y[fix[0]:fix[1]]], axis=1) for fix in fixationtimes.T]
         return np.array(fixations)
+
 
     def extract_variables(self, xss, yss):
         if len(xss) < 3:
@@ -303,6 +304,7 @@ class ClusterFixationDetector:
         rot = [np.abs(angle[a] - angle[a + 1]) for a in range(len(xss) - 2)]
         rot = [r if r <= 180 else 360 - r for r in rot]
         return [np.max(vel), np.max(accel), np.mean(dist), np.mean(vel), np.abs(np.mean(angle)), np.mean(rot)]
+
 
     def inter_vs_intra_dist(self, X, labels):
         n = len(labels)

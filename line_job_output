@@ -1,2765 +1,100 @@
-Saccade labels loaded from /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/labelled_saccades_remapped_gaze.csv
-All labelled spiketimes loaded from /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/spike_labels_remapped_gaze.csv
-Number of processes being used is: 31
-Processing unit in session OTNAL_FV_121021:   0%|          | 0/10 [00:00<?, ?it/s]
-Processing unit in session OTNAL_FV_061721: 0it [00:00, ?it/s][A
-
-Processing unit in session OTNAL_FV_030921:   0%|          | 0/74 [00:00<?, ?it/s][A[AProcessing unit in session OTNAL_FV_061721: 0it [00:00, ?it/s]
-
-Processing unit in session OTNAL_FV_062722:   0%|          | 0/30 [00:00<?, ?it/s][A
-
-
-Processing unit in session OTNAL_FV_031521:   0%|          | 0/55 [00:00<?, ?it/s][A[A[A
-
-
-
-Processing unit in session OTNAL_FV_073021: 0it [00:00, ?it/s][A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:   0%|          | 0/43 [00:00<?, ?it/s][A[A[A[A[AProcessing unit in session OTNAL_FV_073021: 0it [00:02, ?it/s]
-
-
-
-
-Processing unit in session OTNAL_FV_062222:   0%|          | 0/37 [00:00<?, ?it/s][A[A[A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:   0%|          | 0/57 [00:00<?, ?it/s][A[A[A[A[A[A
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070121:   0%|          | 0/30 [00:00<?, ?it/s][A[A[A[A[A[A[A
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062822:   0%|          | 0/29 [00:00<?, ?it/s][A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_120221: 0it [00:00, ?it/s][A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:   0%|          | 0/35 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:   0%|          | 0/19 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:   0%|          | 0/26 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:   0%|          | 0/66 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:   0%|          | 0/79 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062922:   0%|          | 0/15 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_030321:   0%|          | 0/17 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_112320:   0%|          | 0/26 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:   0%|          | 0/51 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_120221: 0it [00:11, ?it/s]
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:   0%|          | 0/52 [00:00<?, ?it/s][A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- ... (more hidden) ...[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:   1%|▏         | 1/74 [01:52<2:17:24, 112.93s/it][A[A
-
-Processing unit in session OTNAL_FV_030921:   3%|▎         | 2/74 [03:58<2:24:08, 120.11s/it][A[A
-
-Processing unit in session OTNAL_FV_030921:   4%|▍         | 3/74 [05:42<2:13:30, 112.83s/it][A[A
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070121:   3%|▎         | 1/30 [07:31<3:38:04, 451.19s/it][A[A[A[A[A[A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:   3%|▎         | 1/37 [08:25<5:02:59, 505.00s/it][A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:   5%|▌         | 4/74 [09:06<2:53:51, 149.03s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_030321:   6%|▌         | 1/17 [09:33<2:32:49, 573.11s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:   2%|▏         | 1/43 [09:54<6:56:01, 594.32s/it][A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:   7%|▋         | 5/74 [10:47<2:31:19, 131.59s/it][A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:   3%|▎         | 1/35 [11:07<6:18:06, 667.26s/it][A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- ... (more hidden) ...[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:   1%|▏         | 1/79 [11:55<15:30:02, 715.41s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_121021:  10%|█         | 1/10 [12:19<1:50:52, 739.21s/it]
-
-Processing unit in session OTNAL_FV_030921:   8%|▊         | 6/74 [12:37<2:20:59, 124.41s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:   4%|▍         | 1/26 [12:32<5:13:38, 752.74s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:   2%|▏         | 1/52 [12:49<10:54:23, 769.88s/it][A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:   9%|▉         | 7/74 [14:19<2:10:37, 116.98s/it][A[A
-
-Processing unit in session OTNAL_FV_030921:  11%|█         | 8/74 [16:06<2:05:07, 113.76s/it][A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:   5%|▌         | 1/19 [17:20<5:12:00, 1040.04s/it][A[A[A[A[A[A[A[A[A[A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:   5%|▌         | 2/37 [17:28<5:07:56, 527.90s/it][A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_030321:  12%|█▏        | 2/17 [17:27<2:08:49, 515.27s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  12%|█▏        | 9/74 [18:13<2:07:35, 117.77s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:   2%|▏         | 1/51 [18:55<15:46:17, 1135.55s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  14%|█▎        | 10/74 [19:16<1:47:51, 101.12s/it][A[A
-
-Processing unit in session OTNAL_FV_030921:  15%|█▍        | 11/74 [20:20<1:34:05, 89.61s/it] [A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:   8%|▊         | 2/26 [20:17<3:53:15, 583.13s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:   6%|▌         | 2/35 [20:23<5:30:55, 601.68s/it][A[A[A[A[A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:   5%|▍         | 2/43 [21:07<7:17:42, 640.56s/it][A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  16%|█▌        | 12/74 [22:55<1:53:15, 109.61s/it][A[A
-
-Processing unit in session OTNAL_FV_030921:  18%|█▊        | 13/74 [24:19<1:43:27, 101.77s/it][A[A
-Processing unit in session OTNAL_FV_062722:   3%|▎         | 1/30 [24:19<11:45:37, 1459.93s/it][A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062922:   7%|▋         | 1/15 [25:07<5:51:41, 1507.27s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  19%|█▉        | 14/74 [25:22<1:30:03, 90.06s/it] [A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:   4%|▍         | 2/51 [26:16<9:53:42, 727.00s/it]  [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  20%|██        | 15/74 [26:54<1:29:04, 90.58s/it][A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  11%|█         | 2/19 [26:45<3:35:31, 760.68s/it] [A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:   4%|▍         | 2/52 [27:00<11:21:10, 817.42s/it][A[A[A[A[A[A[A[A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:   2%|▏         | 1/57 [27:18<25:29:23, 1638.64s/it][A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  22%|██▏       | 16/74 [28:46<1:33:57, 97.19s/it][A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:   9%|▊         | 3/35 [28:40<4:55:34, 554.20s/it][A[A[A[A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_121021:  20%|██        | 2/10 [29:40<2:02:17, 917.13s/it]
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062822:   3%|▎         | 1/29 [30:38<14:18:03, 1838.71s/it][A[A[A[A[A[A[A[A
-Processing unit in session OTNAL_FV_062722:   7%|▋         | 2/30 [31:02<6:31:10, 838.23s/it]  [A
-
-Processing unit in session OTNAL_FV_030921:  23%|██▎       | 17/74 [31:09<1:45:14, 110.78s/it][A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:   7%|▋         | 3/43 [31:54<7:09:03, 643.59s/it][A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:   3%|▎         | 2/79 [31:59<21:27:04, 1002.92s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-Processing unit in session OTNAL_FV_031521:   2%|▏         | 1/55 [32:40<29:24:50, 1960.94s/it][A[A[A
-
-Processing unit in session OTNAL_FV_030921:  24%|██▍       | 18/74 [33:21<1:49:31, 117.35s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:   6%|▌         | 3/51 [33:14<7:48:35, 585.75s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  26%|██▌       | 19/74 [34:49<1:39:27, 108.50s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:   2%|▏         | 1/66 [35:10<38:06:39, 2110.77s/it][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  27%|██▋       | 20/74 [36:21<1:33:14, 103.60s/it][A[A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:   6%|▌         | 3/52 [36:57<9:45:18, 716.70s/it] [A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  28%|██▊       | 21/74 [37:25<1:20:56, 91.62s/it] [A[A
-Processing unit in session OTNAL_FV_062722:  10%|█         | 3/30 [38:09<4:52:35, 650.20s/it][A
-
-Processing unit in session OTNAL_FV_030921:  30%|██▉       | 22/74 [39:00<1:20:15, 92.60s/it][A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:   8%|▊         | 3/37 [39:11<8:19:31, 881.50s/it][A[A[A[A
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070121:   7%|▋         | 2/30 [39:18<10:10:21, 1307.91s/it][A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_121021:  30%|███       | 3/10 [39:38<1:29:59, 771.38s/it]
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  12%|█▏        | 3/26 [39:28<5:23:04, 842.78s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  11%|█▏        | 4/35 [40:15<5:15:00, 609.71s/it][A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  31%|███       | 23/74 [40:31<1:18:16, 92.09s/it][A[A
-
-Processing unit in session OTNAL_FV_030921:  32%|███▏      | 24/74 [41:45<1:12:10, 86.62s/it][A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:   4%|▎         | 2/57 [42:18<18:23:58, 1204.34s/it][A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  34%|███▍      | 25/74 [43:01<1:08:07, 83.42s/it][A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  16%|█▌        | 3/19 [43:20<3:51:26, 867.93s/it][A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:   9%|▉         | 4/43 [44:01<7:19:48, 676.63s/it][A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:   3%|▎         | 2/66 [44:33<21:20:03, 1200.05s/it][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  35%|███▌      | 26/74 [45:30<1:22:39, 103.32s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- ... (more hidden) ...[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_112320:   4%|▍         | 1/26 [46:18<19:17:54, 2778.98s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  36%|███▋      | 27/74 [47:02<1:18:06, 99.71s/it] [A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  11%|█         | 4/37 [47:30<6:41:55, 730.76s/it][A[A[A[A
-Processing unit in session OTNAL_FV_062722:  13%|█▎        | 4/30 [48:02<4:31:59, 627.68s/it][A
-
-Processing unit in session OTNAL_FV_030921:  38%|███▊      | 28/74 [48:57<1:20:04, 104.45s/it][A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  14%|█▍        | 5/35 [49:55<4:59:25, 598.84s/it][A[A[A[A[A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  12%|█▏        | 5/43 [50:00<5:55:55, 561.97s/it][A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  39%|███▉      | 29/74 [50:34<1:16:39, 102.21s/it][A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  21%|██        | 4/19 [52:24<3:04:57, 739.84s/it][A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:   8%|▊         | 4/51 [52:55<10:43:07, 821.01s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062822:   7%|▋         | 2/29 [53:55<11:50:29, 1578.86s/it][A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:   4%|▍         | 3/79 [54:13<24:22:03, 1154.25s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  41%|████      | 30/74 [54:59<1:50:45, 151.03s/it][A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  14%|█▎        | 5/37 [55:50<5:45:11, 647.23s/it][A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062922:  13%|█▎        | 2/15 [55:59<6:10:34, 1710.33s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  42%|████▏     | 31/74 [56:15<1:32:00, 128.38s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:   5%|▍         | 3/66 [56:08<16:57:58, 969.51s/it] [A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_030321:  18%|█▊        | 3/17 [56:20<5:13:51, 1345.11s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  15%|█▌        | 4/26 [56:38<5:35:59, 916.34s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:   5%|▌         | 3/57 [56:52<15:47:59, 1053.32s/it][A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_112320:   8%|▊         | 2/26 [56:48<10:05:47, 1514.49s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  17%|█▋        | 6/35 [57:07<4:22:00, 542.08s/it][A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  43%|████▎     | 32/74 [57:57<1:24:29, 120.69s/it][A[A
-
-Processing unit in session OTNAL_FV_030921:  45%|████▍     | 33/74 [59:31<1:17:00, 112.69s/it][A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  26%|██▋       | 5/19 [1:00:30<2:31:16, 648.34s/it][A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  46%|████▌     | 34/74 [1:01:24<1:15:09, 112.73s/it][A[AProcessing unit in session OTNAL_FV_121021:  40%|████      | 4/10 [1:01:43<1:38:57, 989.65s/it]
-
-
-Processing unit in session OTNAL_FV_031521:   4%|▎         | 2/55 [1:02:29<27:22:35, 1859.53s/it][A[A[A
-
-Processing unit in session OTNAL_FV_030921:  47%|████▋     | 35/74 [1:03:42<1:18:04, 120.12s/it][A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:   7%|▋         | 4/57 [1:04:50<12:09:39, 826.03s/it][A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  19%|█▉        | 5/26 [1:04:59<4:28:22, 766.79s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  16%|█▌        | 6/37 [1:05:56<5:27:16, 633.44s/it][A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  20%|██        | 7/35 [1:06:48<4:18:55, 554.85s/it][A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  49%|████▊     | 36/74 [1:07:03<1:31:32, 144.54s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:   6%|▌         | 4/66 [1:06:53<14:29:18, 841.26s/it][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  32%|███▏      | 6/19 [1:08:05<2:06:15, 582.69s/it][A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  50%|█████     | 37/74 [1:08:22<1:16:52, 124.67s/it][A[A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:   8%|▊         | 4/52 [1:09:12<15:58:13, 1197.78s/it][A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  51%|█████▏    | 38/74 [1:09:47<1:07:45, 112.94s/it][A[AProcessing unit in session OTNAL_FV_121021:  50%|█████     | 5/10 [1:10:51<1:09:13, 830.64s/it]
-
-Processing unit in session OTNAL_FV_030921:  53%|█████▎    | 39/74 [1:12:15<1:11:56, 123.33s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  23%|██▎       | 6/26 [1:13:28<3:46:24, 679.21s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  54%|█████▍    | 40/74 [1:14:40<1:13:33, 129.82s/it][A[A
-Processing unit in session OTNAL_FV_062722:  17%|█▋        | 5/30 [1:15:03<6:50:47, 985.91s/it][A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_112320:  12%|█▏        | 3/26 [1:15:34<8:32:34, 1337.15s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  55%|█████▌    | 41/74 [1:15:55<1:02:26, 113.54s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:   8%|▊         | 5/66 [1:15:44<12:21:38, 729.49s/it][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  23%|██▎       | 8/35 [1:16:09<4:10:33, 556.80s/it][A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:   5%|▌         | 4/79 [1:16:17<25:26:24, 1221.13s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  14%|█▍        | 6/43 [1:16:33<9:22:48, 912.66s/it][A[A[A[A[A
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070121:  10%|█         | 3/30 [1:16:43<13:01:05, 1735.75s/it][A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_121021:  60%|██████    | 6/10 [1:17:59<46:14, 693.62s/it]  
-
-Processing unit in session OTNAL_FV_030921:  57%|█████▋    | 42/74 [1:18:11<1:04:09, 120.31s/it][A[A
-
-Processing unit in session OTNAL_FV_030921:  58%|█████▊    | 43/74 [1:20:28<1:04:43, 125.29s/it][A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  19%|█▉        | 7/37 [1:21:38<6:07:12, 734.40s/it][A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:   9%|▉         | 6/66 [1:22:12<10:13:15, 613.25s/it][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  59%|█████▉    | 44/74 [1:22:35<1:02:51, 125.73s/it][A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  16%|█▋        | 7/43 [1:22:41<7:20:41, 734.48s/it][A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_112320:  15%|█▌        | 4/26 [1:24:01<6:10:10, 1009.55s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  61%|██████    | 45/74 [1:24:23<58:14, 120.51s/it]  [A[A
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062822:  10%|█         | 3/29 [1:24:20<12:12:47, 1691.05s/it][A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  26%|██▌       | 9/35 [1:24:33<3:54:11, 540.43s/it][A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  62%|██████▏   | 46/74 [1:25:39<49:58, 107.10s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062922:  20%|██        | 3/15 [1:25:38<5:48:20, 1741.68s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:  10%|▉         | 5/51 [1:25:46<15:47:18, 1235.63s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  19%|█▊        | 8/43 [1:28:16<5:54:12, 607.23s/it][A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:   6%|▋         | 5/79 [1:28:06<21:18:21, 1036.51s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  27%|██▋       | 7/26 [1:28:40<3:59:09, 755.23s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  37%|███▋      | 7/19 [1:28:42<2:39:19, 796.61s/it][A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- ... (more hidden) ...[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  64%|██████▎   | 47/74 [1:30:36<1:13:51, 164.12s/it][A[A
-
-
-Processing unit in session OTNAL_FV_031521:   5%|▌         | 3/55 [1:31:07<25:55:28, 1794.78s/it][A[A[A
-
-Processing unit in session OTNAL_FV_030921:  65%|██████▍   | 48/74 [1:32:07<1:01:32, 142.01s/it][A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:   9%|▉         | 5/57 [1:33:52<16:42:22, 1156.58s/it][A[A[A[A[A[A
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070121:  13%|█▎        | 4/30 [1:34:25<10:36:51, 1469.67s/it][A[A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  21%|██        | 9/43 [1:34:59<5:08:00, 543.53s/it][A[A[A[A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  22%|██▏       | 8/37 [1:36:01<6:14:37, 775.09s/it][A[A[A[A
-Processing unit in session OTNAL_FV_062722:  20%|██        | 6/30 [1:36:12<7:12:50, 1082.11s/it][A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  31%|███       | 8/26 [1:36:23<3:18:39, 662.22s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:  12%|█▏        | 6/51 [1:36:20<12:53:08, 1030.86s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  66%|██████▌   | 49/74 [1:36:59<1:17:57, 187.11s/it][A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  42%|████▏     | 8/19 [1:37:03<2:08:46, 702.39s/it][A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  68%|██████▊   | 50/74 [1:38:56<1:06:22, 165.94s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:  11%|█         | 7/66 [1:39:52<12:26:42, 759.36s/it][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  29%|██▊       | 10/35 [1:40:23<4:37:54, 666.97s/it][A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_030321:  24%|██▎       | 4/17 [1:40:39<6:43:48, 1863.70s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  23%|██▎       | 10/43 [1:41:00<4:27:52, 487.05s/it][A[A[A[A[A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:  10%|▉         | 5/52 [1:41:08<19:01:11, 1456.83s/it][A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_112320:  19%|█▉        | 5/26 [1:42:23<6:05:01, 1042.94s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  69%|██████▉   | 51/74 [1:42:49<1:11:20, 186.11s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062922:  27%|██▋       | 4/15 [1:43:30<4:30:51, 1477.40s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:  14%|█▎        | 7/51 [1:44:33<10:27:05, 855.12s/it] [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  70%|███████   | 52/74 [1:45:48<1:07:28, 184.02s/it][A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  24%|██▍       | 9/37 [1:46:36<5:41:22, 731.50s/it][A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  72%|███████▏  | 53/74 [1:47:38<56:39, 161.88s/it]  [A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  47%|████▋     | 9/19 [1:48:10<1:55:13, 691.32s/it][A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  73%|███████▎  | 54/74 [1:48:43<44:14, 132.75s/it][A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:  11%|█         | 6/57 [1:49:20<15:17:03, 1078.89s/it][A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  31%|███▏      | 11/35 [1:49:20<4:10:53, 627.21s/it][A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:  12%|█▏        | 6/52 [1:49:09<14:22:26, 1124.93s/it][A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  35%|███▍      | 9/26 [1:49:32<3:18:51, 701.88s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070121:  17%|█▋        | 5/30 [1:50:13<8:54:03, 1281.75s/it] [A[A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  26%|██▌       | 11/43 [1:50:39<4:34:48, 515.25s/it][A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  74%|███████▍  | 55/74 [1:50:48<41:18, 130.44s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:   8%|▊         | 6/79 [1:50:38<23:11:36, 1143.79s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062822:  14%|█▍        | 4/29 [1:52:23<11:43:16, 1687.88s/it][A[A[A[A[A[A[A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  27%|██▋       | 10/37 [1:52:44<4:38:41, 619.32s/it][A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  76%|███████▌  | 56/74 [1:55:14<51:20, 171.14s/it][A[A
-Processing unit in session OTNAL_FV_062722:  23%|██▎       | 7/30 [1:55:41<7:05:41, 1110.50s/it][A
-
-Processing unit in session OTNAL_FV_030921:  77%|███████▋  | 57/74 [1:56:28<40:16, 142.12s/it][A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  34%|███▍      | 12/35 [1:56:26<3:36:53, 565.82s/it][A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  38%|███▊      | 10/26 [1:56:45<2:45:01, 618.82s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  78%|███████▊  | 58/74 [1:58:22<35:38, 133.65s/it][A[AProcessing unit in session OTNAL_FV_121021:  70%|███████   | 7/10 [1:58:54<1:03:28, 1269.53s/it]
-
-Processing unit in session OTNAL_FV_030921:  80%|███████▉  | 59/74 [1:59:32<28:38, 114.59s/it][A[A
-
-
-Processing unit in session OTNAL_FV_031521:   7%|▋         | 4/55 [1:59:45<24:59:51, 1764.53s/it][A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:  12%|█▏        | 8/66 [2:00:05<14:33:40, 903.80s/it][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  81%|████████  | 60/74 [2:01:21<26:17, 112.67s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- ... (more hidden) ...[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  42%|████▏     | 11/26 [2:02:20<2:12:58, 531.93s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  82%|████████▏ | 61/74 [2:02:43<22:28, 103.72s/it][A[A
-
-Processing unit in session OTNAL_FV_030921:  84%|████████▍ | 62/74 [2:04:05<19:23, 96.95s/it] [A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  30%|██▉       | 11/37 [2:04:04<4:36:21, 637.73s/it][A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  85%|████████▌ | 63/74 [2:05:55<18:31, 101.01s/it][A[A
-
-
-Processing unit in session OTNAL_FV_031521:   9%|▉         | 5/55 [2:06:55<17:49:17, 1283.16s/it][A[A[A
-
-Processing unit in session OTNAL_FV_030921:  86%|████████▋ | 64/74 [2:07:06<15:20, 92.02s/it] [A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:  16%|█▌        | 8/51 [2:06:51<12:02:57, 1008.79s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  88%|████████▊ | 65/74 [2:08:21<13:02, 86.96s/it][A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:  12%|█▏        | 7/57 [2:09:12<15:29:39, 1115.60s/it][A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  89%|████████▉ | 66/74 [2:09:45<11:27, 86.00s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:   9%|▉         | 7/79 [2:09:50<22:55:47, 1146.50s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062922:  33%|███▎      | 5/15 [2:09:56<4:12:45, 1516.54s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  91%|█████████ | 67/74 [2:11:34<10:50, 92.96s/it][A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  32%|███▏      | 12/37 [2:11:46<4:03:29, 584.39s/it][A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- ... (more hidden) ...[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  92%|█████████▏| 68/74 [2:13:03<09:09, 91.65s/it][A[A
-
-Processing unit in session OTNAL_FV_030921:  93%|█████████▎| 69/74 [2:14:17<07:12, 86.42s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_030321:  29%|██▉       | 5/17 [2:14:13<6:23:37, 1918.15s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  46%|████▌     | 12/26 [2:14:28<2:18:01, 591.52s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  37%|███▋      | 13/35 [2:15:15<4:30:01, 736.45s/it][A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  95%|█████████▍| 70/74 [2:15:31<05:30, 82.58s/it][A[AProcessing unit in session OTNAL_FV_121021:  80%|████████  | 8/10 [2:16:15<39:53, 1196.88s/it]  
-
-Processing unit in session OTNAL_FV_030921:  96%|█████████▌| 71/74 [2:16:39<03:54, 78.31s/it][A[A
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062822:  17%|█▋        | 5/29 [2:16:45<10:42:40, 1606.69s/it][A[A[A[A[A[A[A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:  14%|█▍        | 8/57 [2:17:26<12:29:31, 917.79s/it] [A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  28%|██▊       | 12/43 [2:17:35<7:19:18, 850.27s/it][A[A[A[A[A
-Processing unit in session OTNAL_FV_062722:  27%|██▋       | 8/30 [2:17:53<7:12:59, 1180.88s/it][A
-
-Processing unit in session OTNAL_FV_030921:  97%|█████████▋| 72/74 [2:18:13<02:45, 82.98s/it][A[A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:  13%|█▎        | 7/52 [2:18:00<16:32:14, 1323.00s/it][A[A[A[A[A[A[A[A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  35%|███▌      | 13/37 [2:18:19<3:30:30, 526.27s/it][A[A[A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  53%|█████▎    | 10/19 [2:19:01<2:37:25, 1049.54s/it][A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_030921:  99%|█████████▊| 73/74 [2:19:54<01:28, 88.48s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_112320:  23%|██▎       | 6/26 [2:19:42<8:03:10, 1449.51s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-Processing unit in session OTNAL_FV_031521:  11%|█         | 6/55 [2:21:35<15:36:00, 1146.12s/it][A[A[A
-
-Processing unit in session OTNAL_FV_030921: 100%|██████████| 74/74 [2:22:44<00:00, 113.03s/it][A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                      [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_030921: 100%|██████████| 74/74 [2:22:45<00:00, 115.74s/it]
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:  14%|█▎        | 9/66 [2:24:23<17:03:20, 1077.21s/it][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_120220:  33%|███▎      | 6/18 [2:25:59<4:14:46, 1273.90s/it][A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  58%|█████▊    | 11/19 [2:26:37<1:55:42, 867.76s/it] [A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:  18%|█▊        | 9/51 [2:26:57<12:29:19, 1070.47s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:  10%|█         | 8/79 [2:27:21<22:00:41, 1116.08s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-Processing unit in session OTNAL_FV_031521:  13%|█▎        | 7/55 [2:27:43<11:53:31, 891.90s/it] [A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062922:  40%|████      | 6/15 [2:28:15<3:26:08, 1374.31s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_121021:  90%|█████████ | 9/10 [2:28:47<17:37, 1057.51s/it]
-
-
-
-Processing unit in session OTNAL_FV_062222:  38%|███▊      | 14/37 [2:29:16<3:36:52, 565.76s/it][A[A[A[A
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070121:  20%|██        | 6/30 [2:32:43<11:25:06, 1712.78s/it][A[A[A[A[A[A[A
-Processing unit in session OTNAL_FV_062722:  30%|███       | 9/30 [2:33:14<6:24:55, 1099.80s/it][A
-
-
-Processing unit in session OTNAL_FV_031521:  15%|█▍        | 8/55 [2:33:58<9:29:42, 727.30s/it] [A[A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  41%|████      | 15/37 [2:34:35<3:00:14, 491.56s/it][A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  30%|███       | 13/43 [2:36:06<7:44:34, 929.14s/it][A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  50%|█████     | 13/26 [2:36:41<2:56:49, 816.10s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_120220:  39%|███▉      | 7/18 [2:37:13<3:17:33, 1077.60s/it][A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  40%|████      | 14/35 [2:37:40<5:22:03, 920.15s/it][A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  63%|██████▎   | 12/19 [2:38:38<1:36:01, 823.07s/it][A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:  15%|█▌        | 10/66 [2:38:42<15:42:29, 1009.82s/it][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:  16%|█▌        | 9/57 [2:40:21<14:08:38, 1060.80s/it][A[A[A[A[A[A
-
-
-Processing unit in session OTNAL_FV_031521:  16%|█▋        | 9/55 [2:40:29<7:56:55, 622.08s/it][A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  33%|███▎      | 14/43 [2:42:25<6:08:43, 762.86s/it][A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:  11%|█▏        | 9/79 [2:42:32<20:27:12, 1051.89s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  43%|████▎     | 16/37 [2:43:55<2:59:14, 512.11s/it][A[A[A[A
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062822:  21%|██        | 6/29 [2:45:18<10:29:44, 1642.79s/it][A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_112320:  27%|██▋       | 7/26 [2:45:16<7:47:44, 1477.06s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  68%|██████▊   | 13/19 [2:45:45<1:10:19, 703.24s/it][A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:  15%|█▌        | 8/52 [2:45:49<17:30:55, 1433.08s/it][A[A[A[A[A[A[A[A[A
-
-
-Processing unit in session OTNAL_FV_031521:  18%|█▊        | 10/55 [2:47:52<7:05:07, 566.84s/it][A[A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:  18%|█▊        | 10/57 [2:48:02<11:25:51, 875.57s/it][A[A[A[A[A[A
-Processing unit in session OTNAL_FV_062722:  33%|███▎      | 10/30 [2:48:10<5:45:34, 1036.74s/it][A
-
-
-
-Processing unit in session OTNAL_FV_062222:  46%|████▌     | 17/37 [2:49:20<2:31:54, 455.70s/it][A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_030321:  35%|███▌      | 6/17 [2:49:22<6:03:33, 1983.02s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_121021: 100%|██████████| 10/10 [2:50:01<00:00, 1124.59s/it]Processing unit in session OTNAL_FV_121021: 100%|██████████| 10/10 [2:50:01<00:00, 1020.18s/it]
-
-
-
-Processing unit in session OTNAL_FV_031521:  20%|██        | 11/55 [2:52:10<5:46:17, 472.22s/it][A[A[A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:  17%|█▋        | 9/52 [2:51:51<13:07:08, 1098.34s/it][A[A[A[A[A[A[A[A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:  19%|█▉        | 11/57 [2:52:42<8:51:39, 693.46s/it] [A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  35%|███▍      | 15/43 [2:53:17<5:40:25, 729.48s/it][A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:  20%|█▉        | 10/51 [2:53:42<14:04:18, 1235.58s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  74%|███████▎  | 14/19 [2:53:52<53:09, 637.98s/it]  [A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070121:  23%|██▎       | 7/30 [2:54:16<10:03:58, 1575.59s/it][A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062922:  47%|████▋     | 7/15 [2:54:52<3:12:57, 1447.19s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_120220:  44%|████▍     | 8/18 [2:54:59<2:58:58, 1073.85s/it][A[A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:  19%|█▉        | 10/52 [2:56:52<9:56:29, 852.12s/it] [A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  54%|█████▍    | 14/26 [2:58:17<3:12:13, 961.14s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-Processing unit in session OTNAL_FV_031521:  22%|██▏       | 12/55 [2:58:27<5:17:49, 443.48s/it][A[A[AProcessing unit in session OTNAL_FV_062422:  21%|██        | 10/48 [2:58:17<11:40:35, 1106.19s/it]
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:  13%|█▎        | 10/79 [3:01:30<20:40:19, 1078.54s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  79%|███████▉  | 15/19 [3:02:32<40:09, 602.29s/it][A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  37%|███▋      | 16/43 [3:02:56<5:07:51, 684.11s/it][A[A[A[A[A
-
-
-Processing unit in session OTNAL_FV_031521:  24%|██▎       | 13/55 [3:04:26<4:52:33, 417.93s/it][A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  43%|████▎     | 15/35 [3:05:44<6:23:31, 1150.56s/it][A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:  14%|█▍        | 11/79 [3:06:55<16:00:51, 847.82s/it] [A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  49%|████▊     | 18/37 [3:07:32<3:24:53, 647.04s/it][A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:  17%|█▋        | 11/66 [3:07:33<18:48:00, 1230.56s/it][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  58%|█████▊    | 15/26 [3:08:59<2:38:35, 865.02s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-Processing unit in session OTNAL_FV_120220:  50%|█████     | 9/18 [3:08:58<2:30:06, 1000.67s/it][A[A
-
-
-Processing unit in session OTNAL_FV_031521:  25%|██▌       | 14/55 [3:09:46<4:25:20, 388.31s/it][A[A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:  21%|██        | 12/57 [3:10:31<10:05:36, 807.47s/it][A[A[A[A[A[A
-Processing unit in session OTNAL_FV_062722:  37%|███▋      | 11/30 [3:10:47<5:59:20, 1134.78s/it][A
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062822:  24%|██▍       | 7/29 [3:10:56<9:49:44, 1608.37s/it] [A[A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_062422:  23%|██▎       | 11/48 [3:11:55<10:27:43, 1017.93s/it]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062922:  53%|█████▎    | 8/15 [3:12:31<2:34:25, 1323.65s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:  22%|██▏       | 11/51 [3:13:00<13:27:53, 1211.83s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  84%|████████▍ | 16/19 [3:13:23<30:50, 616.94s/it][A[A[A[A[A[A[A[A[A[A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  51%|█████▏    | 19/37 [3:15:07<2:56:48, 589.38s/it][A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  62%|██████▏   | 16/26 [3:15:11<1:59:25, 716.55s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-Processing unit in session OTNAL_FV_031521:  27%|██▋       | 15/55 [3:15:42<4:12:19, 378.50s/it][A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  40%|███▉      | 17/43 [3:15:50<5:08:15, 711.36s/it][A[A[A[A[AProcessing unit in session OTNAL_FV_062422:  25%|██▌       | 12/48 [3:15:54<7:48:31, 780.87s/it]  
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  46%|████▌     | 16/35 [3:16:37<5:16:55, 1000.81s/it][A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_030321:  41%|████      | 7/17 [3:18:32<5:17:48, 1906.85s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_112320:  31%|███       | 8/26 [3:18:48<8:14:12, 1647.38s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:  24%|██▎       | 12/51 [3:19:40<10:27:03, 964.71s/it] [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:  15%|█▌        | 12/79 [3:20:03<15:26:16, 829.50s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:  21%|██        | 11/52 [3:20:26<11:39:48, 1024.12s/it][A[A[A[A[A[A[A[A[A
-Processing unit in session OTNAL_FV_062722:  40%|████      | 12/30 [3:23:00<5:03:48, 1012.70s/it][A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  89%|████████▉ | 17/19 [3:23:41<20:34, 617.13s/it][A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:  25%|██▌       | 13/51 [3:24:00<7:55:49, 751.30s/it] [A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  49%|████▊     | 17/35 [3:26:46<4:24:52, 882.89s/it] [A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070121:  27%|██▋       | 8/30 [3:27:26<10:26:07, 1707.60s/it][A[A[A[A[A[A[A
-
-
-Processing unit in session OTNAL_FV_031521:  29%|██▉       | 16/55 [3:27:57<5:15:40, 485.65s/it][A[A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  54%|█████▍    | 20/37 [3:28:52<3:07:02, 660.13s/it][A[A[A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521:  95%|█████████▍| 18/19 [3:29:27<08:55, 535.73s/it][A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:  16%|█▋        | 13/79 [3:29:52<13:52:19, 756.66s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:  18%|█▊        | 12/66 [3:30:17<19:04:00, 1271.12s/it][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_112320:  35%|███▍      | 9/26 [3:31:01<6:25:44, 1361.46s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062922:  60%|██████    | 9/15 [3:31:13<2:06:03, 1260.60s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  65%|██████▌   | 17/26 [3:32:20<2:01:33, 810.36s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062822:  28%|██▊       | 8/29 [3:33:18<8:53:13, 1523.50s/it][A[A[A[A[A[A[A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:  23%|██▎       | 13/57 [3:33:34<12:00:00, 981.82s/it][A[A[A[A[A[AProcessing unit in session OTNAL_FV_062422:  27%|██▋       | 13/48 [3:33:27<8:23:37, 863.35s/it]
-
-
-Processing unit in session OTNAL_FV_031521:  31%|███       | 17/55 [3:34:08<4:45:51, 451.36s/it][A[A[A
-
-Processing unit in session OTNAL_FV_120220:  56%|█████▌    | 10/18 [3:34:43<2:35:49, 1168.66s/it][A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_061521: 100%|██████████| 19/19 [3:36:18<00:00, 498.32s/it][A[A[A[A[A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_061521: 100%|██████████| 19/19 [3:36:18<00:00, 683.09s/it]
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  51%|█████▏    | 18/35 [3:36:52<3:46:35, 799.72s/it][A[A[A[A[A[A[A[A[A[A
-
-
-
-
-Processing unit in session OTNAL_FV_062322:  42%|████▏     | 18/43 [3:37:17<6:08:27, 884.28s/it][A[A[A[A[A
-
-
-
-Processing unit in session OTNAL_FV_062222:  57%|█████▋    | 21/37 [3:37:24<2:44:08, 615.55s/it][A[A[A[A
-Processing unit in session OTNAL_FV_062722:  43%|████▎     | 13/30 [3:38:09<4:38:02, 981.34s/it] [AProcessing unit in session OTNAL_FV_062422:  29%|██▉       | 14/48 [3:38:00<6:28:11, 685.04s/it]
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:  18%|█▊        | 14/79 [3:38:41<12:25:18, 687.97s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032221:  13%|█▎        | 9/71 [3:40:57<24:41:13, 1433.44s/it][A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_112320:  38%|███▊      | 10/26 [3:41:43<5:03:52, 1139.50s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_032421:  19%|█▉        | 15/79 [3:42:25<9:44:40, 548.14s/it] [A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  54%|█████▍    | 19/35 [3:43:19<3:00:11, 675.75s/it][A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070722:  23%|██▎       | 12/52 [3:43:42<12:38:17, 1137.44s/it][A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070522:  69%|██████▉   | 18/26 [3:44:19<1:44:25, 783.19s/it][A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062922:  67%|██████▋   | 10/15 [3:44:42<1:33:26, 1121.32s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-Processing unit in session OTNAL_FV_060221:  25%|██▍       | 14/57 [3:45:37<10:47:43, 903.80s/it][A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_030321:  47%|████▋     | 8/17 [3:46:06<4:33:55, 1826.21s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070622:  27%|██▋       | 14/51 [3:47:10<9:42:15, 944.21s/it][A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[A[AProcessing unit in session OTNAL_FV_062422:  31%|███▏      | 15/48 [3:48:56<6:11:56, 676.25s/it]
-
-
-
-Processing unit in session OTNAL_FV_062222:  59%|█████▉    | 22/37 [3:49:41<2:42:58, 651.91s/it][A[A[A[A
-
-
-
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_070822:  20%|█▉        | 13/66 [3:49:53<18:17:12, 1242.13s/it][A[A[A[A[A[A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062822:  31%|███       | 9/29 [3:50:20<7:35:35, 1366.76s/it][A[A[A[A[A[A[A[A
-
-
-
-
-
-
-
-
-
-Processing unit in session OTNAL_FV_062921:  57%|█████▋    | 20/35 [3:50:33<2:30:47, 603.18s/it][A[A[A[A[A[A[A[A[A[A
-Processing unit in session OTNAL_FV_062722:  47%|████▋     | 14/30 [3:51:28<4:06:57, 926.08s/it][Abash: line 1: 1835148 Killed                  python analyze_gaze_signals.py
-slurmstepd: error: Detected 1 oom_kill event in StepId=27008188.batch. Some of the step tasks have been OOM Killed.
+2024-07-03 10:24:21,826 - DEBUG - matplotlib data path: /gpfs/milgram/project/chang/pg496/conda_envs/nn_gpu/lib/python3.10/site-packages/matplotlib/mpl-data
+2024-07-03 10:24:21,838 - DEBUG - CONFIGDIR=/home/pg496/.config/matplotlib
+2024-07-03 10:24:21,839 - DEBUG - interactive is False
+2024-07-03 10:24:21,840 - DEBUG - platform is linux
+2024-07-03 10:24:22,124 - DEBUG - CACHEDIR=/home/pg496/.cache/matplotlib
+2024-07-03 10:24:22,145 - DEBUG - Using fontManager instance from /home/pg496/.cache/matplotlib/fontlist-v330.json
+2024-07-03 10:24:29,506 - INFO - Job commands in the job list: 31
+2024-07-03 10:24:29,506 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 0 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 1 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 2 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 3 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 4 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 5 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 6 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 7 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 8 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 9 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 10 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 11 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 12 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,507 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 13 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 14 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 15 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 16 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 17 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 18 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 19 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 20 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 21 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 22 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 23 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 24 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 25 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 26 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 27 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 28 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 29 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+2024-07-03 10:24:29,509 - DEBUG - module load miniconda; conda init bash; conda activate nn_gpu; python process_session_fixations.py --session_index 30 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json
+Batch script generated. To submit your jobs, run:
+ sbatch ./job_scripts/dsq-joblist_fixations.sh
+2024-07-03 10:24:30,261 - INFO - Successfully generated the dSQ job script
+2024-07-03 10:24:30,261 - INFO - Using dSQ job script: ./job_scripts/dsq-joblist_fixations.sh
+2024-07-03 10:24:30,274 - INFO - Successfully submitted jobs using sbatch for script ./job_scripts/dsq-joblist_fixations.sh
+2024-07-03 10:24:30,274 - INFO - Submitted job array with ID: 27165775
+2024-07-03 10:24:30,274 - INFO - Tracking progress of job array with ID: 27165775
+2024-07-03 10:24:30,285 - INFO - Job array 27165775 is still running. Checking again in 30 seconds...
+2024-07-03 10:25:00,327 - INFO - Job array 27165775 has completed.
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/0_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/1_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/2_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/3_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/4_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/5_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/6_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/7_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/8_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/9_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/10_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/11_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/12_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/13_fixations.pkl'
+2024-07-03 10:25:00,327 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/14_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/15_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/16_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/17_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/18_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/19_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/20_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/21_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/22_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/23_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/24_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/25_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/26_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/27_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/28_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/29_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - [Errno 2] No such file or directory: '/gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/30_fixations.pkl'
+2024-07-03 10:25:00,328 - ERROR - No results to concatenate.
+Number of available CPUs: 48
+
+Starting to extract fixations and saccades:
+Traceback (most recent call last):
+  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/analyze_gaze_signals.py", line 126, in <module>
+    main()
+  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/analyze_gaze_signals.py", line 123, in main
+    data_manager.run()
+  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/analyze_gaze_signals.py", line 63, in run
+    self.labelled_fixations = self.get_or_load_variable(
+  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/analyze_gaze_signals.py", line 45, in get_or_load_variable
+    setattr(self, variable_name, compute_function(self.params))
+  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/analyze_gaze_signals.py", line 66, in <lambda>
+    lambda p: curate_data.extract_fixations_and_saccades_with_labels(self.labelled_gaze_positions_m1, p)
+  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/curate_data.py", line 129, in extract_fixations_and_saccades_with_labels
+    all_fix_timepos, fix_detection_results, saccade_detection_results = fix_and_saccades.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
+  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/fix_and_saccades.py", line 48, in extract_or_load_fixations_and_saccades
+    return extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaze_positions, params)
+  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/fix_and_saccades.py", line 99, in extract_all_fixations_and_saccades_from_labelled_gaze_positions
+    raise ValueError("No objects to concatenate")
+ValueError: No objects to concatenate
