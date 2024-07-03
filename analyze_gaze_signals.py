@@ -85,8 +85,8 @@ class DataManager:
         # )
 
 
-        if self.params.get('replot_face/eye_vs_obj_violins'):
-            response_comp.compute_pre_and_post_fixation_response_to_roi_for_each_unit(self.labelled_fixation_rasters, self.params)
+        # if self.params.get('replot_face/eye_vs_obj_violins'):
+        #     response_comp.compute_pre_and_post_fixation_response_to_roi_for_each_unit(self.labelled_fixation_rasters, self.params)
 
 def main():
     params = util.get_params()

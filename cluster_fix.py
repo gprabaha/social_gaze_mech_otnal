@@ -56,7 +56,7 @@ class ClusterFixationDetector:
             fixationindexes, fixationtimes = self.behavioral_index(T, 1)
             fixationtimes = self.apply_duration_threshold(fixationtimes, 25)
 
-            notfixations = self.local_reclustering(fixationtimes, points)
+            notfixations = self.local_reclustering((fixationtimes, points))
             fixationindexes = self.remove_not_fixations(fixationindexes, notfixations)
             saccadeindexes, saccadetimes = self.classify_saccades(fixationindexes, points)
 
