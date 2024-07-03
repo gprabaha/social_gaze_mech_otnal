@@ -32,6 +32,7 @@ class ClusterFixationDetector:
         self.flt = signal.firwin2(self.fltord, [0, self.lowpasfrq / self.nyqfrq, self.lowpasfrq / self.nyqfrq, 1], [1, 1, 0, 0])
         self.buffer = int(100 / (self.samprate * 1000))
         self.fixationstats = []
+        self.num_cpus = cpu_count()
 
 
     def detect_fixations(self, eyedat):
@@ -54,7 +55,7 @@ class ClusterFixationDetector:
             fixationindexes, fixationtimes = self.behavioral_index(T, 1)
             fixationtimes = self.apply_duration_threshold(fixationtimes, 25)
 
-            notfixations = self.local_reclustering(fixationtimes, points)
+            notfixations = self.process_local_reclustering(fixationtimes, points)
             fixationindexes = self.remove_not_fixations(fixationindexes, notfixations)
             saccadeindexes, saccadetimes = self.classify_saccades(fixationindexes, points)
 
@@ -143,12 +144,12 @@ class ClusterFixationDetector:
 
     def global_clustering(self, points):
         print("Starting global_clustering...")
-
-        max_workers = min(num_cpus, 4)  # Limiting to 4 parallel jobs
+        
+        numclusts_range = list(range(2, 6))
+        max_workers = min(num_cpus, numclusts_range)  # Limiting to 4 parallel jobs
         if self.use_parallel:
             print("Using parallel processing with Pool")
             with Pool(processes=max_workers) as pool:
-                numclusts_range = list(range(2, 6))
                 results = list(tqdm(pool.imap(self.cluster_and_silhouette, [(points, numclusts) for numclusts in numclusts_range]), total=len(numclusts_range), desc="Global Clustering Progress"))
 
             sil = np.zeros(5)
@@ -225,50 +226,40 @@ class ClusterFixationDetector:
         return times[:, np.diff(times, axis=0)[0] >= threshold]
 
 
-    def local_reclustering(self, fixationtimes, points):
-        notfixations = []
-        max_workers = min(num_cpus, len(fixationtimes.T))
-        if self.use_parallel:
-            print("Using parallel processing with Pool")
-            with Pool(processes=max_workers) as pool:
-                results = list(tqdm(pool.imap(self.process_local_reclustering, [(fix, points) for fix in fixationtimes.T]), total=len(fixationtimes.T), desc="Local Clustering Progress"))
-
-            for result in results:
-                notfixations.extend(result)
-        else:
-            for fix in tqdm(fixationtimes.T, desc="Local Clustering Progress"):
-                try:
-                    notfixations.extend(self.process_local_reclustering((fix, points)))
-                except Exception as e:
-                    print(f"Error processing fixation {fix}: {e}")
-        return np.array(notfixations)
-
-
     def process_local_reclustering(self, data):
         fix, points = data
         altind = np.arange(fix[0] - 50, fix[1] + 50)
         altind = altind[(altind >= 0) & (altind < len(points))]
         POINTS = points[altind]
-        sil = np.zeros(5)
-        for numclusts in range(1, 6):
+
+        def compute_sil(numclusts):
             T = KMeans(n_clusters=numclusts, n_init=5).fit(POINTS[::5])
             silh = self.inter_vs_intra_dist(POINTS[::5], T.labels_)
-            sil[numclusts - 1] = np.mean(silh)
+            return np.mean(silh), numclusts
+
+        with ProcessPoolExecutor() as executor:
+            sil_results = list(executor.map(compute_sil, range(1, 6)))
+        
+        sil = np.zeros(5)
+        for mean_sil, numclusts in sil_results:
+            sil[numclusts - 1] = mean_sil
+
         numclusters = np.argmax(sil) + 1
         T = KMeans(n_clusters=numclusters, n_init=5).fit(POINTS)
         medianvalues = np.array([np.median(POINTS[T.labels_ == i], axis=0) for i in range(numclusters)])
         fixationcluster = np.argmin(np.sum(medianvalues[:, 1:3], axis=1))
         T.labels_[T.labels_ == fixationcluster] = 100
         fixationcluster2 = np.where((medianvalues[:, 1] < medianvalues[fixationcluster, 1] +
-                                     3 * np.std(POINTS[T.labels_ == fixationcluster][:, 1])) &
+                                    3 * np.std(POINTS[T.labels_ == fixationcluster][:, 1])) &
                                     (medianvalues[:, 2] < medianvalues[fixationcluster, 2] +
-                                     3 * np.std(POINTS[T.labels_ == fixationcluster][:, 2])))[0]
+                                    3 * np.std(POINTS[T.labels_ == fixationcluster][:, 2])))[0]
         fixationcluster2 = fixationcluster2[fixationcluster2 != fixationcluster]
         for cluster in fixationcluster2:
             T.labels_[T.labels_ == cluster] = 100
         T.labels_[T.labels_ != 100] = 2
         T.labels_[T.labels_ == 100] = 1
         return altind[T.labels_ == 2]
+
 
     def remove_not_fixations(self, fixationindexes, notfixations):
         fixationindexes = np.setdiff1d(fixationindexes, notfixations)
