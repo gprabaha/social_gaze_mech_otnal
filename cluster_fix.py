@@ -151,7 +151,10 @@ class ClusterFixationDetector:
         if self.use_parallel:
             print("Using parallel processing with ProcessPoolExecutor")
             with ProcessPoolExecutor(max_workers=max_workers) as executor:
-                results = list(tqdm(executor.map(self.cluster_and_silhouette, [(points, numclusts) for numclusts in numclusts_range]), total=len(numclusts_range), desc="Global Clustering Progress"))
+                results = list(tqdm(executor.map(self.cluster_and_silhouette,
+                                                 [(points, numclusts) for numclusts in numclusts_range]),
+                                                 total=len(numclusts_range),
+                                                 desc="Global Clustering Progress"))
             for numclusts, score in results:
                 sil[numclusts - 2] = score
                 print(f"Processed numclusts {numclusts}: Silhouette score = {score}")

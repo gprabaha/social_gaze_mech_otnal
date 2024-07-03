@@ -36,7 +36,7 @@ class HPCFixationDetection:
                 command = (
                     "module load miniconda; "
                     "conda init bash; "
-                    "conda activate nn_gpu; "
+                    "conda activate gaze_processing; "
                     f"python process_session_fixations.py --session_index {idx} --params_file {params_file_path}"
                 )
                 file.write(command + "\n")
