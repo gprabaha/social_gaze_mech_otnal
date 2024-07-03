@@ -63,7 +63,8 @@ class DataManager:
         self.labelled_fixations = self.get_or_load_variable(
             'labelled_fixations',
             load_data.load_m1_fixation_labels,
-            lambda p: curate_data.extract_fixations_and_saccades_with_labels(self.labelled_gaze_positions_m1[1:], p)
+            lambda p: curate_data.extract_fixations_and_saccades_with_labels(self.labelled_gaze_positions_m1, p)
+            # lambda p: curate_data.extract_fixations_and_saccades_with_labels(self.labelled_gaze_positions_m1[1:], p)
         )
         
         # self.labelled_saccades_m1 = self.get_or_load_variable(

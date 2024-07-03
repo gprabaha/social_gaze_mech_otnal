@@ -227,8 +227,7 @@ class ClusterFixationDetector:
     def local_reclustering(self, data):
         fix_times, points = data
         notfixations = []
-        pdb.set_trace()
-        for fix in fix_times:
+        for fix in fix_times.T:
             altind = np.arange(fix[0] - 50, fix[1] + 50)
             altind = altind[(altind >= 0) & (altind < len(points))]
             POINTS = points[altind]
