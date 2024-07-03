@@ -63,7 +63,7 @@ class DataManager:
         self.labelled_fixations = self.get_or_load_variable(
             'labelled_fixations',
             load_data.load_m1_fixation_labels,
-            lambda p: curate_data.extract_fixations_and_saccades_with_labels(self.labelled_gaze_positions_m1, p)
+            lambda p: curate_data.extract_fixations_and_saccades_with_labels(self.labelled_gaze_positions_m1[1:], p)
         )
         
         # self.labelled_saccades_m1 = self.get_or_load_variable(
@@ -92,7 +92,7 @@ def main():
     params = util.get_params()
     params.update({
         'is_cluster': True,
-        'use_parallel': True,
+        'use_parallel': False,
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
         'remake_labelled_fixations': True,
@@ -116,7 +116,7 @@ def main():
         'flush_before_reload': False,
         'use_existing_variables': False,
         'reload_existing_unit_roi_comp_stats': False,
-        'submit_separate_jobs_for_sessions': True
+        'submit_separate_jobs_for_sessions': False
     })
 
     data_manager = DataManager(params)

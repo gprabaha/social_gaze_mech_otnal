@@ -225,33 +225,37 @@ class ClusterFixationDetector:
     
 
     def local_reclustering(self, data):
-        fix, points = data
-        altind = np.arange(fix[0] - 50, fix[1] + 50)
-        altind = altind[(altind >= 0) & (altind < len(points))]
-        POINTS = points[altind]
-        with ProcessPoolExecutor() as executor:
-            sil_results = list(tqdm(executor.map(self.compute_sil,
-                                                 [(numclusts, POINTS) for numclusts in range(1, 6)]),
-                                                 total=5,
-                                                 desc="Local Reclustering Progress"))
-        sil = np.zeros(5)
-        for mean_sil, numclusts in sil_results:
-            sil[numclusts - 1] = mean_sil
-        numclusters = np.argmax(sil) + 1
-        T = KMeans(n_clusters=numclusters, n_init=5).fit(POINTS)
-        medianvalues = np.array([np.median(POINTS[T.labels_ == i], axis=0) for i in range(numclusters)])
-        fixationcluster = np.argmin(np.sum(medianvalues[:, 1:3], axis=1))
-        T.labels_[T.labels_ == fixationcluster] = 100
-        fixationcluster2 = np.where((medianvalues[:, 1] < medianvalues[fixationcluster, 1] +
-                                    3 * np.std(POINTS[T.labels_ == fixationcluster][:, 1])) &
-                                    (medianvalues[:, 2] < medianvalues[fixationcluster, 2] +
-                                    3 * np.std(POINTS[T.labels_ == fixationcluster][:, 2])))[0]
-        fixationcluster2 = fixationcluster2[fixationcluster2 != fixationcluster]
-        for cluster in fixationcluster2:
-            T.labels_[T.labels_ == cluster] = 100 
-        T.labels_[T.labels_ != 100] = 2
-        T.labels_[T.labels_ == 100] = 1
-        return altind[T.labels_ == 2]
+        fix_times, points = data
+        notfixations = []
+        pdb.set_trace()
+        for fix in fix_times:
+            altind = np.arange(fix[0] - 50, fix[1] + 50)
+            altind = altind[(altind >= 0) & (altind < len(points))]
+            POINTS = points[altind]
+            with ProcessPoolExecutor() as executor:
+                sil_results = list(tqdm(executor.map(self.compute_sil,
+                                                    [(numclusts, POINTS) for numclusts in range(1, 6)]),
+                                                    total=5,
+                                                    desc="Local Reclustering Progress"))
+            sil = np.zeros(5)
+            for mean_sil, numclusts in sil_results:
+                sil[numclusts - 1] = mean_sil
+            numclusters = np.argmax(sil) + 1
+            T = KMeans(n_clusters=numclusters, n_init=5).fit(POINTS)
+            medianvalues = np.array([np.median(POINTS[T.labels_ == i], axis=0) for i in range(numclusters)])
+            fixationcluster = np.argmin(np.sum(medianvalues[:, 1:3], axis=1))
+            T.labels_[T.labels_ == fixationcluster] = 100
+            fixationcluster2 = np.where((medianvalues[:, 1] < medianvalues[fixationcluster, 1] +
+                                        3 * np.std(POINTS[T.labels_ == fixationcluster][:, 1])) &
+                                        (medianvalues[:, 2] < medianvalues[fixationcluster, 2] +
+                                        3 * np.std(POINTS[T.labels_ == fixationcluster][:, 2])))[0]
+            fixationcluster2 = fixationcluster2[fixationcluster2 != fixationcluster]
+            for cluster in fixationcluster2:
+                T.labels_[T.labels_ == cluster] = 100 
+            T.labels_[T.labels_ != 100] = 2
+            T.labels_[T.labels_ == 100] = 1
+            notfixations.extend(altind[T.labels_ == 2])
+        return np.array(notfixations)
 
 
     def compute_sil(self, data):
