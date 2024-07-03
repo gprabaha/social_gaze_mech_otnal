@@ -173,7 +173,7 @@ class ClusterFixationDetector:
         labels = T.labels_
         meanvalues = np.array([np.mean(points[labels == i], axis=0) for i in range(numclusters)])
         stdvalues = np.array([np.std(points[labels == i], axis=0) for i in range(numclusters)])
-        print("Clustering completed successfully")
+        print("Global clustering completed successfully")
         return labels, meanvalues, stdvalues
 
 
@@ -225,15 +225,18 @@ class ClusterFixationDetector:
     
 
     def local_reclustering(self, data):
+        print("Starting local_reclustering...")
         fix_times, points = data
         notfixations = []
         for fix in fix_times.T:
             altind = np.arange(fix[0] - 50, fix[1] + 50)
             altind = altind[(altind >= 0) & (altind < len(points))]
             POINTS = points[altind]
-            with ProcessPoolExecutor() as executor:
+            numclusts_range = range(1, 6)
+            max_workers = min(len(numclusts_range), self.num_cpus)
+            with ProcessPoolExecutor(max_workers=max_workers) as executor:
                 sil_results = list(tqdm(executor.map(self.compute_sil,
-                                                    [(numclusts, POINTS) for numclusts in range(1, 6)]),
+                                                    [(numclusts, POINTS) for numclusts in numclusts_range]),
                                                     total=5,
                                                     desc="Local Reclustering Progress"))
             sil = np.zeros(5)
@@ -254,6 +257,7 @@ class ClusterFixationDetector:
             T.labels_[T.labels_ != 100] = 2
             T.labels_[T.labels_ == 100] = 1
             notfixations.extend(altind[T.labels_ == 2])
+        print("Finished local_reclustering...")
         return np.array(notfixations)
 
 
