@@ -10,6 +10,7 @@ Author: pg496
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import cpu_count
 import numpy as np
+import os
 import scipy.signal as signal
 from scipy.interpolate import interp1d
 from sklearn.cluster import KMeans
@@ -18,7 +19,7 @@ from tqdm import tqdm
 import pdb
 
 # Check number of available CPUs
-num_cpus = cpu_count()
+num_cpus = int(os.getenv('SLURM_CPUS_ON_NODE'))
 print(f"Number of available CPUs: {num_cpus}")
 
 
@@ -33,7 +34,7 @@ class ClusterFixationDetector:
         self.flt = signal.firwin2(self.fltord, [0, self.lowpasfrq / self.nyqfrq, self.lowpasfrq / self.nyqfrq, 1], [1, 1, 0, 0])
         self.buffer = int(100 / (self.samprate * 1000))
         self.fixationstats = []
-        self.num_cpus = cpu_count()
+        self.num_cpus = int(os.getenv('SLURM_CPUS_ON_NODE'))
 
 
     def detect_fixations(self, eyedat):
