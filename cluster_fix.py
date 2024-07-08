@@ -18,9 +18,15 @@ from tqdm import tqdm
 
 import pdb
 
-# Check number of available CPUs
-num_cpus = int(os.getenv('SLURM_CPUS_ON_NODE'))
-print(f"Number of available CPUs: {num_cpus}")
+
+# Get the number of CPUs from the environment variable
+slurm_cpus = os.getenv('SLURM_CPUS_ON_NODE')
+# If the environment variable is not set or empty, use cpu_count()
+if slurm_cpus:
+    num_cpus = int(slurm_cpus)
+else:
+    num_cpus = cpu_count()
+print(f"Number of CPUs: {num_cpus}")
 
 
 class ClusterFixationDetector:

@@ -24,7 +24,7 @@ class DataManager:
 
     def setup_logger(self):
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.ERROR)
+        self.logger.setLevel(logging.INFO)
         handler = logging.StreamHandler()
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
@@ -60,12 +60,15 @@ class DataManager:
             lambda p: curate_data.extract_labelled_gaze_positions_m1(p)
         )
 
-        self.labelled_fixations = self.get_or_load_variable(
-            'labelled_fixations',
-            load_data.load_m1_fixation_labels,
-            lambda p: curate_data.extract_fixations_and_saccades_with_labels(self.labelled_gaze_positions_m1, p)
-            # lambda p: curate_data.extract_fixations_and_saccades_with_labels(self.labelled_gaze_positions_m1[1:], p)
-        )
+        pdb.set_trace()
+
+        # input_data = self.labelled_gaze_positions_m1
+        # self.labelled_fixations = self.get_or_load_variable(
+        #     'labelled_fixations',
+        #     load_data.load_m1_fixation_labels,
+        #     lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
+        #     # lambda p: curate_data.extract_fixations_and_saccades_with_labels(self.labelled_gaze_positions_m1[1:], p)
+        # )
         
         # self.labelled_saccades_m1 = self.get_or_load_variable(
         #     'labelled_saccades_m1',
@@ -92,6 +95,8 @@ class DataManager:
 def main():
     params = util.get_params()
     params.update({
+        'use_toy_data': True,
+        'remake_toy_data': True,
         'is_cluster': True,
         'use_parallel': True,
         'remake_labelled_gaze_positions_m1': False,
