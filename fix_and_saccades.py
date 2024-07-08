@@ -155,12 +155,13 @@ def get_session_fixations_and_saccades(session_data):
     positions, info, params = session_data
     session_name = info['session_name']
     sampling_rate = info['sampling_rate']
+    print(params['use_parallel'])
     n_samples = positions.shape[0]
     time_vec = util.create_timevec(n_samples, sampling_rate)
     use_parallel = params.get('use_parallel', False)
 
     if params.get('fixation_detection_method', 'default') == 'cluster_fix':
-        detector = ClusterFixationDetector(samprate=sampling_rate, use_parallel=use_parallel)
+        detector = ClusterFixationDetector(samprate=sampling_rate, params=params)
         x_coords = positions[:, 0]
         y_coords = positions[:, 1]
         # Transform into the expected format

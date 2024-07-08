@@ -83,6 +83,7 @@ class DataManager:
         )
 
         if self.params['use_toy_data']:
+            print('Using toy data')
             input_data = self.generate_toy_gazepos_data(self.labelled_gaze_positions_m1)
         else:
             input_data = self.labelled_gaze_positions_m1

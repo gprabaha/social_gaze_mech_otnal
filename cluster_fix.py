@@ -30,9 +30,10 @@ print(f"Number of CPUs: {num_cpus}")
 
 
 class ClusterFixationDetector:
-    def __init__(self, samprate=1/1000, use_parallel=True):
+    def __init__(self, samprate=1/1000, params=None):
+        self.params = params
         self.samprate = samprate
-        self.use_parallel = use_parallel
+        self.use_parallel = params['use_parallel']
         self.variables = ['Dist', 'Vel', 'Accel', 'Angular Velocity']
         self.fltord = 60
         self.lowpasfrq = 30
@@ -40,7 +41,7 @@ class ClusterFixationDetector:
         self.flt = signal.firwin2(self.fltord, [0, self.lowpasfrq / self.nyqfrq, self.lowpasfrq / self.nyqfrq, 1], [1, 1, 0, 0])
         self.buffer = int(100 / (self.samprate * 1000))
         self.fixationstats = []
-        self.num_cpus = int(os.getenv('SLURM_CPUS_ON_NODE'))
+        self.num_cpus = num_cpus
 
 
     def detect_fixations(self, eyedat):
@@ -240,12 +241,15 @@ class ClusterFixationDetector:
             altind = altind[(altind >= 0) & (altind < len(points))]
             POINTS = points[altind]
             numclusts_range = range(1, 6)
-            max_workers = min(len(numclusts_range), self.num_cpus)
-            with ProcessPoolExecutor(max_workers=max_workers) as executor:
-                sil_results = list(tqdm(executor.map(self.compute_sil,
-                                                    [(numclusts, POINTS) for numclusts in numclusts_range]),
-                                                    total=5,
-                                                    desc="Local Reclustering Progress"))
+            if self.use_parallel:
+                max_workers = min(len(numclusts_range), self.num_cpus)
+                with ProcessPoolExecutor(max_workers=max_workers) as executor:
+                    sil_results = list(tqdm(executor.map(self.compute_sil,
+                                                         [(numclusts, POINTS) for numclusts in numclusts_range]),
+                                            total=5,
+                                            desc="Local Reclustering Progress"))
+            else:
+                sil_results = [self.compute_sil((numclusts, POINTS)) for numclusts in numclusts_range]
             sil = np.zeros(5)
             for mean_sil, numclusts in sil_results:
                 sil[numclusts - 1] = mean_sil
@@ -255,9 +259,9 @@ class ClusterFixationDetector:
             fixationcluster = np.argmin(np.sum(medianvalues[:, 1:3], axis=1))
             T.labels_[T.labels_ == fixationcluster] = 100
             fixationcluster2 = np.where((medianvalues[:, 1] < medianvalues[fixationcluster, 1] +
-                                        3 * np.std(POINTS[T.labels_ == fixationcluster][:, 1])) &
+                                         3 * np.std(POINTS[T.labels_ == fixationcluster][:, 1])) &
                                         (medianvalues[:, 2] < medianvalues[fixationcluster, 2] +
-                                        3 * np.std(POINTS[T.labels_ == fixationcluster][:, 2])))[0]
+                                         3 * np.std(POINTS[T.labels_ == fixationcluster][:, 2])))[0]
             fixationcluster2 = fixationcluster2[fixationcluster2 != fixationcluster]
             for cluster in fixationcluster2:
                 T.labels_[T.labels_ == cluster] = 100 
@@ -267,24 +271,20 @@ class ClusterFixationDetector:
         print("Finished local_reclustering...")
         return np.array(notfixations)
 
-
     def compute_sil(self, data):
         numclusts, POINTS = data
         T = KMeans(n_clusters=numclusts, n_init=5).fit(POINTS[::5])
         silh = self.inter_vs_intra_dist(POINTS[::5], T.labels_)
         return np.mean(silh), numclusts
 
-    
     def remove_not_fixations(self, fixationindexes, notfixations):
         fixationindexes = np.setdiff1d(fixationindexes, notfixations)
         return fixationindexes
-
 
     def classify_saccades(self, fixationindexes, points):
         saccadeindexes = np.setdiff1d(np.arange(len(points)), fixationindexes)
         saccadetimes = self.find_behavioral_times(saccadeindexes)
         return saccadeindexes, saccadetimes
-
 
     def round_times(self, fixationtimes, saccadetimes):
         round5 = np.mod(fixationtimes, self.samprate * 1000)
@@ -308,13 +308,11 @@ class ClusterFixationDetector:
         recalc_stdvalues = [np.nanstd(pointfix, axis=0), np.nanstd(pointsac, axis=0)]
         return pointfix, pointsac, recalc_meanvalues, recalc_stdvalues
 
-
     def extract_fixations(self, fixationtimes, eyedat):
         x = eyedat[0]
         y = eyedat[1]
         fixations = [np.mean([x[fix[0]:fix[1]], y[fix[0]:fix[1]]], axis=1) for fix in fixationtimes.T]
         return np.array(fixations)
-
 
     def extract_variables(self, xss, yss):
         if len(xss) < 3:
@@ -327,23 +325,50 @@ class ClusterFixationDetector:
         rot = [r if r <= 180 else 360 - r for r in rot]
         return [np.max(vel), np.max(accel), np.mean(dist), np.mean(vel), np.abs(np.mean(angle)), np.mean(rot)]
 
-
     def inter_vs_intra_dist(self, X, labels):
+        print('In inter_vs_intra_dist')
         n = len(labels)
         k = len(np.unique(labels))
         count = np.bincount(labels)
-        mbrs = (np.arange(k) == labels[:, None])
-        avgDWithin = np.full(n, np.inf)
-        avgDBetween = np.full((n, k), np.inf)
-        for j in range(n):
-            distj = np.sum((X - X[j]) ** 2, axis=1)
-            for i in range(k):
-                if i == labels[j]:
-                    avgDWithin[j] = np.sum(distj[mbrs[:, i]]) / max(count[i] - 1, 1)
-                else:
-                    avgDBetween[j, i] = np.sum(distj[mbrs[:, i]]) / count[i]
-        minavgDBetween = np.min(avgDBetween, axis=1)
-        silh = (minavgDBetween - avgDWithin) / np.maximum(avgDWithin, minavgDBetween)
+        if k == 0 or n == 0:
+            print("Error: Labels or data points are empty.")
+            return np.full(n, 0.0)  # Return an array of zeros
+        if np.any(count == 0):
+            print("Error: One or more clusters have no members.")
+            return np.full(n, 0.0)  # Return an array of zeros
+        try:
+            mbrs = (np.arange(k) == labels[:, None])
+            avgDWithin = np.full(n, np.inf)
+            avgDBetween = np.full((n, k), np.inf)
+            for j in range(n):
+                distj = np.sum((X - X[j]) ** 2, axis=1)
+                for i in range(k):
+                    if i == labels[j]:
+                        if count[i] > 1:
+                            avgDWithin[j] = np.sum(distj[mbrs[:, i]]) / (count[i] - 1)
+                        else:
+                            avgDWithin[j] = np.nan  # Avoid division by zero, set to NaN
+                    else:
+                        if count[i] > 0:
+                            avgDBetween[j, i] = np.sum(distj[mbrs[:, i]]) / count[i]
+                        else:
+                            avgDBetween[j, i] = np.nan  # Avoid division by zero, set to NaN
+            minavgDBetween = np.nanmin(avgDBetween, axis=1)  # Use nanmin to ignore NaNs
+            # Ensure no division by zero
+            with np.errstate(divide='ignore', invalid='ignore'):  # Suppress warnings for invalid operations
+                silh = (minavgDBetween - avgDWithin) / np.maximum(avgDWithin, minavgDBetween)
+                silh = np.nan_to_num(silh, nan=0.0, posinf=0.0, neginf=0.0)  # Replace NaNs and infs with 0
+        except Exception as e:
+            print(f"An error occurred in inter_vs_intra_dist: {e}")
+            return np.full(n, 0.0)  # Return an array of zeros in case of an error
+        # Debug prints to check intermediate values
+        print("n:", n)
+        print("k:", k)
+        print("count:", count)
+        print("avgDWithin:", avgDWithin)
+        print("avgDBetween:", avgDBetween)
+        print("minavgDBetween:", minavgDBetween)
+        print("silh:", silh)
         return silh
 
 
