@@ -8,6 +8,7 @@ Created on Tue Apr  9 10:25:48 2024
 
 
 import logging
+import numpy as np
 
 import curate_data
 import util
@@ -48,6 +49,27 @@ class DataManager:
                 setattr(self, variable_name, load_function(self.params))
         return getattr(self, variable_name)
 
+    def human_readable_size(self, size):
+        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+            if size < 1024:
+                return f"{size:.2f} {unit}"
+            size /= 1024
+
+    def generate_toy_gazepos_data(self, labelled_gaze_positions):
+        third_session_data = labelled_gaze_positions[2]
+        # Ensure third_session_data[0] is a NumPy array with shape (N, 2)
+        if not isinstance(third_session_data[0], np.ndarray) or third_session_data[0].shape[1] != 2:
+            raise ValueError("Expected third_session_data[0] to be a NumPy array with shape (N, 2)")
+        array_data = third_session_data[0]
+        N = array_data.shape[0]
+        # Determine the length of the continuous segment to extract
+        h = N // 10
+        # Choose a random starting index i such that the segment [i to i + h] is within bounds
+        i = np.random.randint(0, N - h)
+        # Extract the continuous segment
+        toy_data = (array_data[i:i + h], third_session_data[1])
+        return [toy_data]
+
     def run(self):
         root_data_dir, self.params = util.fetch_root_data_dir(self.params)
         data_source_dir, self.params = util.fetch_data_source_dir(self.params)
@@ -60,15 +82,16 @@ class DataManager:
             lambda p: curate_data.extract_labelled_gaze_positions_m1(p)
         )
 
-        pdb.set_trace()
+        if self.params['use_toy_data']:
+            input_data = self.generate_toy_gazepos_data(self.labelled_gaze_positions_m1)
+        else:
+            input_data = self.labelled_gaze_positions_m1
 
-        # input_data = self.labelled_gaze_positions_m1
-        # self.labelled_fixations = self.get_or_load_variable(
-        #     'labelled_fixations',
-        #     load_data.load_m1_fixation_labels,
-        #     lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
-        #     # lambda p: curate_data.extract_fixations_and_saccades_with_labels(self.labelled_gaze_positions_m1[1:], p)
-        # )
+        self.labelled_fixations = self.get_or_load_variable(
+            'labelled_fixations',
+            load_data.load_m1_fixation_labels,
+            lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
+        )
         
         # self.labelled_saccades_m1 = self.get_or_load_variable(
         #     'labelled_saccades_m1',
@@ -95,10 +118,10 @@ class DataManager:
 def main():
     params = util.get_params()
     params.update({
+        'submit_separate_jobs_for_sessions': False,
         'use_toy_data': True,
-        'remake_toy_data': True,
         'is_cluster': True,
-        'use_parallel': True,
+        'use_parallel': False,
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
         'remake_labelled_fixations': True,
@@ -121,8 +144,7 @@ def main():
         'raster_post_event_time': 0.5,
         'flush_before_reload': False,
         'use_existing_variables': False,
-        'reload_existing_unit_roi_comp_stats': False,
-        'submit_separate_jobs_for_sessions': True
+        'reload_existing_unit_roi_comp_stats': False
     })
 
     data_manager = DataManager(params)
@@ -130,8 +152,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 
 
 
