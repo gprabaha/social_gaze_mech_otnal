@@ -155,7 +155,6 @@ def get_session_fixations_and_saccades(session_data):
     positions, info, params = session_data
     session_name = info['session_name']
     sampling_rate = info['sampling_rate']
-    print(params['use_parallel'])
     n_samples = positions.shape[0]
     time_vec = util.create_timevec(n_samples, sampling_rate)
     use_parallel = params.get('use_parallel', False)
@@ -167,9 +166,10 @@ def get_session_fixations_and_saccades(session_data):
         # Transform into the expected format
         eyedat = (x_coords, y_coords)
         fix_stats = detector.detect_fixations(eyedat)
-        fixationtimes = fix_stats[0]['fixationtimes']
-        fixations = fix_stats[0]['fixations']
-        saccadetimes = fix_stats[0]['saccadetimes']
+        pdb.set_trace()
+        fixationtimes = fix_stats['fixationtimes']
+        fixations = fix_stats['fixations']
+        saccadetimes = fix_stats['saccadetimes']
         saccades = format_saccades(saccadetimes, positions, info)
     else:
         fix_detector = EyeMVMFixationDetector(sampling_rate=sampling_rate)

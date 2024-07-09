@@ -14,3 +14,4 @@ CondaError: Run 'conda init' before 'conda deactivate'
 2024-07-08 16:43:09,490 - DEBUG - Loaded backend agg version unknown.
 2024-07-08 16:53:06,173 - __main__ - INFO - Loading variable: labelled_gaze_positions_m1
 2024-07-08 16:53:06,173 - INFO - Loading variable: labelled_gaze_positions_m1
+slurmstepd: error: *** JOB 27167281 ON r811u32n01 CANCELLED AT 2024-07-08T17:04:15 DUE TO TIME LIMIT ***
