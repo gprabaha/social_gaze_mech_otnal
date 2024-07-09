@@ -25,7 +25,7 @@ class DataManager:
 
     def setup_logger(self):
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.INFO)
         handler = logging.StreamHandler()
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
@@ -83,7 +83,7 @@ class DataManager:
         )
 
         if self.params['use_toy_data']:
-            self.logger.debug(f"!! USING TOY DATA !!")
+            self.logger.info(f"!! USING TOY DATA !!")
             input_data = self.generate_toy_gazepos_data(self.labelled_gaze_positions_m1)
         else:
             input_data = self.labelled_gaze_positions_m1
@@ -91,7 +91,7 @@ class DataManager:
         self.labelled_fixations = self.get_or_load_variable(
             'labelled_fixations',
             load_data.load_m1_fixation_labels,
-            lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, self.logger, p)
+            lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
         )
         
         # self.labelled_saccades_m1 = self.get_or_load_variable(
@@ -119,7 +119,7 @@ class DataManager:
 def main():
     params = util.get_params()
     params.update({
-        'parallelize_local_reclustering_over_n_fixations': True,
+        'parallelize_local_reclustering_over_n_fixations': False,
         'submit_separate_jobs_for_sessions': False,
         'use_toy_data': True,
         'is_cluster': True,
@@ -127,7 +127,7 @@ def main():
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
         'remake_labelled_fixations': True,
-        'remake_labelled_saccades_m1': False,
+        'remake_labelled_saccades_m1': True,
         'remake_labelled_spiketimes': False,
         'remake_labelled_fixation_rasters': True,
         'make_plots': False,

@@ -23,7 +23,7 @@ from hpc_cluster import HPCCluster
 
 import pdb
 
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 ### Function to extract meta-information and update params
 def extract_and_update_meta_info(params):
@@ -112,7 +112,7 @@ def extract_labelled_gaze_positions_m1(params):
 
 
 ###
-def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, logger, params):
+def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     """
     Extracts fixations and saccades with labels, possibly in parallel.
     Parameters:
@@ -123,7 +123,7 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, logger, 
     - labelled_fixations (pd.DataFrame): DataFrame of labels for fixations.
     - labelled_saccades (pd.DataFrame): DataFrame containing saccade information with labels.
     """
-    logger.info("\nStarting to extract fixations and saccades:")
+    print("\nStarting to extract fixations and saccades:")
     use_parallel = params.get('use_parallel', True)
 
     # Extract fixations and saccades

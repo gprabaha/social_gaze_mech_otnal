@@ -38,7 +38,7 @@ def extract_or_load_fixations_and_saccades(labelled_gaze_positions, params):
     """
     processed_data_dir = params['processed_data_dir']
     flag_info = util.get_filename_flag_info(params)
-    if params.get('remake_fixations', False) or params.get('remake_saccades', False):
+    if params.get('remake_labelled_fixations', False) or params.get('remake_labelled_saccades_m1', False):
         return extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaze_positions, params)
     else:
         results_file_name = f'fixation_saccade_session_results_m1{flag_info}.npz'
@@ -137,7 +137,15 @@ def extract_fixations_and_saccades(sessions_data, use_parallel):
         print("\nExtracting fixations and saccades serially")
         results = [get_session_fixations_and_saccades(session_data) for session_data in sessions_data]
 
-    fix_detection_results, saccade_detection_results = zip(*results)
+    # Unpack the results into separate lists for fixations, saccades, and info
+    fix_detection_results = []
+    saccade_detection_results = []
+
+    for result in results:
+        fix_timepos_df, info, saccades_df = result
+        fix_detection_results.append(fix_timepos_df)
+        saccade_detection_results.append(saccades_df)
+
     return fix_detection_results, saccade_detection_results
 
 
@@ -150,7 +158,7 @@ def get_session_fixations_and_saccades(session_data):
     Returns:
     - fix_timepos_df (pd.DataFrame): DataFrame of fixation time positions.
     - info (dict): Metadata information for the session.
-    - session_saccades (list): List of saccades for the session.
+    - saccades_df (pd.DataFrame): DataFrame of saccades for the session.
     """
     positions, info, params = session_data
     session_name = info['session_name']
@@ -166,7 +174,6 @@ def get_session_fixations_and_saccades(session_data):
         # Transform into the expected format
         eyedat = (x_coords, y_coords)
         fix_stats = detector.detect_fixations(eyedat)
-        pdb.set_trace()
         fixationtimes = fix_stats['fixationtimes']
         fixations = fix_stats['fixations']
         saccadetimes = fix_stats['saccadetimes']
@@ -176,14 +183,25 @@ def get_session_fixations_and_saccades(session_data):
         fixationtimes, fixations = fix_detector.detect_fixations(positions, time_vec, session_name)
         saccade_detector = EyeMVMSaccadeDetector(params['vel_thresh'], params['min_samples'], params['smooth_func'])
         saccades = saccade_detector.extract_saccades_for_session((positions, info))
+    
 
     fix_timepos_df = pd.DataFrame({
-        'start_time': fixationtimes[0],
-        'end_time': fixationtimes[1],
-        'fix_x': fixations[0],
-        'fix_y': fixations[1]
+        'start_time': fixationtimes[0, :].T,
+        'end_time': fixationtimes[1, :].T,
+        'fix_x': fixations[:, 0],
+        'fix_y': fixations[:, 1]
     })
-    return fix_timepos_df, info, saccades
+    
+    saccades_df = pd.DataFrame(saccades, columns=[
+        'start_time', 'end_time', 'duration', 'trajectory', 
+        'start_roi', 'end_roi', 'session_name', 'category', 
+        'unknown', 'block'
+    ])
+
+    pdb.set_trace()
+    
+    return fix_timepos_df, info, saccades_df
+
 
 
 def process_fixation_results(fix_detection_results):
@@ -228,14 +246,17 @@ def format_saccades(saccadetimes, positions, info):
     """
     saccades = []
     for t_range in saccadetimes.T:
-        start_time = t_range[0]
-        end_time = t_range[1]
+        start_time = int(t_range[0])
+        end_time = int(t_range[1])
         duration = end_time - start_time
         trajectory = positions[start_time:end_time + 1, :]
         start_roi = determine_roi_of_coord(trajectory[0, :2], info['roi_bb_corners'])
         end_roi = determine_roi_of_coord(trajectory[-1, :2], info['roi_bb_corners'])
         block = determine_block(start_time, end_time, info['startS'], info['stopS'])
-        saccades.append([start_time, end_time, duration, trajectory, start_roi, end_roi, info['session_name'], info['category'], None, block])
+        saccades.append([
+            start_time, end_time, duration, trajectory, start_roi, 
+            end_roi, info['session_name'], info['category'], None, block
+        ])
     return saccades
 
 
