@@ -152,7 +152,7 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     use_parallel = params.get('use_parallel', True)
 
     # Extract fixations and saccades
-    all_fix_df, all_info, all_saccades_df = fix_and_saccades.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
+    all_fix_df, all_saccades_df = fix_and_saccades.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
     # labelled_fixations = fix_and_saccades.generate_fixation_labels(fix_detection_results, params, use_parallel)
 
     # saccades = [s for session_saccades in saccade_detection_results for s in session_saccades]
@@ -160,7 +160,7 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     # labelled_saccades = pd.DataFrame(saccades, columns=columns)
     # fix_and_saccades.save_saccade_labels(labelled_saccades, params)
 
-    return all_fix_df, all_info, all_saccades_df
+    return all_fix_df, all_saccades_df
 
 
 ###

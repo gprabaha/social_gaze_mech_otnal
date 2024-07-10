@@ -122,17 +122,12 @@ def extract_fixations_and_saccades(sessions_data, use_parallel):
         print("\nExtracting fixations and saccades in parallel")
         num_cores = multiprocessing.cpu_count()
         num_processes = min(num_cores, len(sessions_data))
-        
         with ProcessPoolExecutor(max_workers=num_processes) as executor:
             futures = {executor.submit(get_session_fixations_and_saccades, session_data): session_data for session_data in sessions_data}
             results = []
             for future in as_completed(futures):
-                try:
-                    result = future.result()
-                    results.append(result)
-                except Exception as e:
-                    logging.error(f"Error processing session data: {e}")
-                    continue
+                result = future.result()
+                results.append(result)
     else:
         print("\nExtracting fixations and saccades serially")
         results = [get_session_fixations_and_saccades(session_data) for session_data in sessions_data]
