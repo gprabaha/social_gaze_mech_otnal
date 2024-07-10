@@ -19,6 +19,7 @@ from tqdm import tqdm
 import logging
 import pdb
 import warnings
+import gc
 
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
@@ -164,23 +165,28 @@ class ClusterFixationDetector:
             print("Using parallel processing with ProcessPoolExecutor")
             with ProcessPoolExecutor(max_workers=max_workers) as executor:
                 results = list(tqdm(executor.map(self.cluster_and_silhouette,
-                                                 [(points, numclusts) for numclusts in numclusts_range]),
-                                                 total=len(numclusts_range),
-                                                 desc="Global Clustering Progress"))
-            for numclusts, score in results:
-                sil[numclusts - 2] = score
+                                                [(points, numclusts) for numclusts in numclusts_range]),
+                                                total=len(numclusts_range),
+                                                desc="Global Clustering Progress"))
+            # Explicitly shut down the executor
+            executor.shutdown(wait=True)
         else:
             print("Using serial processing")
+            results = []
             for numclusts in tqdm(range(2, 6), desc="Global Clustering Progress"):
                 try:
-                    numclusts, score = self.cluster_and_silhouette((points, numclusts))
-                    sil[numclusts - 2] = score
+                    result = self.cluster_and_silhouette((points, numclusts))
+                    results.append(result)
                 except Exception as e:
                     print(f"Error processing numclusts {numclusts}: {e}")
+        for numclusts, score in results:
+            sil[numclusts - 2] = score
+        # Force garbage collection to clean up any remaining resources
+        gc.collect()
         numclusters = np.argmax(sil) + 2
         print(f"Optimal number of clusters: {numclusters}")
         T = KMeans(n_clusters=numclusters, n_init=5).fit(points)
-        labels = T.labels_
+        labels = T.labels()
         meanvalues = np.array([np.mean(points[labels == i], axis=0) for i in range(numclusters)])
         stdvalues = np.array([np.std(points[labels == i], axis=0) for i in range(numclusters)])
         print("Global clustering completed successfully")
