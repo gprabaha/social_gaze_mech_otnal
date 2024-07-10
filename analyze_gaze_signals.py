@@ -42,18 +42,18 @@ class DataManager:
 
 
     def get_or_load_variable(self, variable_name, load_function, compute_function):
-        flag_name = f'remake_{variable_name}'
         variable_names = [name.strip() for name in variable_name.split(',')]
-        should_recompute = self.params.get(flag_name, False)
-        # Check if any of the variables need to be recomputed or loaded
-        needs_loading = should_recompute or any(getattr(self, name) is None for name in variable_names)
+        should_recompute_flags = [self.params.get(f'remake_{name}', False) for name in variable_names]
+        needs_loading = any(should_recompute_flags) or any(getattr(self, name) is None for name in variable_names)
+
         if needs_loading:
-            if should_recompute:
+            if any(should_recompute_flags):
                 self.logger.info(f"Recomputing variable(s): {variable_name}")
                 result = compute_function(self.params)
             else:
                 self.logger.info(f"Loading variable(s): {variable_name}")
                 result = load_function(self.params)
+            
             if isinstance(result, tuple):
                 if len(result) != len(variable_names):
                     raise ValueError(f"Expected {len(variable_names)} values, but got {len(result)}")
@@ -61,7 +61,7 @@ class DataManager:
                     setattr(self, name, value)
             else:
                 setattr(self, variable_names[0], result)
-        # Return the variables
+
         if len(variable_names) == 1:
             return getattr(self, variable_names[0])
         else:
@@ -139,7 +139,7 @@ def main():
         'use_parallel': True,
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
-        'remake_labelled_fixations': True,
+        'remake_labelled_fixations_m1': True,
         'remake_labelled_saccades_m1': True,
         'remake_labelled_spiketimes': False,
         'remake_labelled_fixation_rasters': True,
