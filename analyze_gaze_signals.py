@@ -31,6 +31,7 @@ class DataManager:
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
+
     def initialize_variables(self):
         self.labelled_gaze_positions_m1 = None
         self.toy_data = None
@@ -39,21 +40,32 @@ class DataManager:
         self.labelled_spiketimes = None
         self.labelled_fixation_rasters = None
 
+
     def get_or_load_variable(self, variable_name, load_function, compute_function):
         flag_name = f'remake_{variable_name}'
-        if self.params.get(flag_name, False) or getattr(self, variable_name) is None:
-            if self.params.get(flag_name, False):
-                self.logger.info(f"Recomputing variable: {variable_name}")
+        variable_names = [name.strip() for name in variable_name.split(',')]
+        should_recompute = self.params.get(flag_name, False)
+        # Check if any of the variables need to be recomputed or loaded
+        needs_loading = should_recompute or any(getattr(self, name) is None for name in variable_names)
+        if needs_loading:
+            if should_recompute:
+                self.logger.info(f"Recomputing variable(s): {variable_name}")
                 result = compute_function(self.params)
             else:
-                self.logger.info(f"Loading variable: {variable_name}")
+                self.logger.info(f"Loading variable(s): {variable_name}")
                 result = load_function(self.params)
             if isinstance(result, tuple):
-                for idx, name in enumerate(variable_name.split(',')):
-                    setattr(self, name.strip(), result[idx])
+                if len(result) != len(variable_names):
+                    raise ValueError(f"Expected {len(variable_names)} values, but got {len(result)}")
+                for name, value in zip(variable_names, result):
+                    setattr(self, name, value)
             else:
-                setattr(self, variable_name, result)
-        return getattr(self, variable_name)
+                setattr(self, variable_names[0], result)
+        # Return the variables
+        if len(variable_names) == 1:
+            return getattr(self, variable_names[0])
+        else:
+            return tuple(getattr(self, name) for name in variable_names)
 
 
     def human_readable_size(self, size):
@@ -86,11 +98,12 @@ class DataManager:
         else:
             input_data = self.labelled_gaze_positions_m1
 
-        self.labelled_fixations, self.labelled_saccades_m1 = self.get_or_load_variable(
-            'labelled_fixations',
+        self.labelled_fixations_m1, self.labelled_saccades_m1 = self.get_or_load_variable(
+            'labelled_fixations_m1, labelled_saccades_m1',
             load_data.load_m1_fixation_labels,
             lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
         )
+
         
         # self.labelled_saccades_m1 = self.get_or_load_variable(
         #     'labelled_saccades_m1',
