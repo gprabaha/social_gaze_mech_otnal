@@ -157,7 +157,20 @@ def load_labelled_gaze_positions(params):
     file_name = f'labelled_gaze_positions_m1{flag_info}.pkl'
     with open(os.path.join(processed_data_dir, file_name), 'rb') as f:
         return pickle.load(f)
-    
+
+
+def load_toy_data(params):
+    # Get the processed_data_dir from params
+    processed_data_dir = params['processed_data_dir']
+    toy_data_path = os.path.join(processed_data_dir, 'toy_data.pkl')
+    # Check if the toy_data.pkl file exists
+    if not os.path.exists(toy_data_path):
+        raise FileNotFoundError(f"No toy_data file found in {toy_data_path}")
+    # Load the toy_data from the pickle file
+    with open(toy_data_path, 'rb') as f:
+        toy_data = pickle.load(f)
+    return [toy_data]
+
 
 def load_m1_fixations(params):
     """

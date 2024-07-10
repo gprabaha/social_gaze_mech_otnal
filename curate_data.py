@@ -8,6 +8,7 @@ Created on Wed Apr 10 12:36:36 2024
 
 import numpy as np
 from tqdm import tqdm
+import pickle
 import os
 import pandas as pd
 import logging
@@ -111,6 +112,30 @@ def extract_labelled_gaze_positions_m1(params):
     return labelled_gaze_positions_m1
 
 
+def generate_toy_gazepos_data(labelled_gaze_positions, params):
+    third_session_data = labelled_gaze_positions[2]
+    # Ensure third_session_data[0] is a NumPy array with shape (N, 2)
+    if not isinstance(third_session_data[0], np.ndarray) or third_session_data[0].shape[1] != 2:
+        raise ValueError("Expected third_session_data[0] to be a NumPy array with shape (N, 2)")
+    array_data = third_session_data[0]
+    N = array_data.shape[0]
+    # Determine the length of the continuous segment to extract
+    h = N // 10
+    # Choose a random starting index i such that the segment [i to i + h] is within bounds
+    i = np.random.randint(0, N - h)
+    # Extract the continuous segment
+    toy_data = (array_data[i:i + h], third_session_data[1])
+    # Save the toy_data in the processed_data_dir specified in params
+    processed_data_dir = params['processed_data_dir']
+    if not os.path.exists(processed_data_dir):
+        os.makedirs(processed_data_dir)
+    toy_data_path = os.path.join(processed_data_dir, 'toy_data.pkl')
+    with open(toy_data_path, 'wb') as f:
+        pickle.dump(toy_data, f)
+    return [toy_data]
+
+
+
 ###
 def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     """
@@ -127,15 +152,15 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     use_parallel = params.get('use_parallel', True)
 
     # Extract fixations and saccades
-    all_fix_timepos, fix_detection_results, saccade_detection_results = fix_and_saccades.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
-    labelled_fixations = fix_and_saccades.generate_fixation_labels(fix_detection_results, params, use_parallel)
+    all_fix_df, all_info, all_saccades_df = fix_and_saccades.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
+    # labelled_fixations = fix_and_saccades.generate_fixation_labels(fix_detection_results, params, use_parallel)
 
-    saccades = [s for session_saccades in saccade_detection_results for s in session_saccades]
-    columns = ["start_time", "end_time", "duration", "trajectory", "start_roi", "end_roi", "session_name", "category", "run", "block"]
-    labelled_saccades = pd.DataFrame(saccades, columns=columns)
-    fix_and_saccades.save_saccade_labels(labelled_saccades, params)
+    # saccades = [s for session_saccades in saccade_detection_results for s in session_saccades]
+    # columns = ["start_time", "end_time", "duration", "trajectory", "start_roi", "end_roi", "session_name", "category", "run", "block"]
+    # labelled_saccades = pd.DataFrame(saccades, columns=columns)
+    # fix_and_saccades.save_saccade_labels(labelled_saccades, params)
 
-    return labelled_fixations, labelled_saccades
+    return all_fix_df, all_info, all_saccades_df
 
 
 ###

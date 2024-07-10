@@ -8,7 +8,7 @@ Author: pg496
 
 
 from concurrent.futures import ProcessPoolExecutor
-from multiprocessing import cpu_count
+from multiprocessing import cpu_count, Pool
 import numpy as np
 import os
 import scipy.signal as signal
@@ -19,7 +19,7 @@ from tqdm import tqdm
 import logging
 import pdb
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 # Get the number of CPUs from the environment variable
@@ -159,7 +159,7 @@ class ClusterFixationDetector:
         numclusts_range = list(range(2, 6))
         max_workers = min(len(numclusts_range), self.num_cpus)  # Limiting to 4 parallel jobs
         sil = np.zeros(5)
-        if 1:  # self.use_parallel:
+        if self.use_parallel:
             print("Using parallel processing with ProcessPoolExecutor")
             with ProcessPoolExecutor(max_workers=max_workers) as executor:
                 results = list(tqdm(executor.map(self.cluster_and_silhouette,
@@ -208,9 +208,11 @@ class ClusterFixationDetector:
         T[T == 100] = 1
         return T
 
+
     def behavioral_index(self, T, label):
         indexes = np.where(T == label)[0]
         return indexes, self.find_behavioral_times(indexes)
+
 
     def find_behavioral_times(self, indexes):
         dind = np.diff(indexes)
@@ -234,18 +236,8 @@ class ClusterFixationDetector:
         fix_times, points = data
         notfixations = []
         try:
-            if 1: # self.params.get('parallelize_local_reclustering_over_n_fixations', False):
-                logger.debug("In parallel processing...")
-                with ProcessPoolExecutor(max_workers=self.num_cpus) as executor:
-                    results = list(tqdm(executor.map(lambda fix: self.process_fixation_local_reclustering(fix, points), fix_times.T), 
-                                        total=len(fix_times.T), 
-                                        desc="Top-level Reclustering Progress"))
-                    for result in results:
-                        notfixations.extend(result)
-            else:
-                logger.debug("In serial processing...")
-                for fix in tqdm(fix_times.T, desc="Serial Reclustering Progress"):
-                    notfixations.extend(self.process_fixation_local_reclustering(fix, points))
+            for fix in tqdm(fix_times.T, desc="Serial Reclustering Progress"):
+                notfixations.extend(self.process_fixation_local_reclustering(fix, points))
         except Exception as e:
             logger.exception("Exception occurred during local reclustering")
         logger.debug("Finished local_reclustering...")
@@ -254,29 +246,27 @@ class ClusterFixationDetector:
 
     def process_fixation_local_reclustering(self, fix, points):
         try:
+            logger.debug("Starting process_fixation_local_reclustering...")
+            logger.debug(f"Fixation indices: {fix}")
             altind = np.arange(fix[0] - 50, fix[1] + 50)
             altind = altind[(altind >= 0) & (altind < len(points))]
             POINTS = points[altind]
+            logger.debug(f"Altind: {altind}")
+            logger.debug(f"Number of points for reclustering: {len(POINTS)}")
             numclusts_range = range(1, 6)
-            if 1: # self.params.get('parallelize_local_reclustering_over_n_fixations', False):
-                sil_results = [self.compute_sil((numclusts, POINTS)) for numclusts in numclusts_range]
-            else:
-                if self.use_parallel:
-                    max_workers = min(len(numclusts_range), self.num_cpus)
-                    with ProcessPoolExecutor(max_workers=max_workers) as executor:
-                        sil_results = list(tqdm(executor.map(self.compute_sil,
-                                                            [(numclusts, POINTS) for numclusts in numclusts_range]),
-                                                total=len(numclusts_range),
-                                                desc="Local Reclustering Progress"))
-                else:
-                    sil_results = [self.compute_sil((numclusts, POINTS)) for numclusts in numclusts_range]
+            logger.debug("Parallelizing local reclustering over numclusts range")
+            sil_results = [self.compute_sil((numclusts, POINTS)) for numclusts in numclusts_range]
             sil = np.zeros(5)
             for mean_sil, numclusts in sil_results:
                 sil[numclusts - 1] = mean_sil
+            logger.debug(f"Silhouette scores: {sil}")
             numclusters = np.argmax(sil) + 1
+            logger.debug(f"Optimal number of clusters: {numclusters}")
             T = KMeans(n_clusters=numclusters, n_init=5).fit(POINTS)
             medianvalues = np.array([np.median(POINTS[T.labels_ == i], axis=0) for i in range(numclusters)])
+            logger.debug(f"Median values: {medianvalues}")
             fixationcluster = np.argmin(np.sum(medianvalues[:, 1:3], axis=1))  # Velocity and acceleration
+            logger.debug(f"Fixation cluster index: {fixationcluster}")
             fixation_indices = np.where(T.labels_ == fixationcluster)[0]
             # Check if the fixation cluster has no points
             if fixation_indices.size == 0:
@@ -289,12 +279,14 @@ class ClusterFixationDetector:
                 (medianvalues[:, 2] < medianvalues[fixationcluster, 2] + 3 * np.std(POINTS[fixation_indices][:, 2]))
             )[0]
             fixationcluster2 = fixationcluster2[fixationcluster2 != fixationcluster]
+            logger.debug(f"Additional fixation clusters: {fixationcluster2}")
             for cluster in fixationcluster2:
                 cluster_indices = np.where(T.labels_ == cluster)[0]
                 T.labels_[cluster_indices] = 100
             # Final relabeling
             T.labels_[T.labels_ != 100] = 2
             T.labels_[T.labels_ == 100] = 1
+            logger.debug("Reclustering completed successfully")
             return altind[T.labels_ == 2]
         except Exception as e:
             logger.exception("Exception occurred during fixation local reclustering")

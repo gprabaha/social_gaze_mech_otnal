@@ -55,20 +55,6 @@ class DataManager:
                 return f"{size:.2f} {unit}"
             size /= 1024
 
-    def generate_toy_gazepos_data(self, labelled_gaze_positions):
-        third_session_data = labelled_gaze_positions[2]
-        # Ensure third_session_data[0] is a NumPy array with shape (N, 2)
-        if not isinstance(third_session_data[0], np.ndarray) or third_session_data[0].shape[1] != 2:
-            raise ValueError("Expected third_session_data[0] to be a NumPy array with shape (N, 2)")
-        array_data = third_session_data[0]
-        N = array_data.shape[0]
-        # Determine the length of the continuous segment to extract
-        h = N // 10
-        # Choose a random starting index i such that the segment [i to i + h] is within bounds
-        i = np.random.randint(0, N - h)
-        # Extract the continuous segment
-        toy_data = (array_data[i:i + h], third_session_data[1])
-        return [toy_data]
 
     def run(self):
         root_data_dir, self.params = util.fetch_root_data_dir(self.params)
@@ -84,7 +70,11 @@ class DataManager:
 
         if self.params['use_toy_data']:
             self.logger.info(f"!! USING TOY DATA !!")
-            input_data = self.generate_toy_gazepos_data(self.labelled_gaze_positions_m1)
+            input_data = self.get_or_load_variable(
+                'toy_data',
+                load_data.load_toy_data,
+                lambda p: curate_data.generate_toy_gazepos_data(self.labelled_gaze_positions_m1, p)
+            )
         else:
             input_data = self.labelled_gaze_positions_m1
 
@@ -116,6 +106,7 @@ class DataManager:
         # if self.params.get('replot_face/eye_vs_obj_violins'):
         #     response_comp.compute_pre_and_post_fixation_response_to_roi_for_each_unit(self.labelled_fixation_rasters, self.params)
 
+
 def main():
     params = util.get_params()
     params.update({
@@ -123,9 +114,10 @@ def main():
         'submit_separate_jobs_for_sessions': False,
         'use_toy_data': True,
         'is_cluster': True,
-        'use_parallel': False,
+        'use_parallel': True,
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
+        'remake_toy_data': True,
         'remake_labelled_fixations': True,
         'remake_labelled_saccades_m1': True,
         'remake_labelled_spiketimes': False,

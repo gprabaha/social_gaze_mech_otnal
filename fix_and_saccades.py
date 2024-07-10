@@ -97,14 +97,14 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
         if not results:
             logging.error("No results to concatenate.")
             raise ValueError("No objects to concatenate")
-        all_fix_timepos, fix_detection_results, saccade_detection_results = zip(*results)
+        all_fix_df, all_info, all_saccades_df = zip(*results)
     else:
         sessions_data = [(session_data[0], session_data[1], params) for session_data in labelled_gaze_positions]
-        fix_detection_results, saccade_detection_results = extract_fixations_and_saccades(sessions_data, use_parallel)
-        all_fix_timepos = process_fixation_results(fix_detection_results)
-        save_fixation_and_saccade_results(processed_data_dir, all_fix_timepos, fix_detection_results, saccade_detection_results, params)
+        all_fix_df, all_saccades_df = extract_fixations_and_saccades(sessions_data, use_parallel)
+        all_fix_timepos = process_fixation_results(all_fix_df)
+        save_fixation_and_saccade_results(processed_data_dir, all_fix_timepos, all_saccades_df, params)
 
-    return all_fix_timepos, fix_detection_results, saccade_detection_results
+    return all_fix_df, all_info, all_saccades_df
 
 
 
@@ -183,7 +183,6 @@ def get_session_fixations_and_saccades(session_data):
         fixationtimes, fixations = fix_detector.detect_fixations(positions, time_vec, session_name)
         saccade_detector = EyeMVMSaccadeDetector(params['vel_thresh'], params['min_samples'], params['smooth_func'])
         saccades = saccade_detector.extract_saccades_for_session((positions, info))
-    
 
     fix_timepos_df = pd.DataFrame({
         'start_time': fixationtimes[0, :].T,
@@ -198,8 +197,6 @@ def get_session_fixations_and_saccades(session_data):
         'unknown', 'block'
     ])
 
-    pdb.set_trace()
-    
     return fix_timepos_df, info, saccades_df
 
 
@@ -213,12 +210,12 @@ def process_fixation_results(fix_detection_results):
     - all_fix_timepos (pd.DataFrame): DataFrame of fixation time positions.
     """
     all_fix_timepos = pd.DataFrame()
-    for session_timepos_df, _ in fix_detection_results:
+    for session_timepos_df in fix_detection_results:
         all_fix_timepos = pd.concat([all_fix_timepos, session_timepos_df], ignore_index=True)
     return all_fix_timepos
 
 
-def save_fixation_and_saccade_results(processed_data_dir, all_fix_timepos, fix_detection_results, saccade_detection_results, params):
+def save_fixation_and_saccade_results(processed_data_dir, fix_timepos_df, saccades, params):
     """
     Saves fixation and saccade results to files.
     Parameters:
@@ -228,9 +225,11 @@ def save_fixation_and_saccade_results(processed_data_dir, all_fix_timepos, fix_d
     - saccade_detection_results (list): List of saccade detection results.
     - params (dict): Dictionary of parameters.
     """
+    output_dir = processed_data_dir
+    fixations_file = os.path.join(output_dir, f"fixations_and saccades.pkl")
+    with open(fixations_file, 'wb') as f:
+        pickle.dump((fix_timepos_df, saccades), f)
     flag_info = util.get_filename_flag_info(params)
-    timepos_file_name = f'fix_timepos_m1{flag_info}.csv'
-    all_fix_timepos.to_csv(os.path.join(processed_data_dir, timepos_file_name), index=False)
     # Save the fixation and saccade detection results using pickle or similar method
 
 
