@@ -104,7 +104,7 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
         all_fix_timepos = process_fixation_results(all_fix_df)
         save_fixation_and_saccade_results(processed_data_dir, all_fix_timepos, all_saccades_df, params)
 
-    return all_fix_df, all_info, all_saccades_df
+    return all_fix_df, all_saccades_df
 
 
 

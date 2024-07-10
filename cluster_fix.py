@@ -18,6 +18,7 @@ from tqdm import tqdm
 
 import logging
 import pdb
+import warnings
 
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
@@ -347,6 +348,7 @@ class ClusterFixationDetector:
 
 
     def extract_variables(self, xss, yss):
+        warnings.showwarning = self.custom_warning_handler
         if len(xss) < 3:
             return np.full(6, np.nan)
         vel = np.sqrt(np.diff(xss) ** 2 + np.diff(yss) ** 2) / self.samprate
@@ -355,7 +357,17 @@ class ClusterFixationDetector:
         dist = [np.sqrt((xss[a] - xss[a + 2]) ** 2 + (yss[a] - yss[a + 2]) ** 2) for a in range(len(xss) - 2)]
         rot = [np.abs(angle[a] - angle[a + 1]) for a in range(len(xss) - 2)]
         rot = [r if r <= 180 else 360 - r for r in rot]
+        # Reset warning handler to default after this function
+        warnings.showwarning = warnings._showwarnmsg_impl
         return [np.max(vel), np.max(accel), np.mean(dist), np.mean(vel), np.abs(np.mean(angle)), np.mean(rot)]
+
+
+    def custom_warning_handler(self, message, category, filename, lineno, file=None, line=None):
+        if category == RuntimeWarning and 'invalid value encountered in sqrt' in str(message):
+            pdb.set_trace()  # This will trigger the debugger
+        else:
+            # Use the default warning handler for other warnings
+            warnings.showwarning(message, category, filename, lineno, file, line)
 
 
     def inter_vs_intra_dist(self, X, labels):
