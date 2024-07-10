@@ -7,7 +7,7 @@ Author: pg496
 """
 
 
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count, Pool
 import numpy as np
 import os
@@ -186,7 +186,7 @@ class ClusterFixationDetector:
         numclusters = np.argmax(sil) + 2
         print(f"Optimal number of clusters: {numclusters}")
         T = KMeans(n_clusters=numclusters, n_init=5).fit(points)
-        labels = T.labels()
+        labels = T.labels_
         meanvalues = np.array([np.mean(points[labels == i], axis=0) for i in range(numclusters)])
         stdvalues = np.array([np.std(points[labels == i], axis=0) for i in range(numclusters)])
         print("Global clustering completed successfully")
@@ -243,12 +243,27 @@ class ClusterFixationDetector:
         fix_times, points = data
         notfixations = []
         try:
-            for fix in tqdm(fix_times.T, desc="Serial Reclustering Progress"):
-                notfixations.extend(self.process_fixation_local_reclustering(fix, points))
+            if self.params['use_parallel']:
+                with ProcessPoolExecutor() as executor:
+                    futures = {executor.submit(self.process_fixation_wrapper, fix, points): fix for fix in fix_times.T}
+                    for future in tqdm(as_completed(futures), total=len(fix_times.T), desc="Parallel Reclustering Progress"):
+                        try:
+                            notfixations.extend(future.result())
+                        except Exception as e:
+                            logger.exception("Exception occurred during parallel local reclustering")
+                executor.shutdown(wait=True)
+                gc.collect()  # Ensure garbage collection after executor shutdown
+            else:
+                for fix in tqdm(fix_times.T, desc="Serial Reclustering Progress"):
+                    notfixations.extend(self.process_fixation_local_reclustering(fix, points))
         except Exception as e:
             logger.exception("Exception occurred during local reclustering")
         logger.debug("Finished local_reclustering...")
         return np.array(notfixations)
+
+
+    def process_fixation_wrapper(self, fix, points):
+        return self.process_fixation_local_reclustering(fix, points)
 
 
     def process_fixation_local_reclustering(self, fix, points):
