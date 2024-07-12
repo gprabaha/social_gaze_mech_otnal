@@ -38,14 +38,14 @@ def main(session_index, params_file):
     session_data = (session_data[0], session_data[1], params)  # Prepare session data as needed by the function
 
     # Extract fixations and saccades using get_session_fixations_and_saccades
-    fix_timepos_df, info, saccades = get_session_fixations_and_saccades(session_data)
+    fix_timepos_df, info, saccades_df = get_session_fixations_and_saccades(session_data)
 
     # Save results
     output_dir = params['processed_data_dir']
     fixations_file = os.path.join(output_dir, f"{session_index}_fixations.pkl")
 
     with open(fixations_file, 'wb') as f:
-        pickle.dump((fix_timepos_df, info, saccades), f)
+        pickle.dump((fix_timepos_df, info, saccades_df), f)
 
     logging.info(f"Fixation detection completed for session index: {session_index}")
     logging.info(f"Results saved to: {fixations_file}")

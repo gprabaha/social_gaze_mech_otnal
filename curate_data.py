@@ -154,7 +154,6 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     # Extract fixations and saccades
     all_fix_df, all_saccades_df = fix_and_saccades.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
     # labelled_fixations = fix_and_saccades.generate_fixation_labels(fix_detection_results, params, use_parallel)
-
     # saccades = [s for session_saccades in saccade_detection_results for s in session_saccades]
     # columns = ["start_time", "end_time", "duration", "trajectory", "start_roi", "end_roi", "session_name", "category", "run", "block"]
     # labelled_saccades = pd.DataFrame(saccades, columns=columns)

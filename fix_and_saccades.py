@@ -185,13 +185,13 @@ def get_session_fixations_and_saccades(session_data):
         'fix_x': fixations[:, 0],
         'fix_y': fixations[:, 1]
     })
-    
+    print(fix_timepos_df)
     saccades_df = pd.DataFrame(saccades, columns=[
         'start_time', 'end_time', 'duration', 'trajectory', 
         'start_roi', 'end_roi', 'session_name', 'category', 
         'unknown', 'block'
     ])
-
+    print(saccades_df)
     return fix_timepos_df, info, saccades_df
 
 
