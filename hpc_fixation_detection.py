@@ -75,8 +75,13 @@ class HPCFixationDetection:
             logging.error(f"Error during job submission process: {e}")
             raise
 
+
     def track_job_progress(self, job_id):
         logging.info(f"Tracking progress of job array with ID: {job_id}")
+        start_time = time.time()
+        check_interval = 30  # seconds
+        print_interval = 5 * 60  # 5 minutes
+        last_print_time = start_time
         while True:
             result = subprocess.run(
                 f'squeue --job {job_id} -h -o %T',
@@ -90,10 +95,12 @@ class HPCFixationDetection:
                 logging.info(f"Job array {job_id} has completed.")
                 break
             running_jobs = [status for status in ('PENDING', 'RUNNING', 'CONFIGURING') if status in job_statuses]
+            current_time = time.time()
             if not running_jobs:
                 logging.info(f"Job array {job_id} has completed.")
                 break
-            else:
+            elif current_time - last_print_time >= print_interval:
                 logging.info(f"Job array {job_id} is still running. Checking again in 30 seconds...")
-                time.sleep(30)
+                last_print_time = current_time
+            time.sleep(check_interval)
 

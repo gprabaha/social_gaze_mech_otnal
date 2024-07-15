@@ -217,6 +217,7 @@ def save_fixation_and_saccade_results(processed_data_dir, fix_timepos_df, saccad
     """
     output_dir = processed_data_dir
     fixations_file = os.path.join(output_dir, f"all_fixations_and_saccades.pkl")
+    logging.info("Saving: " + fixations_file)
     with open(fixations_file, 'wb') as f:
         pickle.dump((fix_timepos_df, saccades), f)
 
