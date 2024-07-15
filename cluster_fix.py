@@ -272,7 +272,6 @@ class ClusterFixationDetector:
             gc.collect()  # Ensure garbage collection after executor shutdown
         else:
             logger.info("Serial local_reclustering over the detected fix time points")
-                futures = {executor_2.submit(self.process_fixation_wrapper, fix, points): fix for fix in
             for fix in tqdm(fix_times.T, desc="Serial Reclustering Progress"):
                 notfixations.extend(self.process_fixation_local_reclustering(fix, points))
         logger.info("Finished local_reclustering...")
@@ -285,7 +284,6 @@ class ClusterFixationDetector:
 
     def process_fixation_local_reclustering(self, fix, points):
         try:
-            logger.info("Starting process_fixation_local_reclustering...")
             logger.debug(f"Fixation indices: {fix}")
             altind = np.arange(fix[0] - 50, fix[1] + 50)
             altind = altind[(altind >= 0) & (altind < len(points))]
@@ -325,7 +323,6 @@ class ClusterFixationDetector:
             # Final relabeling
             T.labels_[T.labels_ != 100] = 2
             T.labels_[T.labels_ == 100] = 1
-            logger.info("Reclustering completed successfully")
             return altind[T.labels_ == 2]
         except Exception as e:
             logger.exception("Exception occurred during fixation local reclustering")

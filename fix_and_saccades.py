@@ -79,7 +79,6 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
     processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', True)
     submit_separate_jobs = params.get('submit_separate_jobs_for_sessions', True)
-
     if submit_separate_jobs:
         hpc_fixation_detection = HPCFixationDetection(params)
         job_file_path = hpc_fixation_detection.generate_fixation_job_file(labelled_gaze_positions)
@@ -130,16 +129,13 @@ def extract_fixations_and_saccades(sessions_data, use_parallel):
     else:
         print("\nExtracting fixations and saccades serially")
         results = [get_session_fixations_and_saccades(session_data) for session_data in sessions_data]
-
     # Unpack the results into separate lists for fixations, saccades, and info
     fix_detection_results = []
     saccade_detection_results = []
-
     for result in results:
         fix_timepos_df, info, saccades_df = result
         fix_detection_results.append(fix_timepos_df)
         saccade_detection_results.append(saccades_df)
-
     return fix_detection_results, saccade_detection_results
 
 
