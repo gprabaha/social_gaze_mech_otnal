@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/analyze_gaze_signals.py", line 11, in <module>
-    import numpy as np
-ModuleNotFoundError: No module named 'numpy'

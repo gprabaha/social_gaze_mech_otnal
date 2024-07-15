@@ -101,9 +101,8 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
     else:
         sessions_data = [(session_data[0], session_data[1], params) for session_data in labelled_gaze_positions]
         all_fix_df, all_saccades_df = extract_fixations_and_saccades(sessions_data, use_parallel)
-        all_fix_timepos = process_fixation_results(all_fix_df)
-        save_fixation_and_saccade_results(processed_data_dir, all_fix_timepos, all_saccades_df, params)
-
+    all_fix_timepos = process_fixation_results(all_fix_df)
+    save_fixation_and_saccade_results(processed_data_dir, all_fix_timepos, all_saccades_df, params)
     return all_fix_df, all_saccades_df
 
 
@@ -221,11 +220,9 @@ def save_fixation_and_saccade_results(processed_data_dir, fix_timepos_df, saccad
     - params (dict): Dictionary of parameters.
     """
     output_dir = processed_data_dir
-    fixations_file = os.path.join(output_dir, f"fixations_and saccades.pkl")
+    fixations_file = os.path.join(output_dir, f"all_fixations_and_saccades.pkl")
     with open(fixations_file, 'wb') as f:
         pickle.dump((fix_timepos_df, saccades), f)
-    flag_info = util.get_filename_flag_info(params)
-    # Save the fixation and saccade detection results using pickle or similar method
 
 
 def format_saccades(saccadetimes, positions, info):

@@ -25,7 +25,7 @@ import warnings
 import gc
 import time
 
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Get the number of CPUs from the environment variable
@@ -163,11 +163,12 @@ class ClusterFixationDetector:
         sil = np.zeros(5)
         results = []
         if self.use_parallel:
+            logging.info("Using parallel processing for global clustering")
             results = self.parallel_global_clustering(points, numclusts_range, max_workers)
             gc.collect()
             time.sleep(1)  # Add a small delay to ensure cleanup
         else:
-            logging.info("Using serial processing")
+            logging.info("Using serial processing for global clustering")
             for numclusts in tqdm(numclusts_range, desc="Global Clustering Progress"):
                 try:
                     result = self.cluster_and_silhouette(points, numclusts)
@@ -182,7 +183,7 @@ class ClusterFixationDetector:
         labels = T.labels_
         meanvalues = np.array([np.mean(points[labels == i], axis=0) for i in range(numclusters)])
         stdvalues = np.array([np.std(points[labels == i], axis=0) for i in range(numclusters)])
-        print("Clustering completed successfully")
+        logging.info("Global clustering completed successfully")
         return labels, meanvalues, stdvalues
 
 
@@ -254,12 +255,13 @@ class ClusterFixationDetector:
 
 
     def local_reclustering(self, data):
-        logger.debug("Starting local_reclustering...")
+        logger.info("Starting local_reclustering...")
         fix_times, points = data
         notfixations = []
         if 0: # self.params['use_parallel']:
             importlib.reload(concurrent.futures)
             with concurrent.futures.ProcessPoolExecutor() as executor_2:
+                logger.info("Parallelize local_reclustering over the detected fix time points")
                 futures = {executor_2.submit(self.process_fixation_wrapper, fix, points): fix for fix in fix_times.T}
                 for future in tqdm(concurrent.futures.as_completed(futures), total=len(fix_times.T), desc="Parallel Reclustering Progress"):
                     try:
@@ -269,9 +271,11 @@ class ClusterFixationDetector:
             executor_2.shutdown(wait=True)
             gc.collect()  # Ensure garbage collection after executor shutdown
         else:
+            logger.info("Serial local_reclustering over the detected fix time points")
+                futures = {executor_2.submit(self.process_fixation_wrapper, fix, points): fix for fix in
             for fix in tqdm(fix_times.T, desc="Serial Reclustering Progress"):
                 notfixations.extend(self.process_fixation_local_reclustering(fix, points))
-        logger.debug("Finished local_reclustering...")
+        logger.info("Finished local_reclustering...")
         return np.array(notfixations)
 
 
@@ -281,7 +285,7 @@ class ClusterFixationDetector:
 
     def process_fixation_local_reclustering(self, fix, points):
         try:
-            logger.debug("Starting process_fixation_local_reclustering...")
+            logger.info("Starting process_fixation_local_reclustering...")
             logger.debug(f"Fixation indices: {fix}")
             altind = np.arange(fix[0] - 50, fix[1] + 50)
             altind = altind[(altind >= 0) & (altind < len(points))]
@@ -321,7 +325,7 @@ class ClusterFixationDetector:
             # Final relabeling
             T.labels_[T.labels_ != 100] = 2
             T.labels_[T.labels_ == 100] = 1
-            logger.debug("Reclustering completed successfully")
+            logger.info("Reclustering completed successfully")
             return altind[T.labels_ == 2]
         except Exception as e:
             logger.exception("Exception occurred during fixation local reclustering")

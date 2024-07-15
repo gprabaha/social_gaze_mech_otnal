@@ -86,6 +86,7 @@ class DataManager:
             load_data.load_labelled_gaze_positions,
             lambda p: curate_data.extract_labelled_gaze_positions_m1(p)
         )
+        self.logger.info(f"M1 remapped gaze pos data acquired!")
 
         if self.params['use_toy_data']:
             self.logger.info(f"!! USING TOY DATA !!")
@@ -103,6 +104,7 @@ class DataManager:
             load_data.load_m1_fixation_labels,
             lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
         )
+        self.logger.info(f"M1 fixations and saccades acquired")
 
         
         # self.labelled_saccades_m1 = self.get_or_load_variable(
@@ -132,8 +134,8 @@ def main():
     params = util.get_params()
     params.update({
         'parallelize_local_reclustering_over_n_fixations': False,
-        'submit_separate_jobs_for_sessions': False,
-        'use_toy_data': True,
+        'submit_separate_jobs_for_sessions': True,
+        'use_toy_data': False,
         'remake_toy_data': False,
         'is_cluster': True,
         'use_parallel': True,
