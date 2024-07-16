@@ -172,6 +172,26 @@ def load_toy_data(params):
     return [toy_data]
 
 
+def load_m1_labelled_fixations_and_saccades(params):
+    """
+    Loads and returns the labelled fixation and saccade results for m1 from files.
+    Parameters:
+    - processed_data_dir (str): Directory to load processed data from. 
+    Returns:
+    - labelled_fixations (pd.DataFrame): DataFrame of labelled fixation time positions.
+    - labelled_saccades (list): List of labelled saccade detection results.
+    """
+    processed_data_dir = params.get('processed_data_dir')
+    fixations_file = os.path.join(processed_data_dir, "m1_labelled_fixations_and_saccades.pkl")
+    logging.info("Loading: " + fixations_file) 
+    if not os.path.exists(fixations_file):
+        logging.error("File not found: " + fixations_file)
+        return None, None
+    with open(fixations_file, 'rb') as f:
+        labelled_fixations, labelled_saccades = pickle.load(f)
+    return labelled_fixations, labelled_saccades
+
+
 def load_m1_fixations(params):
     """
     Load M1 fixations and related data.
@@ -250,9 +270,6 @@ def load_saccade_labels(params):
         print(f"No file found at {file_path}")
         return None
 
-
-
-from scipy.io import loadmat
 
 def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
     """

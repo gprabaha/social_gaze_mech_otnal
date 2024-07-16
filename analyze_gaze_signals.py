@@ -101,11 +101,11 @@ class DataManager:
 
         self.labelled_fixations_m1, self.labelled_saccades_m1 = self.get_or_load_variable(
             'labelled_fixations_m1, labelled_saccades_m1',
-            load_data.load_m1_fixation_labels,
+            load_data.load_m1_labelled_fixations_and_saccades,
             lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
         )
         self.logger.info(f"M1 fixations and saccades acquired")
-
+        pdb.set_trace()
         
         # self.labelled_saccades_m1 = self.get_or_load_variable(
         #     'labelled_saccades_m1',
@@ -141,8 +141,8 @@ def main():
         'use_parallel': True,
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
-        'remake_labelled_fixations_m1': True,
-        'remake_labelled_saccades_m1': True,
+        'remake_labelled_fixations_m1': False,
+        'remake_labelled_saccades_m1': False,
         'remake_labelled_spiketimes': False,
         'remake_labelled_fixation_rasters': True,
         'make_plots': False,
