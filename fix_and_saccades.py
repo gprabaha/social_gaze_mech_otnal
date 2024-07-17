@@ -72,9 +72,8 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
     - labelled_gaze_positions (list): List of labelled gaze positions.
     - params (dict): Dictionary of parameters.
     Returns:
-    - all_fix_timepos (pd.DataFrame): DataFrame of fixation time positions.
-    - fix_detection_results (list): List of fixation detection results.
-    - saccade_detection_results (list): List of saccade detection results.
+    - all_fix_df (pd.DataFrame): DataFrame of all fixation time positions.
+    - all_saccades_df (pd.DataFrame): DataFrame of all saccades.
     """
     processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', True)
@@ -100,9 +99,27 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
     else:
         sessions_data = [(session_data[0], session_data[1], params) for session_data in labelled_gaze_positions]
         all_fix_df, all_saccades_df = extract_fixations_and_saccades(sessions_data, use_parallel)
-    all_fix_timepos = process_fixation_results(all_fix_df)
-    save_fixation_and_saccade_results(processed_data_dir, all_fix_timepos, all_saccades_df, params)
+    all_fix_df, all_saccades_df = process_detection_results(all_fix_df, all_saccades_df)
+    save_fixation_and_saccade_results(processed_data_dir, all_fix_df, all_saccades_df, params)
     return all_fix_df, all_saccades_df
+
+
+def process_detection_results(fix_detection_results, saccade_detection_results):
+    """
+    Processes the results from fixation and saccade detection.
+    Parameters:
+    - fix_detection_results (list): List of fixation detection results.
+    - saccade_detection_results (list): List of saccade detection results.
+    Returns:
+    - all_fix_timepos (pd.DataFrame): DataFrame of all fixation time positions.
+    - all_saccades (pd.DataFrame): DataFrame of all saccades.
+    """
+    all_fix_timepos = pd.DataFrame()
+    all_saccades = pd.DataFrame()
+    for fix_df, saccade_df in zip(fix_detection_results, saccade_detection_results):
+        all_fix_timepos = pd.concat([all_fix_timepos, fix_df], ignore_index=True)
+        all_saccades = pd.concat([all_saccades, saccade_df], ignore_index=True)
+    return all_fix_timepos, all_saccades
 
 
 
@@ -156,7 +173,6 @@ def get_session_fixations_and_saccades(session_data):
     n_samples = positions.shape[0]
     time_vec = util.create_timevec(n_samples, sampling_rate)
     use_parallel = params.get('use_parallel', False)
-
     if params.get('fixation_detection_method', 'default') == 'cluster_fix':
         detector = ClusterFixationDetector(samprate=sampling_rate, params=params)
         x_coords = positions[:, 0]
@@ -167,42 +183,76 @@ def get_session_fixations_and_saccades(session_data):
         fixationtimes = fix_stats['fixationtimes']
         fixations = fix_stats['fixations']
         saccadetimes = fix_stats['saccadetimes']
-        saccades = format_saccades(saccadetimes, positions, info)
     else:
         fix_detector = EyeMVMFixationDetector(sampling_rate=sampling_rate)
         fixationtimes, fixations = fix_detector.detect_fixations(positions, time_vec, session_name)
         saccade_detector = EyeMVMSaccadeDetector(params['vel_thresh'], params['min_samples'], params['smooth_func'])
-        saccades = saccade_detector.extract_saccades_for_session((positions, info))
-
-    fix_timepos_df = pd.DataFrame({
-        'start_time': fixationtimes[0, :].T,
-        'end_time': fixationtimes[1, :].T,
-        'fix_x': fixations[:, 0],
-        'fix_y': fixations[:, 1]
-    })
+        saccadetimes = saccade_detector.extract_saccades_for_session((positions, info))
+    fix_timepos_df = make_fixations_df(fixationtimes, fixations, positions, info)
+    saccades_df = make_saccades_df(saccadetimes, positions, info)
     print(fix_timepos_df)
-    saccades_df = pd.DataFrame(saccades, columns=[
-        'start_time', 'end_time', 'duration', 'trajectory', 
-        'start_roi', 'end_roi', 'session_name', 'category', 
-        'unknown', 'block'
-    ])
     print(saccades_df)
     return fix_timepos_df, info, saccades_df
 
 
-
-def process_fixation_results(fix_detection_results):
+def make_fixations_df(fixationtimes, fixations, positions, info):
     """
-    Processes the results from fixation detection.
+    Creates a DataFrame for fixations.
     Parameters:
-    - fix_detection_results (list): List of fixation detection results.
+    - fixationtimes (array): Array of fixation times.
+    - fixations (array): Array of fixation coordinates.
+    - positions (array): Array of gaze positions.
+    - info (dict): Dictionary of session information.
     Returns:
-    - all_fix_timepos (pd.DataFrame): DataFrame of fixation time positions.
+    - fix_timepos_df (pd.DataFrame): DataFrame of fixation time positions.
     """
-    all_fix_timepos = pd.DataFrame()
-    for session_timepos_df in fix_detection_results:
-        all_fix_timepos = pd.concat([all_fix_timepos, session_timepos_df], ignore_index=True)
-    return all_fix_timepos
+    fix_timepos_df = pd.DataFrame({
+        'start_time': fixationtimes[0, :].T,
+        'end_time': fixationtimes[1, :].T,
+        'mean_x_pos': fixations[:, 0],
+        'mean_y_pos': fixations[:, 1]
+    })
+    # Calculate additional fixation parameters
+    fix_timepos_df['fix_duration'] = fix_timepos_df['end_time'] - fix_timepos_df['start_time']
+    fix_timepos_df['fix_roi'] = fix_timepos_df.apply(lambda row: determine_roi_of_coord([row['mean_x_pos'], row['mean_y_pos']], info['roi_bb_corners']), axis=1)
+    fix_timepos_df['category'] = info['category']
+    fix_timepos_df['session_name'] = info['session_name']
+    fix_timepos_df['run'] = info.get('run', None)
+    fix_timepos_df['block'] = fix_timepos_df.apply(lambda row: determine_block(row['start_time'], row['end_time'], info['startS'], info['stopS']), axis=1)
+    fix_timepos_df['agent'] = info.get('agent', None)
+    return fix_timepos_df
+
+
+
+def make_saccades_df(saccadetimes, positions, info):
+    """
+    Creates a DataFrame for saccades.
+    Parameters:
+    - saccadetimes (array): Array of saccade times.
+    - positions (array): Array of gaze positions.
+    - info (dict): Dictionary of session information.
+    Returns:
+    - saccades_df (pd.DataFrame): DataFrame of saccades for the session.
+    """
+    saccades = []
+    for t_range in saccadetimes.T:
+        start_time = int(t_range[0])
+        end_time = int(t_range[1])
+        duration = end_time - start_time
+        trajectory = positions[start_time:end_time + 1, :]
+        start_roi = determine_roi_of_coord(trajectory[0, :2], info['roi_bb_corners'])
+        end_roi = determine_roi_of_coord(trajectory[-1, :2], info['roi_bb_corners'])
+        block = determine_block(start_time, end_time, info['startS'], info['stopS'])
+        saccades.append([
+            start_time, end_time, duration, trajectory, start_roi, 
+            end_roi, info['session_name'], info['category'], block
+        ])
+    saccades_df = pd.DataFrame(saccades, columns=[
+        'start_time', 'end_time', 'duration', 'trajectory', 
+        'start_roi', 'end_roi', 'session_name', 'category',
+        'block'
+    ])
+    return saccades_df
 
 
 def save_fixation_and_saccade_results(processed_data_dir, fix_timepos_df, saccades, params):
@@ -222,30 +272,6 @@ def save_fixation_and_saccade_results(processed_data_dir, fix_timepos_df, saccad
         pickle.dump((fix_timepos_df, saccades), f)
 
 
-def format_saccades(saccadetimes, positions, info):
-    """
-    Formats the saccade times into a list of saccade details.
-    Parameters:
-    - saccadetimes (array): Array of saccade times.
-    - positions (array): Array of gaze positions.
-    - info (dict): Dictionary of session information.
-    Returns:
-    - saccades (list): List of saccade details.
-    """
-    saccades = []
-    for t_range in saccadetimes.T:
-        start_time = int(t_range[0])
-        end_time = int(t_range[1])
-        duration = end_time - start_time
-        trajectory = positions[start_time:end_time + 1, :]
-        start_roi = determine_roi_of_coord(trajectory[0, :2], info['roi_bb_corners'])
-        end_roi = determine_roi_of_coord(trajectory[-1, :2], info['roi_bb_corners'])
-        block = determine_block(start_time, end_time, info['startS'], info['stopS'])
-        saccades.append([
-            start_time, end_time, duration, trajectory, start_roi, 
-            end_roi, info['session_name'], info['category'], None, block
-        ])
-    return saccades
 
 
 def determine_roi_of_coord(position, bbox_corners):
