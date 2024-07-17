@@ -306,7 +306,7 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
         print(f"mat73 failed to load {file_path}, falling back to scipy.io.loadmat. Error: {e}")
         try:
             # Fallback to scipy.io.loadmat
-            data_spikeTs = loadmat(file_path)
+            data_spikeTs = scipy.io.loadmat(file_path)
             spikeTs_struct = data_spikeTs['spikeTs']
             spikeS = [np.squeeze(spikeS).tolist() for spikeS in spikeTs_struct['spikeS'][0]]
             spikeMs = [np.squeeze(spikeMs).tolist() for spikeMs in spikeTs_struct['spikeMs'][0]]
