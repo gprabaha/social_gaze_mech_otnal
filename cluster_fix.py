@@ -78,8 +78,10 @@ class ClusterFixationDetector:
 
             return {
                 'fixationtimes': fixationtimes * self.samprate,  # Convert indices to time points
+                'fixationindices': fixationtimes,
                 'fixations': self.extract_fixations(fixationtimes, data),
                 'saccadetimes': saccadetimes * self.samprate,  # Convert indices to time points
+                'saccadeindices': saccadetimes,
                 'FixationClusterValues': pointfix,
                 'SaccadeClusterValues': pointsac,
                 'MeanClusterValues': recalc_meanvalues,
