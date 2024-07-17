@@ -134,9 +134,9 @@ def main():
     params = util.get_params()
     params.update({
         'parallelize_local_reclustering_over_n_fixations': False,
-        'submit_separate_jobs_for_sessions': False,
-        'use_toy_data': True,
-        'remake_toy_data': True,
+        'submit_separate_jobs_for_sessions': True,
+        'use_toy_data': False,
+        'remake_toy_data': False,
         'is_cluster': True,
         'use_parallel': True,
         'remake_labelled_gaze_positions_m1': False,
