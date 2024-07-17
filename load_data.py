@@ -182,7 +182,7 @@ def load_m1_labelled_fixations_and_saccades(params):
     - labelled_saccades (list): List of labelled saccade detection results.
     """
     processed_data_dir = params.get('processed_data_dir')
-    fixations_file = os.path.join(processed_data_dir, "m1_labelled_fixations_and_saccades.pkl")
+    fixations_file = os.path.join(processed_data_dir, "all_labelled_fixations_and_saccades.pkl")
     logging.info("Loading: " + fixations_file) 
     if not os.path.exists(fixations_file):
         logging.error("File not found: " + fixations_file)
