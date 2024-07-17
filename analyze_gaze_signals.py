@@ -134,7 +134,7 @@ def main():
     params = util.get_params()
     params.update({
         'parallelize_local_reclustering_over_n_fixations': False,
-        'submit_separate_jobs_for_sessions': True,
+        'submit_separate_jobs_for_sessions': False,
         'use_toy_data': True,
         'remake_toy_data': True,
         'is_cluster': True,
