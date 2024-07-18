@@ -69,9 +69,10 @@ def plot_fixation_proportions_for_diff_conditions(labelled_fixations, params):
             ax.set_ylabel('Proportion of Fixations')
             ax.set_xlabel('ROI')
     plt.tight_layout(rect=[0, 0, 1, 0.96])
-    plot_filename = f'fixation_proportions{remap_flag}.png'
+    plot_filename = f'fixation_proportions.png'
     plot_path = os.path.join(plots_dir, plot_filename)
     plt.savefig(plot_path)
+    pdb.set_trace()
     plt.close()
 
 
