@@ -72,7 +72,6 @@ def plot_fixation_proportions_for_diff_conditions(labelled_fixations, params):
     plot_filename = f'fixation_proportions.png'
     plot_path = os.path.join(plots_dir, plot_filename)
     plt.savefig(plot_path)
-    pdb.set_trace()
     plt.close()
 
 

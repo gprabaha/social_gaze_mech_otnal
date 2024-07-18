@@ -106,7 +106,6 @@ class DataManager:
             lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
         )
         self.logger.info(f"M1 fixations and saccades acquired")
-        pdb.set_trace()
 
         plotter.plot_fixation_proportions_for_diff_conditions(self.labelled_fixations_m1, self.params)
         plotter.plot_fixation_heatmaps(self.labelled_fixations_m1, self.params)
@@ -138,9 +137,9 @@ def main():
     params = util.get_params()
     params.update({
         'parallelize_local_reclustering_over_n_fixations': False,
-        'submit_separate_jobs_for_sessions': False,
-        'use_toy_data': True,
-        'remake_toy_data': True,
+        'submit_separate_jobs_for_sessions': True,
+        'use_toy_data': False,
+        'remake_toy_data': False,
         'is_cluster': True,
         'use_parallel': True,
         'remake_labelled_gaze_positions_m1': False,

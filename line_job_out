@@ -1,9 +1,2 @@
 Batch script generated. To submit your jobs, run:
  sbatch ./job_scripts/dsq-joblist_fixations.sh
-Number of CPUs: 8
-
-Starting to extract fixations and saccades:
---Return--
-> /gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/analyze_gaze_signals.py(108)run()->None
--> pdb.set_trace()
-(Pdb) 
