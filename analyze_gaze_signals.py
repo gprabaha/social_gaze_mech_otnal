@@ -106,6 +106,8 @@ class DataManager:
 
         plotter.plot_fixation_proportions_for_diff_conditions(self.labelled_fixations_m1, self.params)
         plotter.plot_fixation_heatmaps(self.labelled_fixations_m1, self.params)
+
+        self.logger.info(f"Plots generated successfully")
         
         # self.labelled_saccades_m1 = self.get_or_load_variable(
         #     'labelled_saccades_m1',
@@ -134,8 +136,8 @@ def main():
     params = util.get_params()
     params.update({
         'parallelize_local_reclustering_over_n_fixations': False,
-        'submit_separate_jobs_for_sessions': False,
-        'use_toy_data': True,
+        'submit_separate_jobs_for_sessions': True,
+        'use_toy_data': False,
         'remake_toy_data': True,
         'is_cluster': True,
         'use_parallel': True,
