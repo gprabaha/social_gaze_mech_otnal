@@ -14,6 +14,7 @@ import curate_data
 import util
 import load_data
 import response_comp
+import plotter
 
 import pdb
 
@@ -106,6 +107,9 @@ class DataManager:
         )
         self.logger.info(f"M1 fixations and saccades acquired")
         pdb.set_trace()
+
+        plotter.plot_fixation_proportions_for_diff_conditions(self.labelled_fixations_m1, self.params)
+        plotter.plot_fixation_heatmaps(self.labelled_fixations_m1, self.params)
         
         # self.labelled_saccades_m1 = self.get_or_load_variable(
         #     'labelled_saccades_m1',

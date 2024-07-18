@@ -26,7 +26,8 @@ import pdb
 logger = logging.getLogger(__name__)
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
-def plot_fixation_proportions_for_diff_conditions(params):
+
+def plot_fixation_proportions_for_diff_conditions(labelled_fixations, params):
     """
     Plots the proportion of fixations on different ROIs for different conditions.
 
@@ -34,13 +35,13 @@ def plot_fixation_proportions_for_diff_conditions(params):
     - params (dict): Dictionary containing parameters.
     """
     root_data_dir = params['root_data_dir']
-    if params.get('export_plots_to_local_folder', True):
+    if params.get('export_plots_to_local_folder', False):
         plots_dir = 'plots'
     else:
         plots_dir = os.path.join(root_data_dir, 'plots')
     os.makedirs(plots_dir, exist_ok=True)
     remap_flag = util.get_filename_flag_info(params)
-    fixation_labels_m1 = load_data.load_m1_fixation_labels(params)
+    fixation_labels_m1 = labelled_fixations
     # Filtering out discarded runs
     valid_runs = fixation_labels_m1[fixation_labels_m1['block']
                                     != 'discard']
@@ -81,7 +82,7 @@ def plot_gaze_heatmaps(params):
     - params (dict): Dictionary containing parameters.
     """
     root_data_dir = params['root_data_dir']
-    if params.get('export_plots_to_local_folder', True):
+    if params.get('export_plots_to_local_folder', False):
         plots_dir = util.add_date_dir_to_path('plots/gaze_heatmaps')
     else:
         plots_dir = util.add_date_dir_to_path(
@@ -142,7 +143,7 @@ def plot_gaze_heatmap_for_one_session(gaze_positions, session_info,
     plt.close()
 
 
-def plot_fixation_heatmaps(params):
+def plot_fixation_heatmaps(labelled_fixations, params):
     root_data_dir = params['root_data_dir']
     if params.get('export_plots_to_local_folder', True):
         plots_dir = util.add_date_dir_to_path('plots/fix_heatmaps')
@@ -152,7 +153,7 @@ def plot_fixation_heatmaps(params):
     os.makedirs(plots_dir, exist_ok=True)
     labelled_gaze_positions_m1 = load_data.load_labelled_gaze_positions(
         params)
-    all_fixation_labels = load_data.load_m1_fixation_labels(params)
+    all_fixation_labels = labelled_fixations
     plot_fixation_heatmaps_for_all_sessions(
             all_fixation_labels, labelled_gaze_positions_m1, params, plots_dir)
 
