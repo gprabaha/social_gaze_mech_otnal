@@ -219,7 +219,8 @@ def make_fixations_df(fixationtimes, fixations, positions, info):
     fix_timepos_df['session_name'] = info['session_name']
     fix_timepos_df['run'] = info.get('run', None)
     fix_timepos_df['block'] = fix_timepos_df.apply(lambda row: determine_block(row['start_time'], row['end_time'], info['startS'], info['stopS']), axis=1)
-    fix_timepos_df['agent'] = info.get('agent', None)
+    fix_timepos_df['agent'] = info.get('monkey_1', None)
+    fix_timepos_df['partner'] = info.get('monkey_2', None)
     return fix_timepos_df
 
 
@@ -245,12 +246,13 @@ def make_saccades_df(saccadetimes, positions, info):
         block = determine_block(start_time, end_time, info['startS'], info['stopS'])
         saccades.append([
             start_time, end_time, duration, trajectory, start_roi, 
-            end_roi, info['session_name'], info['category'], block
+            end_roi, info['session_name'], info['category'],
+            info['monkey_1'], info['monkey_2'], block
         ])
     saccades_df = pd.DataFrame(saccades, columns=[
         'start_time', 'end_time', 'duration', 'trajectory', 
         'start_roi', 'end_roi', 'session_name', 'category',
-        'block'
+        'agent', 'partner', 'block'
     ])
     return saccades_df
 
