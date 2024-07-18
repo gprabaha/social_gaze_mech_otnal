@@ -73,7 +73,7 @@ class ClusterFixationDetector:
             notfixations = self.local_reclustering((fixationtimes, points))
             fixationindexes = self.remove_not_fixations(fixationindexes, notfixations)
             saccadeindexes, saccadetimes = self.classify_saccades(fixationindexes, points)
-            fixationtimes, saccadetimes = self.round_times(fixationtimes, saccadetimes)
+            # fixationtimes, saccadetimes = self.round_times(fixationtimes, saccadetimes)
             pointfix, pointsac, recalc_meanvalues, recalc_stdvalues = self.calculate_cluster_values(fixationtimes, saccadetimes, data)
 
             return {
@@ -350,6 +350,7 @@ class ClusterFixationDetector:
     def classify_saccades(self, fixationindexes, points):
         saccadeindexes = np.setdiff1d(np.arange(len(points)), fixationindexes)
         saccadetimes = self.find_behavioral_times(saccadeindexes)
+        print(saccadetimes)
         return saccadeindexes, saccadetimes
 
 

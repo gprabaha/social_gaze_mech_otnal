@@ -120,7 +120,7 @@ def generate_toy_gazepos_data(labelled_gaze_positions, params):
     array_data = third_session_data[0]
     N = array_data.shape[0]
     # Determine the length of the continuous segment to extract
-    h = N // 10
+    h = N // 20
     # Choose a random starting index i such that the segment [i to i + h] is within bounds
     i = np.random.randint(0, N - h)
     # Extract the continuous segment

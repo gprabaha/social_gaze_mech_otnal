@@ -19,18 +19,18 @@ class HPCFixationDetection:
         self.params = params
         self.job_script_out_dir = './job_scripts/'
 
+
     def serialize_params(self, filepath):
         with open(filepath, 'w') as f:
             json.dump(self.params, f)
 
+
     def generate_fixation_job_file(self, labelled_gaze_positions):
         job_file_path = os.path.join(self.job_script_out_dir, 'fixation_joblist.txt')
         os.makedirs(self.job_script_out_dir, exist_ok=True)
-
         # Use params['processed_data_dir'] for saving the parameters
         params_file_path = os.path.join(self.params['processed_data_dir'], 'params.json')
         self.serialize_params(params_file_path)
-        
         with open(job_file_path, 'w') as file:
             for idx in range(len(labelled_gaze_positions)):
                 command = (
@@ -39,16 +39,15 @@ class HPCFixationDetection:
                     "conda activate gaze_processing; "
                     f"python process_session_fixations.py --session_index {idx} --params_file {params_file_path}"
                 )
-                file.write(command + "\n")
-                
+                file.write(command + "\n")  
         # Check the contents of the job file for debugging
         with open(job_file_path, 'r') as file:
             job_commands = file.readlines()
             logging.info(f"Job commands in the job list: {len(job_commands)}")
             for command in job_commands:
-                logging.debug(command.strip())
-                
+                logging.debug(command.strip())  
         return job_file_path
+
 
     def submit_job_array(self, job_file_path):
         try:
@@ -62,7 +61,6 @@ class HPCFixationDetection:
                 logging.error(f"No job script found at {job_script_path}.")
                 return
             logging.info(f"Using dSQ job script: {job_script_path}")
-            
             result = subprocess.run(
                 f'sbatch --job-name=fixation_jobs_dsq --output={self.job_script_out_dir}/fixation_session_%a.out --error={self.job_script_out_dir}/fixation_session_%a.err {job_script_path}',
                 shell=True, check=True, capture_output=True, text=True, executable='/bin/bash'

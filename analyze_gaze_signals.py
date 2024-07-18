@@ -46,7 +46,6 @@ class DataManager:
         variable_names = [name.strip() for name in variable_name.split(',')]
         should_recompute_flags = [self.params.get(f'remake_{name}', False) for name in variable_names]
         needs_loading = any(should_recompute_flags) or any(getattr(self, name) is None for name in variable_names)
-
         if needs_loading:
             if any(should_recompute_flags):
                 self.logger.info(f"Recomputing variable(s): {variable_name}")
@@ -54,7 +53,6 @@ class DataManager:
             else:
                 self.logger.info(f"Loading variable(s): {variable_name}")
                 result = load_function(self.params)
-            
             if isinstance(result, tuple):
                 if len(result) != len(variable_names):
                     raise ValueError(f"Expected {len(variable_names)} values, but got {len(result)}")
@@ -62,7 +60,6 @@ class DataManager:
                     setattr(self, name, value)
             else:
                 setattr(self, variable_names[0], result)
-
         if len(variable_names) == 1:
             return getattr(self, variable_names[0])
         else:
@@ -137,9 +134,9 @@ def main():
     params = util.get_params()
     params.update({
         'parallelize_local_reclustering_over_n_fixations': False,
-        'submit_separate_jobs_for_sessions': True,
-        'use_toy_data': False,
-        'remake_toy_data': False,
+        'submit_separate_jobs_for_sessions': False,
+        'use_toy_data': True,
+        'remake_toy_data': True,
         'is_cluster': True,
         'use_parallel': True,
         'remake_labelled_gaze_positions_m1': False,

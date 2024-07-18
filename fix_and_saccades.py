@@ -237,8 +237,8 @@ def make_saccades_df(saccadetimes, positions, info):
     """
     saccades = []
     for t_range in saccadetimes.T:
-        start_time = int(t_range[0])
-        end_time = int(t_range[1])
+        start_time = int(t_range[0]/info['sampling_rate'])
+        end_time = int(t_range[1]/info['sampling_rate'])
         duration = end_time - start_time
         trajectory = positions[start_time:end_time + 1, :]
         start_roi = determine_roi_of_coord(trajectory[0, :2], info['roi_bb_corners'])
