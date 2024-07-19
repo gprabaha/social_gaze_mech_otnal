@@ -173,25 +173,17 @@ def get_session_fixations_and_saccades(session_data):
     n_samples = positions.shape[0]
     time_vec = util.create_timevec(n_samples, sampling_rate)
     use_parallel = params.get('use_parallel', False)
-    if params.get('fixation_detection_method', 'default') == 'cluster_fix':
-        detector = ClusterFixationDetector(samprate=sampling_rate, params=params)
-        x_coords = positions[:, 0]
-        y_coords = positions[:, 1]
-        # Transform into the expected format
-        eyedat = (x_coords, y_coords)
-        fix_stats = detector.detect_fixations(eyedat)
-        fixationtimes = fix_stats['fixationtimes']
-        fixationindices = fix_stats['fixationindices']
-        fixations = fix_stats['fixations']
-        saccadetimes = fix_stats['saccadetimes']
-        saccadeindices = fix_stats['saccadeindices']
-    else:
-        fix_detector = EyeMVMFixationDetector(sampling_rate=sampling_rate)
-        fixationtimes, fixations = fix_detector.detect_fixations(positions, time_vec, session_name)
-        saccade_detector = EyeMVMSaccadeDetector(params['vel_thresh'], params['min_samples'], params['smooth_func'])
-        saccadetimes = saccade_detector.extract_saccades_for_session((positions, info))
-    fix_timepos_df = make_fixations_df(fixationtimes, fixationindices, fixations, positions, info)
-    saccades_df = make_saccades_df(saccadeindices, positions, info)
+    detector = ClusterFixationDetector(samprate=sampling_rate, params=params)
+    x_coords = positions[:, 0]
+    y_coords = positions[:, 1]
+    # Transform into the expected format
+    eyedat = (x_coords, y_coords)
+    fix_stats = detector.detect_fixations(eyedat)
+    fixationtimes = fix_stats['fixationtimes']
+    fixationindices = fix_stats['fixationindices']
+    fixations = fix_stats['fixations']
+    saccadetimes = fix_stats['saccadetimes']
+    saccadeindices = fix_stats['saccadeindices']
     print(fix_timepos_df)
     print(saccades_df)
     return fix_timepos_df, info, saccades_df
