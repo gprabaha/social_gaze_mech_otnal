@@ -184,6 +184,8 @@ def get_session_fixations_and_saccades(session_data):
     fixations = fix_stats['fixations']
     saccadetimes = fix_stats['saccadetimes']
     saccadeindices = fix_stats['saccadeindices']
+    fix_timepos_df = make_fixations_df(fixationtimes, fixationindices, fixations, positions, info)
+    saccades_df = make_saccades_df(saccadeindices, positions, info)
     print(fix_timepos_df)
     print(saccades_df)
     return fix_timepos_df, info, saccades_df
