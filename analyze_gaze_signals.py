@@ -9,6 +9,8 @@ Created on Tue Apr  9 10:25:48 2024
 
 import logging
 import numpy as np
+import os
+import random
 
 import curate_data
 import util
@@ -73,6 +75,23 @@ class DataManager:
             size /= 1024
 
 
+    def plot_fixations_in_gaze_snippets(self):
+        root_data_dir = self.params['root_data_dir']
+        plots_dir = util.add_date_dir_to_path(os.path.join(root_data_dir, 'plots', 'fixations_in_gaze_snippets'))
+        os.makedirs(plots_dir, exist_ok=True)
+        # Select 5 random sessions
+        sessions = list(self.labelled_fixations_m1['session_name'].unique())
+        selected_sessions = random.sample(sessions, 5)
+        for session in selected_sessions:
+            plotter.plot_fixations_and_saccades(
+                session, 
+                self.labelled_fixations_m1, 
+                self.labelled_saccades_m1, 
+                self.labelled_gaze_positions_m1, 
+                plots_dir
+            )
+
+
     def run(self):
         root_data_dir, self.params = util.fetch_root_data_dir(self.params)
         data_source_dir, self.params = util.fetch_data_source_dir(self.params)
@@ -104,8 +123,11 @@ class DataManager:
         )
         self.logger.info(f"M1 fixations and saccades acquired")
 
+        self.plot_fixations_in_gaze_snippets()
+
         plotter.plot_fixation_proportions_for_diff_conditions(self.labelled_fixations_m1, self.params)
         plotter.plot_fixation_heatmaps(self.labelled_fixations_m1, self.params)
+        
 
         self.logger.info(f"Plots generated successfully")
         

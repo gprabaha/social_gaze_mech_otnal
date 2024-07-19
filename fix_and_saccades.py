@@ -181,6 +181,7 @@ def get_session_fixations_and_saccades(session_data):
         eyedat = (x_coords, y_coords)
         fix_stats = detector.detect_fixations(eyedat)
         fixationtimes = fix_stats['fixationtimes']
+        fixationindices = fix_stats['fixationindices']
         fixations = fix_stats['fixations']
         saccadetimes = fix_stats['saccadetimes']
     else:
@@ -188,14 +189,14 @@ def get_session_fixations_and_saccades(session_data):
         fixationtimes, fixations = fix_detector.detect_fixations(positions, time_vec, session_name)
         saccade_detector = EyeMVMSaccadeDetector(params['vel_thresh'], params['min_samples'], params['smooth_func'])
         saccadetimes = saccade_detector.extract_saccades_for_session((positions, info))
-    fix_timepos_df = make_fixations_df(fixationtimes, fixations, positions, info)
+    fix_timepos_df = make_fixations_df(fixationtimes, fixationindices, fixations, positions, info)
     saccades_df = make_saccades_df(saccadetimes, positions, info)
     print(fix_timepos_df)
     print(saccades_df)
     return fix_timepos_df, info, saccades_df
 
 
-def make_fixations_df(fixationtimes, fixations, positions, info):
+def make_fixations_df(fixationtimes, fixationindices, fixations, positions, info):
     """
     Creates a DataFrame for fixations.
     Parameters:
@@ -209,6 +210,8 @@ def make_fixations_df(fixationtimes, fixations, positions, info):
     fix_timepos_df = pd.DataFrame({
         'start_time': fixationtimes[0, :].T,
         'end_time': fixationtimes[1, :].T,
+        'start_index': fixationindices[0, :].T,
+        'end_index': fixationindices[1, :].T,
         'mean_x_pos': fixations[:, 0],
         'mean_y_pos': fixations[:, 1]
     })
@@ -237,20 +240,21 @@ def make_saccades_df(saccadetimes, positions, info):
     """
     saccades = []
     for t_range in saccadetimes.T:
-        start_time = int(t_range[0]/info['sampling_rate'])
-        end_time = int(t_range[1]/info['sampling_rate'])
+        start_index, end_index = t_range
+        start_time = int(start_index/info['sampling_rate'])
+        end_time = int(end_index/info['sampling_rate'])
         duration = end_time - start_time
-        trajectory = positions[start_time:end_time + 1, :]
+        trajectory = positions[start_index:end_index + 1, :]
         start_roi = determine_roi_of_coord(trajectory[0, :2], info['roi_bb_corners'])
         end_roi = determine_roi_of_coord(trajectory[-1, :2], info['roi_bb_corners'])
         block = determine_block(start_time, end_time, info['startS'], info['stopS'])
         saccades.append([
-            start_time, end_time, duration, trajectory, start_roi, 
+            start_index, end_index, start_time, end_time, duration, trajectory, start_roi, 
             end_roi, info['session_name'], info['category'],
             info['monkey_1'], info['monkey_2'], block
         ])
     saccades_df = pd.DataFrame(saccades, columns=[
-        'start_time', 'end_time', 'duration', 'trajectory', 
+        'start_index', 'end_index', 'start_time', 'end_time', 'duration', 'trajectory', 
         'start_roi', 'end_roi', 'session_name', 'category',
         'agent', 'partner', 'block'
     ])

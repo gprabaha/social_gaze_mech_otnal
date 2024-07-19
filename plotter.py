@@ -15,6 +15,7 @@ import seaborn as sns
 from datetime import datetime
 import logging
 from matplotlib_venn import venn3
+import random
 
 from tqdm import tqdm
 
@@ -25,6 +26,88 @@ import pdb
 
 logger = logging.getLogger(__name__)
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
+
+
+
+
+def plot_fixations_and_saccades(session, fixations_df, saccades_df, gaze_positions_list, plots_dir):
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    # Get fixations and saccades for the selected session
+    session_fixations = fixations_df[fixations_df['session_name'] == session]
+    session_saccades = saccades_df[saccades_df['session_name'] == session]
+
+    def select_fixations(block_fixations, rois):
+        selected_fixations = []
+        for roi in rois:
+            if roi in ['left_obj_bbox', 'right_obj_bbox']:
+                fixations = block_fixations[block_fixations['fix_roi'].isin(['left_obj_bbox', 'right_obj_bbox'])]
+            else:
+                fixations = block_fixations[block_fixations['fix_roi'] == roi]
+            if len(fixations) > 0:
+                selected_fixation = fixations.iloc[random.randint(0, len(fixations) - 1)]
+                selected_fixations.append(selected_fixation)
+        return selected_fixations
+
+    def plot_gaze_trajectory(ax, gaze_positions, fixation, block_saccades, start_index, end_index, info):
+        ax.plot(gaze_positions[:, 0], gaze_positions[:, 1], color='blue', label='Gaze Trajectory')
+        # Overlay fixations
+        fixation_positions = gaze_positions[fixation['start_index'] - start_index : fixation['end_index'] - start_index]
+        ax.scatter(fixation_positions[:, 0], fixation_positions[:, 1], color='red', label='Fixations')
+        # Overlay saccades
+        saccades_in_range = block_saccades[(block_saccades['start_index'] >= start_index) & (block_saccades['end_index'] <= end_index)]
+        for _, saccade in saccades_in_range.iterrows():
+            saccade_positions = gaze_positions[saccade['start_index'] - start_index : saccade['end_index'] - start_index]
+            ax.plot(saccade_positions[:, 0], saccade_positions[:, 1], color='green', label='Saccades')
+        # Overlay bounding boxes
+        for key, bbox in info.items():
+            if 'bbox' in key:
+                bottom_left = bbox['bottomLeft']
+                top_right = bbox['topRight']
+                rect = plt.Rectangle(bottom_left, top_right[0] - bottom_left[0], top_right[1] - bottom_left[1], fill=False, edgecolor='yellow')
+                ax.add_patch(rect)
+
+    # Process each block separately (mon_up and mon_down)
+    for i, block in enumerate(['mon_up', 'mon_down']):
+        block_fixations = session_fixations[session_fixations['block'] == block]
+        block_saccades = session_saccades[session_saccades['block'] == block]
+        # Select fixations for each ROI
+        rois = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
+        selected_fixations = select_fixations(block_fixations, rois)
+        for j, fixation in enumerate(selected_fixations):
+            start_index = max(0, fixation['start_index'] - 6)
+            end_index = fixation['end_index'] + 6
+            # Get gaze positions for the selected range
+            gaze_data = [data for data in gaze_positions_list if data[1]['session_name'] == session][0]
+            gaze_positions = gaze_data[0][start_index:end_index]
+            info = gaze_data[1]
+            # Plot gaze trajectory
+            ax = axes[j, i]
+            plot_gaze_trajectory(ax, gaze_positions, fixation, block_saccades, start_index, end_index, info)
+            ax.set_title(f'{block} - {fixation["fix_roi"]}')
+            ax.legend()
+    fig.suptitle(f'Session: {session}')
+    plt.tight_layout()
+    plt.savefig(os.path.join(plots_dir, f'{session}_fixations.png'))
+    plt.close(fig)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def plot_fixation_proportions_for_diff_conditions(labelled_fixations, params):
@@ -73,6 +156,20 @@ def plot_fixation_proportions_for_diff_conditions(labelled_fixations, params):
     plot_path = os.path.join(plots_dir, plot_filename)
     plt.savefig(plot_path)
     plt.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def plot_gaze_heatmaps(params):
