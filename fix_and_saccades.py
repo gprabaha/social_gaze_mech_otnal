@@ -184,13 +184,14 @@ def get_session_fixations_and_saccades(session_data):
         fixationindices = fix_stats['fixationindices']
         fixations = fix_stats['fixations']
         saccadetimes = fix_stats['saccadetimes']
+        saccadeindices = fix_stats['saccadeindices']
     else:
         fix_detector = EyeMVMFixationDetector(sampling_rate=sampling_rate)
         fixationtimes, fixations = fix_detector.detect_fixations(positions, time_vec, session_name)
         saccade_detector = EyeMVMSaccadeDetector(params['vel_thresh'], params['min_samples'], params['smooth_func'])
         saccadetimes = saccade_detector.extract_saccades_for_session((positions, info))
     fix_timepos_df = make_fixations_df(fixationtimes, fixationindices, fixations, positions, info)
-    saccades_df = make_saccades_df(saccadetimes, positions, info)
+    saccades_df = make_saccades_df(saccadeindices, positions, info)
     print(fix_timepos_df)
     print(saccades_df)
     return fix_timepos_df, info, saccades_df
@@ -228,7 +229,7 @@ def make_fixations_df(fixationtimes, fixationindices, fixations, positions, info
 
 
 
-def make_saccades_df(saccadetimes, positions, info):
+def make_saccades_df(saccadeindices, positions, info):
     """
     Creates a DataFrame for saccades.
     Parameters:
@@ -239,8 +240,8 @@ def make_saccades_df(saccadetimes, positions, info):
     - saccades_df (pd.DataFrame): DataFrame of saccades for the session.
     """
     saccades = []
-    for t_range in saccadetimes.T:
-        start_index, end_index = t_range
+    for i_range in saccadeindices.T:
+        start_index, end_index = i_range
         start_time = int(start_index/info['sampling_rate'])
         end_time = int(end_index/info['sampling_rate'])
         duration = end_time - start_time
