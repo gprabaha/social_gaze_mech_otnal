@@ -11,6 +11,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import concurrent.futures
 import multiprocessing
 from multiprocessing import cpu_count, Pool
+import numexpr as ne
 import numpy as np
 import os
 import scipy.signal as signal
@@ -28,14 +29,32 @@ import time
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Get the number of CPUs from the environment variable
-slurm_cpus = os.getenv('SLURM_CPUS_ON_NODE')
-# If the environment variable is not set or empty, use cpu_count()
-if slurm_cpus:
-    num_cpus = int(slurm_cpus)
-else:
-    num_cpus = cpu_count()
-print(f"Number of CPUs: {num_cpus}")
+# Try to detect the number of cores using NumExpr
+try:
+    num_cpus = ne.detect_number_of_cores()
+    print(f"NumExpr detected {num_cpus} cores")
+except Exception as e:
+    print(f"Failed to detect cores with NumExpr: {e}")
+    num_cpus = None
+
+# If NumExpr detection fails, fallback to SLURM environment variable
+if num_cpus is None or num_cpus <= 0:
+    slurm_cpus = os.getenv('SLURM_CPUS_ON_NODE')
+    if slurm_cpus:
+        num_cpus = int(slurm_cpus)
+        print(f"SLURM detected {num_cpus} CPUs")
+    else:
+        num_cpus = None
+
+# If SLURM detection fails, fallback to multiprocessing.cpu_count()
+if num_cpus is None or num_cpus <= 0:
+    num_cpus = multiprocessing.cpu_count()
+    print(f"multiprocessing detected {num_cpus} CPUs")
+
+# Set the maximum number of threads for NumExpr
+os.environ['NUMEXPR_MAX_THREADS'] = str(num_cpus)
+ne.set_num_threads(num_cpus)
+print(f"NumExpr set to use {ne.detect_number_of_threads()} threads")
 
 
 class ClusterFixationDetector:
