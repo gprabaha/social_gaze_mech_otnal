@@ -196,6 +196,7 @@ def make_fixations_df(fixationtimes, fixationindices, fixations, positions, info
     Creates a DataFrame for fixations.
     Parameters:
     - fixationtimes (array): Array of fixation times.
+    - fixationindices (array): Array of fixation indices.
     - fixations (array): Array of fixation coordinates.
     - positions (array): Array of gaze positions.
     - info (dict): Dictionary of session information.
@@ -215,12 +216,43 @@ def make_fixations_df(fixationtimes, fixationindices, fixations, positions, info
     fix_timepos_df['fix_roi'] = fix_timepos_df.apply(lambda row: determine_roi_of_coord([row['mean_x_pos'], row['mean_y_pos']], info['roi_bb_corners']), axis=1)
     fix_timepos_df['category'] = info['category']
     fix_timepos_df['session_name'] = info['session_name']
-    fix_timepos_df['run'] = info.get('run', None)
+    fix_timepos_df['run'] = fix_timepos_df.apply(
+        lambda row: determine_run(row['start_time'], row['end_time'], info['startS'], info['stopS']),
+        axis=1
+    )
     fix_timepos_df['block'] = fix_timepos_df.apply(lambda row: determine_block(row['start_time'], row['end_time'], info['startS'], info['stopS']), axis=1)
     fix_timepos_df['agent'] = info.get('monkey_1', None)
     fix_timepos_df['partner'] = info.get('monkey_2', None)
     return fix_timepos_df
 
+
+# Determine the run number based on start and end times
+def determine_run(start_time, end_time, startS, stopS):
+    for run_number, (start, stop) in enumerate(zip(startS, stopS), start=1):
+        if start <= end_time and stop >= start_time:
+            return run_number
+    return None
+
+
+def determine_roi_of_coord(position, bbox_corners):
+    bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
+    inside_roi = [util.is_inside_roi(position, bbox_corners[key]) for key in bounding_boxes]
+    if any(inside_roi):
+        if inside_roi[0] and inside_roi[1]:
+            return bounding_boxes[0]
+        return bounding_boxes[inside_roi.index(True)]
+    return 'out_of_roi'
+
+
+def determine_block(start_time, end_time, startS, stopS):
+    if start_time < startS[0] or end_time > stopS[-1]:
+        return 'discard'
+    for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
+        if start_time >= run_start and end_time <= run_stop:
+            return 'mon_down'
+        elif i < len(startS) and end_time <= startS[i]:
+            return 'mon_up'
+    return 'discard'
 
 
 def make_saccades_df(saccadeindices, positions, info):
@@ -275,24 +307,6 @@ def save_fixation_and_saccade_results(processed_data_dir, fix_timepos_df, saccad
 
 
 
-def determine_roi_of_coord(position, bbox_corners):
-    bounding_boxes = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
-    inside_roi = [util.is_inside_roi(position, bbox_corners[key]) for key in bounding_boxes]
-    if any(inside_roi):
-        if inside_roi[0] and inside_roi[1]:
-            return bounding_boxes[0]
-        return bounding_boxes[inside_roi.index(True)]
-    return 'out_of_roi'
 
-
-def determine_block(start_time, end_time, startS, stopS):
-    if start_time < startS[0] or end_time > stopS[-1]:
-        return 'discard'
-    for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
-        if start_time >= run_start and end_time <= run_stop:
-            return 'mon_down'
-        elif i < len(startS) and end_time <= startS[i]:
-            return 'mon_up'
-    return 'discard'
 
 
