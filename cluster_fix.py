@@ -26,7 +26,6 @@ import warnings
 import gc
 import time
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Try to detect the number of cores using NumExpr

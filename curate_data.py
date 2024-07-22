@@ -24,8 +24,6 @@ from hpc_cluster import HPCCluster
 
 import pdb
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
 ### Function to extract meta-information and update params
 def extract_and_update_meta_info(params):
     """

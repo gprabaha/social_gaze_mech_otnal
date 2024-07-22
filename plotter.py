@@ -28,7 +28,6 @@ logger = logging.getLogger(__name__)
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 
-
 def plot_behavior_for_session(self, session, plots_dir):
     session_fixations = self.labelled_fixations_m1[self.labelled_fixations_m1['session_name'] == session]
     session_saccades = self.labelled_saccades_m1[self.labelled_saccades_m1['session_name'] == session]
