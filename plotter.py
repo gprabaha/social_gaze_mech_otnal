@@ -29,31 +29,28 @@ logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 
 
-
 def plot_fixations_and_saccades(session, fixations_df, saccades_df, gaze_positions_list, plots_dir):
     fig, axes = plt.subplots(4, 2, figsize=(15, 10))
     # Get fixations and saccades for the selected session
     session_fixations = fixations_df[fixations_df['session_name'] == session]
     session_saccades = saccades_df[saccades_df['session_name'] == session]
-    pdb.set_trace()
-    def select_fixations(block_fixations, rois):
-        selected_fixations = []
-        for roi in rois:
-            fixations = block_fixations[block_fixations['fix_roi'] == roi]
-            if len(fixations) > 0:
-                selected_fixation = fixations.iloc[random.randint(0, len(fixations) - 1)]
-                selected_fixations.append(selected_fixation)
-        return selected_fixations
 
-    def plot_gaze_trajectory(ax, gaze_positions, fixation, block_saccades, start_index, end_index, info):
+    def select_fixations_around_random(block_fixations):
+        selected_fixation = block_fixations.sample(n=1).iloc[0]
+        selected_index = block_fixations.index.get_loc(selected_fixation.name)
+        start_index = max(0, selected_index - 6)
+        end_index = min(len(block_fixations), selected_index + 6)
+        return block_fixations.iloc[start_index:end_index]
+
+    def plot_gaze_trajectory(ax, gaze_positions, fixations, block_saccades, info):
         ax.plot(gaze_positions[:, 0], gaze_positions[:, 1], color='blue', label='Gaze Trajectory')
         # Overlay fixations
-        fixation_positions = gaze_positions[fixation['start_index'] - start_index : fixation['end_index'] - start_index]
-        ax.scatter(fixation_positions[:, 0], fixation_positions[:, 1], color='red', label='Fixations')
+        for _, fixation in fixations.iterrows():
+            fixation_positions = gaze_positions[fixation['start_index'] : fixation['end_index']]
+            ax.scatter(fixation_positions[:, 0], fixation_positions[:, 1], color='red', label='Fixations')
         # Overlay saccades
-        saccades_in_range = block_saccades[(block_saccades['start_index'] >= start_index) & (block_saccades['end_index'] <= end_index)]
-        for _, saccade in saccades_in_range.iterrows():
-            saccade_positions = gaze_positions[saccade['start_index'] - start_index : saccade['end_index'] - start_index]
+        for _, saccade in block_saccades.iterrows():
+            saccade_positions = gaze_positions[saccade['start_index'] : saccade['end_index']]
             ax.plot(saccade_positions[:, 0], saccade_positions[:, 1], color='green', label='Saccades')
         # Overlay bounding boxes
         for key, bbox in info.items():
@@ -69,19 +66,21 @@ def plot_fixations_and_saccades(session, fixations_df, saccades_df, gaze_positio
         block_saccades = session_saccades[session_saccades['block'] == block]
         # Select fixations for each ROI
         rois = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
-        selected_fixations = select_fixations(block_fixations, rois)
-        for j, fixation in enumerate(selected_fixations):
-            start_index = max(0, fixation['start_index'] - 6)
-            end_index = fixation['end_index'] + 6
-            # Get gaze positions for the selected range
-            gaze_data = [data for data in gaze_positions_list if data[1]['session_name'] == session][0]
-            gaze_positions = gaze_data[0][start_index:end_index]
-            info = gaze_data[1]
-            # Plot gaze trajectory
-            ax = axes[j, i]
-            plot_gaze_trajectory(ax, gaze_positions, fixation, block_saccades, start_index, end_index, info)
-            ax.set_title(f'{block} - {fixation["fix_roi"]}')
-            ax.legend()
+        for j, roi in enumerate(rois):
+            roi_fixations = block_fixations[block_fixations['fix_roi'] == roi]
+            if len(roi_fixations) > 0:
+                selected_fixations = select_fixations_around_random(roi_fixations)
+                start_index = selected_fixations.iloc[0]['start_index']
+                end_index = selected_fixations.iloc[-1]['end_index']
+                # Get gaze positions for the selected range
+                gaze_data = [data for data in gaze_positions_list if data[1]['session_name'] == session][0]
+                gaze_positions = gaze_data[0][start_index:end_index]
+                info = gaze_data[1]
+                # Plot gaze trajectory
+                ax = axes[j, i]
+                plot_gaze_trajectory(ax, gaze_positions, selected_fixations, block_saccades, info)
+                ax.set_title(f'events around {roi} fixations - {block}')
+                ax.legend()
     fig.suptitle(f'Session: {session}')
     plt.tight_layout()
     plt.savefig(os.path.join(plots_dir, f'{session}_fixations.png'))
