@@ -75,21 +75,13 @@ class DataManager:
             size /= 1024
 
 
-    def plot_fixations_in_gaze_snippets(self):
+    def plot_all_behavior_in_all_sessions(self):
         root_data_dir = self.params['root_data_dir']
-        plots_dir = util.add_date_dir_to_path(os.path.join(root_data_dir, 'plots', 'fixations_in_gaze_snippets'))
+        plots_dir = util.add_date_dir_to_path(os.path.join(root_data_dir, 'plots', 'gaze_for_whole_session'))
         os.makedirs(plots_dir, exist_ok=True)
-        # Select 5 random sessions
         sessions = list(self.labelled_fixations_m1['session_name'].unique())
-        selected_sessions = random.sample(sessions, 5)
-        for session in selected_sessions:
-            plotter.plot_fixations_and_saccades(
-                session, 
-                self.labelled_fixations_m1, 
-                self.labelled_saccades_m1, 
-                self.labelled_gaze_positions_m1, 
-                plots_dir
-            )
+        for session in sessions:
+            self.plot_behavior_for_session(session, plots_dir)
 
 
     def run(self):
@@ -123,10 +115,10 @@ class DataManager:
         )
         self.logger.info(f"M1 fixations and saccades acquired")
 
-        self.plot_fixations_in_gaze_snippets()
+        # self.plot_all_behavior_in_all_sessions()
 
-        plotter.plot_fixation_proportions_for_diff_conditions(self.labelled_fixations_m1, self.params)
-        plotter.plot_fixation_heatmaps(self.labelled_fixations_m1, self.params)
+        # plotter.plot_fixation_proportions_for_diff_conditions(self.labelled_fixations_m1, self.params)
+        # plotter.plot_fixation_heatmaps(self.labelled_fixations_m1, self.params)
         
 
         self.logger.info(f"Plots generated successfully")
@@ -165,8 +157,8 @@ def main():
         'use_parallel': True,
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
-        'remake_labelled_fixations_m1': False,
-        'remake_labelled_saccades_m1': False,
+        'remake_labelled_fixations_m1': True,
+        'remake_labelled_saccades_m1': True,
         'remake_labelled_spiketimes': False,
         'remake_labelled_fixation_rasters': True,
         'make_plots': False,

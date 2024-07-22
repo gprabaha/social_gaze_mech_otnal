@@ -1,22 +1,20 @@
+
+CondaError: Run 'conda init' before 'conda deactivate'
+
 WARNING:numexpr.utils:Deprecated, use `init_num_threads` instead.
-2024-07-21 11:10:05,930 - __main__ - INFO - Loading variable(s): labelled_gaze_positions_m1
+2024-07-22 15:03:31,692 - __main__ - INFO - Loading variable(s): labelled_gaze_positions_m1
 INFO:__main__:Loading variable(s): labelled_gaze_positions_m1
-2024-07-21 11:10:06,462 - __main__ - INFO - M1 remapped gaze pos data acquired!
+2024-07-22 15:03:32,518 - __main__ - INFO - M1 remapped gaze pos data acquired!
 INFO:__main__:M1 remapped gaze pos data acquired!
-2024-07-21 11:10:06,462 - __main__ - INFO - Loading variable(s): labelled_fixations_m1, labelled_saccades_m1
-INFO:__main__:Loading variable(s): labelled_fixations_m1, labelled_saccades_m1
-INFO:root:Loading: /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/all_fixations_and_saccades.pkl
-2024-07-21 11:10:07,171 - __main__ - INFO - M1 fixations and saccades acquired
-INFO:__main__:M1 fixations and saccades acquired
-Traceback (most recent call last):
-  File "analyze_gaze_signals.py", line 195, in <module>
-    main()
-  File "analyze_gaze_signals.py", line 192, in main
-    data_manager.run()
-  File "analyze_gaze_signals.py", line 126, in run
-    self.plot_fixations_in_gaze_snippets()
-  File "analyze_gaze_signals.py", line 86, in plot_fixations_in_gaze_snippets
-    plotter.plot_fixations_and_saccades(
-  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/plotter.py", line 84, in plot_fixations_and_saccades
-    ax = axes[j, i]
-IndexError: index 2 is out of bounds for axis 0 with size 2
+2024-07-22 15:03:32,518 - __main__ - INFO - Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1
+INFO:__main__:Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1
+INFO:root:Job commands in the job list: 31
+INFO:root:Successfully generated the dSQ job script
+INFO:root:Using dSQ job script: ./job_scripts/dsq-joblist_fixations.sh
+INFO:root:Successfully submitted jobs using sbatch for script ./job_scripts/dsq-joblist_fixations.sh
+INFO:root:Submitted job array with ID: 27383877
+INFO:root:Tracking progress of job array with ID: 27383877
+INFO:root:Job array 27383877 is still running. Checking again in 30 seconds...
+INFO:root:Job array 27383877 is still running. Checking again in 30 seconds...
+INFO:root:Job array 27383877 is still running. Checking again in 30 seconds...
+INFO:root:Job array 27383877 is still running. Checking again in 30 seconds...

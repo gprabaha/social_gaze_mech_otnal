@@ -29,62 +29,56 @@ logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 
 
-def plot_fixations_and_saccades(session, fixations_df, saccades_df, gaze_positions_list, plots_dir):
-    fig, axes = plt.subplots(4, 2, figsize=(15, 10))
-    # Get fixations and saccades for the selected session
-    session_fixations = fixations_df[fixations_df['session_name'] == session]
-    session_saccades = saccades_df[saccades_df['session_name'] == session]
-
-    def select_fixations_around_random(block_fixations):
-        selected_fixation = block_fixations.sample(n=1).iloc[0]
-        selected_index = block_fixations.index.get_loc(selected_fixation.name)
-        start_index = max(0, selected_index - 6)
-        end_index = min(len(block_fixations), selected_index + 6)
-        return block_fixations.iloc[start_index:end_index]
-
-    def plot_gaze_trajectory(ax, gaze_positions, fixations, block_saccades, info):
-        ax.plot(gaze_positions[:, 0], gaze_positions[:, 1], color='blue', label='Gaze Trajectory')
-        # Overlay fixations
-        for _, fixation in fixations.iterrows():
-            fixation_positions = gaze_positions[fixation['start_index'] : fixation['end_index']]
-            ax.scatter(fixation_positions[:, 0], fixation_positions[:, 1], color='red', label='Fixations')
-        # Overlay saccades
-        for _, saccade in block_saccades.iterrows():
-            saccade_positions = gaze_positions[saccade['start_index'] : saccade['end_index']]
-            ax.plot(saccade_positions[:, 0], saccade_positions[:, 1], color='green', label='Saccades')
-        # Overlay bounding boxes
-        for key, bbox in info.items():
-            if 'bbox' in key:
-                bottom_left = bbox['bottomLeft']
-                top_right = bbox['topRight']
-                rect = plt.Rectangle(bottom_left, top_right[0] - bottom_left[0], top_right[1] - bottom_left[1], fill=False, edgecolor='yellow')
-                ax.add_patch(rect)
-
-    # Process each block separately (mon_up and mon_down)
-    for i, block in enumerate(['mon_up', 'mon_down']):
-        block_fixations = session_fixations[session_fixations['block'] == block]
-        block_saccades = session_saccades[session_saccades['block'] == block]
-        # Select fixations for each ROI
-        rois = ['eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox']
-        for j, roi in enumerate(rois):
-            roi_fixations = block_fixations[block_fixations['fix_roi'] == roi]
-            if len(roi_fixations) > 0:
-                selected_fixations = select_fixations_around_random(roi_fixations)
-                start_index = selected_fixations.iloc[0]['start_index']
-                end_index = selected_fixations.iloc[-1]['end_index']
-                # Get gaze positions for the selected range
-                gaze_data = [data for data in gaze_positions_list if data[1]['session_name'] == session][0]
-                gaze_positions = gaze_data[0][start_index:end_index]
-                info = gaze_data[1]
-                # Plot gaze trajectory
-                ax = axes[j, i]
-                plot_gaze_trajectory(ax, gaze_positions, selected_fixations, block_saccades, info)
-                ax.set_title(f'events around {roi} fixations - {block}')
-                ax.legend()
+def plot_behavior_for_session(self, session, plots_dir):
+    session_fixations = self.labelled_fixations_m1[self.labelled_fixations_m1['session_name'] == session]
+    session_saccades = self.labelled_saccades_m1[self.labelled_saccades_m1['session_name'] == session]
+    gaze_data = [data for data in self.labelled_gaze_positions_m1 if data[1]['session_name'] == session][0]
+    gaze_positions = gaze_data[0]
+    info = gaze_data[1]
+    mon_down_blocks = session_fixations[session_fixations['block'] == 'mon_down']['run'].unique()
+    n_runs = len(mon_down_blocks)
+    fig, axes = plt.subplots(n_runs + 1, 1, figsize=(20, 10 * (n_runs + 1)))
+    # Plot for combined mon_up blocks
+    mon_up_fixations = session_fixations[session_fixations['block'] == 'mon_up']
+    mon_up_saccades = session_saccades[session_saccades['block'] == 'mon_up']
+    plot_session_gaze_trajectory(axes[0], gaze_positions, mon_up_fixations, mon_up_saccades, info, 'mon_up blocks')
+    # Plot for each mon_down run
+    for i, run in enumerate(mon_down_blocks):
+        run_fixations = session_fixations[(session_fixations['block'] == 'mon_down') & (session_fixations['run'] == run)]
+        run_saccades = session_saccades[(session_saccades['block'] == 'mon_down') & (session_saccades['run'] == run)]
+        plot_session_gaze_trajectory(axes[i + 1], gaze_positions, run_fixations, run_saccades, info, f'mon_down run {run}')
     fig.suptitle(f'Session: {session}')
     plt.tight_layout()
-    plt.savefig(os.path.join(plots_dir, f'{session}_fixations.png'))
+    plt.savefig(os.path.join(plots_dir, f'{session}_behavior.png'))
     plt.close(fig)
+
+
+def plot_session_gaze_trajectory(self, ax, gaze_positions, fixations, saccades, info, title):
+    ax.plot(gaze_positions[:, 0], gaze_positions[:, 1], color='gray', label='Gaze Trajectory')
+    cmap = plt.get_cmap('viridis')
+    norm = plt.Normalize(fixations['start_index'].min(), fixations['end_index'].max())
+    # Overlay fixations with color coding based on time
+    for _, fixation in fixations.iterrows():
+        fixation_positions = gaze_positions[fixation['start_index']: fixation['end_index']]
+        color = cmap(norm(fixation['start_index']))
+        ax.scatter(fixation_positions[:, 0], fixation_positions[:, 1], color=color, label='Fixations', s=10)
+    # Overlay saccades with color coding based on time
+    for _, saccade in saccades.iterrows():
+        saccade_positions = gaze_positions[saccade['start_index']: saccade['end_index']]
+        color = cmap(norm(saccade['start_index']))
+        ax.plot(saccade_positions[:, 0], saccade_positions[:, 1], color=color, label='Saccades')
+    # Overlay bounding boxes
+    for key, bbox in info.items():
+        if 'bbox' in key:
+            bottom_left = bbox['bottomLeft']
+            top_right = bbox['topRight']
+            rect = plt.Rectangle(bottom_left, top_right[0] - bottom_left[0], top_right[1] - bottom_left[1], fill=False, edgecolor='yellow')
+            ax.add_patch(rect)
+    ax.set_title(title)
+    ax.legend()
+
+
+
 
 
 
