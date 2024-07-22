@@ -31,7 +31,7 @@ logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 
 def plot_fixations_and_saccades(session, fixations_df, saccades_df, gaze_positions_list, plots_dir):
-    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    fig, axes = plt.subplots(4, 2, figsize=(15, 10))
     # Get fixations and saccades for the selected session
     session_fixations = fixations_df[fixations_df['session_name'] == session]
     session_saccades = saccades_df[saccades_df['session_name'] == session]
@@ -39,10 +39,7 @@ def plot_fixations_and_saccades(session, fixations_df, saccades_df, gaze_positio
     def select_fixations(block_fixations, rois):
         selected_fixations = []
         for roi in rois:
-            if roi in ['left_obj_bbox', 'right_obj_bbox']:
-                fixations = block_fixations[block_fixations['fix_roi'].isin(['left_obj_bbox', 'right_obj_bbox'])]
-            else:
-                fixations = block_fixations[block_fixations['fix_roi'] == roi]
+            fixations = block_fixations[block_fixations['fix_roi'] == roi]
             if len(fixations) > 0:
                 selected_fixation = fixations.iloc[random.randint(0, len(fixations) - 1)]
                 selected_fixations.append(selected_fixation)
