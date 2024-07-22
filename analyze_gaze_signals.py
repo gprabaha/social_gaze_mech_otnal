@@ -26,6 +26,7 @@ class DataManager:
         self.setup_logger()
         self.initialize_variables()
 
+
     def setup_logger(self):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
@@ -107,7 +108,7 @@ class DataManager:
             input_data = self.toy_data
         else:
             input_data = self.labelled_gaze_positions_m1
-
+        
         self.labelled_fixations_m1, self.labelled_saccades_m1 = self.get_or_load_variable(
             'labelled_fixations_m1, labelled_saccades_m1',
             load_data.load_m1_labelled_fixations_and_saccades,

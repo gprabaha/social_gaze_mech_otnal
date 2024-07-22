@@ -275,15 +275,16 @@ def make_saccades_df(saccadeindices, positions, info):
         start_roi = determine_roi_of_coord(trajectory[0, :2], info['roi_bb_corners'])
         end_roi = determine_roi_of_coord(trajectory[-1, :2], info['roi_bb_corners'])
         block = determine_block(start_time, end_time, info['startS'], info['stopS'])
+        run = determine_run(start_time, end_time, info['startS'], info['stopS'])
         saccades.append([
             start_index, end_index, start_time, end_time, duration, trajectory, start_roi, 
             end_roi, info['session_name'], info['category'],
-            info['monkey_1'], info['monkey_2'], block
+            info['monkey_1'], info['monkey_2'], block, run
         ])
     saccades_df = pd.DataFrame(saccades, columns=[
         'start_index', 'end_index', 'start_time', 'end_time', 'duration', 'trajectory', 
         'start_roi', 'end_roi', 'session_name', 'category',
-        'agent', 'partner', 'block'
+        'agent', 'partner', 'block', 'run'
     ])
     return saccades_df
 
