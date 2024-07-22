@@ -35,7 +35,7 @@ def plot_fixations_and_saccades(session, fixations_df, saccades_df, gaze_positio
     # Get fixations and saccades for the selected session
     session_fixations = fixations_df[fixations_df['session_name'] == session]
     session_saccades = saccades_df[saccades_df['session_name'] == session]
-
+    pdb.set_trace()
     def select_fixations(block_fixations, rois):
         selected_fixations = []
         for roi in rois:
