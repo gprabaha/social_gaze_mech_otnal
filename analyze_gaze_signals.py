@@ -118,15 +118,21 @@ class DataManager:
             load_data.load_m1_labelled_fixations_and_saccades,
             lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
         )
-        self.logger.info(f"M1 fixations and saccades acquired")
 
-        self.plot_all_behavior_in_all_sessions()
+
+
+        self.combined_behav_df = curate_data.combine_behaviors_in_temporal_order(self.labelled_fixations_m1, self.labelled_saccades_m1)
+
+        self.logger.info(f"M1 fixations and saccades acquired")
+        if self.params['make_plots']:
+            self.plot_all_behavior_in_all_sessions()
+            self.logger.info(f"Plots generated successfully")
 
         # plotter.plot_fixation_proportions_for_diff_conditions(self.labelled_fixations_m1, self.params)
         # plotter.plot_fixation_heatmaps(self.labelled_fixations_m1, self.params)
         
 
-        self.logger.info(f"Plots generated successfully")
+        
         
         # self.labelled_saccades_m1 = self.get_or_load_variable(
         #     'labelled_saccades_m1',

@@ -160,6 +160,18 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     return all_fix_df, all_saccades_df
 
 
+
+
+
+
+def combine_behaviors_in_temporal_order(labelled_fixations_df, labelled_saccades_df):
+    return 0
+
+
+
+
+
+
 ###
 def extract_spiketimes_for_all_sessions(params):
     processed_data_dir = params.get('processed_data_dir')
