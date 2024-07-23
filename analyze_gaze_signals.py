@@ -119,7 +119,7 @@ class DataManager:
             lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
         )
 
-
+        pdb.set_trace()
 
         self.combined_behav_df = curate_data.combine_behaviors_in_temporal_order(self.labelled_fixations_m1, self.labelled_saccades_m1)
 
