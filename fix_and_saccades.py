@@ -186,6 +186,7 @@ def get_session_fixations_and_saccades(session_data):
     return fixations_df, info, saccades_df
 
 
+
 def make_fixations_df(fix_stats, info):
     """
     Creates a DataFrame for fixations.
@@ -197,23 +198,24 @@ def make_fixations_df(fix_stats, info):
     """
     fixationindices = fix_stats['fixationindices']
     fixationtimes = fix_stats['fixationtimes']
-    points_in_fixation = fix_stats['FixationClusterValues']
-    fixations = fix_stats['fixations']
-    mean_fix_pos = fix_stats['MeanClusterValues']
-    fix_spread = fix_stats['STDClusterValues']
+    positions = fix_stats['XY'].T
+    # Calculate points in events
+    points_in_event = [positions[start:end+1, :] for start, end in zip(fixationindices[0, :], fixationindices[1, :])]
+    # Calculate mean position and std spread for each event
+    mean_position = [np.nanmean(point, axis=0) for point in points_in_event]
+    std_spread = [np.nanstd(point, axis=0) for point in points_in_event]
     fix_timepos_df = pd.DataFrame({
         'start_index': fixationindices[0, :].T,
         'end_index': fixationindices[1, :].T,
         'start_time': fixationtimes[0, :].T,
         'end_time': fixationtimes[1, :].T,
-        'points_in_event': points_in_fixation,
-        'mean_x_pos': mean_fix_pos[:, 0],
-        'mean_y_pos': mean_fix_pos[:, 1],
-        'std_spread': fix_spread
+        'points_in_event': points_in_event,
+        'mean_position': mean_position,
+        'std_spread': std_spread
     })
     # Calculate additional fixation parameters
     fix_timepos_df['duration'] = fix_timepos_df['end_time'] - fix_timepos_df['start_time']
-    fix_timepos_df['start_roi'] = fix_timepos_df.apply(lambda row: determine_roi_of_coord([row['mean_x_pos'], row['mean_y_pos']], info['roi_bb_corners']), axis=1)
+    fix_timepos_df['start_roi'] = fix_timepos_df.apply(lambda row: determine_roi_of_coord(row['mean_position'], info['roi_bb_corners']), axis=1)
     fix_timepos_df['end_roi'] = fix_timepos_df['start_roi']
     fix_timepos_df['category'] = info['category']
     fix_timepos_df['session_name'] = info['session_name']
@@ -228,57 +230,59 @@ def make_fixations_df(fix_stats, info):
     fix_timepos_df = fix_timepos_df[[
         'session_name', 'run', 'block', 'agent', 'partner', 
         'start_index', 'end_index', 'start_time', 'end_time', 
-        'duration', 'points_in_event', 'mean_x_pos', 'mean_y_pos', 
+        'duration', 'points_in_event', 'mean_position', 
         'std_spread', 'start_roi', 'end_roi', 'category'
     ]]
     return fix_timepos_df
 
 
-def make_saccades_df(fix_stats, info):
+def make_saccades_df(saccade_stats, info):
     """
     Creates a DataFrame for saccades.
     Parameters:
-    - fix_stats (dict): Dictionary containing saccade statistics.
+    - saccade_stats (dict): Dictionary containing saccade statistics.
     - info (dict): Dictionary of session information.
     Returns:
-    - saccades_df (pd.DataFrame): DataFrame of saccades for the session.
+    - saccade_timepos_df (pd.DataFrame): DataFrame of saccade time positions.
     """
-    saccadeindices = fix_stats['saccadeindices']
-    saccadetimes = fix_stats['saccadetimes']
-    points_in_saccade = fix_stats['SaccadeClusterValues']
-    mean_sac_pos = fix_stats['MeanClusterValues']
-    sac_spread = fix_stats['STDClusterValues']
-    saccades_df = pd.DataFrame({
+    saccadeindices = saccade_stats['saccadeindices']
+    saccadetimes = saccade_stats['saccadetimes']
+    positions = saccade_stats['XY'].T
+    # Calculate points in events
+    points_in_event = [positions[start:end+1, :] for start, end in zip(saccadeindices[0, :], saccadeindices[1, :])]
+    # Calculate mean position and std spread for each event
+    mean_position = [np.nanmean(point, axis=0) for point in points_in_event]
+    std_spread = [np.nanstd(point, axis=0) for point in points_in_event]
+    saccade_timepos_df = pd.DataFrame({
         'start_index': saccadeindices[0, :].T,
         'end_index': saccadeindices[1, :].T,
         'start_time': saccadetimes[0, :].T,
         'end_time': saccadetimes[1, :].T,
-        'points_in_event': points_in_saccade,
-        'mean_x_pos': mean_sac_pos[:, 0],
-        'mean_y_pos': mean_sac_pos[:, 1],
-        'std_spread': sac_spread
+        'points_in_event': points_in_event,
+        'mean_position': mean_position,
+        'std_spread': std_spread
     })
     # Calculate additional saccade parameters
-    saccades_df['duration'] = saccades_df['end_time'] - saccades_df['start_time']
-    saccades_df['start_roi'] = saccades_df.apply(lambda row: determine_roi_of_coord([row['mean_x_pos'], row['mean_y_pos']], info['roi_bb_corners']), axis=1)
-    saccades_df['end_roi'] = saccades_df.apply(lambda row: determine_roi_of_coord([row['mean_x_pos'], row['mean_y_pos']], info['roi_bb_corners']), axis=1)
-    saccades_df['category'] = info['category']
-    saccades_df['session_name'] = info['session_name']
-    saccades_df['run'] = saccades_df.apply(
+    saccade_timepos_df['duration'] = saccade_timepos_df['end_time'] - saccade_timepos_df['start_time']
+    saccade_timepos_df['start_roi'] = saccade_timepos_df.apply(lambda row: determine_roi_of_coord(row['mean_position'], info['roi_bb_corners']), axis=1)
+    saccade_timepos_df['end_roi'] = saccade_timepos_df['start_roi']
+    saccade_timepos_df['category'] = info['category']
+    saccade_timepos_df['session_name'] = info['session_name']
+    saccade_timepos_df['run'] = saccade_timepos_df.apply(
         lambda row: determine_run(row['start_time'], row['end_time'], info['startS'], info['stopS']),
         axis=1
     )
-    saccades_df['block'] = saccades_df.apply(lambda row: determine_block(row['start_time'], row['end_time'], info['startS'], info['stopS']), axis=1)
-    saccades_df['agent'] = info.get('monkey_1', None)
-    saccades_df['partner'] = info.get('monkey_2', None)
+    saccade_timepos_df['block'] = saccade_timepos_df.apply(lambda row: determine_block(row['start_time'], row['end_time'], info['startS'], info['stopS']), axis=1)
+    saccade_timepos_df['agent'] = info.get('monkey_1', None)
+    saccade_timepos_df['partner'] = info.get('monkey_2', None)
     # Reorder columns
-    saccades_df = saccades_df[[
+    saccade_timepos_df = saccade_timepos_df[[
         'session_name', 'run', 'block', 'agent', 'partner', 
         'start_index', 'end_index', 'start_time', 'end_time', 
-        'duration', 'points_in_event', 'mean_x_pos', 'mean_y_pos', 
+        'duration', 'points_in_event', 'mean_position', 
         'std_spread', 'start_roi', 'end_roi', 'category'
     ]]
-    return saccades_df
+    return saccade_timepos_df
 
 
 
