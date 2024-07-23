@@ -78,11 +78,17 @@ class DataManager:
 
     def plot_all_behavior_in_all_sessions(self):
         root_data_dir = self.params['root_data_dir']
-        plots_dir = util.add_date_dir_to_path(os.path.join(root_data_dir, 'plots', 'gaze_for_whole_session'))
+        plots_dir = util.add_date_dir_to_path(os.path.join(root_data_dir, 'plots', 'fix_and_saccades_all_sessions'))
         os.makedirs(plots_dir, exist_ok=True)
         sessions = list(self.labelled_fixations_m1['session_name'].unique())
         for session in sessions:
-            self.plot_behavior_for_session(session, plots_dir)
+            plotter.plot_behavior_for_session(
+                session, 
+                self.labelled_fixations_m1, 
+                self.labelled_saccades_m1, 
+                self.labelled_gaze_positions_m1, 
+                plots_dir
+            )
 
 
     def run(self):
@@ -116,7 +122,7 @@ class DataManager:
         )
         self.logger.info(f"M1 fixations and saccades acquired")
 
-        # self.plot_all_behavior_in_all_sessions()
+        self.plot_all_behavior_in_all_sessions()
 
         # plotter.plot_fixation_proportions_for_diff_conditions(self.labelled_fixations_m1, self.params)
         # plotter.plot_fixation_heatmaps(self.labelled_fixations_m1, self.params)
@@ -158,8 +164,8 @@ def main():
         'use_parallel': True,
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
-        'remake_labelled_fixations_m1': True,
-        'remake_labelled_saccades_m1': True,
+        'remake_labelled_fixations_m1': False,
+        'remake_labelled_saccades_m1': False,
         'remake_labelled_spiketimes': False,
         'remake_labelled_fixation_rasters': True,
         'make_plots': False,

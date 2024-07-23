@@ -28,10 +28,10 @@ logger = logging.getLogger(__name__)
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 
-def plot_behavior_for_session(self, session, plots_dir):
-    session_fixations = self.labelled_fixations_m1[self.labelled_fixations_m1['session_name'] == session]
-    session_saccades = self.labelled_saccades_m1[self.labelled_saccades_m1['session_name'] == session]
-    gaze_data = [data for data in self.labelled_gaze_positions_m1 if data[1]['session_name'] == session][0]
+def plot_behavior_for_session(session, fixations_df, saccades_df, gaze_positions_list, plots_dir):
+    session_fixations = fixations_df[fixations_df['session_name'] == session]
+    session_saccades = saccades_df[saccades_df['session_name'] == session]
+    gaze_data = [data for data in gaze_positions_list if data[1]['session_name'] == session][0]
     gaze_positions = gaze_data[0]
     info = gaze_data[1]
     mon_down_blocks = session_fixations[session_fixations['block'] == 'mon_down']['run'].unique()
@@ -52,7 +52,7 @@ def plot_behavior_for_session(self, session, plots_dir):
     plt.close(fig)
 
 
-def plot_session_gaze_trajectory(self, ax, gaze_positions, fixations, saccades, info, title):
+def plot_session_gaze_trajectory(ax, gaze_positions, fixations, saccades, info, title):
     ax.plot(gaze_positions[:, 0], gaze_positions[:, 1], color='gray', label='Gaze Trajectory')
     cmap = plt.get_cmap('viridis')
     norm = plt.Normalize(fixations['start_index'].min(), fixations['end_index'].max())
