@@ -8,9 +8,8 @@ Created on Tue Apr  9 10:25:48 2024
 
 
 import logging
-import numpy as np
 import os
-import random
+from multiprocessing import Pool
 
 import curate_data
 import util
@@ -81,13 +80,10 @@ class DataManager:
         plots_dir = util.add_date_dir_to_path(os.path.join(root_data_dir, 'plots', 'fix_and_saccades_all_sessions'))
         os.makedirs(plots_dir, exist_ok=True)
         sessions = list(self.labelled_fixations_m1['session_name'].unique())
-        for session in sessions:
-            plotter.plot_behavior_for_session(
-                session, 
-                self.labelled_fixations_m1, 
-                self.labelled_saccades_m1, 
-                self.labelled_gaze_positions_m1, 
-                plots_dir
+        with Pool() as pool:
+            pool.starmap(
+                plotter.plot_behavior_for_session,
+                [(session, self.labelled_fixations_m1, self.labelled_saccades_m1, self.labelled_gaze_positions_m1, plots_dir) for session in sessions]
             )
 
 

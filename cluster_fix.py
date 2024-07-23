@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 # Try to detect the number of cores using NumExpr
 try:
-    num_cpus = ne.detect_number_of_cores()
+    num_cpus = ne.init_num_threads()
     print(f"NumExpr detected {num_cpus} cores")
 except Exception as e:
     print(f"Failed to detect cores with NumExpr: {e}")
