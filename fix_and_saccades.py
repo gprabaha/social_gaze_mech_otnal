@@ -136,7 +136,7 @@ def extract_fixations_and_saccades(sessions_data, use_session_parallelization_fo
     - saccade_detection_results (list): List of saccade detection results.
     """
     if use_session_parallelization_for_local_runs:
-        print("\nExtracting fixations and saccades in parallel")
+        print("\nExtracting fixations and saccades in parallel over sessions")
         num_processes = min(num_cpus, len(sessions_data))
         with ProcessPoolExecutor(max_workers=num_processes) as executor:
             futures = {executor.submit(get_session_fixations_and_saccades, session_data, num_cpus): session_data for session_data in sessions_data}
@@ -145,7 +145,7 @@ def extract_fixations_and_saccades(sessions_data, use_session_parallelization_fo
                 result = future.result()
                 results.append(result)
     else:
-        print("\nExtracting fixations and saccades serially")
+        print("\nExtracting fixations and saccades serially over sessions")
         results = [get_session_fixations_and_saccades(session_data, num_cpus) for session_data in sessions_data]
     # Unpack the results into separate lists for fixations and saccades
     fix_detection_results = []
