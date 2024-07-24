@@ -172,30 +172,35 @@ def check_clashes(session_df):
 
 def combine_behaviors_in_temporal_order(params, *dataframes):
     logger = logging.getLogger(__name__)
+    use_parallel = params.get('use_parallel', False)
     num_cpus = params.get('num_cpus', 1)
     # Combine all provided DataFrames
     combined_df = pd.concat(dataframes, ignore_index=True)
-    # Predeclare DataFrame size
-    sorted_dfs = []
     unique_sessions = combined_df['session_name'].unique()
-    logger.info("Starting parallel sorting of sessions.")
-    # Use parallel processing to sort each session
-    with Pool(num_cpus) as pool:
-        sorted_dfs = list(tqdm(pool.imap(sort_behavioral_event_dataframes_in_session, 
-                                         [combined_df[combined_df['session_name'] == session] for session in unique_sessions]), 
-                               total=len(unique_sessions), desc="Sorting session behav dfs"))
-        pool.close()
-        pool.join()
+    logger.info("Starting sorting of sessions.")
+    if use_parallel:
+        with Pool(num_cpus) as pool:
+            sorted_dfs = list(tqdm(pool.imap(sort_behavioral_event_dataframes_in_session, 
+                                             [combined_df[combined_df['session_name'] == session] for session in unique_sessions]), 
+                                   total=len(unique_sessions), desc="Sorting session behav dfs"))
+            pool.close()
+            pool.join()
+    else:
+        sorted_dfs = [sort_behavioral_event_dataframes_in_session(combined_df[combined_df['session_name'] == session])
+                      for session in unique_sessions]
     # Concatenate the sorted DataFrames
     final_sorted_df = pd.concat(sorted_dfs, ignore_index=True)
     logger.info("Finished sorting sessions. Checking for time window clashes.")
-    # Use parallel processing to check for clashes
-    with Pool(num_cpus) as pool:
-        results = list(tqdm(pool.imap(check_clashes, 
-                                      [final_sorted_df[final_sorted_df['session_name'] == session] for session in unique_sessions]), 
-                            total=len(unique_sessions), desc="Checking time window clashes within events"))
-        pool.close()
-        pool.join()
+    if use_parallel:
+        with Pool(num_cpus) as pool:
+            results = list(tqdm(pool.imap(check_clashes, 
+                                          [final_sorted_df[final_sorted_df['session_name'] == session] for session in unique_sessions]), 
+                                total=len(unique_sessions), desc="Checking time window clashes within events"))
+            pool.close()
+            pool.join()
+    else:
+        results = [check_clashes(final_sorted_df[final_sorted_df['session_name'] == session])
+                   for session in unique_sessions]
     # Collect all clashes
     clashes = [clash for result in results for clash in result]
     if clashes:
