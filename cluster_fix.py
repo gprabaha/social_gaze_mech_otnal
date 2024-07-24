@@ -244,31 +244,29 @@ class ClusterFixationDetector:
     def local_reclustering(self, data):
         self.logger.info("Starting local_reclustering...")
         fix_times, points = data
-        notfixations = []
+        notfixations = np.empty(0, dtype=int)  # Pre-allocate an empty numpy array for notfixations
+        num_fixes = fix_times.shape[1]
         if self.use_parallel:
             self.logger.info("Parallelize local_reclustering over the detected fix time points")
             with Pool(processes=self.num_cpus) as pool:
-                results = []
-                for fix in tqdm(fix_times.T, desc="Parallel Reclustering Progress"):
-                    try:
-                        result = pool.apply_async(self.process_fixation_local_reclustering, (fix, points))
-                        results.append(result)
-                    except Exception as e:
-                        self.logger.exception("Exception occurred during parallel local reclustering")
-                for result in results:
-                    try:
-                        notfixations.extend(result.get())
-                    except Exception as e:
-                        self.logger.exception("Exception occurred during result retrieval")
+                results = [pool.apply_async(self.process_fixation_local_reclustering, (fix_times[:, i], points)) for i in range(num_fixes)]
                 pool.close()
                 pool.join()
+            for result in tqdm(results, desc="Parallel Reclustering Progress"):
+                try:
+                    notfixations = np.concatenate((notfixations, result.get()))
+                except Exception as e:
+                    self.logger.exception("Exception occurred during result retrieval")
             gc.collect()  # Ensure garbage collection after pool shutdown
         else:
             self.logger.info("Serial local_reclustering over the detected fix time points")
-            for fix in tqdm(fix_times.T, desc="Serial Reclustering Progress"):
-                notfixations.extend(self.process_fixation_local_reclustering(fix, points))
+            for i in tqdm(range(num_fixes), desc="Serial Reclustering Progress"):
+                try:
+                    notfixations = np.concatenate((notfixations, self.process_fixation_local_reclustering(fix_times[:, i], points)))
+                except Exception as e:
+                    self.logger.exception("Exception occurred during serial local reclustering")
         self.logger.info("Finished local_reclustering...")
-        return np.array(notfixations)
+        return notfixations
 
 
     def process_fixation_local_reclustering(self, fix, points):

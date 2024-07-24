@@ -193,7 +193,7 @@ def main():
         'num_cpus': 1,
         'parallelize_local_reclustering_over_n_fixations': False,
         'use_session_parallelization_for_local_runs': False,
-        'submit_separate_jobs_for_sessions': True,
+        'submit_separate_jobs_for_sessions': False,
         'use_toy_data': True,
         'remake_toy_data': False,
         'is_cluster': True,
