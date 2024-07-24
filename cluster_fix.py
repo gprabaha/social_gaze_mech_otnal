@@ -22,7 +22,7 @@ import pdb
 
 class ClusterFixationDetector:
     def __init__(self, samprate=1/1000, params=None, num_cpus=1):
-        self.logger = logging.getLogger(__name__)
+        self.setup_logger()
         self.params = params
         self.samprate = samprate
         self.num_cpus = num_cpus
@@ -35,6 +35,14 @@ class ClusterFixationDetector:
         self.buffer = int(100 / (self.samprate * 1000))
         self.fixationstats = []
         
+    def setup_logger(self):
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+
 
     def detect_fixations(self, eyedat):
         if not eyedat:
@@ -245,38 +253,45 @@ class ClusterFixationDetector:
         self.logger.info("Starting local_reclustering...")
         fix_times, points = data
         num_fixes = fix_times.shape[1]
-        notfixations = np.empty((0,))
+        notfixations = []
         do_parallel = self.params.get('do_local_reclustering_in_parallel', False)
         max_processes = min(16, self.num_cpus, num_fixes)
         if do_parallel:
             self.logger.info("Parallelize local_reclustering over the detected fix time points")
             with Pool(processes=max_processes) as pool:
-                results = [
-                    pool.apply_async(self.process_fixation_local_reclustering, (fix_times[:, i], points))
-                    for i in tqdm(range(num_fixes), desc="Parallel Reclustering Progress")
-                ]
+                args = [(fix_times[:, i], points) for i in range(num_fixes)]
+                results = []
+                for result in tqdm(
+                        pool.imap(self.process_fixation_local_reclustering_wrapper, args),
+                        total=num_fixes,
+                        desc="Parallel Reclustering Progress"):
+                    try:
+                        results.append(result)
+                    except Exception as e:
+                        self.logger.exception("Error processing result: %s", e)
                 pool.close()
                 pool.join()
             self.logger.info("Extraction done, now concatenating results")
-            try:
-                all_results = [result.get() for result in results]
-                notfixations = np.concatenate(all_results)
-            except Exception as e:
-                self.logger.exception("Exception occurred during result retrieval")
+            if results:
+                notfixations = np.concatenate(results)
             gc.collect()  # Ensure garbage collection after pool shutdown
         else:
             self.logger.info("Serial local_reclustering over the detected fix time points")
-            all_results = []
             for i in tqdm(range(num_fixes), desc="Serial Reclustering Progress"):
                 try:
                     result = self.process_fixation_local_reclustering(fix_times[:, i], points)
-                    all_results.append(result)
+                    notfixations.append(result)
                 except Exception as e:
                     self.logger.exception("Exception occurred during serial local reclustering")
-            if all_results:
-                notfixations = np.concatenate(all_results)
+            if notfixations:
+                notfixations = np.concatenate(notfixations)
         self.logger.info("Finished local_reclustering...")
         return notfixations
+
+
+    def process_fixation_local_reclustering_wrapper(self, args):
+        fix, points = args
+        return self.process_fixation_local_reclustering(fix, points)
 
 
     def process_fixation_local_reclustering(self, fix, points):

@@ -192,7 +192,7 @@ def main():
     params.update({
         'num_cpus': 1,
         'parallelize_local_reclustering_over_n_fixations': False,
-        'do_local_reclustering_in_parallel': True,
+        'do_local_reclustering_in_parallel': False,
         'submit_separate_jobs_for_sessions': False,
         'use_toy_data': True,
         'remake_toy_data': False,
