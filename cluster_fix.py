@@ -59,22 +59,20 @@ class ClusterFixationDetector:
             T, meanvalues, stdvalues = self.global_clustering(points)
             fixationcluster, fixationcluster2 = self.find_fixation_clusters(meanvalues, stdvalues)
             T = self.classify_fixations(T, fixationcluster, fixationcluster2)
-            fixationindexes, fixationtimes = self.behavioral_index(T, 1)
-            fixationtimes = self.apply_duration_threshold(fixationtimes, int(0.025 / self.samprate))
-            notfixations = self.local_reclustering((fixationtimes, points))
-            fixationindexes = self.remove_not_fixations(fixationindexes, notfixations)
-            saccadeindexes, saccadetimes = self.classify_saccades(fixationindexes, points)
+            fix_start_inds, fixationindexes = self.behavioral_start_index_and_range(T, 1)
+            fixationindexes = self.apply_duration_threshold(fixationindexes, int(0.025 / self.samprate))
+            notfixations = self.local_reclustering((fixationindexes, points))
+            fix_start_inds = self.remove_not_fixations(fix_start_inds, notfixations)
+            fixationindexes = self.find_behavioral_times(fix_start_inds)
+            saccade_start_inds = self.classify_saccades(fix_start_inds, points)
+            saccadeindexes = self.find_behavioral_times(saccade_start_inds)
             # fixationtimes, saccadetimes = self.round_times(fixationtimes, saccadetimes)
-            pointfix, pointsac, recalc_meanvalues, recalc_stdvalues = self.calculate_cluster_values(fixationtimes, saccadetimes, data)
-            
-            pdb.set_trace()
-
+            pointfix, pointsac, recalc_meanvalues, recalc_stdvalues = self.calculate_cluster_values(fixationindexes, saccadeindexes, data)
             return {
-                'fixationtimes': fixationtimes * self.samprate,  # Convert indices to time points
-                'fixationindices': fixationtimes,
-                'fixations': self.extract_fixations(fixationtimes, data),
-                'saccadetimes': saccadetimes * self.samprate,  # Convert indices to time points
-                'saccadeindices': saccadetimes,
+                'fixationindices': fixationindexes,  # Convert indices to time points
+                'fixationtimes': fixationindexes * self.samprate,
+                'saccadeindices': saccadeindexes,  # Convert indices to time points
+                'saccadetimes': saccadeindexes * self.samprate,
                 'FixationClusterValues': pointfix,
                 'SaccadeClusterValues': pointsac,
                 'MeanClusterValues': recalc_meanvalues,
@@ -85,7 +83,6 @@ class ClusterFixationDetector:
         else:
             return {
                 'fixationtimes': [],
-                'fixations': [],
                 'saccadetimes': [],
                 'FixationClusterValues': [],
                 'SaccadeClusterValues': [],
@@ -227,18 +224,18 @@ class ClusterFixationDetector:
         return T
 
 
-    def behavioral_index(self, T, label):
-        indexes = np.where(T == label)[0]
-        return indexes, self.find_behavioral_times(indexes)
+    def behavioral_start_index_and_range(self, T, label):
+        start_inds = np.where(T == label)[0]
+        return start_inds, self.find_behavioral_times(start_inds)
 
 
-    def find_behavioral_times(self, indexes):
-        dind = np.diff(indexes)
+    def find_behavioral_times(self, start_inds):
+        dind = np.diff(start_inds)
         gaps = np.where(dind > 1)[0]
         if gaps.size > 0:
-            behaveind = np.split(indexes, gaps + 1)
+            behaveind = np.split(start_inds, gaps + 1)
         else:
-            behaveind = [indexes]
+            behaveind = [start_inds]
         behaviortime = np.zeros((2, len(behaveind)), dtype=int)
         for i, ind in enumerate(behaveind):
             behaviortime[:, i] = [ind[0], ind[-1]]
@@ -357,10 +354,9 @@ class ClusterFixationDetector:
         return fixationindexes
 
 
-    def classify_saccades(self, fixationindexes, points):
-        saccadeindexes = np.setdiff1d(np.arange(len(points)), fixationindexes)
-        saccadetimes = self.find_behavioral_times(saccadeindexes)
-        return saccadeindexes, saccadetimes
+    def classify_saccades(self, fix_start_inds, points):
+        saccade_start_inds = np.setdiff1d(np.arange(len(points)), fix_start_inds)
+        return saccade_start_inds
 
 
     def calculate_cluster_values(self, fixationtimes, saccadetimes, eyedat):
@@ -371,13 +367,6 @@ class ClusterFixationDetector:
         recalc_meanvalues = [np.nanmean(pointfix, axis=0), np.nanmean(pointsac, axis=0)]
         recalc_stdvalues = [np.nanstd(pointfix, axis=0), np.nanstd(pointsac, axis=0)]
         return pointfix, pointsac, recalc_meanvalues, recalc_stdvalues
-
-
-    def extract_fixations(self, fixationtimes, eyedat):
-        x = eyedat[0]
-        y = eyedat[1]
-        fixations = [np.mean([x[fix[0]:fix[1]], y[fix[0]:fix[1]]], axis=1) for fix in fixationtimes.T]
-        return np.array(fixations)
 
 
     def extract_variables(self, xss, yss):

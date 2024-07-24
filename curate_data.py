@@ -149,7 +149,6 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     - labelled_fixations (pd.DataFrame): DataFrame of labels for fixations.
     - labelled_saccades (pd.DataFrame): DataFrame containing saccade information with labels.
     """
-    print("\nStarting to extract fixations and saccades:")
     # Extract fixations and saccades
     all_fix_df, all_saccades_df = fix_and_saccades.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
     combined_behav_df = combine_behaviors_in_temporal_order(params, all_fix_df, all_saccades_df)
