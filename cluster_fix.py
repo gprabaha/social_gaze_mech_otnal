@@ -9,9 +9,8 @@ Author: pg496
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import concurrent.futures
-import multiprocessing
-from multiprocessing import cpu_count, Pool
-import numexpr as ne
+from multiprocessing import Pool
+
 import numpy as np
 import os
 import scipy.signal as signal
@@ -28,38 +27,11 @@ import time
 
 logger = logging.getLogger(__name__)
 
-# Try to detect the number of cores using NumExpr
-try:
-    num_cpus = ne.detect_number_of_cores()
-    print(f"NumExpr detected {num_cpus} cores")
-except Exception as e:
-    print(f"Failed to detect cores with NumExpr: {e}")
-    num_cpus = None
-
-# If NumExpr detection fails, fallback to SLURM environment variable
-if num_cpus is None or num_cpus <= 0:
-    slurm_cpus = os.getenv('SLURM_CPUS_ON_NODE')
-    if slurm_cpus:
-        num_cpus = int(slurm_cpus)
-        print(f"SLURM detected {num_cpus} CPUs")
-    else:
-        num_cpus = None
-
-# If SLURM detection fails, fallback to multiprocessing.cpu_count()
-if num_cpus is None or num_cpus <= 0:
-    num_cpus = multiprocessing.cpu_count()
-    print(f"multiprocessing detected {num_cpus} CPUs")
-
-# Set the maximum number of threads for NumExpr
-os.environ['NUMEXPR_MAX_THREADS'] = str(num_cpus)
-ne.set_num_threads(num_cpus)
-print(f"NumExpr set to use {ne.detect_number_of_threads()} threads")
-
-
 class ClusterFixationDetector:
-    def __init__(self, samprate=1/1000, params=None):
+    def __init__(self, samprate=1/1000, params=None, num_cpus=1):
         self.params = params
         self.samprate = samprate
+        self.num_cpus = num_cpus
         self.use_parallel = params['use_parallel']
         self.variables = ['Dist', 'Vel', 'Accel', 'Angular Velocity']
         self.fltord = 60
@@ -68,8 +40,7 @@ class ClusterFixationDetector:
         self.flt = signal.firwin2(self.fltord, [0, self.lowpasfrq / self.nyqfrq, self.lowpasfrq / self.nyqfrq, 1], [1, 1, 0, 0])
         self.buffer = int(100 / (self.samprate * 1000))
         self.fixationstats = []
-        self.num_cpus = num_cpus
-
+        
 
     def detect_fixations(self, eyedat):
         if not eyedat:

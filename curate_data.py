@@ -15,6 +15,7 @@ import logging
 import h5py
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+
 import util
 import load_data
 import eyelink
@@ -151,7 +152,6 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     - labelled_saccades (pd.DataFrame): DataFrame containing saccade information with labels.
     """
     print("\nStarting to extract fixations and saccades:")
-    use_parallel = params.get('use_parallel', True)
     # Extract fixations and saccades
     all_fix_df, all_saccades_df = fix_and_saccades.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
     combined_behav_df = combine_behaviors_in_temporal_order(all_fix_df, all_saccades_df)
@@ -161,6 +161,14 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
 def sort_behavioral_event_dataframes_in_session(df):
     return df.sort_values(by=['start_index', 'end_index'])
 
+def check_clashes(session_df):
+    clashes = []
+    for i in range(1, len(session_df)):
+        prev_end_index = session_df.iloc[i-1]['end_index']
+        curr_start_index = session_df.iloc[i]['start_index']
+        if curr_start_index < prev_end_index:
+            clashes.append((session_df.iloc[i]['session_name'], i-1, i, prev_end_index, curr_start_index))
+    return clashes
 
 def combine_behaviors_in_temporal_order(*dataframes):
     # Combine all provided DataFrames
@@ -170,22 +178,24 @@ def combine_behaviors_in_temporal_order(*dataframes):
     unique_sessions = combined_df['session_name'].unique()
     logger.info("Starting parallel sorting of sessions.")
     # Use parallel processing to sort each session
-    with Pool() as pool:
+    with Pool(cpu_count()) as pool:
         sorted_dfs = list(tqdm(pool.imap(sort_behavioral_event_dataframes_in_session, 
                                          [combined_df[combined_df['session_name'] == session] for session in unique_sessions]), 
                                total=len(unique_sessions), desc="Sorting sessions"))
+        pool.close()
+        pool.join()
     # Concatenate the sorted DataFrames
     final_sorted_df = pd.concat(sorted_dfs, ignore_index=True)
     logger.info("Finished sorting sessions. Checking for time window clashes.")
-    # Check for time window clashes
-    clashes = []
-    for session in unique_sessions:
-        session_df = final_sorted_df[final_sorted_df['session_name'] == session]
-        for i in range(1, len(session_df)):
-            prev_end_index = session_df.iloc[i-1]['end_index']
-            curr_start_index = session_df.iloc[i]['start_index']
-            if curr_start_index < prev_end_index:
-                clashes.append((session, i-1, i, prev_end_index, curr_start_index))
+    # Use parallel processing to check for clashes
+    with Pool(cpu_count()) as pool:
+        results = list(tqdm(pool.imap(check_clashes, 
+                                      [final_sorted_df[final_sorted_df['session_name'] == session] for session in unique_sessions]), 
+                            total=len(unique_sessions), desc="Checking clashes"))
+        pool.close()
+        pool.join()
+    # Collect all clashes
+    clashes = [clash for result in results for clash in result]
     if clashes:
         logger.info("Time window clashes found:")
         for clash in clashes:
@@ -194,7 +204,7 @@ def combine_behaviors_in_temporal_order(*dataframes):
         logger.info("No time window clashes found.")
     # Print the first 50 events in the `mon_down` condition
     mon_down_events = final_sorted_df[final_sorted_df['block'] == 'mon_down'].head(50)
-    logger.info(f"First 50 events in the 'mon_down' condition:\n{mon_down_events}")  
+    logger.info(f"First 50 events in the 'mon_down' condition:\n{mon_down_events}")
     return final_sorted_df
 
 

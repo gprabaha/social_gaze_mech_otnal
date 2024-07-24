@@ -98,7 +98,8 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
         all_fix_df, all_info, all_saccades_df = zip(*results)
     else:
         sessions_data = [(session_data[0], session_data[1], params) for session_data in labelled_gaze_positions]
-        all_fix_df, all_saccades_df = extract_fixations_and_saccades(sessions_data, use_parallel)
+        num_cpus = params['num_cpus']
+        all_fix_df, all_saccades_df = extract_fixations_and_saccades(sessions_data, use_parallel, num_cpus)
     all_fix_df, all_saccades_df = process_detection_results(all_fix_df, all_saccades_df)
     save_fixation_and_saccade_results(processed_data_dir, all_fix_df, all_saccades_df, params)
     return all_fix_df, all_saccades_df
@@ -122,31 +123,30 @@ def process_detection_results(fix_detection_results, saccade_detection_results):
     return all_fix_timepos, all_saccades
 
 
-
-def extract_fixations_and_saccades(sessions_data, use_parallel):
+def extract_fixations_and_saccades(sessions_data, use_parallel, num_cpus):
     """
     Extracts fixations and saccades from session data.
     Parameters:
     - sessions_data (list): List of session data tuples.
     - use_parallel (bool): Flag to determine if parallel processing should be used.
+    - num_cpus (int): Number of CPUs to use for parallel processing.
     Returns:
     - fix_detection_results (list): List of fixation detection results.
     - saccade_detection_results (list): List of saccade detection results.
     """
     if use_parallel:
         print("\nExtracting fixations and saccades in parallel")
-        num_cores = multiprocessing.cpu_count()
-        num_processes = min(num_cores, len(sessions_data))
+        num_processes = min(num_cpus, len(sessions_data))
         with ProcessPoolExecutor(max_workers=num_processes) as executor:
-            futures = {executor.submit(get_session_fixations_and_saccades, session_data): session_data for session_data in sessions_data}
+            futures = {executor.submit(get_session_fixations_and_saccades, session_data, num_cpus): session_data for session_data in sessions_data}
             results = []
             for future in as_completed(futures):
                 result = future.result()
                 results.append(result)
     else:
         print("\nExtracting fixations and saccades serially")
-        results = [get_session_fixations_and_saccades(session_data) for session_data in sessions_data]
-    # Unpack the results into separate lists for fixations, saccades, and info
+        results = [get_session_fixations_and_saccades(session_data, num_cpus) for session_data in sessions_data]
+    # Unpack the results into separate lists for fixations and saccades
     fix_detection_results = []
     saccade_detection_results = []
     for result in results:
@@ -157,7 +157,7 @@ def extract_fixations_and_saccades(sessions_data, use_parallel):
 
 
 
-def get_session_fixations_and_saccades(session_data):
+def get_session_fixations_and_saccades(session_data, num_cpus):
     """
     Extracts fixations and saccades for a session.
     Parameters:
@@ -173,7 +173,7 @@ def get_session_fixations_and_saccades(session_data):
     n_samples = positions.shape[0]
     time_vec = util.create_timevec(n_samples, sampling_rate)
     use_parallel = params.get('use_parallel', False)
-    detector = ClusterFixationDetector(samprate=sampling_rate, params=params)
+    detector = ClusterFixationDetector(samprate=sampling_rate, params=params, num_cpus=num_cpus)
     x_coords = positions[:, 0]
     y_coords = positions[:, 1]
     # Transform into the expected format

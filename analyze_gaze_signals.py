@@ -9,8 +9,10 @@ Created on Tue Apr  9 10:25:48 2024
 
 import logging
 import os
+import multiprocessing
 from multiprocessing import Pool
 from tqdm import tqdm
+import numexpr as ne
 
 import curate_data
 import util
@@ -25,6 +27,7 @@ class DataManager:
         self.params = params
         self.setup_logger()
         self.initialize_variables()
+        self.find_n_cores()
 
 
     def setup_logger(self):
@@ -43,6 +46,32 @@ class DataManager:
         self.labelled_saccades_m1 = None
         self.labelled_spiketimes = None
         self.labelled_fixation_rasters = None
+
+
+    def find_n_cores(self):
+        try:
+            num_cpus = ne.detect_number_of_cores()
+            print(f"NumExpr detected {num_cpus} cores")
+        except Exception as e:
+            print(f"Failed to detect cores with NumExpr: {e}")
+            num_cpus = None
+        # If NumExpr detection fails, fallback to SLURM environment variable
+        if num_cpus is None or num_cpus <= 0:
+            slurm_cpus = os.getenv('SLURM_CPUS_ON_NODE')
+            if slurm_cpus:
+                num_cpus = int(slurm_cpus)
+                print(f"SLURM detected {num_cpus} CPUs")
+            else:
+                num_cpus = None
+        # If SLURM detection fails, fallback to multiprocessing.cpu_count()
+        if num_cpus is None or num_cpus <= 0:
+            num_cpus = multiprocessing.cpu_count()
+            print(f"multiprocessing detected {num_cpus} CPUs")
+        # Set the maximum number of threads for NumExpr
+        os.environ['NUMEXPR_MAX_THREADS'] = str(num_cpus)
+        ne.set_num_threads(num_cpus)
+        self.num_cpus = num_cpus
+        print(f"NumExpr set to use {ne.detect_number_of_threads()} threads")
 
 
     def get_or_load_variable(self, variable_name, load_function, compute_function):
@@ -94,6 +123,7 @@ class DataManager:
         data_source_dir, self.params = util.fetch_data_source_dir(self.params)
         session_paths, self.params = util.fetch_session_subfolder_paths_from_source(self.params)
         processed_data_dir, self.params = util.fetch_processed_data_dir(self.params)
+        self.params['num_cpus'] = self.num_cpus
 
         self.labelled_gaze_positions_m1 = self.get_or_load_variable(
             'labelled_gaze_positions_m1',
@@ -119,9 +149,9 @@ class DataManager:
             lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
         )
 
-        pdb.set_trace()
+        self.combined_behav_df = curate_data.combine_behaviors_in_temporal_order(self.labelled_fixations_m1, self.labelled_saccades_m1)
 
-        # self.combined_behav_df = curate_data.combine_behaviors_in_temporal_order(self.labelled_fixations_m1, self.labelled_saccades_m1)
+        pdb.set_trace()
 
         self.logger.info(f"M1 fixations and saccades acquired")
         if self.params['make_plots']:
@@ -160,6 +190,7 @@ class DataManager:
 def main():
     params = util.get_params()
     params.update({
+        'num_cpus': 1,
         'parallelize_local_reclustering_over_n_fixations': False,
         'submit_separate_jobs_for_sessions': True,
         'use_toy_data': False,
