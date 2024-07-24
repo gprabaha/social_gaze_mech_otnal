@@ -50,26 +50,18 @@ class DataManager:
 
     def find_n_cores(self):
         try:
-            num_cpus = ne.detect_number_of_cores()
-            print(f"NumExpr detected {num_cpus} cores")
-        except Exception as e:
-            print(f"Failed to detect cores with NumExpr: {e}")
-            num_cpus = None
-        # If NumExpr detection fails, fallback to SLURM environment variable
-        if num_cpus is None or num_cpus <= 0:
             slurm_cpus = os.getenv('SLURM_CPUS_ON_NODE')
-            if slurm_cpus:
-                num_cpus = int(slurm_cpus)
-                print(f"SLURM detected {num_cpus} CPUs")
-            else:
-                num_cpus = None
+            num_cpus = int(slurm_cpus)
+            print(f"SLURM detected {num_cpus} CPUs")
+        except Exception as e:
+            print(f"Failed to detect cores with SLURM_CPUS_ON_NODE: {e}")
+            num_cpus = None
         # If SLURM detection fails, fallback to multiprocessing.cpu_count()
         if num_cpus is None or num_cpus <= 0:
             num_cpus = multiprocessing.cpu_count()
             print(f"multiprocessing detected {num_cpus} CPUs")
         # Set the maximum number of threads for NumExpr
         os.environ['NUMEXPR_MAX_THREADS'] = str(num_cpus)
-        ne.set_num_threads(num_cpus)
         self.num_cpus = num_cpus
         print(f"NumExpr set to use {ne.detect_number_of_threads()} threads")
 
@@ -191,8 +183,8 @@ def main():
         'num_cpus': 1,
         'parallelize_local_reclustering_over_n_fixations': False,
         'do_local_reclustering_in_parallel': False,
-        'submit_separate_jobs_for_sessions': True,
-        'use_toy_data': False,
+        'submit_separate_jobs_for_sessions': False,
+        'use_toy_data': True,
         'remake_toy_data': False,
         'is_cluster': True,
         'use_parallel': True,

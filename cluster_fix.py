@@ -66,6 +66,7 @@ class ClusterFixationDetector:
             fixationindexes = self.find_behavioral_times(fix_start_inds)
             saccade_start_inds = self.classify_saccades(fix_start_inds, points)
             saccadeindexes = self.find_behavioral_times(saccade_start_inds)
+            saccadeindexes = self.apply_saccade_vel_threshold(points, saccadeindexes, 0.3)
             # fixationtimes, saccadetimes = self.round_times(fixationtimes, saccadetimes)
             pointfix, pointsac, recalc_meanvalues, recalc_stdvalues = self.calculate_cluster_values(fixationindexes, saccadeindexes, data)
             return {
@@ -353,6 +354,12 @@ class ClusterFixationDetector:
     def classify_saccades(self, fix_start_inds, points):
         saccade_start_inds = np.setdiff1d(np.arange(len(points)), fix_start_inds)
         return saccade_start_inds
+
+
+    def apply_saccade_vel_threshold(self, points, saccadeindexes, threshold):
+        vel = points[:,0]
+        mean_vel = np.array([np.mean(vel[ind[0]:ind[1]+1]) for ind in saccadeindexes.T])
+        return saccadeindexes[:, mean_vel >= threshold]
 
 
     def calculate_cluster_values(self, fixationtimes, saccadetimes, eyedat):

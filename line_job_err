@@ -5,3 +5,4 @@ Deprecated, use `init_num_threads` instead.
 2024-07-24 15:05:01,020 - __main__ - INFO - Loading variable(s): labelled_gaze_positions_m1
 2024-07-24 15:05:01,293 - __main__ - INFO - M1 remapped gaze pos data acquired!
 2024-07-24 15:05:01,293 - __main__ - INFO - Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1
+slurmstepd: error: *** JOB 27489980 ON r811u34n03 CANCELLED AT 2024-07-24T15:53:29 ***

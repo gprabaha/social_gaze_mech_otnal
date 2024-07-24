@@ -56,19 +56,12 @@ def main(session_index, params_file, num_cpus):
 
 if __name__ == "__main__":
     try:
-        num_cpus = ne.detect_number_of_cores()
-        print(f"NumExpr detected {num_cpus} cores")
-    except Exception as e:
-        print(f"Failed to detect cores with NumExpr: {e}")
-        num_cpus = None
-    # If NumExpr detection fails, fallback to SLURM environment variable
-    if num_cpus is None or num_cpus <= 0:
         slurm_cpus = os.getenv('SLURM_CPUS_ON_NODE')
-        if slurm_cpus:
-            num_cpus = int(slurm_cpus)
-            print(f"SLURM detected {num_cpus} CPUs")
-        else:
-            num_cpus = None
+        num_cpus = int(slurm_cpus)
+        print(f"SLURM detected {num_cpus} CPUs")
+    except Exception as e:
+        print(f"Failed to detect cores with SLURM_CPUS_ON_NODE: {e}")
+        num_cpus = None
     # If SLURM detection fails, fallback to multiprocessing.cpu_count()
     if num_cpus is None or num_cpus <= 0:
         num_cpus = multiprocessing.cpu_count()
