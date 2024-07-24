@@ -292,50 +292,46 @@ class ClusterFixationDetector:
 
 
     def process_fixation_local_reclustering(self, fix, points):
-        try:
-            self.logger.debug(f"Fixation indices: {fix}")
-            altind = np.arange(fix[0] - 50, fix[1] + 50)
-            altind = altind[(altind >= 0) & (altind < len(points))]
-            POINTS = points[altind]
-            self.logger.debug(f"Altind: {altind}")
-            self.logger.debug(f"Number of points for reclustering: {len(POINTS)}")
-            numclusts_range = range(1, 6)
-            self.logger.debug("Parallelizing local reclustering over numclusts range")
-            sil_results = [self.compute_sil((numclusts, POINTS)) for numclusts in numclusts_range]
-            sil = np.zeros(5)
-            for mean_sil, numclusts in sil_results:
-                sil[numclusts - 1] = mean_sil
-            self.logger.debug(f"Silhouette scores: {sil}")
-            numclusters = np.argmax(sil) + 1
-            self.logger.debug(f"Optimal number of clusters: {numclusters}")
-            T = KMeans(n_clusters=numclusters, n_init=5).fit(POINTS)
-            medianvalues = np.array([np.median(POINTS[T.labels_ == i], axis=0) for i in range(numclusters)])
-            self.logger.debug(f"Median values: {medianvalues}")
-            fixationcluster = np.argmin(np.sum(medianvalues[:, 1:3], axis=1))  # Velocity and acceleration
-            self.logger.debug(f"Fixation cluster index: {fixationcluster}")
-            fixation_indices = np.where(T.labels_ == fixationcluster)[0]
-            # Check if the fixation cluster has no points
-            if fixation_indices.size == 0:
-                self.logger.warning("No points assigned to the fixationcluster")
-                return np.array([])  # Return an empty array directly
-            # Label the fixation points as 100 temporarily
-            T.labels_[fixation_indices] = 100
-            fixationcluster2 = np.where(
-                (medianvalues[:, 1] < medianvalues[fixationcluster, 1] + 3 * np.std(POINTS[fixation_indices][:, 1])) &
-                (medianvalues[:, 2] < medianvalues[fixationcluster, 2] + 3 * np.std(POINTS[fixation_indices][:, 2]))
-            )[0]
-            fixationcluster2 = fixationcluster2[fixationcluster2 != fixationcluster]
-            self.logger.debug(f"Additional fixation clusters: {fixationcluster2}")
-            for cluster in fixationcluster2:
-                cluster_indices = np.where(T.labels_ == cluster)[0]
-                T.labels_[cluster_indices] = 100
-            # Final relabeling
-            T.labels_[T.labels_ != 100] = 2
-            T.labels_[T.labels_ == 100] = 1
-            return altind[T.labels_ == 2]
-        except Exception as e:
-            self.logger.exception("Exception occurred during fixation local reclustering")
-            return np.array([])
+        self.logger.debug(f"Fixation indices: {fix}")
+        altind = np.arange(fix[0] - 50, fix[1] + 50)
+        altind = altind[(altind >= 0) & (altind < len(points))]
+        POINTS = points[altind]
+        self.logger.debug(f"Altind: {altind}")
+        self.logger.debug(f"Number of points for reclustering: {len(POINTS)}")
+        numclusts_range = range(1, 6)
+        self.logger.debug("Parallelizing local reclustering over numclusts range")
+        sil_results = [self.compute_sil((numclusts, POINTS)) for numclusts in numclusts_range]
+        sil = np.zeros(5)
+        for mean_sil, numclusts in sil_results:
+            sil[numclusts - 1] = mean_sil
+        self.logger.debug(f"Silhouette scores: {sil}")
+        numclusters = np.argmax(sil) + 1
+        self.logger.debug(f"Optimal number of clusters: {numclusters}")
+        T = KMeans(n_clusters=numclusters, n_init=5).fit(POINTS)
+        medianvalues = np.array([np.median(POINTS[T.labels_ == i], axis=0) for i in range(numclusters)])
+        self.logger.debug(f"Median values: {medianvalues}")
+        fixationcluster = np.argmin(np.sum(medianvalues[:, 1:3], axis=1))  # Velocity and acceleration
+        self.logger.debug(f"Fixation cluster index: {fixationcluster}")
+        fixation_indices = np.where(T.labels_ == fixationcluster)[0]
+        # Check if the fixation cluster has no points
+        if fixation_indices.size == 0:
+            self.logger.warning("No points assigned to the fixationcluster")
+            return np.array([])  # Return an empty array directly
+        # Label the fixation points as 100 temporarily
+        T.labels_[fixation_indices] = 100
+        fixationcluster2 = np.where(
+            (medianvalues[:, 1] < medianvalues[fixationcluster, 1] + 3 * np.std(POINTS[fixation_indices][:, 1])) &
+            (medianvalues[:, 2] < medianvalues[fixationcluster, 2] + 3 * np.std(POINTS[fixation_indices][:, 2]))
+        )[0]
+        fixationcluster2 = fixationcluster2[fixationcluster2 != fixationcluster]
+        self.logger.debug(f"Additional fixation clusters: {fixationcluster2}")
+        for cluster in fixationcluster2:
+            cluster_indices = np.where(T.labels_ == cluster)[0]
+            T.labels_[cluster_indices] = 100
+        # Final relabeling
+        T.labels_[T.labels_ != 100] = 2
+        T.labels_[T.labels_ == 100] = 1
+        return altind[T.labels_ == 2]
 
 
     def compute_sil(self, data):
