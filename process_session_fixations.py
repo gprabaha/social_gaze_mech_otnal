@@ -16,7 +16,12 @@ from fix_and_saccades import get_session_fixations_and_saccades
 import load_data
 
 def main(session_index, params_file):
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
     # Load parameters from the JSON file
     with open(params_file, 'r') as f:

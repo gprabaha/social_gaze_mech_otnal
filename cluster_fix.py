@@ -368,7 +368,6 @@ class ClusterFixationDetector:
     def classify_saccades(self, fixationindexes, points):
         saccadeindexes = np.setdiff1d(np.arange(len(points)), fixationindexes)
         saccadetimes = self.find_behavioral_times(saccadeindexes)
-        print(saccadetimes)
         return saccadeindexes, saccadetimes
 
 
