@@ -99,7 +99,8 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
     else:
         sessions_data = [(session_data[0], session_data[1], params) for session_data in labelled_gaze_positions]
         num_cpus = params['num_cpus']
-        all_fix_df, all_saccades_df = extract_fixations_and_saccades(sessions_data, use_parallel, num_cpus)
+        use_session_parallelization_for_local_runs = params.get('use_session_parallelization_for_local_runs', False)
+        all_fix_df, all_saccades_df = extract_fixations_and_saccades(sessions_data, use_session_parallelization_for_local_runs, num_cpus)
     all_fix_df, all_saccades_df = process_detection_results(all_fix_df, all_saccades_df)
     save_fixation_and_saccade_results(processed_data_dir, all_fix_df, all_saccades_df, params)
     return all_fix_df, all_saccades_df
@@ -123,7 +124,7 @@ def process_detection_results(fix_detection_results, saccade_detection_results):
     return all_fix_timepos, all_saccades
 
 
-def extract_fixations_and_saccades(sessions_data, use_parallel, num_cpus):
+def extract_fixations_and_saccades(sessions_data, use_session_parallelization_for_local_runs, num_cpus):
     """
     Extracts fixations and saccades from session data.
     Parameters:
@@ -134,7 +135,7 @@ def extract_fixations_and_saccades(sessions_data, use_parallel, num_cpus):
     - fix_detection_results (list): List of fixation detection results.
     - saccade_detection_results (list): List of saccade detection results.
     """
-    if use_parallel:
+    if use_session_parallelization_for_local_runs:
         print("\nExtracting fixations and saccades in parallel")
         num_processes = min(num_cpus, len(sessions_data))
         with ProcessPoolExecutor(max_workers=num_processes) as executor:

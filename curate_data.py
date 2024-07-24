@@ -27,8 +27,6 @@ from multiprocessing import Pool
 
 import pdb
 
-logger = logging.getLogger(__name__)
-
 ### Function to extract meta-information and update params
 def extract_and_update_meta_info(params):
     """
@@ -173,6 +171,7 @@ def check_clashes(session_df):
 
 
 def combine_behaviors_in_temporal_order(params, *dataframes):
+    logger = logging.getLogger(__name__)
     num_cpus = params.get('num_cpus', 1)
     # Combine all provided DataFrames
     combined_df = pd.concat(dataframes, ignore_index=True)
@@ -184,7 +183,7 @@ def combine_behaviors_in_temporal_order(params, *dataframes):
     with Pool(num_cpus) as pool:
         sorted_dfs = list(tqdm(pool.imap(sort_behavioral_event_dataframes_in_session, 
                                          [combined_df[combined_df['session_name'] == session] for session in unique_sessions]), 
-                               total=len(unique_sessions), desc="Sorting sessions"))
+                               total=len(unique_sessions), desc="Sorting session behav dfs"))
         pool.close()
         pool.join()
     # Concatenate the sorted DataFrames
@@ -194,7 +193,7 @@ def combine_behaviors_in_temporal_order(params, *dataframes):
     with Pool(num_cpus) as pool:
         results = list(tqdm(pool.imap(check_clashes, 
                                       [final_sorted_df[final_sorted_df['session_name'] == session] for session in unique_sessions]), 
-                            total=len(unique_sessions), desc="Checking clashes"))
+                            total=len(unique_sessions), desc="Checking time window clashes within events"))
         pool.close()
         pool.join()
     # Collect all clashes
