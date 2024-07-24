@@ -22,7 +22,11 @@ import fix_and_saccades
 from raster import RasterManager
 from hpc_cluster import HPCCluster
 
+from multiprocessing import Pool
+
 import pdb
+
+logger = logging.getLogger(__name__)
 
 ### Function to extract meta-information and update params
 def extract_and_update_meta_info(params):
@@ -148,24 +152,50 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     """
     print("\nStarting to extract fixations and saccades:")
     use_parallel = params.get('use_parallel', True)
-
     # Extract fixations and saccades
     all_fix_df, all_saccades_df = fix_and_saccades.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
-    # labelled_fixations = fix_and_saccades.generate_fixation_labels(fix_detection_results, params, use_parallel)
-    # saccades = [s for session_saccades in saccade_detection_results for s in session_saccades]
-    # columns = ["start_time", "end_time", "duration", "trajectory", "start_roi", "end_roi", "session_name", "category", "run", "block"]
-    # labelled_saccades = pd.DataFrame(saccades, columns=columns)
-    # fix_and_saccades.save_saccade_labels(labelled_saccades, params)
-
+    combined_behav_df = combine_behaviors_in_temporal_order(all_fix_df, all_saccades_df)
     return all_fix_df, all_saccades_df
 
 
+def sort_behavioral_event_dataframes_in_session(df):
+    return df.sort_values(by=['start_index', 'end_index'])
 
 
-
-
-def combine_behaviors_in_temporal_order(labelled_fixations_df, labelled_saccades_df):
-    return 0
+def combine_behaviors_in_temporal_order(*dataframes):
+    # Combine all provided DataFrames
+    combined_df = pd.concat(dataframes, ignore_index=True)
+    # Predeclare DataFrame size
+    sorted_dfs = []
+    unique_sessions = combined_df['session_name'].unique()
+    logger.info("Starting parallel sorting of sessions.")
+    # Use parallel processing to sort each session
+    with Pool() as pool:
+        sorted_dfs = list(tqdm(pool.imap(sort_behavioral_event_dataframes_in_session, 
+                                         [combined_df[combined_df['session_name'] == session] for session in unique_sessions]), 
+                               total=len(unique_sessions), desc="Sorting sessions"))
+    # Concatenate the sorted DataFrames
+    final_sorted_df = pd.concat(sorted_dfs, ignore_index=True)
+    logger.info("Finished sorting sessions. Checking for time window clashes.")
+    # Check for time window clashes
+    clashes = []
+    for session in unique_sessions:
+        session_df = final_sorted_df[final_sorted_df['session_name'] == session]
+        for i in range(1, len(session_df)):
+            prev_end_index = session_df.iloc[i-1]['end_index']
+            curr_start_index = session_df.iloc[i]['start_index']
+            if curr_start_index < prev_end_index:
+                clashes.append((session, i-1, i, prev_end_index, curr_start_index))
+    if clashes:
+        logger.info("Time window clashes found:")
+        for clash in clashes:
+            logger.info(f"Session: {clash[0]}, Row {clash[1]} ends at index {clash[3]}, but Row {clash[2]} starts at index {clash[4]}")
+    else:
+        logger.info("No time window clashes found.")
+    # Print the first 50 events in the `mon_down` condition
+    mon_down_events = final_sorted_df[final_sorted_df['block'] == 'mon_down'].head(50)
+    logger.info(f"First 50 events in the 'mon_down' condition:\n{mon_down_events}")  
+    return final_sorted_df
 
 
 

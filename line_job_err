@@ -1,9 +1,4 @@
-
-CondaError: Run 'conda init' before 'conda deactivate'
-
 Deprecated, use `init_num_threads` instead.
-2024-07-23 18:41:02,706 - __main__ - INFO - Loading variable(s): labelled_gaze_positions_m1
-2024-07-23 18:41:03,218 - __main__ - INFO - M1 remapped gaze pos data acquired!
-2024-07-23 18:41:03,218 - __main__ - INFO - Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1
-2024-07-23 22:40:43,367 - __main__ - INFO - M1 fixations and saccades acquired
-INFO:__main__:M1 fixations and saccades acquired
+2024-07-24 09:56:17,476 - __main__ - INFO - Loading variable(s): labelled_gaze_positions_m1
+2024-07-24 09:56:18,046 - __main__ - INFO - M1 remapped gaze pos data acquired!
+2024-07-24 09:56:18,046 - __main__ - INFO - Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1

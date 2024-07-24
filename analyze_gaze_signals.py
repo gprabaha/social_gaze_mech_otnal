@@ -119,7 +119,7 @@ class DataManager:
             lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
         )
 
-        # pdb.set_trace()
+        pdb.set_trace()
 
         # self.combined_behav_df = curate_data.combine_behaviors_in_temporal_order(self.labelled_fixations_m1, self.labelled_saccades_m1)
 
@@ -165,11 +165,11 @@ def main():
         'use_toy_data': False,
         'remake_toy_data': False,
         'is_cluster': True,
-        'use_parallel': True,
+        'use_parallel': False,
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
-        'remake_labelled_fixations_m1': True,
-        'remake_labelled_saccades_m1': True,
+        'remake_labelled_fixations_m1': False,
+        'remake_labelled_saccades_m1': False,
         'remake_labelled_spiketimes': False,
         'remake_labelled_fixation_rasters': True,
         'make_plots': False,

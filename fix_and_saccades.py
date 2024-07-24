@@ -181,8 +181,8 @@ def get_session_fixations_and_saccades(session_data):
     fix_stats = detector.detect_fixations(eyedat)
     fixations_df = make_fixations_df(fix_stats, info)
     saccades_df = make_saccades_df(fix_stats, info)
-    print(fixations_df)
-    print(saccades_df)
+    print(fixations_df.head())
+    print(saccades_df.head())
     return fixations_df, info, saccades_df
 
 
