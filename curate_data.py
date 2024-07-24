@@ -154,12 +154,13 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     print("\nStarting to extract fixations and saccades:")
     # Extract fixations and saccades
     all_fix_df, all_saccades_df = fix_and_saccades.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
-    combined_behav_df = combine_behaviors_in_temporal_order(all_fix_df, all_saccades_df)
+    combined_behav_df = combine_behaviors_in_temporal_order(params, all_fix_df, all_saccades_df)
     return all_fix_df, all_saccades_df
 
 
 def sort_behavioral_event_dataframes_in_session(df):
     return df.sort_values(by=['start_index', 'end_index'])
+
 
 def check_clashes(session_df):
     clashes = []
@@ -170,7 +171,9 @@ def check_clashes(session_df):
             clashes.append((session_df.iloc[i]['session_name'], i-1, i, prev_end_index, curr_start_index))
     return clashes
 
-def combine_behaviors_in_temporal_order(*dataframes):
+
+def combine_behaviors_in_temporal_order(params, *dataframes):
+    num_cpus = params.get('num_cpus', 1)
     # Combine all provided DataFrames
     combined_df = pd.concat(dataframes, ignore_index=True)
     # Predeclare DataFrame size
@@ -178,7 +181,7 @@ def combine_behaviors_in_temporal_order(*dataframes):
     unique_sessions = combined_df['session_name'].unique()
     logger.info("Starting parallel sorting of sessions.")
     # Use parallel processing to sort each session
-    with Pool(cpu_count()) as pool:
+    with Pool(num_cpus) as pool:
         sorted_dfs = list(tqdm(pool.imap(sort_behavioral_event_dataframes_in_session, 
                                          [combined_df[combined_df['session_name'] == session] for session in unique_sessions]), 
                                total=len(unique_sessions), desc="Sorting sessions"))
@@ -188,7 +191,7 @@ def combine_behaviors_in_temporal_order(*dataframes):
     final_sorted_df = pd.concat(sorted_dfs, ignore_index=True)
     logger.info("Finished sorting sessions. Checking for time window clashes.")
     # Use parallel processing to check for clashes
-    with Pool(cpu_count()) as pool:
+    with Pool(num_cpus) as pool:
         results = list(tqdm(pool.imap(check_clashes, 
                                       [final_sorted_df[final_sorted_df['session_name'] == session] for session in unique_sessions]), 
                             total=len(unique_sessions), desc="Checking clashes"))
