@@ -432,6 +432,30 @@ def distance(point1, point2):
     return sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
 
+
+def define_frame_of_attention(bboxes):
+    left_bbox_center = np.mean([bboxes['left_obj_bbox']['bottomLeft'], bboxes['left_obj_bbox']['topRight']], axis=0)
+    right_bbox_center = np.mean([bboxes['right_obj_bbox']['bottomLeft'], bboxes['right_obj_bbox']['topRight']], axis=0)
+    center_point = (left_bbox_center + right_bbox_center) / 2
+    bbox_distance = np.linalg.norm(left_bbox_center - right_bbox_center)
+    # Calculate the frame boundaries
+    left_boundary = center_point[0] - 1.5 * bbox_distance
+    right_boundary = center_point[0] + 1.5 * bbox_distance
+    mean_height = np.mean([bboxes['left_obj_bbox']['topRight'][1] - bboxes['left_obj_bbox']['bottomLeft'][1],
+                           bboxes['right_obj_bbox']['topRight'][1] - bboxes['right_obj_bbox']['bottomLeft'][1]])
+    top_boundary = center_point[1] + 1.5 * mean_height
+    bottom_boundary = center_point[1] - 3.5 * mean_height
+    return left_boundary, right_boundary, top_boundary, bottom_boundary
+
+
+def is_within_frame(position, frame):
+    x, y = position
+    left_boundary, right_boundary, top_boundary, bottom_boundary = frame
+    return left_boundary <= x <= right_boundary and bottom_boundary <= y <= top_boundary
+
+
+
+
 def px2deg(px, monitor_info=None):
     if monitor_info is None:
         monitor_info = defaults.fetch_monitor_info() # in defaults

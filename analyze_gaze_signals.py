@@ -144,6 +144,12 @@ class DataManager:
         )
         self.logger.info(f"M1 fixations and saccades acquired")
 
+        events_within_attention_frame = curate_data.isolate_events_within_attention_frame(self.combined_behav_m1, self.labelled_gaze_positions_m1)
+        # Display the isolated events
+        events_within_attention_frame.head()
+
+        pdb.set_trace()
+
         if self.params['make_plots']:
             self.plot_all_behavior_in_all_sessions()
             self.logger.info(f"Plots generated successfully")
@@ -183,16 +189,16 @@ def main():
         'num_cpus': 1,
         'parallelize_local_reclustering_over_n_fixations': False,
         'do_local_reclustering_in_parallel': False,
-        'submit_separate_jobs_for_sessions': False,
-        'use_toy_data': True,
+        'submit_separate_jobs_for_sessions': True,
+        'use_toy_data': False,
         'remake_toy_data': False,
         'is_cluster': True,
         'use_parallel': True,
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
-        'remake_labelled_fixations_m1': True,
-        'remake_labelled_saccades_m1': True,
-        'remake_combined_behav_m1': True,
+        'remake_labelled_fixations_m1': False,
+        'remake_labelled_saccades_m1': False,
+        'remake_combined_behav_m1': False,
         'remake_labelled_spiketimes': False,
         'remake_labelled_fixation_rasters': True,
         'make_plots': False,

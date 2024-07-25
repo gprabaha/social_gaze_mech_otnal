@@ -268,6 +268,29 @@ def save_combined_df_to_csv(params, df, filename):
 
 
 
+def isolate_events_within_attention_frame(dataframe, gaze_data):
+    events_within_frame = []
+    for session_data in gaze_data:
+        session_name = session_data[1]['session_name']
+        bboxes = session_data[1]['roi_bb_corners']
+        frame = util.define_frame_of_attention(bboxes)
+        session_events = dataframe[dataframe['session_name'] == session_name]
+        gaze_positions = session_data[0]  # x, y positions array
+        for index, row in session_events.iterrows():
+            start_index = row['start_index']
+            end_index = row['end_index']
+            mean_position = row['mean_position']
+            # Fetch the positions from gaze data
+            start_position = gaze_positions[start_index]
+            end_position = gaze_positions[end_index]
+            if (util.is_within_frame(start_position, frame) or 
+                util.is_within_frame(end_position, frame) or 
+                util.is_within_frame(mean_position, frame)):
+                events_within_frame.append(row)
+    return pd.DataFrame(events_within_frame)
+
+
+
 
 ###
 def extract_spiketimes_for_all_sessions(params):
