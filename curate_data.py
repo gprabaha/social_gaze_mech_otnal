@@ -279,7 +279,9 @@ def isolate_events_within_attention_frame(dataframe, gaze_data):
         for index, row in session_events.iterrows():
             start_index = row['start_index']
             end_index = row['end_index']
-            mean_position = row['mean_position']
+            mean_position_str = row['mean_position']
+            # Convert mean_position to numpy array
+            mean_position = util.convert_to_array(mean_position_str)
             # Fetch the positions from gaze data
             start_position = gaze_positions[start_index]
             end_position = gaze_positions[end_index]

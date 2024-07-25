@@ -454,6 +454,8 @@ def is_within_frame(position, frame):
     return left_boundary <= x <= right_boundary and bottom_boundary <= y <= top_boundary
 
 
+def convert_to_array(position_str):
+    return np.fromstring(position_str.strip('[]'), sep=' ')
 
 
 def px2deg(px, monitor_info=None):
