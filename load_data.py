@@ -172,24 +172,37 @@ def load_toy_data(params):
     return [toy_data]
 
 
-def load_m1_labelled_fixations_and_saccades(params):
+def load_m1_labelled_fixations_saccades_and_combined(params):
     """
-    Loads and returns the labelled fixation and saccade results for m1 from files.
+    Loads and returns the labelled fixation, saccade results, and combined gaze and behavioral data for m1 from files.
     Parameters:
-    - processed_data_dir (str): Directory to load processed data from. 
+    - params (dict): Dictionary containing configuration parameters including 'processed_data_dir'.
     Returns:
     - labelled_fixations (pd.DataFrame): DataFrame of labelled fixation time positions.
     - labelled_saccades (list): List of labelled saccade detection results.
+    - combined_gaze_behav (pd.DataFrame): DataFrame of combined gaze and behavioral data.
     """
     processed_data_dir = params.get('processed_data_dir')
-    fixations_file = os.path.join(processed_data_dir, "all_fixations_and_saccades.pkl")
-    logging.info("Loading: " + fixations_file) 
-    if not os.path.exists(fixations_file):
-        logging.error("File not found: " + fixations_file)
-        return None, None
-    with open(fixations_file, 'rb') as f:
+    # File paths
+    fixations_saccades_file = os.path.join(processed_data_dir, "all_fixations_and_saccades.pkl")
+    combined_gaze_behav_file = os.path.join(processed_data_dir, "combined_gaze_behav_m1.csv")
+    # Logging
+    logger = logging.getLogger(__name__)
+    logger.info("Loading fixations and saccades from: " + fixations_saccades_file) 
+    logger.info("Loading combined gaze and behavioral data from: " + combined_gaze_behav_file)
+    # Check if files exist
+    if not os.path.exists(fixations_saccades_file):
+        logger.error("File not found: " + fixations_saccades_file)
+        return None, None, None
+    if not os.path.exists(combined_gaze_behav_file):
+        logger.error("File not found: " + combined_gaze_behav_file)
+        return None, None, None
+    # Load fixations and saccades
+    with open(fixations_saccades_file, 'rb') as f:
         labelled_fixations, labelled_saccades = pickle.load(f)
-    return labelled_fixations, labelled_saccades
+    # Load combined gaze and behavioral data
+    combined_gaze_behav = pd.read_csv(combined_gaze_behav_file)
+    return labelled_fixations, labelled_saccades, combined_gaze_behav
 
 
 def load_m1_fixations(params):

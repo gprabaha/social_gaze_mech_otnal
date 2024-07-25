@@ -138,8 +138,8 @@ class DataManager:
         
         self.labelled_fixations_m1, self.labelled_saccades_m1, self.combined_behav_m1 = self.get_or_load_variable(
             'labelled_fixations_m1, labelled_saccades_m1', 'combined_behav_m1',
-            load_data.load_m1_labelled_fixations_and_saccades,
-            lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
+            load_data.load_m1_labelled_fixations_saccades_and_combined,
+            lambda p: curate_data.extract_all_fixations_and_saccades_from_labelled_gaze_positions(input_data, p)
         )
 
         self.combined_behav_df = curate_data.combine_behaviors_in_temporal_order(self.params, self.labelled_fixations_m1, self.labelled_saccades_m1)
@@ -193,6 +193,7 @@ def main():
         'fixation_detection_method': 'cluster_fix',
         'remake_labelled_fixations_m1': True,
         'remake_labelled_saccades_m1': True,
+        'remake_combined_behav_m1': True,
         'remake_labelled_spiketimes': False,
         'remake_labelled_fixation_rasters': True,
         'make_plots': False,

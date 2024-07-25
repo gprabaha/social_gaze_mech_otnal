@@ -25,46 +25,6 @@ from hpc_fixation_detection import HPCFixationDetection  # Import the new HPCFix
 import pdb
 
 
-def extract_or_load_fixations_and_saccades(labelled_gaze_positions, params):
-    """
-    Extract or load fixations and saccades based on parameters.
-    Parameters:
-    - labelled_gaze_positions (list): List of tuples containing gaze positions and associated metadata.
-    - params (dict): Dictionary of parameters.
-    Returns:
-    - all_fix_timepos (pd.DataFrame): DataFrame of fixation time positions.
-    - fix_detection_results (list): List of fixation detection results.
-    - saccade_detection_results (list): List of saccade detection results.
-    """
-    processed_data_dir = params['processed_data_dir']
-    flag_info = util.get_filename_flag_info(params)
-    if params.get('remake_labelled_fixations', False) or params.get('remake_labelled_saccades_m1', False):
-        return extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaze_positions, params)
-    else:
-        results_file_name = f'fixation_saccade_session_results_m1{flag_info}.npz'
-        if os.path.exists(os.path.join(processed_data_dir, results_file_name)):
-            return load_existing_fixations_and_saccades(params)
-        else:
-            return extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaze_positions, params)
-
-
-def load_existing_fixations_and_saccades(params):
-    """
-    Load existing fixations and saccades from files.
-    Parameters:
-    - params (dict): Dictionary of parameters.
-    Returns:
-    - all_fix_timepos (pd.DataFrame): DataFrame of fixation time positions.
-    - fix_detection_results (list): List of fixation detection results.
-    - saccade_detection_results (list): List of saccade detection results.
-    """
-    all_fix_timepos_df = load_data.load_m1_fixations(params)
-    fix_detection_results = load_data.load_fix_detection_results(params)
-    saccade_detection_results = load_data.load_saccade_detection_results(params)
-    return all_fix_timepos_df, fix_detection_results, saccade_detection_results
-
-
-
 def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaze_positions, params):
     """
     Extracts fixations and saccades from labelled gaze positions.
