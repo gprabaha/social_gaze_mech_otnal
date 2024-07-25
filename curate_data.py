@@ -99,7 +99,7 @@ def extract_labelled_gaze_positions_m1(params):
     unique_doses = params.get('unique_doses')
     dose_inds = params.get('dose_inds')
     use_parallel = params.get('use_parallel', True)
-    
+
     def process_index(idx):
         return load_data.get_labelled_gaze_positions_dict_m1(idx, params)
     
@@ -152,7 +152,7 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     # Extract fixations and saccades
     all_fix_df, all_saccades_df = fix_and_saccades.extract_or_load_fixations_and_saccades(labelled_gaze_positions, params)
     combined_behav_df = combine_behaviors_in_temporal_order(params, all_fix_df, all_saccades_df)
-    return all_fix_df, all_saccades_df
+    return all_fix_df, all_saccades_df, combined_behav_df
 
 
 def sort_behavioral_event_dataframes_in_session(df):
@@ -211,9 +211,31 @@ def combine_behaviors_in_temporal_order(params, *dataframes):
     # Print the first 50 events in the `mon_down` condition
     mon_down_events = final_sorted_df[final_sorted_df['block'] == 'mon_down'].head(50)
     logger.info(f"First 50 events in the 'mon_down' condition:\n{mon_down_events}")
+    save_combined_df_to_csv(params, final_sorted_df, 'combined_gaze_behav_m1.csv')
     return final_sorted_df
 
 
+def save_combined_df_to_csv(params, df, filename):
+    """
+    Saves the provided DataFrame to a CSV file in the directory specified by params['processed_data_dir'].
+    Args:
+    - params (dict): A dictionary containing parameters including 'processed_data_dir'.
+    - df (pd.DataFrame): The DataFrame to save.
+    - filename (str): The name of the file to save the DataFrame as.
+    Returns:
+    - None
+    """
+    logger = logging.getLogger(__name__)
+    processed_data_dir = params['processed_data_dir']
+    # Ensure the directory exists
+    if not os.path.exists(processed_data_dir):
+        os.makedirs(processed_data_dir)
+        logger.info(f"Created directory: {processed_data_dir}")
+    # Define the full path for the output file
+    output_path = os.path.join(processed_data_dir, filename)
+    # Save the DataFrame as a CSV file
+    df.to_csv(output_path, index=False)
+    logger.info(f"DataFrame saved to: {output_path}")
 
 
 

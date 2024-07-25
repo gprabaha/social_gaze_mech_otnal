@@ -46,6 +46,7 @@ class DataManager:
         self.labelled_saccades_m1 = None
         self.labelled_spiketimes = None
         self.labelled_fixation_rasters = None
+        self.combined_behav_m1 = None
 
 
     def find_n_cores(self):
@@ -135,8 +136,8 @@ class DataManager:
         else:
             input_data = self.labelled_gaze_positions_m1
         
-        self.labelled_fixations_m1, self.labelled_saccades_m1 = self.get_or_load_variable(
-            'labelled_fixations_m1, labelled_saccades_m1',
+        self.labelled_fixations_m1, self.labelled_saccades_m1, self.combined_behav_m1 = self.get_or_load_variable(
+            'labelled_fixations_m1, labelled_saccades_m1', 'combined_behav_m1',
             load_data.load_m1_labelled_fixations_and_saccades,
             lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
         )
@@ -183,8 +184,8 @@ def main():
         'num_cpus': 1,
         'parallelize_local_reclustering_over_n_fixations': False,
         'do_local_reclustering_in_parallel': False,
-        'submit_separate_jobs_for_sessions': False,
-        'use_toy_data': True,
+        'submit_separate_jobs_for_sessions': True,
+        'use_toy_data': False,
         'remake_toy_data': False,
         'is_cluster': True,
         'use_parallel': True,
