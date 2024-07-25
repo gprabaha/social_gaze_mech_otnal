@@ -156,10 +156,29 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
 
 
 def sort_behavioral_event_dataframes_in_session(df):
+    """
+    Sorts the behavioral event DataFrame by 'start_index' and 'end_index'.
+    Input:
+    - df (pd.DataFrame): DataFrame containing behavioral event data.
+    Output:
+    - pd.DataFrame: Sorted DataFrame.
+    Usage:
+    sorted_df = sort_behavioral_event_dataframes_in_session(df)
+    """
     return df.sort_values(by=['start_index', 'end_index'])
 
 
 def check_clashes(session_df):
+    """
+    Checks for time window clashes in the session DataFrame.
+    Input:
+    - session_df (pd.DataFrame): DataFrame containing sorted session data.
+    Output:
+    - list: List of clashes with tuples containing session name, previous
+        row index, current row index, previous end index, and current start index.
+    Usage:
+    clashes = check_clashes(session_df)
+    """
     clashes = []
     for i in range(1, len(session_df)):
         prev_end_index = session_df.iloc[i-1]['end_index']
@@ -170,10 +189,23 @@ def check_clashes(session_df):
 
 
 def combine_behaviors_in_temporal_order(params, *dataframes):
+    """
+    Combines fixation and saccade DataFrames into a single DataFrame in temporal order.
+    Input:
+    - params (dict): Dictionary containing parameters.
+    - dataframes (pd.DataFrame): Two DataFrames, one for fixations and one for saccades.
+    Output:
+    - pd.DataFrame: Combined and sorted DataFrame with an added 'event_type' column.
+    Usage:
+    combined_df = combine_behaviors_in_temporal_order(params, fixation_df, saccade_df)
+    """
     logger = logging.getLogger(__name__)
     use_parallel = params.get('use_parallel', False)
     num_cpus = params.get('num_cpus', 1)
-    # Combine all provided DataFrames
+    if len(dataframes) != 2:
+        raise ValueError("Exactly two DataFrames must be provided, one for fixations and one for saccades.")
+    for df, event_type in zip(dataframes, ['fixation', 'saccade']):
+        df['event_type'] = event_type
     combined_df = pd.concat(dataframes, ignore_index=True)
     unique_sessions = combined_df['session_name'].unique()
     logger.info("Starting sorting of sessions.")
@@ -187,7 +219,6 @@ def combine_behaviors_in_temporal_order(params, *dataframes):
     else:
         sorted_dfs = [sort_behavioral_event_dataframes_in_session(combined_df[combined_df['session_name'] == session])
                       for session in unique_sessions]
-    # Concatenate the sorted DataFrames
     final_sorted_df = pd.concat(sorted_dfs, ignore_index=True)
     logger.info("Finished sorting sessions. Checking for time window clashes.")
     if use_parallel:
@@ -200,7 +231,6 @@ def combine_behaviors_in_temporal_order(params, *dataframes):
     else:
         results = [check_clashes(final_sorted_df[final_sorted_df['session_name'] == session])
                    for session in unique_sessions]
-    # Collect all clashes
     clashes = [clash for result in results for clash in result]
     if clashes:
         logger.info("Time window clashes found:")
@@ -208,7 +238,6 @@ def combine_behaviors_in_temporal_order(params, *dataframes):
             logger.info(f"Session: {clash[0]}, Row {clash[1]} ends at index {clash[3]}, but Row {clash[2]} starts at index {clash[4]}")
     else:
         logger.info("No time window clashes found.")
-    # Print the first 50 events in the `mon_down` condition
     mon_down_events = final_sorted_df[final_sorted_df['block'] == 'mon_down'].head(50)
     logger.info(f"First 50 events in the 'mon_down' condition:\n{mon_down_events}")
     save_combined_df_to_csv(params, final_sorted_df, 'combined_gaze_behav_m1.csv')
