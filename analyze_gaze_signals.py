@@ -19,6 +19,7 @@ import util
 import load_data
 import response_comp
 import plotter
+import fix_and_saccades
 
 import pdb
 
@@ -139,7 +140,7 @@ class DataManager:
         self.labelled_fixations_m1, self.labelled_saccades_m1, self.combined_behav_m1 = self.get_or_load_variable(
             'labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1',
             load_data.load_m1_labelled_fixations_saccades_and_combined,
-            lambda p: curate_data.extract_all_fixations_and_saccades_from_labelled_gaze_positions(input_data, p)
+            lambda p: fix_and_saccades.extract_all_fixations_and_saccades_from_labelled_gaze_positions(input_data, p)
         )
         self.logger.info(f"M1 fixations and saccades acquired")
 
