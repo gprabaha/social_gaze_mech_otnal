@@ -137,14 +137,12 @@ class DataManager:
             input_data = self.labelled_gaze_positions_m1
         
         self.labelled_fixations_m1, self.labelled_saccades_m1, self.combined_behav_m1 = self.get_or_load_variable(
-            'labelled_fixations_m1, labelled_saccades_m1', 'combined_behav_m1',
+            'labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1',
             load_data.load_m1_labelled_fixations_saccades_and_combined,
             lambda p: curate_data.extract_all_fixations_and_saccades_from_labelled_gaze_positions(input_data, p)
         )
-
-        self.combined_behav_df = curate_data.combine_behaviors_in_temporal_order(self.params, self.labelled_fixations_m1, self.labelled_saccades_m1)
-
         self.logger.info(f"M1 fixations and saccades acquired")
+
         if self.params['make_plots']:
             self.plot_all_behavior_in_all_sessions()
             self.logger.info(f"Plots generated successfully")
@@ -184,8 +182,8 @@ def main():
         'num_cpus': 1,
         'parallelize_local_reclustering_over_n_fixations': False,
         'do_local_reclustering_in_parallel': False,
-        'submit_separate_jobs_for_sessions': True,
-        'use_toy_data': False,
+        'submit_separate_jobs_for_sessions': False,
+        'use_toy_data': True,
         'remake_toy_data': False,
         'is_cluster': True,
         'use_parallel': True,
