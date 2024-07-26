@@ -7,6 +7,7 @@ Created on Wed May 22 11:35:03 2024
 """
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import os
@@ -40,26 +41,48 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     session_label = next(item for item in gaze_labels if item['session_name'] == session)
     plotting_frame = session_label['plotting_frame']
     roi_bb_corners = session_label['roi_bb_corners']
-    runs = session_events[session_events['block'] == 'mon_down']
-    inter_runs = session_events[session_events['block'] == 'mon_up']
-    fig, axes = plt.subplots(nrows=max(len(runs), len(inter_runs)), ncols=2, figsize=(15, 10))
-    for i, (run, inter_run) in enumerate(zip_longest(runs.iterrows(), inter_runs.iterrows(), fillvalue=None)):
-        ax_run = axes[i, 0]
-        ax_inter_run = axes[i, 1] if inter_run is not None else None
+    # Identifying runs and inter-runs
+    runs, inter_runs = [], []
+    current_run, current_inter_run = [], []
+    for index, row in session_events.iterrows():
+        if row['block'] == 'mon_down':
+            if current_run:
+                runs.append(current_run)
+                current_run = []
+            if current_inter_run:
+                inter_runs.append(current_inter_run)
+                current_inter_run = []
+            current_run.append(row)
+        elif row['block'] == 'mon_up':
+            if current_inter_run:
+                inter_runs.append(current_inter_run)
+                current_inter_run = []
+            current_inter_run.append(row)
+    if current_run:
+        runs.append(current_run)
+    if current_inter_run:
+        inter_runs.append(current_inter_run)
+    total_plots = len(runs) + len(inter_runs)
+    fig, axes = plt.subplots(nrows=total_plots, ncols=1, figsize=(15, 5 * total_plots))
+    for i, (run, inter_run) in enumerate(zip_longest(runs, inter_runs, fillvalue=None)):
         if run is not None:
-            plot_events(run[1], ax_run, plotting_frame, roi_bb_corners)
-        if ax_inter_run is not None and inter_run is not None:
-            plot_events(inter_run[1], ax_inter_run, plotting_frame, roi_bb_corners)
+            ax_run = axes[i]
+            plot_events(pd.DataFrame(run), ax_run, plotting_frame, roi_bb_corners)
+        if inter_run is not None:
+            ax_inter_run = axes[i + 1] if i + 1 < len(axes) else None
+            if ax_inter_run is not None:
+                plot_events(pd.DataFrame(inter_run), ax_inter_run, plotting_frame, roi_bb_corners)
+                i += 1
     plt.tight_layout()
     plt.savefig(os.path.join(plots_dir, f'{session}_behavior_plot.png'))
     plt.close()
 
 
-def plot_events(event, ax, plotting_frame, roi_bb_corners):
+def plot_events(events_df, ax, plotting_frame, roi_bb_corners):
     """
     Plots the events on the given axis within the plotting frame.
     Args:
-    - event (pd.Series): Series containing event data.
+    - events_df (pd.DataFrame): DataFrame containing event data.
     - ax (matplotlib.axes.Axes): The axis to plot on.
     - plotting_frame (dict): Dictionary defining the bounds of the plotting frame.
     - roi_bb_corners (dict): Dictionary containing bounding boxes for all ROIs.
@@ -67,7 +90,7 @@ def plot_events(event, ax, plotting_frame, roi_bb_corners):
     ax.set_xlim([plotting_frame['bottomLeft'][0], plotting_frame['topRight'][0]])
     ax.set_ylim([plotting_frame['bottomLeft'][1], plotting_frame['topRight'][1]])
     ax.set_facecolor('black')
-    for idx, row in event.iterrows():
+    for idx, row in events_df.iterrows():
         points = util.convert_to_array(row['points_in_event'])
         mean_position = util.convert_to_array(row['mean_position'])
         event_type = row['event_type']
