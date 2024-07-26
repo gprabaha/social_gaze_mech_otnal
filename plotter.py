@@ -18,14 +18,20 @@ import logging
 from matplotlib_venn import venn3
 from itertools import zip_longest
 from tqdm import tqdm
+import concurrent.futures
 
 import util
 import load_data
 
 import pdb
 
-logger = logging.getLogger(__name__)
-logging.getLogger('matplotlib').setLevel(logging.WARNING)
+
+def process_row(index, row):
+    if row['block'] == 'mon_down':
+        return 'run', row
+    elif row['block'] == 'mon_up':
+        return 'inter_run', row
+    return None, None
 
 
 def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
@@ -37,22 +43,29 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     - gaze_labels (list): List of dictionaries containing gaze position labels and plotting frames.
     - plots_dir (str): Directory to save the plots.
     """
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
     logger.info(f'Starting to process session: {session}')
     session_events = events_df[events_df['session_name'] == session]
     session_label = next(item for item in gaze_labels if item['session_name'] == session)
     plotting_frame = session_label['plotting_frame']
     roi_bb_corners = session_label['roi_bb_corners']
-    # Identifying runs and inter-runs
     runs, inter_runs = [], []
     current_inter_run = []
-    for index, row in session_events.iterrows():
-        if row['block'] == 'mon_down':
-            if current_inter_run:
-                inter_runs.append(current_inter_run)
-                current_inter_run = []
-            runs.append(row)
-        elif row['block'] == 'mon_up':
-            current_inter_run.append(row)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_to_row = {executor.submit(process_row, index, row): index for index, row in session_events.iterrows()}
+        for future in tqdm(concurrent.futures.as_completed(future_to_row), total=len(future_to_row), desc="Processing rows"):
+            try:
+                result_type, result_row = future.result()
+                if result_type == 'run':
+                    if current_inter_run:
+                        inter_runs.append(current_inter_run)
+                        current_inter_run = []
+                    runs.append(result_row)
+                elif result_type == 'inter_run':
+                    current_inter_run.append(result_row)
+            except Exception as exc:
+                logger.error(f'Row processing generated an exception: {exc}')
     if current_inter_run:
         inter_runs.append(current_inter_run)
     total_plots = len(runs) + len(inter_runs)
