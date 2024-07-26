@@ -51,28 +51,6 @@ class DataManager:
         self.labelled_fixation_rasters = None
         self.combined_behav_m1 = None
 
-    def split_gaze_data(self):
-        self.gaze_positions_m1 = [item[0] for item in self.labelled_gaze_positions_m1]
-        self.gaze_position_labels_m1 = [item[1] for item in self.labelled_gaze_positions_m1]
-
-
-    def find_n_cores(self):
-        try:
-            slurm_cpus = os.getenv('SLURM_CPUS_ON_NODE')
-            num_cpus = int(slurm_cpus)
-            print(f"SLURM detected {num_cpus} CPUs")
-        except Exception as e:
-            print(f"Failed to detect cores with SLURM_CPUS_ON_NODE: {e}")
-            num_cpus = None
-        # If SLURM detection fails, fallback to multiprocessing.cpu_count()
-        if num_cpus is None or num_cpus <= 0:
-            num_cpus = multiprocessing.cpu_count()
-            print(f"multiprocessing detected {num_cpus} CPUs")
-        # Set the maximum number of threads for NumExpr
-        os.environ['NUMEXPR_MAX_THREADS'] = str(num_cpus)
-        self.num_cpus = num_cpus
-        print(f"NumExpr set to use {ne.detect_number_of_threads()} threads")
-
 
     def get_or_load_variable(self, variable_name, load_function, compute_function):
         variable_names = [name.strip() for name in variable_name.split(',')]
@@ -98,17 +76,37 @@ class DataManager:
             return tuple(getattr(self, name) for name in variable_names)
 
 
-    def add_frame_of_attention_to_gaze_labels(self):
+    def split_gaze_data(self):
+        self.gaze_positions_m1 = [item[0] for item in self.labelled_gaze_positions_m1]
+        self.gaze_position_labels_m1 = [item[1] for item in self.labelled_gaze_positions_m1]
+
+
+    def find_n_cores(self):
+        try:
+            slurm_cpus = os.getenv('SLURM_CPUS_ON_NODE')
+            num_cpus = int(slurm_cpus)
+            print(f"SLURM detected {num_cpus} CPUs")
+        except Exception as e:
+            print(f"Failed to detect cores with SLURM_CPUS_ON_NODE: {e}")
+            num_cpus = None
+        # If SLURM detection fails, fallback to multiprocessing.cpu_count()
+        if num_cpus is None or num_cpus <= 0:
+            num_cpus = multiprocessing.cpu_count()
+            print(f"multiprocessing detected {num_cpus} CPUs")
+        # Set the maximum number of threads for NumExpr
+        os.environ['NUMEXPR_MAX_THREADS'] = str(num_cpus)
+        self.num_cpus = num_cpus
+        print(f"NumExpr set to use {ne.detect_number_of_threads()} threads")
+
+
+    def add_frame_of_attention_and_plotting_frame_to_gaze_labels(self):
         for session_data in self.gaze_position_labels_m1:
             bboxes = session_data['roi_bb_corners']
             frame = util.define_frame_of_attention(bboxes)
             session_data['frame_of_attention'] = frame
-
-    def human_readable_size(self, size):
-        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
-            if size < 1024:
-                return f"{size:.2f} {unit}"
-            size /= 1024
+            # Calculate the plotting frame
+            plotting_frame = util.remap_source_coords(frame, frame, 1.3, 'stretch_from_center_of_mass')
+            session_data['plotting_frame'] = plotting_frame
 
 
     def plot_all_behavior_in_all_sessions(self):
@@ -141,8 +139,8 @@ class DataManager:
         self.split_gaze_data()
         self.logger.info(f"Gaze data split into: self.gaze_positions and self.gaze_position_labels!")
 
-        self.add_frame_of_attention_to_gaze_labels()
-        self.logger.info(f"frame of attention and plotting added to gaze data")
+        self.add_frame_of_attention_and_plotting_frame_to_gaze_labels()
+        self.logger.info(f"Frame of attention and plotting added to gaze data")
 
         if self.params['use_toy_data']:
             self.logger.info(f"!! USING TOY DATA !!")
