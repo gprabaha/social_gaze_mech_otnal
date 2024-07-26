@@ -37,45 +37,42 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     - gaze_labels (list): List of dictionaries containing gaze position labels and plotting frames.
     - plots_dir (str): Directory to save the plots.
     """
+    logger.info(f'Starting to process session: {session}')
     session_events = events_df[events_df['session_name'] == session]
     session_label = next(item for item in gaze_labels if item['session_name'] == session)
     plotting_frame = session_label['plotting_frame']
     roi_bb_corners = session_label['roi_bb_corners']
     # Identifying runs and inter-runs
     runs, inter_runs = [], []
-    current_run, current_inter_run = [], []
+    current_inter_run = []
     for index, row in session_events.iterrows():
         if row['block'] == 'mon_down':
-            if current_run:
-                runs.append(current_run)
-                current_run = []
             if current_inter_run:
                 inter_runs.append(current_inter_run)
                 current_inter_run = []
-            current_run.append(row)
+            runs.append(row)
         elif row['block'] == 'mon_up':
-            if current_inter_run:
-                inter_runs.append(current_inter_run)
-                current_inter_run = []
             current_inter_run.append(row)
-    if current_run:
-        runs.append(current_run)
     if current_inter_run:
         inter_runs.append(current_inter_run)
     total_plots = len(runs) + len(inter_runs)
-    fig, axes = plt.subplots(nrows=total_plots, ncols=1, figsize=(15, 5 * total_plots))
-    for i, (run, inter_run) in enumerate(zip_longest(runs, inter_runs, fillvalue=None)):
-        if run is not None:
-            ax_run = axes[i]
-            plot_events(pd.DataFrame(run), ax_run, plotting_frame, roi_bb_corners)
-        if inter_run is not None:
-            ax_inter_run = axes[i + 1] if i + 1 < len(axes) else None
-            if ax_inter_run is not None:
-                plot_events(pd.DataFrame(inter_run), ax_inter_run, plotting_frame, roi_bb_corners)
-                i += 1
+    logger.info(f'Total plots to generate: {total_plots}')
+    fig, axes = plt.subplots(nrows=total_plots, ncols=1, figsize=(15, 5 * total_plots), squeeze=False)
+    for i in range(total_plots):
+        logger.info(f'Generating plot {i+1} of {total_plots}')
+        ax_run = axes[i][0] if i < len(runs) else None
+        ax_inter_run = axes[i][1] if i < len(inter_runs) else None
+        if ax_run is not None:
+            logger.info(f'Plotting run {i+1}')
+            plot_events(pd.DataFrame([runs[i]]), ax_run, plotting_frame, roi_bb_corners)
+        if ax_inter_run is not None:
+            logger.info(f'Plotting inter-run {i+1 - len(runs)}')
+            plot_events(pd.DataFrame(inter_runs[i]), ax_inter_run, plotting_frame, roi_bb_corners)
     plt.tight_layout()
-    plt.savefig(os.path.join(plots_dir, f'{session}_behavior_plot.png'))
+    plot_path = os.path.join(plots_dir, f'{session}_behavior_plot.png')
+    plt.savefig(plot_path)
     plt.close()
+    logger.info(f'Plot saved to {plot_path}')
 
 
 def plot_events(events_df, ax, plotting_frame, roi_bb_corners):
@@ -90,9 +87,11 @@ def plot_events(events_df, ax, plotting_frame, roi_bb_corners):
     ax.set_xlim([plotting_frame['bottomLeft'][0], plotting_frame['topRight'][0]])
     ax.set_ylim([plotting_frame['bottomLeft'][1], plotting_frame['topRight'][1]])
     ax.set_facecolor('black')
+    events_df['points_in_event'] = events_df['points_in_event'].apply(util.convert_to_array)
+    events_df['mean_position'] = events_df['mean_position'].apply(util.convert_to_array)
     for idx, row in events_df.iterrows():
-        points = util.convert_to_array(row['points_in_event'])
-        mean_position = util.convert_to_array(row['mean_position'])
+        points = row['points_in_event']
+        mean_position = row['mean_position']
         event_type = row['event_type']
         if event_type == 'fixation':
             times = np.linspace(0, 1, len(points))
@@ -108,7 +107,6 @@ def plot_events(events_df, ax, plotting_frame, roi_bb_corners):
         top_right = bbox['topRight']
         rect = plt.Rectangle(bottom_left, top_right[0] - bottom_left[0], top_right[1] - bottom_left[1], linewidth=1, edgecolor='cyan', facecolor='none')
         ax.add_patch(rect)
-
 
 
 def plot_session_gaze_trajectory(ax, gaze_positions, fixations, saccades, info, title):
