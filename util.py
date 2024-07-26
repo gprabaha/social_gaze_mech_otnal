@@ -432,8 +432,14 @@ def distance(point1, point2):
     return sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
 
-
 def define_frame_of_attention(bboxes):
+    """
+    Define the frame of attention based on the bounding boxes of left and right objects.
+    Parameters:
+    - bboxes (dict): Dictionary containing bounding boxes with 'bottomLeft' and 'topRight' corners for 'left_obj_bbox' and 'right_obj_bbox'.
+    Returns:
+    - dict: Dictionary with 'bottomLeft' and 'topRight' corners defining the frame of attention.
+    """
     left_bbox_center = np.mean([bboxes['left_obj_bbox']['bottomLeft'], bboxes['left_obj_bbox']['topRight']], axis=0)
     right_bbox_center = np.mean([bboxes['right_obj_bbox']['bottomLeft'], bboxes['right_obj_bbox']['topRight']], axis=0)
     center_point = (left_bbox_center + right_bbox_center) / 2
@@ -445,13 +451,22 @@ def define_frame_of_attention(bboxes):
                            bboxes['right_obj_bbox']['topRight'][1] - bboxes['right_obj_bbox']['bottomLeft'][1]])
     top_boundary = center_point[1] + 1.5 * mean_height
     bottom_boundary = center_point[1] - 3.5 * mean_height
-    return left_boundary, right_boundary, top_boundary, bottom_boundary
+    return {'bottomLeft': (left_boundary, bottom_boundary), 'topRight': (right_boundary, top_boundary)}
 
 
 def is_within_frame(position, frame):
+    """
+    Check if a coordinate is within the frame of attention.
+    Parameters:
+    - position (array-like): Single coordinate (x, y).
+    - frame (dict): Dictionary with 'bottomLeft' and 'topRight' corners defining the frame of attention.
+    Returns:
+    - bool: Whether the coordinate is within the frame.
+    """
     x, y = position
-    left_boundary, right_boundary, top_boundary, bottom_boundary = frame
-    return left_boundary <= x <= right_boundary and bottom_boundary <= y <= top_boundary
+    bottom_left = frame['bottomLeft']
+    top_right = frame['topRight']
+    return bottom_left[0] <= x <= top_right[0] and bottom_left[1] <= y <= top_right[1]
 
 
 def convert_to_array(position_str):
