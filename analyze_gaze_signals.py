@@ -110,23 +110,29 @@ class DataManager:
             session_data['plotting_frame'] = plotting_frame
 
 
-    def plot_all_behavior_in_all_sessions(self):
+    def plot_all_behavior_in_all_sessions(self, use_parallel=False):
         """
         Plots all behavior within the frame of attention for all sessions.
-        Utilizes parallel processing to generate plots for each session.
+        Utilizes parallel processing to generate plots for each session if use_parallel is True.
+        Args:
+        - use_parallel (bool): Flag to determine if parallel processing should be used.
         """
         root_data_dir = self.params['root_data_dir']
         plots_dir = util.add_date_dir_to_path(os.path.join(root_data_dir, 'plots', 'fix_and_saccades_all_sessions'))
         os.makedirs(plots_dir, exist_ok=True)
         sessions = list(self.events_within_attention_frame_m1['session_name'].unique())
-        with Pool() as pool:
-            for _ in tqdm(pool.starmap(
-                    plotter.plot_behavior_for_session,
-                    [(session, self.events_within_attention_frame_m1, self.gaze_position_labels_m1, plots_dir) for session in sessions]
-                ), total=len(sessions)):
-                pass
-            pool.close()
-            pool.join()
+        if use_parallel:
+            with Pool() as pool:
+                for _ in tqdm(pool.starmap(
+                        plotter.plot_behavior_for_session,
+                        [(session, self.events_within_attention_frame_m1, self.gaze_position_labels_m1, plots_dir) for session in sessions]
+                    ), total=len(sessions)):
+                    pass
+                pool.close()
+                pool.join()
+        else:
+            for session in tqdm(sessions, total=len(sessions)):
+                plotter.plot_behavior_for_session(session, self.events_within_attention_frame_m1, self.gaze_position_labels_m1, plots_dir)
 
 
     
