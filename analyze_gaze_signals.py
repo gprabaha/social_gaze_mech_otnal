@@ -98,6 +98,12 @@ class DataManager:
             return tuple(getattr(self, name) for name in variable_names)
 
 
+    def add_frame_of_attention_to_gaze_labels(self):
+        for session_data in self.gaze_position_labels_m1:
+            bboxes = session_data['roi_bb_corners']
+            frame = util.define_frame_of_attention(bboxes)
+            session_data['frame_of_attention'] = frame
+
     def human_readable_size(self, size):
         for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
             if size < 1024:
@@ -134,6 +140,9 @@ class DataManager:
         
         self.split_gaze_data()
         self.logger.info(f"Gaze data split into: self.gaze_positions and self.gaze_position_labels!")
+
+        self.add_frame_of_attention_to_gaze_labels()
+        self.logger.info(f"frame of attention and plotting added to gaze data")
 
         if self.params['use_toy_data']:
             self.logger.info(f"!! USING TOY DATA !!")

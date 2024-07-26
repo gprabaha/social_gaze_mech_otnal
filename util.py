@@ -108,96 +108,119 @@ def add_date_dir_to_path(path):
     return os.path.join(path, date_str)
 
 
-def remap_source_coords(coord, params, remapping_type):
+def remap_source_coords(coord, params, remapping_type, scale=None):
+    """
+    Remap source coordinates based on the specified remapping type.
+    Parameters:
+    coord (various): The coordinate(s) to be remapped. Can be a tuple, list, numpy array, or dictionary.
+    params (dict): Dictionary of parameters containing flags and additional settings for remapping.
+    remapping_type (str): Type of remapping to apply. Options are 'inverted_to_standard_y_axis', 'to_eyelink_space', and 'stretch_from_center_of_mass'.
+    scale (float, optional): Scaling factor for 'stretch_from_center_of_mass' remapping type. Defaults to None.
+    Returns:
+    various: Remapped coordinates in the same format as the input.
+    """
 
     def remap_inverted_to_standard_y_axis(coord):
+        """
+        Remap coordinates from an inverted y-axis to a standard y-axis.
+        Parameters:
+        coord (various): The coordinate(s) to be remapped.
+        Returns:
+        various: Remapped coordinates.
+        """
         def remap_single_coord_from_inverted_to_standard_y_axis(coord):
+            # Convert coordinate to numpy array and invert the y-axis
             coord = np.array(coord, dtype=np.int16)
             return (coord[0], -coord[1])
-        if not params.get(
-                'remap_source_coord_from_inverted_to_standard_y_axis', False):
+        if not params.get('remap_source_coord_from_inverted_to_standard_y_axis', False):
+            # Return original coordinate if remapping is not required
             return coord
+        # Handle different input types (tuple, list, numpy array, dictionary)
         if isinstance(coord, (list, tuple)):
-            if len(coord) == 2 and all(isinstance(i, (int, float))
-                                       for i in coord):
-                remapped_coord = \
-                    remap_single_coord_from_inverted_to_standard_y_axis(coord)
+            if len(coord) == 2 and all(isinstance(i, (int, float)) for i in coord):
+                remapped_coord = remap_single_coord_from_inverted_to_standard_y_axis(coord)
                 return type(coord)(remapped_coord)
-            elif all(isinstance(i, (list, tuple, np.ndarray)) \
-                     and len(i) == 2 for i in coord):
-                return [remap_single_coord_from_inverted_to_standard_y_axis(c)
-                        for c in coord]
+            elif all(isinstance(i, (list, tuple, np.ndarray)) and len(i) == 2 for i in coord):
+                return [remap_single_coord_from_inverted_to_standard_y_axis(c) for c in coord]
         elif isinstance(coord, np.ndarray):
             if coord.ndim == 1 and coord.shape[0] == 2:
-                return np.array(
-                    remap_single_coord_from_inverted_to_standard_y_axis(coord))
+                return np.array(remap_single_coord_from_inverted_to_standard_y_axis(coord))
             elif coord.ndim == 2 and coord.shape[1] == 2:
-                return np.apply_along_axis(
-                    remap_single_coord_from_inverted_to_standard_y_axis,
-                    1, coord)
+                return np.apply_along_axis(remap_single_coord_from_inverted_to_standard_y_axis, 1, coord)
         elif isinstance(coord, dict):
-            return {key: remap_inverted_to_standard_y_axis(value)
-                    for key, value in coord.items()}
+            return {key: remap_inverted_to_standard_y_axis(value) for key, value in coord.items()}
         return coord
 
     def map_coord_to_eyelink_space(coord):
+        """
+        Remap coordinates to EyeLink space.
+        Parameters:
+        coord (various): The coordinate(s) to be remapped.
+        Returns:
+        various: Remapped coordinates.
+        """
         def span(array):
             return max(array) - min(array)
         def remap_single_coord_to_eyelink_space(coord):
+            # Fetch monitor information and calculate pixel ranges
             monitor_info = defaults.fetch_monitor_info()
             hor_rez = monitor_info['horizontal_resolution']
             vert_rez = monitor_info['vertical_resolution']
             x_px_range = [-hor_rez * 0.2, hor_rez + hor_rez * 0.2]
             y_px_range = [-vert_rez * 0.2, vert_rez + vert_rez * 0.2]
+            # Convert coordinate to numpy array and remap to EyeLink space
             coord = np.array(coord, dtype=np.int16)
             return [
                 span(x_px_range) * (coord[0] / span(x_px_range)) + min(x_px_range),
-                span(y_px_range) * (coord[1] / span(y_px_range)) + min(y_px_range)]
+                span(y_px_range) * (coord[1] / span(y_px_range)) + min(y_px_range)
+            ]
         if not params.get('map_roi_coord_to_eyelink_space', False):
+            # Return original coordinate if remapping is not required
             return coord
-        if (isinstance(coord, (tuple, list)) and len(coord) == 2) \
-            or (isinstance(coord, np.ndarray) and coord.ndim == 1):
+        # Handle different input types (tuple, list, numpy array, dictionary)
+        if (isinstance(coord, (tuple, list)) and len(coord) == 2) or (isinstance(coord, np.ndarray) and coord.ndim == 1):
             remapped_coord = remap_single_coord_to_eyelink_space(coord)
-            return type(coord)(remapped_coord) \
-                if isinstance(coord, (tuple, list)) \
-                    else np.array(remapped_coord)
-        elif isinstance(coord, np.ndarray) \
-            and coord.ndim == 2 \
-                and coord.shape[1] == 2:
-            return np.apply_along_axis(
-                remap_single_coord_to_eyelink_space, 1, coord)
+            return type(coord)(remapped_coord) if isinstance(coord, (tuple, list)) else np.array(remapped_coord)
+        elif isinstance(coord, np.ndarray) and coord.ndim == 2 and coord.shape[1] == 2:
+            return np.apply_along_axis(remap_single_coord_to_eyelink_space, 1, coord)
         elif isinstance(coord, dict):
-            return {key: map_coord_to_eyelink_space(value)
-                    for key, value in coord.items()}
+            return {key: map_coord_to_eyelink_space(value) for key, value in coord.items()}
         else:
-            raise ValueError(
-                "Input must be a 2-element tuple/list or a 2D array with 2 columns")
+            raise ValueError("Input must be a 2-element tuple/list or a 2D array with 2 columns")
 
     def stretch_bounding_box_corners(bb_corner_coord_dict, scale=1.3):
+        """
+        Stretch bounding box corners from the center of mass.
+        Parameters:
+        bb_corner_coord_dict (dict): Dictionary of bounding box corner coordinates.
+        scale (float): Scaling factor for stretching. Default is 1.3.
+        Returns:
+        dict: Stretched bounding box coordinates.
+        """
         if isinstance(bb_corner_coord_dict, dict):
-            mean_x = sum(point[0] for point in
-                         bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
-            mean_y = sum(point[1] for point in 
-                        bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
-            shifted_points = {key: (point[0] - mean_x, point[1] - mean_y)
-                              for key, point in bb_corner_coord_dict.items()}
-            scaled_points = {key: (point[0] * scale, point[1] * scale)
-                             for key, point in shifted_points.items()}
-            stretched_points = {key: (point[0] + mean_x, point[1] + mean_y)
-                             for key, point in scaled_points.items()}
+            # Calculate the center of mass
+            mean_x = sum(point[0] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
+            mean_y = sum(point[1] for point in bb_corner_coord_dict.values()) / len(bb_corner_coord_dict)
+            # Shift points to the origin, scale them, and shift back to the center of mass
+            shifted_points = {key: (point[0] - mean_x, point[1] - mean_y) for key, point in bb_corner_coord_dict.items()}
+            scaled_points = {key: (point[0] * scale, point[1] * scale) for key, point in shifted_points.items()}
+            stretched_points = {key: (point[0] + mean_x, point[1] + mean_y) for key, point in scaled_points.items()}
             return stretched_points
         else:
-            raise ValueError(
-                "Input for 'stretch_from_center_of_mass' must be a dictionary")
+            raise ValueError("Input for 'stretch_from_center_of_mass' must be a dictionary")
 
+    # Determine the remapping type and apply the appropriate remapping function
     if remapping_type == 'inverted_to_standard_y_axis':
         return remap_inverted_to_standard_y_axis(coord)
     elif remapping_type == 'to_eyelink_space':
         return map_coord_to_eyelink_space(coord)
     elif remapping_type == 'stretch_from_center_of_mass':
-        scale = params['bbox_expansion_factor']
-        stretch_bounding_box_corners(coord, scale=scale)
+        # Use the provided scale or default to the value in params
+        if scale is None:
+            scale = params.get('bbox_expansion_factor', 1.3)
+        return stretch_bounding_box_corners(coord, scale=scale)
     return coord
+
 
 
 def get_bl_and_tr_roi_coords_m1(m1_landmarks, params):
