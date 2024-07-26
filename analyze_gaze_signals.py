@@ -42,12 +42,18 @@ class DataManager:
 
     def initialize_variables(self):
         self.labelled_gaze_positions_m1 = None
+        self.gaze_positions_m1 = None
+        self.gaze_position_labels_m1 = None
         self.toy_data = None
         self.labelled_fixations_m1 = None
         self.labelled_saccades_m1 = None
         self.labelled_spiketimes = None
         self.labelled_fixation_rasters = None
         self.combined_behav_m1 = None
+
+    def split_gaze_data(self):
+        self.gaze_positions_m1 = [item[0] for item in self.labelled_gaze_positions_m1]
+        self.gaze_position_labels_m1 = [item[1] for item in self.labelled_gaze_positions_m1]
 
 
     def find_n_cores(self):
@@ -125,6 +131,9 @@ class DataManager:
             lambda p: curate_data.extract_labelled_gaze_positions_m1(p)
         )
         self.logger.info(f"M1 remapped gaze pos data acquired!")
+        
+        self.split_gaze_data()
+        self.logger.info(f"Gaze data split into: self.gaze_positions and self.gaze_position_labels!")
 
         if self.params['use_toy_data']:
             self.logger.info(f"!! USING TOY DATA !!")
