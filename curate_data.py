@@ -267,28 +267,52 @@ def save_combined_df_to_csv(params, df, filename):
     logger.info(f"DataFrame saved to: {output_path}")
 
 
-
 def isolate_events_within_attention_frame(dataframe, gaze_data):
+    """
+    Isolates events within the frame of attention for all sessions.
+    Utilizes parallel processing to handle each session separately.
+    Args:
+    - dataframe (pd.DataFrame): DataFrame containing all events.
+    - gaze_data (list): List of gaze data containing session information and gaze positions.
+    Returns:
+    - pd.DataFrame: DataFrame containing events within the frame of attention.
+    """
+    with Pool() as pool:
+        results = list(tqdm(pool.starmap(isolate_events_for_session, [(dataframe, session_data) for session_data in gaze_data]), total=len(gaze_data)))
+        pool.close()
+        pool.join()
+    events_within_frame = pd.concat(results, ignore_index=True)
+    return events_within_frame
+
+
+def isolate_events_for_session(dataframe, session_data):
+    """
+    Isolates events within the frame of attention for a single session.
+    Args:
+    - dataframe (pd.DataFrame): DataFrame containing all events.
+    - session_data (tuple): Tuple containing gaze data for a single session.
+    Returns:
+    - pd.DataFrame: DataFrame containing events within the frame of attention for the session.
+    """
     events_within_frame = []
-    for session_data in gaze_data:
-        session_name = session_data[1]['session_name']
-        bboxes = session_data[1]['roi_bb_corners']
-        frame = util.define_frame_of_attention(bboxes)
-        session_events = dataframe[dataframe['session_name'] == session_name]
-        gaze_positions = session_data[0]  # x, y positions array
-        for index, row in session_events.iterrows():
-            start_index = row['start_index']
-            end_index = row['end_index']
-            mean_position_str = row['mean_position']
-            # Convert mean_position to numpy array
-            mean_position = util.convert_to_array(mean_position_str)
-            # Fetch the positions from gaze data
-            start_position = gaze_positions[start_index]
-            end_position = gaze_positions[end_index]
-            if (util.is_within_frame(start_position, frame) or 
-                util.is_within_frame(end_position, frame) or 
-                util.is_within_frame(mean_position, frame)):
-                events_within_frame.append(row)
+    session_name = session_data[1]['session_name']
+    bboxes = session_data[1]['roi_bb_corners']
+    frame = util.define_frame_of_attention(bboxes)
+    session_events = dataframe[dataframe['session_name'] == session_name]
+    gaze_positions = session_data[0]  # x, y positions array
+    for index, row in session_events.iterrows():
+        start_index = row['start_index']
+        end_index = row['end_index']
+        mean_position_str = row['mean_position']
+        # Convert mean_position to numpy array
+        mean_position = util.convert_to_array(mean_position_str)
+        # Fetch the positions from gaze data
+        start_position = gaze_positions[start_index]
+        end_position = gaze_positions[end_index]
+        if (util.is_within_frame(start_position, frame) or 
+            util.is_within_frame(end_position, frame) or 
+            util.is_within_frame(mean_position, frame)):
+            events_within_frame.append(row)
     return pd.DataFrame(events_within_frame)
 
 

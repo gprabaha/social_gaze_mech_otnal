@@ -166,7 +166,7 @@ class DataManager:
         self.events_within_attention_frame_m1 = curate_data.isolate_events_within_attention_frame(self.combined_behav_m1, self.labelled_gaze_positions_m1)
         # Display the isolated events
         self.events_within_attention_frame_m1.head()
-
+        self.logger.info(f"Events within attention frame isolated")
         if self.params['make_plots']:
             self.plot_all_behavior_in_all_sessions()
             self.logger.info(f"Plots generated successfully")
@@ -220,7 +220,7 @@ def main():
         'remake_combined_behav_m1': False,
         'remake_labelled_spiketimes': False,
         'remake_labelled_fixation_rasters': True,
-        'make_plots': False,
+        'make_plots': True,
         'recalculate_unit_ROI_responses': True,
         'replot_face/eye_vs_obj_violins': True,
         'remap_source_coord_from_inverted_to_standard_y_axis': True,
