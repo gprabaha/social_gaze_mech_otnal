@@ -15,8 +15,7 @@ import seaborn as sns
 from datetime import datetime
 import logging
 from matplotlib_venn import venn3
-import random
-
+from itertools import zip_longest
 from tqdm import tqdm
 
 import util
@@ -28,28 +27,65 @@ logger = logging.getLogger(__name__)
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 
-def plot_behavior_for_session(session, fixations_df, saccades_df, gaze_positions_list, plots_dir):
-    session_fixations = fixations_df[fixations_df['session_name'] == session]
-    session_saccades = saccades_df[saccades_df['session_name'] == session]
-    gaze_data = [data for data in gaze_positions_list if data[1]['session_name'] == session][0]
-    gaze_positions = gaze_data[0]
-    info = gaze_data[1]
-    mon_down_blocks = session_fixations[session_fixations['block'] == 'mon_down']['run'].unique()
-    n_runs = len(mon_down_blocks)
-    fig, axes = plt.subplots(n_runs + 1, 1, figsize=(20, 10 * (n_runs + 1)))
-    # Plot for combined mon_up blocks
-    mon_up_fixations = session_fixations[session_fixations['block'] == 'mon_up']
-    mon_up_saccades = session_saccades[session_saccades['block'] == 'mon_up']
-    plot_session_gaze_trajectory(axes[0], gaze_positions, mon_up_fixations, mon_up_saccades, info, 'mon_up blocks')
-    # Plot for each mon_down run
-    for i, run in enumerate(mon_down_blocks):
-        run_fixations = session_fixations[(session_fixations['block'] == 'mon_down') & (session_fixations['run'] == run)]
-        run_saccades = session_saccades[(session_saccades['block'] == 'mon_down') & (session_saccades['run'] == run)]
-        plot_session_gaze_trajectory(axes[i + 1], gaze_positions, run_fixations, run_saccades, info, f'mon_down run {run}')
-    fig.suptitle(f'Session: {session}')
+def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
+    """
+    Generates plots for all events within the frame of attention for a given session.
+    Args:
+    - session (str): The session name.
+    - events_df (pd.DataFrame): DataFrame containing events within the frame of attention.
+    - gaze_labels (list): List of dictionaries containing gaze position labels and plotting frames.
+    - plots_dir (str): Directory to save the plots.
+    """
+    session_events = events_df[events_df['session_name'] == session]
+    session_label = next(item for item in gaze_labels if item['session_name'] == session)
+    plotting_frame = session_label['plotting_frame']
+    roi_bb_corners = session_label['roi_bb_corners']
+    runs = session_events[session_events['block'] == 'mon_down']
+    inter_runs = session_events[session_events['block'] == 'mon_up']
+    fig, axes = plt.subplots(nrows=max(len(runs), len(inter_runs)), ncols=2, figsize=(15, 10))
+    for i, (run, inter_run) in enumerate(zip_longest(runs.iterrows(), inter_runs.iterrows(), fillvalue=None)):
+        ax_run = axes[i, 0]
+        ax_inter_run = axes[i, 1] if inter_run is not None else None
+        if run is not None:
+            plot_events(run[1], ax_run, plotting_frame, roi_bb_corners)
+        if ax_inter_run is not None and inter_run is not None:
+            plot_events(inter_run[1], ax_inter_run, plotting_frame, roi_bb_corners)
     plt.tight_layout()
-    plt.savefig(os.path.join(plots_dir, f'{session}_behavior.png'))
-    plt.close(fig)
+    plt.savefig(os.path.join(plots_dir, f'{session}_behavior_plot.png'))
+    plt.close()
+
+
+def plot_events(event, ax, plotting_frame, roi_bb_corners):
+    """
+    Plots the events on the given axis within the plotting frame.
+    Args:
+    - event (pd.Series): Series containing event data.
+    - ax (matplotlib.axes.Axes): The axis to plot on.
+    - plotting_frame (dict): Dictionary defining the bounds of the plotting frame.
+    - roi_bb_corners (dict): Dictionary containing bounding boxes for all ROIs.
+    """
+    ax.set_xlim([plotting_frame['bottomLeft'][0], plotting_frame['topRight'][0]])
+    ax.set_ylim([plotting_frame['bottomLeft'][1], plotting_frame['topRight'][1]])
+    ax.set_facecolor('black')
+    for idx, row in event.iterrows():
+        points = util.convert_to_array(row['points_in_event'])
+        mean_position = util.convert_to_array(row['mean_position'])
+        event_type = row['event_type']
+        if event_type == 'fixation':
+            times = np.linspace(0, 1, len(points))
+            colors = plt.cm.copper(times)
+            ax.scatter(points[:, 0], points[:, 1], c=colors, alpha=0.5)
+            ax.plot(mean_position[0], mean_position[1], 'wo')
+        elif event_type == 'saccade':
+            ax.scatter(points[:, 0], points[:, 1], c='gray', alpha=0.5)
+            start, end = points[0], points[-1]
+            ax.annotate('', xy=end, xytext=start, arrowprops=dict(facecolor='green', alpha=0.5))
+    for key, bbox in roi_bb_corners.items():
+        bottom_left = bbox['bottomLeft']
+        top_right = bbox['topRight']
+        rect = plt.Rectangle(bottom_left, top_right[0] - bottom_left[0], top_right[1] - bottom_left[1], linewidth=1, edgecolor='cyan', facecolor='none')
+        ax.add_patch(rect)
+
 
 
 def plot_session_gaze_trajectory(ax, gaze_positions, fixations, saccades, info, title):

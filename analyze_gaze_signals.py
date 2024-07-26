@@ -47,9 +47,28 @@ class DataManager:
         self.toy_data = None
         self.labelled_fixations_m1 = None
         self.labelled_saccades_m1 = None
+        self.combined_behav_m1 = None
+        self.events_within_attention_frame_m1 = None
         self.labelled_spiketimes = None
         self.labelled_fixation_rasters = None
-        self.combined_behav_m1 = None
+
+
+    def find_n_cores(self):
+        try:
+            slurm_cpus = os.getenv('SLURM_CPUS_ON_NODE')
+            num_cpus = int(slurm_cpus)
+            print(f"SLURM detected {num_cpus} CPUs")
+        except Exception as e:
+            print(f"Failed to detect cores with SLURM_CPUS_ON_NODE: {e}")
+            num_cpus = None
+        # If SLURM detection fails, fallback to multiprocessing.cpu_count()
+        if num_cpus is None or num_cpus <= 0:
+            num_cpus = multiprocessing.cpu_count()
+            print(f"multiprocessing detected {num_cpus} CPUs")
+        # Set the maximum number of threads for NumExpr
+        os.environ['NUMEXPR_MAX_THREADS'] = str(num_cpus)
+        self.num_cpus = num_cpus
+        print(f"NumExpr set to use {ne.detect_number_of_threads()} threads")
 
 
     def get_or_load_variable(self, variable_name, load_function, compute_function):
@@ -81,24 +100,6 @@ class DataManager:
         self.gaze_position_labels_m1 = [item[1] for item in self.labelled_gaze_positions_m1]
 
 
-    def find_n_cores(self):
-        try:
-            slurm_cpus = os.getenv('SLURM_CPUS_ON_NODE')
-            num_cpus = int(slurm_cpus)
-            print(f"SLURM detected {num_cpus} CPUs")
-        except Exception as e:
-            print(f"Failed to detect cores with SLURM_CPUS_ON_NODE: {e}")
-            num_cpus = None
-        # If SLURM detection fails, fallback to multiprocessing.cpu_count()
-        if num_cpus is None or num_cpus <= 0:
-            num_cpus = multiprocessing.cpu_count()
-            print(f"multiprocessing detected {num_cpus} CPUs")
-        # Set the maximum number of threads for NumExpr
-        os.environ['NUMEXPR_MAX_THREADS'] = str(num_cpus)
-        self.num_cpus = num_cpus
-        print(f"NumExpr set to use {ne.detect_number_of_threads()} threads")
-
-
     def add_frame_of_attention_and_plotting_frame_to_gaze_labels(self):
         for session_data in self.gaze_position_labels_m1:
             bboxes = session_data['roi_bb_corners']
@@ -110,38 +111,42 @@ class DataManager:
 
 
     def plot_all_behavior_in_all_sessions(self):
+        """
+        Plots all behavior within the frame of attention for all sessions.
+        Utilizes parallel processing to generate plots for each session.
+        """
         root_data_dir = self.params['root_data_dir']
         plots_dir = util.add_date_dir_to_path(os.path.join(root_data_dir, 'plots', 'fix_and_saccades_all_sessions'))
         os.makedirs(plots_dir, exist_ok=True)
-        sessions = list(self.labelled_fixations_m1['session_name'].unique())
+        sessions = list(self.events_within_attention_frame_m1['session_name'].unique())
         with Pool() as pool:
             for _ in tqdm(pool.starmap(
                     plotter.plot_behavior_for_session,
-                    [(session, self.labelled_fixations_m1, self.labelled_saccades_m1, self.labelled_gaze_positions_m1, plots_dir) for session in sessions]
+                    [(session, self.events_within_attention_frame_m1, self.gaze_position_labels_m1, plots_dir) for session in sessions]
                 ), total=len(sessions)):
                 pass
+            pool.close()
+            pool.join()
 
+
+    
 
     def run(self):
-        root_data_dir, self.params = util.fetch_root_data_dir(self.params)
-        data_source_dir, self.params = util.fetch_data_source_dir(self.params)
-        session_paths, self.params = util.fetch_session_subfolder_paths_from_source(self.params)
-        processed_data_dir, self.params = util.fetch_processed_data_dir(self.params)
+        _, self.params = util.fetch_root_data_dir(self.params)
+        _, self.params = util.fetch_data_source_dir(self.params)
+        _, self.params = util.fetch_session_subfolder_paths_from_source(self.params)
+        _, self.params = util.fetch_processed_data_dir(self.params)
         self.params['num_cpus'] = self.num_cpus
-
         self.labelled_gaze_positions_m1 = self.get_or_load_variable(
             'labelled_gaze_positions_m1',
             load_data.load_labelled_gaze_positions,
             lambda p: curate_data.extract_labelled_gaze_positions_m1(p)
         )
         self.logger.info(f"M1 remapped gaze pos data acquired!")
-        
         self.split_gaze_data()
         self.logger.info(f"Gaze data split into: self.gaze_positions and self.gaze_position_labels!")
-
         self.add_frame_of_attention_and_plotting_frame_to_gaze_labels()
         self.logger.info(f"Frame of attention and plotting added to gaze data")
-
         if self.params['use_toy_data']:
             self.logger.info(f"!! USING TOY DATA !!")
             self.toy_data = self.get_or_load_variable(
@@ -152,19 +157,15 @@ class DataManager:
             input_data = self.toy_data
         else:
             input_data = self.labelled_gaze_positions_m1
-        
         self.labelled_fixations_m1, self.labelled_saccades_m1, self.combined_behav_m1 = self.get_or_load_variable(
             'labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1',
             load_data.load_m1_labelled_fixations_saccades_and_combined,
             lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
         )
         self.logger.info(f"M1 fixations and saccades acquired")
-
-        events_within_attention_frame = curate_data.isolate_events_within_attention_frame(self.combined_behav_m1, self.labelled_gaze_positions_m1)
+        self.events_within_attention_frame_m1 = curate_data.isolate_events_within_attention_frame(self.combined_behav_m1, self.labelled_gaze_positions_m1)
         # Display the isolated events
-        events_within_attention_frame.head()
-
-        pdb.set_trace()
+        self.events_within_attention_frame_m1.head()
 
         if self.params['make_plots']:
             self.plot_all_behavior_in_all_sessions()
@@ -197,6 +198,8 @@ class DataManager:
 
         # if self.params.get('replot_face/eye_vs_obj_violins'):
         #     response_comp.compute_pre_and_post_fixation_response_to_roi_for_each_unit(self.labelled_fixation_rasters, self.params)
+
+
 
 
 def main():
