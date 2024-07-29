@@ -26,67 +26,7 @@ import load_data
 import pdb
 
 
-def process_row(index, row):
-    if row['block'] == 'mon_down':
-        return 'run', row
-    elif row['block'] == 'mon_up':
-        return 'inter_run', row
-    return None, None
-
-
-def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
-    """
-    Generates plots for all events within the frame of attention for a given session.
-    Args:
-    - session (str): The session name.
-    - events_df (pd.DataFrame): DataFrame containing events within the frame of attention.
-    - gaze_labels (list): List of dictionaries containing gaze position labels and plotting frames.
-    - plots_dir (str): Directory to save the plots.
-    """
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
-    logger.info(f'Starting to process session: {session}')
-    session_events = events_df[events_df['session_name'] == session]
-    session_label = next(item for item in gaze_labels if item['session_name'] == session)
-    plotting_frame = session_label['plotting_frame']
-    roi_bb_corners = session_label['roi_bb_corners']
-    runs, inter_runs = [], []
-    current_inter_run = []
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_to_row = {executor.submit(process_row, index, row): index for index, row in session_events.iterrows()}
-        for future in tqdm(concurrent.futures.as_completed(future_to_row), total=len(future_to_row), desc="Processing rows"):
-            try:
-                result_type, result_row = future.result()
-                if result_type == 'run':
-                    if current_inter_run:
-                        inter_runs.append(current_inter_run)
-                        current_inter_run = []
-                    runs.append(result_row)
-                elif result_type == 'inter_run':
-                    current_inter_run.append(result_row)
-            except Exception as exc:
-                logger.error(f'Row processing generated an exception: {exc}')
-    if current_inter_run:
-        inter_runs.append(current_inter_run)
-    total_plots = len(runs) + len(inter_runs)
-    logger.info(f'Total plots to generate: {total_plots}')
-    fig, axes = plt.subplots(nrows=total_plots, ncols=1, figsize=(15, 5 * total_plots), squeeze=False)
-    for i in range(total_plots):
-        logger.info(f'Generating plot {i+1} of {total_plots}')
-        ax_run = axes[i][0] if i < len(runs) else None
-        ax_inter_run = axes[i][1] if i < len(inter_runs) else None
-        if ax_run is not None:
-            logger.info(f'Plotting run {i+1}')
-            plot_events(pd.DataFrame([runs[i]]), ax_run, plotting_frame, roi_bb_corners)
-        if ax_inter_run is not None:
-            logger.info(f'Plotting inter-run {i+1 - len(runs)}')
-            plot_events(pd.DataFrame(inter_runs[i]), ax_inter_run, plotting_frame, roi_bb_corners)
-    plt.tight_layout()
-    plot_path = os.path.join(plots_dir, f'{session}_behavior_plot.png')
-    plt.savefig(plot_path)
-    plt.close()
-    logger.info(f'Plot saved to {plot_path}')
-
+logger = logging.getLogger(__name__)
 
 def plot_events(events_df, ax, plotting_frame, roi_bb_corners):
     """
@@ -120,6 +60,90 @@ def plot_events(events_df, ax, plotting_frame, roi_bb_corners):
         top_right = bbox['topRight']
         rect = plt.Rectangle(bottom_left, top_right[0] - bottom_left[0], top_right[1] - bottom_left[1], linewidth=1, edgecolor='cyan', facecolor='none')
         ax.add_patch(rect)
+
+def process_row(row):
+    if row['block'] == 'mon_down' and not pd.isna(row['run']):
+        return 'run', row
+    elif row['block'] == 'mon_up' and pd.isna(row['run']):
+        return 'inter_run', row
+    return None, row
+
+def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
+    """
+    Generates plots for all events within the frame of attention for a given session.
+    Args:
+    - session (str): The session name.
+    - events_df (pd.DataFrame): DataFrame containing events within the frame of attention.
+    - gaze_labels (list): List of dictionaries containing gaze position labels and plotting frames.
+    - plots_dir (str): Directory to save the plots.
+    """
+    logger.info(f'Starting to process session: {session}')
+    session_events = events_df[(events_df['session_name'] == session) & (events_df['block'] != 'discard')]
+    session_label = next(item for item in gaze_labels if item['session_name'] == session)
+
+    pdb.set_trace()
+
+    plotting_frame = session_label['plotting_frame']
+    roi_bb_corners = session_label['roi_bb_corners']
+
+    runs, inter_runs = [], []
+    current_run, current_inter_run = [], []
+
+    # Grouping rows into runs and inter-runs
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_to_row = {executor.submit(process_row, row): index for index, row in session_events.iterrows()}
+        for future in tqdm(concurrent.futures.as_completed(future_to_row), total=len(future_to_row), desc="Processing rows"):
+            try:
+                result_type, result_row = future.result()
+                if result_type == 'run':
+                    if current_inter_run:
+                        inter_runs.append(current_inter_run)
+                        current_inter_run = []
+                    current_run.append(result_row)
+                elif result_type == 'inter_run':
+                    if current_run:
+                        runs.append(current_run)
+                        current_run = []
+                    current_inter_run.append(result_row)
+            except Exception as exc:
+                logger.error(f'Row processing generated an exception: {exc}')
+
+    if current_run:
+        runs.append(current_run)
+    if current_inter_run:
+        inter_runs.append(current_inter_run)
+
+    total_plots = len(runs) + len(inter_runs)
+    logger.info(f'Total plots to generate: {total_plots}')
+
+    pdb.set_trace()  # Debugger set to check the computation
+
+    fig, axes = plt.subplots(nrows=total_plots, ncols=1, figsize=(15, 5 * total_plots), squeeze=False)
+
+    for i in range(total_plots):
+        logger.info(f'Generating plot {i+1} of {total_plots}')
+        if i < len(runs):
+            ax_run = axes[i][0]
+            logger.info(f'Plotting run {i+1}')
+            plot_events(pd.DataFrame(runs[i]), ax_run, plotting_frame, roi_bb_corners)
+        else:
+            ax_inter_run = axes[i][0]
+            logger.info(f'Plotting inter-run {i+1 - len(runs)}')
+            plot_events(pd.DataFrame(inter_runs[i - len(runs)]), ax_inter_run, plotting_frame, roi_bb_corners)
+
+    plt.tight_layout()
+    plot_path = os.path.join(plots_dir, f'{session}_behavior_plot.png')
+    plt.savefig(plot_path)
+    plt.close()
+    logger.info(f'Plot saved to {plot_path}')
+
+
+
+
+
+
+
+
 
 
 def plot_session_gaze_trajectory(ax, gaze_positions, fixations, saccades, info, title):

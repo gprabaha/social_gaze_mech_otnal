@@ -208,7 +208,6 @@ def remap_source_coords(coord, params, remapping_type, scale=None):
             return stretched_points
         else:
             raise ValueError("Input for 'stretch_from_center_of_mass' must be a dictionary")
-
     # Determine the remapping type and apply the appropriate remapping function
     if remapping_type == 'inverted_to_standard_y_axis':
         return remap_inverted_to_standard_y_axis(coord)

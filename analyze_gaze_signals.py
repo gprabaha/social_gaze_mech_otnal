@@ -23,6 +23,13 @@ import fix_and_saccades
 
 import pdb
 
+
+"""
+Big changes needed in session plotter. currently it is appending each row as a separate event which is true
+but we have to collect each event in a run and then plot them out. This is too complicated for chatgpt 
+so write manually
+"""
+
 class DataManager:
     def __init__(self, params):
         self.params = params
@@ -106,7 +113,7 @@ class DataManager:
             frame = util.define_frame_of_attention(bboxes)
             session_data['frame_of_attention'] = frame
             # Calculate the plotting frame
-            plotting_frame = util.remap_source_coords(frame, frame, 1.3, 'stretch_from_center_of_mass')
+            plotting_frame = util.remap_source_coords(frame, self.params, 'stretch_from_center_of_mass', 1.3)
             session_data['plotting_frame'] = plotting_frame
 
 
