@@ -181,10 +181,17 @@ def make_fixations_df(fix_stats, info):
     fix_timepos_df['category'] = info['category']
     fix_timepos_df['session_name'] = info['session_name']
     fix_timepos_df['run'] = fix_timepos_df.apply(
-        lambda row: determine_run(row['start_time'], row['end_time'], info['startS'], info['stopS']),
+        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'], info['startS'], info['stopS'], 'run'),
         axis=1
     )
-    fix_timepos_df['block'] = fix_timepos_df.apply(lambda row: determine_block(row['start_time'], row['end_time'], info['startS'], info['stopS']), axis=1)
+    fix_timepos_df['inter_run'] = fix_timepos_df.apply(
+        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'], info['startS'], info['stopS'], 'inter_run'),
+        axis=1
+    )
+    fix_timepos_df['block'] = fix_timepos_df.apply(
+        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'], info['startS'], info['stopS'], 'block'),
+        axis=1
+    )
     fix_timepos_df['agent'] = info.get('monkey_1', None)
     fix_timepos_df['partner'] = info.get('monkey_2', None)
     # Reorder columns
@@ -230,10 +237,17 @@ def make_saccades_df(saccade_stats, info):
     saccade_timepos_df['category'] = info['category']
     saccade_timepos_df['session_name'] = info['session_name']
     saccade_timepos_df['run'] = saccade_timepos_df.apply(
-        lambda row: determine_run(row['start_time'], row['end_time'], info['startS'], info['stopS']),
+        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'], info['startS'], info['stopS'], 'run'),
         axis=1
     )
-    saccade_timepos_df['block'] = saccade_timepos_df.apply(lambda row: determine_block(row['start_time'], row['end_time'], info['startS'], info['stopS']), axis=1)
+    saccade_timepos_df['inter_run'] = saccade_timepos_df.apply(
+        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'], info['startS'], info['stopS'], 'inter_run'),
+        axis=1
+    )
+    saccade_timepos_df['block'] = saccade_timepos_df.apply(
+        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'], info['startS'], info['stopS'], 'block'),
+        axis=1
+    )
     saccade_timepos_df['agent'] = info.get('monkey_1', None)
     saccade_timepos_df['partner'] = info.get('monkey_2', None)
     # Reorder columns
@@ -246,13 +260,29 @@ def make_saccades_df(saccade_stats, info):
     return saccade_timepos_df
 
 
-
 # Determine the run number based on start and end times
-def determine_run(start_time, end_time, startS, stopS):
-    for run_number, (start, stop) in enumerate(zip(startS, stopS), start=1):
-        if start <= end_time and stop >= start_time:
-            return run_number
-    return None
+def determine_time_period_of_event(start_time, end_time, startS, stopS, mode):
+    if mode == 'run':
+        for run_number, (start, stop) in enumerate(zip(startS, stopS), start=1):
+            if start <= end_time and stop >= start_time:
+                return run_number
+        return None
+    elif mode == 'inter_run':
+        for inter_run_number, (prev_stop, next_start) in enumerate(zip(stopS[:-1], startS[1:]), start=0):
+            if prev_stop < start_time and next_start > end_time:
+                return inter_run_number
+        return None
+    elif mode == 'block':
+        if start_time < startS[0] or end_time > stopS[-1]:
+            return 'discard'
+        for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
+            if start_time >= run_start and end_time <= run_stop:
+                return 'mon_down'
+            elif i < len(startS) and end_time <= startS[i]:
+                return 'mon_up'
+        return 'discard'
+    else:
+        raise ValueError("Mode should be 'run', 'inter_run', or 'block'")
 
 
 def determine_roi_of_coord(position, bbox_corners):
@@ -263,19 +293,6 @@ def determine_roi_of_coord(position, bbox_corners):
             return bounding_boxes[0]
         return bounding_boxes[inside_roi.index(True)]
     return 'out_of_roi'
-
-
-def determine_block(start_time, end_time, startS, stopS):
-    if start_time < startS[0] or end_time > stopS[-1]:
-        return 'discard'
-    for i, (run_start, run_stop) in enumerate(zip(startS, stopS), start=1):
-        if start_time >= run_start and end_time <= run_stop:
-            return 'mon_down'
-        elif i < len(startS) and end_time <= startS[i]:
-            return 'mon_up'
-    return 'discard'
-
-
 
 
 

@@ -61,12 +61,14 @@ def plot_events(events_df, ax, plotting_frame, roi_bb_corners):
         rect = plt.Rectangle(bottom_left, top_right[0] - bottom_left[0], top_right[1] - bottom_left[1], linewidth=1, edgecolor='cyan', facecolor='none')
         ax.add_patch(rect)
 
+
 def process_row(row):
     if row['block'] == 'mon_down' and not pd.isna(row['run']):
         return 'run', row
     elif row['block'] == 'mon_up' and pd.isna(row['run']):
         return 'inter_run', row
     return None, row
+
 
 def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     """
@@ -88,6 +90,9 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
 
     runs, inter_runs = [], []
     current_run, current_inter_run = [], []
+
+    for index, row in session_events.iterrows():
+        x=1
 
     # Grouping rows into runs and inter-runs
     with concurrent.futures.ThreadPoolExecutor() as executor:
