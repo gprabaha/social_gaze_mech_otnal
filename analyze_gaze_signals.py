@@ -153,8 +153,7 @@ class DataManager:
         self.labelled_gaze_positions_m1 = self.get_or_load_variable(
             'labelled_gaze_positions_m1',
             load_data.load_labelled_gaze_positions,
-            lambda p: curate_data.extract_labelled_gaze_positions_m1(p)
-        )
+            lambda p: curate_data.extract_labelled_gaze_positions_m1(p))
         self.logger.info(f"M1 remapped gaze pos data acquired!")
         self.split_gaze_data()
         self.logger.info(f"Gaze data split into: self.gaze_positions and self.gaze_position_labels!")
@@ -165,18 +164,17 @@ class DataManager:
             self.toy_data = self.get_or_load_variable(
                 'toy_data',
                 load_data.load_toy_data,
-                lambda p: curate_data.generate_toy_gazepos_data(self.labelled_gaze_positions_m1, p)
-            )
+                lambda p: curate_data.generate_toy_gazepos_data(self.labelled_gaze_positions_m1, p))
             input_data = self.toy_data
         else:
             input_data = self.labelled_gaze_positions_m1
         self.labelled_fixations_m1, self.labelled_saccades_m1, self.combined_behav_m1 = self.get_or_load_variable(
             'labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1',
             load_data.load_m1_labelled_fixations_saccades_and_combined,
-            lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p)
-        )
+            lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p))
         self.logger.info(f"M1 fixations and saccades acquired")
-        self.events_within_attention_frame_m1 = curate_data.isolate_events_within_attention_frame(self.combined_behav_m1, self.labelled_gaze_positions_m1)
+        self.events_within_attention_frame_m1 = curate_data.isolate_events_within_attention_frame(
+            self.combined_behav_m1, self.labelled_gaze_positions_m1)
         # Display the isolated events
         self.events_within_attention_frame_m1.head()
         self.logger.info(f"Events within attention frame isolated")
@@ -228,12 +226,12 @@ def main():
         'use_parallel': True,
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
-        'remake_labelled_fixations_m1': False,
-        'remake_labelled_saccades_m1': False,
-        'remake_combined_behav_m1': False,
+        'remake_labelled_fixations_m1': True,
+        'remake_labelled_saccades_m1': True,
+        'remake_combined_behav_m1': True,
         'remake_labelled_spiketimes': False,
         'remake_labelled_fixation_rasters': True,
-        'make_plots': True,
+        'make_plots': False,
         'recalculate_unit_ROI_responses': True,
         'replot_face/eye_vs_obj_violins': True,
         'remap_source_coord_from_inverted_to_standard_y_axis': True,

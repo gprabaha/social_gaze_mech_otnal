@@ -176,22 +176,20 @@ def make_fixations_df(fix_stats, info):
     })
     # Calculate additional fixation parameters
     fix_timepos_df['duration'] = fix_timepos_df['end_time'] - fix_timepos_df['start_time']
-    fix_timepos_df['start_roi'] = fix_timepos_df.apply(lambda row: determine_roi_of_coord(row['mean_position'], info['roi_bb_corners']), axis=1)
+    fix_timepos_df['start_roi'] = fix_timepos_df.apply(
+        lambda row: determine_roi_of_coord(row['mean_position'], info['roi_bb_corners']), axis=1)
     fix_timepos_df['end_roi'] = fix_timepos_df['start_roi']
     fix_timepos_df['category'] = info['category']
     fix_timepos_df['session_name'] = info['session_name']
     fix_timepos_df['run'] = fix_timepos_df.apply(
-        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'], info['startS'], info['stopS'], 'run'),
-        axis=1
-    )
+        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'],
+                                                   info['startS'], info['stopS'], 'run'), axis=1)
     fix_timepos_df['inter_run'] = fix_timepos_df.apply(
-        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'], info['startS'], info['stopS'], 'inter_run'),
-        axis=1
-    )
+        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'],
+                                                   info['startS'], info['stopS'], 'inter_run'), axis=1)
     fix_timepos_df['block'] = fix_timepos_df.apply(
-        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'], info['startS'], info['stopS'], 'block'),
-        axis=1
-    )
+        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'],
+                                                   info['startS'], info['stopS'], 'block'), axis=1)
     fix_timepos_df['agent'] = info.get('monkey_1', None)
     fix_timepos_df['partner'] = info.get('monkey_2', None)
     # Reorder columns
@@ -199,8 +197,7 @@ def make_fixations_df(fix_stats, info):
         'session_name', 'run', 'block', 'agent', 'partner', 
         'start_index', 'end_index', 'start_time', 'end_time', 
         'duration', 'points_in_event', 'mean_position', 
-        'std_spread', 'start_roi', 'end_roi', 'category'
-    ]]
+        'std_spread', 'start_roi', 'end_roi', 'category']]
     return fix_timepos_df
 
 
@@ -217,7 +214,9 @@ def make_saccades_df(saccade_stats, info):
     saccadetimes = saccade_stats['saccadetimes']
     positions = saccade_stats['XY'].T
     # Calculate points in events
-    points_in_event = [positions[start:end+1, :] for start, end in zip(saccadeindices[0, :], saccadeindices[1, :])]
+    points_in_event = [positions[start:end+1, :]
+                       for start, end in
+                       zip(saccadeindices[0, :], saccadeindices[1, :])]
     # Calculate mean position and std spread for each event
     mean_position = [np.nanmean(point, axis=0) for point in points_in_event]
     std_spread = [np.nanstd(point, axis=0) for point in points_in_event]
@@ -232,22 +231,20 @@ def make_saccades_df(saccade_stats, info):
     })
     # Calculate additional saccade parameters
     saccade_timepos_df['duration'] = saccade_timepos_df['end_time'] - saccade_timepos_df['start_time']
-    saccade_timepos_df['start_roi'] = saccade_timepos_df.apply(lambda row: determine_roi_of_coord(row['mean_position'], info['roi_bb_corners']), axis=1)
+    saccade_timepos_df['start_roi'] = saccade_timepos_df.apply(
+        lambda row: determine_roi_of_coord(row['mean_position'], info['roi_bb_corners']), axis=1)
     saccade_timepos_df['end_roi'] = saccade_timepos_df['start_roi']
     saccade_timepos_df['category'] = info['category']
     saccade_timepos_df['session_name'] = info['session_name']
     saccade_timepos_df['run'] = saccade_timepos_df.apply(
-        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'], info['startS'], info['stopS'], 'run'),
-        axis=1
-    )
+        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'],
+                                                   info['startS'], info['stopS'], 'run'), axis=1)
     saccade_timepos_df['inter_run'] = saccade_timepos_df.apply(
-        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'], info['startS'], info['stopS'], 'inter_run'),
-        axis=1
-    )
+        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'],
+                                                   info['startS'], info['stopS'], 'inter_run'), axis=1)
     saccade_timepos_df['block'] = saccade_timepos_df.apply(
-        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'], info['startS'], info['stopS'], 'block'),
-        axis=1
-    )
+        lambda row: determine_time_period_of_event(row['start_time'], row['end_time'],
+                                                   info['startS'], info['stopS'], 'block'), axis=1)
     saccade_timepos_df['agent'] = info.get('monkey_1', None)
     saccade_timepos_df['partner'] = info.get('monkey_2', None)
     # Reorder columns
