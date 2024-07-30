@@ -65,11 +65,12 @@ class DataManager:
         except Exception as e:
             print(f"Failed to detect cores with SLURM_CPUS_ON_NODE: {e}")
             num_cpus = None
-        if num_cpus is None or num_cpus <= 0:
+        if num_cpus is None or num_cpus <= 1:
             num_cpus = multiprocessing.cpu_count()
             print(f"multiprocessing detected {num_cpus} CPUs")
         os.environ['NUMEXPR_MAX_THREADS'] = str(num_cpus)
         self.num_cpus = num_cpus
+        self.params['num_cpu'] = num_cpu
         print(f"NumExpr set to use {ne.detect_number_of_threads()} threads")
 
 
