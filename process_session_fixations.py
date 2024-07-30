@@ -14,7 +14,7 @@ import pickle
 import numexpr as ne
 import multiprocessing
 
-from fix_and_saccades import get_session_fixations_and_saccades
+import fix_and_saccades
 import load_data
 
 
@@ -27,14 +27,13 @@ def main(session_index, params_file, num_cpus):
         ]
     )
     logger = logging.getLogger(__name__)
+    # Set the maximum number of threads for NumExpr
+    os.environ['NUMEXPR_MAX_THREADS'] = str(num_cpus)
+    ne.set_num_threads(num_cpus)
+    logger.info(f"NumExpr set to use {num_cpus} threads")
     # Load parameters from the JSON file
     with open(params_file, 'r') as f:
         params = json.load(f)
-    # Placeholder for parameter updates (if needed)
-    # params.update({
-    #     'some_param': 'some_value',
-    #     ...
-    # })
     logger.info(f"Starting fixation detection for session index: {session_index}")
     # Load labelled gaze positions
     labelled_gaze_positions = load_data.load_labelled_gaze_positions(params)
@@ -42,7 +41,7 @@ def main(session_index, params_file, num_cpus):
     session_data = labelled_gaze_positions[session_index]
     session_data = (session_data[0], session_data[1], params)  # Prepare session data as needed by the function
     # Extract fixations and saccades using get_session_fixations_and_saccades
-    fix_timepos_df, info, saccades_df = get_session_fixations_and_saccades(session_data, num_cpus)
+    fix_timepos_df, info, saccades_df = fix_and_saccades.get_session_fixations_and_saccades(session_data, num_cpus)
     # Save results
     output_dir = params['processed_data_dir']
     fixations_file = os.path.join(output_dir, f"{session_index}_fixations.pkl")
@@ -50,7 +49,6 @@ def main(session_index, params_file, num_cpus):
         pickle.dump((fix_timepos_df, info, saccades_df), f)
     logger.info(f"Fixation detection completed for session index: {session_index}")
     logger.info(f"Results saved to: {fixations_file}")
-
 
 
 if __name__ == "__main__":
@@ -62,13 +60,9 @@ if __name__ == "__main__":
         print(f"Failed to detect cores with SLURM_CPUS_ON_NODE: {e}")
         num_cpus = None
     # If SLURM detection fails, fallback to multiprocessing.cpu_count()
-    if num_cpus is None or num_cpus <= 0:
+    if num_cpus is None or num_cpus <= 1:
         num_cpus = multiprocessing.cpu_count()
-        print(f"multiprocessing detected {num_cpus} CPUs")
-    # Set the maximum number of threads for NumExpr
-    os.environ['NUMEXPR_MAX_THREADS'] = str(num_cpus)
-    ne.set_num_threads(num_cpus)
-    print(f"NumExpr set to use {ne.detect_number_of_threads()} threads")
+        print(f"Multiprocessing detected {num_cpus} CPUs")
     parser = argparse.ArgumentParser(description="Process session fixation detection")
     parser.add_argument('--session_index', type=int, required=True, help='Index of the session in labelled gaze positions list')
     parser.add_argument('--params_file', type=str, required=True, help='Path to the JSON file with parameters')
