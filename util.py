@@ -491,19 +491,13 @@ def is_within_frame(position, frame):
 
 
 def convert_to_array(position_str):
-    """
-    Converts a position string to a numpy array. Handles cases where the input is already a numpy array.
-    Parameters: position_str (str or np.ndarray) - The position data to convert.
-    Returns: np.ndarray - The numpy array representation of the position string.
-    Updates: Added type check for numpy array inputs and exception handling.
-    """
     try:
         if isinstance(position_str, np.ndarray):
-            return position_str  # Directly return if already a numpy array.
+            return position_str  # If it's already an ndarray, return it as is
         return np.fromstring(position_str.strip('[]'), sep=' ')
     except Exception as e:
         print(f"Error converting position string to array: {e}")
-        return None  # Return None if an error occurs.
+        return None  # or raise an appropriate exception
 
 
 def px2deg(px, monitor_info=None):
