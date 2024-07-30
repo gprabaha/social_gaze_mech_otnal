@@ -177,6 +177,7 @@ class DataManager:
             self.combined_behav_m1, self.labelled_gaze_positions_m1)
         # Display the isolated events
         self.events_within_attention_frame_m1.head()
+        
         self.logger.info(f"Events within attention frame isolated")
         if self.params['make_plots']:
             self.plot_all_behavior_in_all_sessions()
@@ -219,8 +220,8 @@ def main():
         'num_cpus': 1,
         'parallelize_local_reclustering_over_n_fixations': False,
         'do_local_reclustering_in_parallel': False,
-        'submit_separate_jobs_for_sessions': True,
-        'use_toy_data': False,
+        'submit_separate_jobs_for_sessions': False,
+        'use_toy_data': True,
         'remake_toy_data': False,
         'is_cluster': True,
         'use_parallel': True,

@@ -151,6 +151,7 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     """
     # Extract fixations and saccades
     all_fix_df, all_saccades_df = fix_and_saccades.extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaze_positions, params)
+    pdb.set_trace()
     combined_behav_df = combine_behaviors_in_temporal_order(params, all_fix_df, all_saccades_df)
     return all_fix_df, all_saccades_df, combined_behav_df
 

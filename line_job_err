@@ -4,3 +4,4 @@ Deprecated, use `init_num_threads` instead.
 2024-07-29 14:55:04,720 - __main__ - INFO - Gaze data split into: self.gaze_positions and self.gaze_position_labels!
 2024-07-29 14:55:04,722 - __main__ - INFO - Frame of attention and plotting added to gaze data
 2024-07-29 14:55:04,722 - __main__ - INFO - Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1
+slurmstepd: error: *** JOB 27536197 ON r811u32n03 CANCELLED AT 2024-07-29T18:55:02 DUE TO TIME LIMIT ***
