@@ -27,6 +27,8 @@ from multiprocessing import Pool
 
 import pdb
 
+logger = logging.getLogger(__name__)
+
 ### Function to extract meta-information and update params
 def extract_and_update_meta_info(params):
     """
@@ -151,7 +153,6 @@ def extract_fixations_and_saccades_with_labels(labelled_gaze_positions, params):
     """
     # Extract fixations and saccades
     all_fix_df, all_saccades_df = fix_and_saccades.extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaze_positions, params)
-    pdb.set_trace()
     combined_behav_df = combine_behaviors_in_temporal_order(params, all_fix_df, all_saccades_df)
     return all_fix_df, all_saccades_df, combined_behav_df
 
@@ -200,7 +201,6 @@ def combine_behaviors_in_temporal_order(params, *dataframes):
     Usage:
     combined_df = combine_behaviors_in_temporal_order(params, fixation_df, saccade_df)
     """
-    logger = logging.getLogger(__name__)
     use_parallel = params.get('use_parallel', False)
     num_cpus = params.get('num_cpus', 1)
     if len(dataframes) != 2:
@@ -255,7 +255,6 @@ def save_combined_df_to_csv(params, df, filename):
     Returns:
     - None
     """
-    logger = logging.getLogger(__name__)
     processed_data_dir = params['processed_data_dir']
     # Ensure the directory exists
     if not os.path.exists(processed_data_dir):
@@ -279,7 +278,9 @@ def isolate_events_within_attention_frame(dataframe, gaze_data):
     - pd.DataFrame: DataFrame containing events within the frame of attention.
     """
     with Pool() as pool:
-        results = list(tqdm(pool.starmap(isolate_events_for_session, [(dataframe, session_data) for session_data in gaze_data]), total=len(gaze_data)))
+        results = list(tqdm(pool.starmap(isolate_events_for_session, [(dataframe, session_data) for session_data in gaze_data]),
+                            total=len(gaze_data),
+                            desc="Isolating events within frame of attention"))
         pool.close()
         pool.join()
     events_within_frame = pd.concat(results, ignore_index=True)
@@ -386,10 +387,9 @@ def save_spiketimes_to_hdf5(labelled_spiketimes, file_path):
 
 def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketimes, params):
     session_names = [os.path.basename(session_path) for session_path in session_paths]
-    logging.debug(f"Session names extracted from paths: {session_names}")
+    logger.debug(f"Session names extracted from paths: {session_names}")
     results = []
     raster_manager = RasterManager(params)
-    
     if params.get('remake_raster', False):
         if params.get('submit_separate_jobs_for_sessions', True):
             hpc_cluster = HPCCluster(params)
@@ -401,10 +401,10 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
                     session_data = load_data.load_session_raster_data(session_file)
                     results.append(session_data)
                 except FileNotFoundError as e:
-                    logging.error(e)
+                    logger.error(e)
                     continue
             if not results:
-                logging.error("No results to concatenate.")
+                logger.error("No results to concatenate.")
                 raise ValueError("No objects to concatenate")
             labelled_fixation_rasters = pd.concat(results, ignore_index=True)
         else:
@@ -413,7 +413,7 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
             else:
                 results = raster_manager.make_session_rasters_serial(session_paths, labelled_fixations, labelled_spiketimes)
             if not results:
-                logging.error("No results to concatenate.")
+                logger.error("No results to concatenate.")
                 raise ValueError("No objects to concatenate")
             labelled_fixation_rasters = pd.concat(results, ignore_index=True)
     else:
@@ -421,17 +421,16 @@ def extract_fixation_raster(session_paths, labelled_fixations, labelled_spiketim
         for session in session_names:
             session_file_path = os.path.join(params['processed_data_dir'], f"{session}_raster.pkl")
             try:
-                logging.info(f"Loading existing data for session {session} from {session_file_path}")
+                logger.info(f"Loading existing data for session {session} from {session_file_path}")
                 session_data = load_data.load_session_raster_data(session_file_path)
                 session_files.append(session_data)
             except FileNotFoundError as e:
-                logging.error(e)
+                logger.error(e)
                 continue
         if not session_files:
-            logging.error("No files to concatenate.")
+            logger.error("No files to concatenate.")
             raise ValueError("No objects to concatenate")
         labelled_fixation_rasters = pd.concat(session_files, ignore_index=True)
-    
     raster_manager.save_labelled_fixation_rasters(labelled_fixation_rasters)
     return labelled_fixation_rasters
 

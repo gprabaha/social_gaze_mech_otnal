@@ -487,7 +487,7 @@ def plot_roi_response_of_each_unit(labelled_fixation_rasters, params):
             plt.savefig(plot_path)
             plt.close(fig)
         except Exception as e:
-            logging.error(f"Error processing unit {unit} in session {session_name}, region {region}: {e}")
+            logger.error(f"Error processing unit {unit} in session {session_name}, region {region}: {e}")
             continue
     
     # Pie charts for ACC and BLA neurons
@@ -508,7 +508,7 @@ def plot_roi_response_of_each_unit(labelled_fixation_rasters, params):
             plt.savefig(pie_chart_path)
             plt.close(fig)
         except Exception as e:
-            logging.error(f"Error processing pie chart for region {region}: {e}")
+            logger.error(f"Error processing pie chart for region {region}: {e}")
             continue
 
 
