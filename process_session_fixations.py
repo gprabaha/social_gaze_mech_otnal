@@ -18,16 +18,15 @@ from fix_and_saccades import get_session_fixations_and_saccades
 import load_data
 
 
-
-
-
 def main(session_index, params_file, num_cpus):
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler()
+        ]
+    )
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
     # Load parameters from the JSON file
     with open(params_file, 'r') as f:
         params = json.load(f)
@@ -36,7 +35,7 @@ def main(session_index, params_file, num_cpus):
     #     'some_param': 'some_value',
     #     ...
     # })
-    logging.info(f"Starting fixation detection for session index: {session_index}")
+    logger.info(f"Starting fixation detection for session index: {session_index}")
     # Load labelled gaze positions
     labelled_gaze_positions = load_data.load_labelled_gaze_positions(params)
     # Prepare session data for the specific index
@@ -49,8 +48,8 @@ def main(session_index, params_file, num_cpus):
     fixations_file = os.path.join(output_dir, f"{session_index}_fixations.pkl")
     with open(fixations_file, 'wb') as f:
         pickle.dump((fix_timepos_df, info, saccades_df), f)
-    logging.info(f"Fixation detection completed for session index: {session_index}")
-    logging.info(f"Results saved to: {fixations_file}")
+    logger.info(f"Fixation detection completed for session index: {session_index}")
+    logger.info(f"Results saved to: {fixations_file}")
 
 
 
