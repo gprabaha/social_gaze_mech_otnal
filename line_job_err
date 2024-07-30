@@ -1,16 +1,11 @@
-2024-07-30 17:09:21,075 - numexpr.utils - WARNING - Deprecated, use `init_num_threads` instead.
-2024-07-30 17:09:21,075 - data_manager - INFO - Loading variable(s): labelled_gaze_positions_m1
-2024-07-30 17:09:21,363 - data_manager - INFO - M1 remapped gaze pos data acquired!
-2024-07-30 17:09:21,363 - data_manager - INFO - Gaze data split into: self.gaze_positions and self.gaze_position_labels!
-2024-07-30 17:09:21,365 - data_manager - INFO - Frame of attention and plotting added to gaze data
-2024-07-30 17:09:21,365 - data_manager - INFO - Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1
-2024-07-30 17:09:21,369 - root - INFO - Job commands in the job list: 31
-2024-07-30 17:09:22,176 - root - INFO - Successfully generated the dSQ job script
-2024-07-30 17:09:22,176 - root - INFO - Using dSQ job script: ./job_scripts/dsq-joblist_fixations.sh
-2024-07-30 17:09:22,198 - root - INFO - Successfully submitted jobs using sbatch for script ./job_scripts/dsq-joblist_fixations.sh
-2024-07-30 17:09:22,198 - root - INFO - Submitted job array with ID: 27552077
-2024-07-30 17:09:22,198 - root - INFO - Tracking progress of job array with ID: 27552077
-2024-07-30 17:14:22,728 - root - INFO - Job array 27552077 is still running. Checking again in 30 seconds...
-2024-07-30 17:19:23,224 - root - INFO - Job array 27552077 is still running. Checking again in 30 seconds...
-2024-07-30 17:24:23,721 - root - INFO - Job array 27552077 is still running. Checking again in 30 seconds...
-slurmstepd: error: *** JOB 27552076 ON r811u32n02 CANCELLED AT 2024-07-30T17:24:47 ***
+2024-07-30 17:31:36,660 - data_manager - INFO - Loading variable(s): labelled_gaze_positions_m1
+2024-07-30 17:31:36,947 - data_manager - INFO - M1 remapped gaze pos data acquired!
+2024-07-30 17:31:36,947 - data_manager - INFO - Gaze data split into: self.gaze_positions and self.gaze_position_labels!
+2024-07-30 17:31:36,949 - data_manager - INFO - Frame of attention and plotting added to gaze data
+2024-07-30 17:31:36,949 - data_manager - INFO - Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1
+2024-07-30 17:31:36,952 - root - INFO - Job commands in the job list: 31
+2024-07-30 17:31:37,760 - root - INFO - Successfully generated the dSQ job script
+2024-07-30 17:31:37,760 - root - INFO - Using dSQ job script: ./job_scripts/dsq-joblist_fixations.sh
+2024-07-30 17:31:37,781 - root - INFO - Successfully submitted jobs using sbatch for script ./job_scripts/dsq-joblist_fixations.sh
+2024-07-30 17:31:37,782 - root - INFO - Submitted job array with ID: 27552178
+2024-07-30 17:31:37,782 - root - INFO - Tracking progress of job array with ID: 27552178

@@ -70,8 +70,8 @@ class DataManager:
             print(f"multiprocessing detected {num_cpus} CPUs")
         os.environ['NUMEXPR_MAX_THREADS'] = str(num_cpus)
         self.num_cpus = num_cpus
-        self.params['num_cpu'] = num_cpu
-        print(f"NumExpr set to use {ne.detect_number_of_threads()} threads")
+        self.params['num_cpus'] = num_cpus
+        print(f"NumExpr set to use {num_cpus} threads")
 
 
     def get_or_load_variable(self, variable_name, load_function, compute_function):
