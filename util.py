@@ -221,7 +221,6 @@ def remap_source_coords(coord, params, remapping_type, scale=None):
     return coord
 
 
-
 def get_bl_and_tr_roi_coords_m1(m1_landmarks, params):
     """
     Calculates the bounding box corners for regions of interest (ROIs) based on M1 landmarks.
@@ -492,7 +491,13 @@ def is_within_frame(position, frame):
 
 
 def convert_to_array(position_str):
-    return np.fromstring(position_str.strip('[]'), sep=' ')
+    try:
+        if isinstance(position_str, np.ndarray):
+            return position_str  # If it's already an ndarray, return it as is
+        return np.fromstring(position_str.strip('[]'), sep=' ')
+    except Exception as e:
+        print(f"Error converting position string to array: {e}")
+        return None  # or raise an appropriate exception
 
 
 def px2deg(px, monitor_info=None):
