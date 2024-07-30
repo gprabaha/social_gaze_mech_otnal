@@ -142,8 +142,6 @@ class DataManager:
                 plotter.plot_behavior_for_session(session, self.events_within_attention_frame_m1, self.gaze_position_labels_m1, plots_dir)
 
 
-    
-
     def run(self):
         _, self.params = util.fetch_root_data_dir(self.params)
         _, self.params = util.fetch_data_source_dir(self.params)
@@ -214,7 +212,22 @@ class DataManager:
 
 
 
+
+
+
+
+
+
+
 def main():
+    # Configure the root logger
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler()
+        ]
+    )
     params = util.get_params()
     params.update({
         'num_cpus': 1,
@@ -250,9 +263,11 @@ def main():
         'use_existing_variables': False,
         'reload_existing_unit_roi_comp_stats': False
     })
-
     data_manager = DataManager(params)
     data_manager.run()
+
+
+
 
 if __name__ == "__main__":
     main()
