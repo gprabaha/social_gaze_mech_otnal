@@ -40,9 +40,7 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     - plots_dir (str): Directory to save the plots.
     """
     logger.info(f'Starting to process session: {session}')
-    session_events = events_df[(
-        events_df['session_name'] == session) & (
-            events_df['block'] != 'discard')]
+    session_events = events_df[( events_df['session_name'] == session) & (events_df['block'] != 'discard')]
     session_label = next(
         item for item in gaze_labels if item['session_name'] == session)
     roi_bb_corners = session_label['roi_bb_corners']
@@ -61,6 +59,7 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
             ax = axs[0]
         else:
             ax = axs[i, 0]
+        print([i, run])
         run_events = session_events[session_events['run'] == run]
         logger.info(f'Processing run {run} with {len(run_events)} events')
         plot_behavior_in_epoch(run_events, roi_bb_corners, ax, event_type='run')
@@ -114,12 +113,13 @@ def plot_behavior_in_epoch(events, roi_bb_corners, ax, event_type='run'):
     mean_positions = []
     start_times = []
     for _, fixation in fixations.iterrows():
-        points = np.array(fixation['points_in_event'])
-        mean_position = np.array(fixation['mean_position'])
+        points = util.convert_to_array(fixation['points_in_event'])
+        mean_position = util.convert_to_array(fixation['mean_position'])
         start_time = fixation['start_time']
         all_points.extend(points)
         mean_positions.append(mean_position)
         start_times.append(start_time)
+    pdb.set_trace()
     all_points = np.array(all_points)
     mean_positions = np.array(mean_positions)
     start_times = np.array(start_times)
@@ -132,7 +132,7 @@ def plot_behavior_in_epoch(events, roi_bb_corners, ax, event_type='run'):
     saccade_end_points = []
     saccade_start_times = []
     for _, saccade in saccades.iterrows():
-        points = np.array(saccade['points_in_event'])
+        points = util.convert_to_array(saccade['points_in_event'])
         start_point = points[0]
         end_point = points[-1]
         start_time = saccade['start_time']

@@ -267,22 +267,28 @@ def save_combined_df_to_csv(params, df, filename):
     logger.info(f"DataFrame saved to: {output_path}")
 
 
-def isolate_events_within_attention_frame(dataframe, gaze_data):
+def isolate_events_within_attention_frame(dataframe, gaze_data, use_parallel=False):
     """
     Isolates events within the frame of attention for all sessions.
-    Utilizes parallel processing to handle each session separately.
+    Utilizes parallel processing to handle each session separately if use_parallel is True.
     Args:
     - dataframe (pd.DataFrame): DataFrame containing all events.
     - gaze_data (list): List of gaze data containing session information and gaze positions.
+    - use_parallel (bool, optional): Flag to determine whether to use parallel processing. Default is False.
     Returns:
     - pd.DataFrame: DataFrame containing events within the frame of attention.
     """
-    with Pool() as pool:
-        results = list(tqdm(pool.starmap(isolate_events_for_session, [(dataframe, session_data) for session_data in gaze_data]),
-                            total=len(gaze_data),
-                            desc="Isolating events within frame of attention"))
-        pool.close()
-        pool.join()
+    if use_parallel:
+        with Pool() as pool:
+            results = list(tqdm(pool.starmap(isolate_events_for_session, [(dataframe, session_data) for session_data in gaze_data]),
+                                total=len(gaze_data),
+                                desc="Isolating events within frame of attention"))
+            pool.close()
+            pool.join()
+    else:
+        results = [isolate_events_for_session(dataframe, session_data)
+                   for session_data in tqdm(
+                       gaze_data, desc="Isolating events within frame of attention")]
     events_within_frame = pd.concat(results, ignore_index=True)
     return events_within_frame
 
@@ -302,6 +308,7 @@ def isolate_events_for_session(dataframe, session_data):
     frame = util.define_frame_of_attention(bboxes)
     session_events = dataframe[dataframe['session_name'] == session_name]
     gaze_positions = session_data[0]  # x, y positions array
+    
     for index, row in session_events.iterrows():
         start_index = row['start_index']
         end_index = row['end_index']
@@ -311,10 +318,16 @@ def isolate_events_for_session(dataframe, session_data):
         # Fetch the positions from gaze data
         start_position = gaze_positions[start_index]
         end_position = gaze_positions[end_index]
-        if (util.is_within_frame(start_position, frame) or 
-            util.is_within_frame(end_position, frame) or 
-            util.is_within_frame(mean_position, frame)):
-            events_within_frame.append(row)
+        
+        try:
+            if (util.is_within_frame(start_position, frame) or 
+                util.is_within_frame(end_position, frame) or 
+                util.is_within_frame(mean_position, frame)):
+                events_within_frame.append(row)
+        except Exception as e:
+            print(f"Error processing row {index}: {row}")
+            print(f"Exception: {e}")
+    
     return pd.DataFrame(events_within_frame)
 
 

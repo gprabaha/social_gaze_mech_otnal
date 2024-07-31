@@ -11,6 +11,7 @@ import numpy as np
 from math import degrees, atan2, sqrt
 from datetime import datetime
 import itertools
+import re
 
 import defaults
 
@@ -475,29 +476,39 @@ def define_frame_of_attention(bboxes):
     return {'bottomLeft': (left_boundary, bottom_boundary), 'topRight': (right_boundary, top_boundary)}
 
 
-def is_within_frame(position, frame):
-    """
-    Check if a coordinate is within the frame of attention.
-    Parameters:
-    - position (array-like): Single coordinate (x, y).
-    - frame (dict): Dictionary with 'bottomLeft' and 'topRight' corners defining the frame of attention.
-    Returns:
-    - bool: Whether the coordinate is within the frame.
-    """
-    x, y = position
-    bottom_left = frame['bottomLeft']
-    top_right = frame['topRight']
-    return bottom_left[0] <= x <= top_right[0] and bottom_left[1] <= y <= top_right[1]
+def is_within_frame(mean_position, frame):
+    try:
+        # Log the values for debugging
+        bottom_left = frame['bottomLeft']
+        top_right = frame['topRight']
+        if mean_position.size != 2:
+            raise ValueError(f"mean_position does not have exactly two elements: {mean_position}")
+        x, y = mean_position
+        return bottom_left[0] <= x <= top_right[0] and bottom_left[1] <= y <= top_right[1]
+    except Exception as e:
+        print(f"Error in is_within_frame: {e}, mean_position: {mean_position}, frame: {frame}")
+        raise  # Re-raise the exception to maintain the original error behavior
+
 
 
 def convert_to_array(position_str):
     try:
         if isinstance(position_str, np.ndarray):
             return position_str  # If it's already an ndarray, return it as is
-        return np.fromstring(position_str.strip('[]'), sep=' ')
+        # Remove newline characters and extra spaces
+        position_str = position_str.replace('\n', ' ').strip()
+        # Use regular expressions to extract numbers, handling both 2D and 1D arrays, including scientific notation
+        position_list = re.findall(r'-?\d+\.?\d*(?:[eE][+-]?\d+)?', position_str)
+        # Convert to numpy array of floats
+        array = np.array(position_list, dtype=float)
+        # Check if the array length is even and greater than 2, indicating a 2D array
+        if array.size > 2 and array.size % 2 == 0 and ' ' in position_str:
+            array = array.reshape(-1, 2)
+        return array
     except Exception as e:
         print(f"Error converting position string to array: {e}")
         return None  # or raise an appropriate exception
+
 
 
 def px2deg(px, monitor_info=None):
