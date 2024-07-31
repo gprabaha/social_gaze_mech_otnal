@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
+import matplotlib.cm as cm
 import os
 from scipy.stats import ttest_ind
 import seaborn as sns
@@ -28,51 +29,10 @@ import pdb
 
 logger = logging.getLogger(__name__)
 
-def plot_events(events_df, ax, plotting_frame, roi_bb_corners):
-    """
-    Plots the events on the given axis within the plotting frame.
-    Args:
-    - events_df (pd.DataFrame): DataFrame containing event data.
-    - ax (matplotlib.axes.Axes): The axis to plot on.
-    - plotting_frame (dict): Dictionary defining the bounds of the plotting frame.
-    - roi_bb_corners (dict): Dictionary containing bounding boxes for all ROIs.
-    """
-    ax.set_xlim([plotting_frame['bottomLeft'][0], plotting_frame['topRight'][0]])
-    ax.set_ylim([plotting_frame['bottomLeft'][1], plotting_frame['topRight'][1]])
-    ax.set_facecolor('black')
-    events_df['points_in_event'] = events_df['points_in_event'].apply(util.convert_to_array)
-    events_df['mean_position'] = events_df['mean_position'].apply(util.convert_to_array)
-    for idx, row in events_df.iterrows():
-        points = row['points_in_event']
-        mean_position = row['mean_position']
-        event_type = row['event_type']
-        if event_type == 'fixation':
-            times = np.linspace(0, 1, len(points))
-            colors = plt.cm.copper(times)
-            ax.scatter(points[:, 0], points[:, 1], c=colors, alpha=0.5)
-            ax.plot(mean_position[0], mean_position[1], 'wo')
-        elif event_type == 'saccade':
-            ax.scatter(points[:, 0], points[:, 1], c='gray', alpha=0.5)
-            start, end = points[0], points[-1]
-            ax.annotate('', xy=end, xytext=start, arrowprops=dict(facecolor='green', alpha=0.5))
-    for key, bbox in roi_bb_corners.items():
-        bottom_left = bbox['bottomLeft']
-        top_right = bbox['topRight']
-        rect = plt.Rectangle(bottom_left, top_right[0] - bottom_left[0], top_right[1] - bottom_left[1], linewidth=1, edgecolor='cyan', facecolor='none')
-        ax.add_patch(rect)
-
-
-def process_row(row):
-    if row['block'] == 'mon_down' and not pd.isna(row['run']):
-        return 'run', row
-    elif row['block'] == 'mon_up' and pd.isna(row['run']):
-        return 'inter_run', row
-    return None, row
-
 
 def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     """
-    Generates plots for all events within the frame of attention for a given session.
+    Generates a single figure with subplots for all events (fixations and saccades) within the frame of attention for a given session.
     Args:
     - session (str): The session name.
     - events_df (pd.DataFrame): DataFrame containing events within the frame of attention.
@@ -82,64 +42,108 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     logger.info(f'Starting to process session: {session}')
     session_events = events_df[(events_df['session_name'] == session) & (events_df['block'] != 'discard')]
     session_label = next(item for item in gaze_labels if item['session_name'] == session)
-    plotting_frame = session_label['plotting_frame']
     roi_bb_corners = session_label['roi_bb_corners']
+    agent = session_label.get('agent', 'Unknown')
+    runs = session_events['run'].unique()
+    inter_runs = session_events['inter_run'].unique()
+    num_plots = max(len(runs), len(inter_runs))
+    fig, axs = plt.subplots(num_plots, 2, figsize=(20, 5 * num_plots))
+    if num_plots == 1:
+        axs = [axs]
+    # Plot runs
     pdb.set_trace()
-    runs, inter_runs = [], []
-    current_run, current_inter_run = [], []
-
-    for index, row in session_events.iterrows():
-        x=1
-
-    # Grouping rows into runs and inter-runs
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_to_row = {executor.submit(process_row, row): index for index, row in session_events.iterrows()}
-        for future in tqdm(concurrent.futures.as_completed(future_to_row), total=len(future_to_row), desc="Processing rows"):
-            try:
-                result_type, result_row = future.result()
-                if result_type == 'run':
-                    if current_inter_run:
-                        inter_runs.append(current_inter_run)
-                        current_inter_run = []
-                    current_run.append(result_row)
-                elif result_type == 'inter_run':
-                    if current_run:
-                        runs.append(current_run)
-                        current_run = []
-                    current_inter_run.append(result_row)
-            except Exception as exc:
-                logger.error(f'Row processing generated an exception: {exc}')
-
-    if current_run:
-        runs.append(current_run)
-    if current_inter_run:
-        inter_runs.append(current_inter_run)
-
-    total_plots = len(runs) + len(inter_runs)
-    logger.info(f'Total plots to generate: {total_plots}')
-
-    pdb.set_trace()  # Debugger set to check the computation
-
-    fig, axes = plt.subplots(nrows=total_plots, ncols=1, figsize=(15, 5 * total_plots), squeeze=False)
-
-    for i in range(total_plots):
-        logger.info(f'Generating plot {i+1} of {total_plots}')
-        if i < len(runs):
-            ax_run = axes[i][0]
-            logger.info(f'Plotting run {i+1}')
-            plot_events(pd.DataFrame(runs[i]), ax_run, plotting_frame, roi_bb_corners)
-        else:
-            ax_inter_run = axes[i][0]
-            logger.info(f'Plotting inter-run {i+1 - len(runs)}')
-            plot_events(pd.DataFrame(inter_runs[i - len(runs)]), ax_inter_run, plotting_frame, roi_bb_corners)
-
-    plt.tight_layout()
-    plot_path = os.path.join(plots_dir, f'{session}_behavior_plot.png')
-    plt.savefig(plot_path)
-    plt.close()
-    logger.info(f'Plot saved to {plot_path}')
+    for i, run in enumerate(runs):
+        ax = axs[i, 0]
+        run_events = session_events[session_events['run'] == run]
+        logger.info(f'Processing run {run} with {len(run_events)} events')
+        plot_behavior_for_epoch(run_events, roi_bb_corners, ax, event_type='run')
+    # Plot inter-runs
+    pdb.set_trace()
+    for i, inter_run in enumerate(inter_runs):
+        ax = axs[i, 1]
+        inter_run_events = session_events[session_events['inter_run'] == inter_run]
+        logger.info(f'Processing inter-run {inter_run} with {len(inter_run_events)} events')
+        plot_behavior_for_epoch(inter_run_events, roi_bb_corners, ax, event_type='inter_run')
+    # Calculate averages
+    avg_fixations_run = session_events[session_events['event_type'] == 'fixation'].groupby('run').size().mean()
+    avg_saccades_run = session_events[session_events['event_type'] == 'saccade'].groupby('run').size().mean()
+    avg_fixations_inter_run = session_events[session_events['event_type'] == 'fixation'].groupby('inter_run').size().mean()
+    avg_saccades_inter_run = session_events[session_events['event_type'] == 'saccade'].groupby('inter_run').size().mean()
+    # Set the main title
+    fig.suptitle(f'Session: {session}, Agent: {agent}\n'
+                 f'Number of Runs: {len(runs)}, Number of Inter-Runs: {len(inter_runs)}\n'
+                 f'Average Fixations per Run: {avg_fixations_run:.2f}, Average Saccades per Run: {avg_saccades_run:.2f}\n'
+                 f'Average Fixations per Inter-Run: {avg_fixations_inter_run:.2f}, Average Saccades per Inter-Run: {avg_saccades_inter_run:.2f}',
+                 fontsize=16)
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt_path = os.path.join(plots_dir, f'{session}_behavior.png')
+    plt.savefig(plt_path)
+    logger.info(f'Saved plot to {plt_path}')
+    plt.close(fig)
+    logger.info(f'Completed processing for session: {session}')
 
 
+def plot_behavior_for_epoch(events, roi_bb_corners, ax, event_type='run'):
+    """
+    Generates plots for fixation points and saccade arrows within a given set of events.
+    Args:
+    - events (pd.DataFrame): DataFrame containing events (fixations and saccades).
+    - roi_bb_corners (list): List containing bounding box corners for region of interest.
+    - ax (matplotlib.axes.Axes): Axes object to plot the events.
+    - event_type (str): Type of event ('run' or 'inter_run').
+    """
+    all_start_times = events['start_time'].values
+    fixations = events[events['event_type'] == 'fixation']
+    saccades = events[events['event_type'] == 'saccade']
+    logger.info(f'Processing {event_type} with {len(fixations)} fixations and {len(saccades)} saccades')
+    # Plot fixations
+    all_points = []
+    mean_positions = []
+    start_times = []
+    for _, fixation in fixations.iterrows():
+        points = np.array(fixation['points_in_event'])
+        mean_position = np.array(fixation['mean_position'])
+        start_time = fixation['start_time']
+        all_points.extend(points)
+        mean_positions.append(mean_position)
+        start_times.append(start_time)
+    all_points = np.array(all_points)
+    mean_positions = np.array(mean_positions)
+    start_times = np.array(start_times)
+    norm = plt.Normalize(all_start_times.min(), all_start_times.max())
+    fixation_colors = cm.viridis(norm(start_times))
+    ax.scatter(all_points[:, 0], all_points[:, 1], c='gray', alpha=0.5)
+    ax.scatter(mean_positions[:, 0], mean_positions[:, 1], c=fixation_colors, edgecolor='black')
+    # Collect saccades start and end points
+    saccade_start_points = []
+    saccade_end_points = []
+    saccade_start_times = []
+    for _, saccade in saccades.iterrows():
+        points = np.array(saccade['points_in_event'])
+        start_point = points[0]
+        end_point = points[-1]
+        start_time = saccade['start_time']
+        saccade_start_points.append(start_point)
+        saccade_end_points.append(end_point)
+        saccade_start_times.append(start_time)
+    saccade_start_points = np.array(saccade_start_points)
+    saccade_end_points = np.array(saccade_end_points)
+    saccade_start_times = np.array(saccade_start_times)
+    saccade_colors = cm.Greens(norm(saccade_start_times))
+    # Plot all saccade arrows at once
+    for start_point, end_point, color in zip(saccade_start_points, saccade_end_points, saccade_colors):
+        ax.arrow(start_point[0], start_point[1],
+                 end_point[0] - start_point[0],
+                 end_point[1] - start_point[1],
+                 head_width=0.05, head_length=0.1,
+                 fc=color, ec=color, alpha=0.8)
+    ax.set_xlim(roi_bb_corners[0], roi_bb_corners[2])
+    ax.set_ylim(roi_bb_corners[1], roi_bb_corners[3])
+    if event_type == 'run':
+        title = f'Run: {events["run"].iloc[0]}'
+    else:
+        title = f'Inter-Run: {events["inter_run"].iloc[0]}'
+    ax.set_title(title)
 
 
 

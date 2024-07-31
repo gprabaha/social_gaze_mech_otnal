@@ -1,0 +1,1 @@
+1	0	r811u34n03.milgram.ycrc.yale.edu	2024-07-31 10:26:15	2024-07-31 11:03:59	2264.31	module load miniconda; conda init zsh; conda deactivate; conda activate gaze_processing; python process_session_fixations.py --session_index 1 --params_file /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/params.json

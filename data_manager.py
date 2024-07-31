@@ -143,12 +143,14 @@ class DataManager:
                         plotter.plot_behavior_for_session,
                         [(session, self.events_within_attention_frame_m1,
                           self.gaze_position_labels_m1, plots_dir) for session in sessions]
-                    ), total=len(sessions)):
+                    ), total=len(sessions),
+                    desc='Plotting behavior for session in parallel'):
                     pass
                 pool.close()
                 pool.join()
         else:
-            for session in tqdm(sessions, total=len(sessions)):
+            for session in tqdm(sessions, total=len(sessions),
+                                desc='Plotting behavior for session in serial'):
                 plotter.plot_behavior_for_session(
                     session, self.events_within_attention_frame_m1,
                     self.gaze_position_labels_m1, plots_dir)
