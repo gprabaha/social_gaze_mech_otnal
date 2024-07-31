@@ -40,8 +40,11 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     - plots_dir (str): Directory to save the plots.
     """
     logger.info(f'Starting to process session: {session}')
-    session_events = events_df[(events_df['session_name'] == session) & (events_df['block'] != 'discard')]
-    session_label = next(item for item in gaze_labels if item['session_name'] == session)
+    session_events = events_df[(
+        events_df['session_name'] == session) & (
+            events_df['block'] != 'discard')]
+    session_label = next(
+        item for item in gaze_labels if item['session_name'] == session)
     roi_bb_corners = session_label['roi_bb_corners']
     agent = session_label.get('agent', 'Unknown')
     runs = session_events['run'].unique()
@@ -50,25 +53,35 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     fig, axs = plt.subplots(num_plots, 2, figsize=(20, 5 * num_plots))
     if num_plots == 1:
         axs = [axs]
+    elif num_plots > 1:
+        axs = np.array(axs).reshape(num_plots, 2)
     # Plot runs
-    pdb.set_trace()
     for i, run in enumerate(runs):
-        ax = axs[i, 0]
+        if num_plots == 1:
+            ax = axs[0]
+        else:
+            ax = axs[i, 0]
         run_events = session_events[session_events['run'] == run]
         logger.info(f'Processing run {run} with {len(run_events)} events')
-        plot_behavior_for_epoch(run_events, roi_bb_corners, ax, event_type='run')
+        plot_behavior_in_epoch(run_events, roi_bb_corners, ax, event_type='run')
     # Plot inter-runs
-    pdb.set_trace()
     for i, inter_run in enumerate(inter_runs):
-        ax = axs[i, 1]
+        if num_plots == 1:
+            ax = axs[1]
+        else:
+            ax = axs[i, 1]
         inter_run_events = session_events[session_events['inter_run'] == inter_run]
         logger.info(f'Processing inter-run {inter_run} with {len(inter_run_events)} events')
-        plot_behavior_for_epoch(inter_run_events, roi_bb_corners, ax, event_type='inter_run')
+        plot_behavior_in_epoch(inter_run_events, roi_bb_corners, ax, event_type='inter_run')
     # Calculate averages
-    avg_fixations_run = session_events[session_events['event_type'] == 'fixation'].groupby('run').size().mean()
-    avg_saccades_run = session_events[session_events['event_type'] == 'saccade'].groupby('run').size().mean()
-    avg_fixations_inter_run = session_events[session_events['event_type'] == 'fixation'].groupby('inter_run').size().mean()
-    avg_saccades_inter_run = session_events[session_events['event_type'] == 'saccade'].groupby('inter_run').size().mean()
+    avg_fixations_run = session_events[
+        session_events['event_type'] == 'fixation'].groupby('run').size().mean()
+    avg_saccades_run = session_events[
+        session_events['event_type'] == 'saccade'].groupby('run').size().mean()
+    avg_fixations_inter_run = session_events[
+        session_events['event_type'] == 'fixation'].groupby('inter_run').size().mean()
+    avg_saccades_inter_run = session_events[
+        session_events['event_type'] == 'saccade'].groupby('inter_run').size().mean()
     # Set the main title
     fig.suptitle(f'Session: {session}, Agent: {agent}\n'
                  f'Number of Runs: {len(runs)}, Number of Inter-Runs: {len(inter_runs)}\n'
@@ -83,7 +96,7 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     logger.info(f'Completed processing for session: {session}')
 
 
-def plot_behavior_for_epoch(events, roi_bb_corners, ax, event_type='run'):
+def plot_behavior_in_epoch(events, roi_bb_corners, ax, event_type='run'):
     """
     Generates plots for fixation points and saccade arrows within a given set of events.
     Args:
@@ -132,11 +145,7 @@ def plot_behavior_for_epoch(events, roi_bb_corners, ax, event_type='run'):
     saccade_colors = cm.Greens(norm(saccade_start_times))
     # Plot all saccade arrows at once
     for start_point, end_point, color in zip(saccade_start_points, saccade_end_points, saccade_colors):
-        ax.arrow(start_point[0], start_point[1],
-                 end_point[0] - start_point[0],
-                 end_point[1] - start_point[1],
-                 head_width=0.05, head_length=0.1,
-                 fc=color, ec=color, alpha=0.8)
+        ax.arrow(start_point[0], start_point[1], end_point[0] - start_point[0], end_point[1] - start_point[1], head_width=0.05, head_length=0.1, fc=color, ec=color, alpha=0.8)
     ax.set_xlim(roi_bb_corners[0], roi_bb_corners[2])
     ax.set_ylim(roi_bb_corners[1], roi_bb_corners[3])
     if event_type == 'run':
@@ -144,6 +153,20 @@ def plot_behavior_for_epoch(events, roi_bb_corners, ax, event_type='run'):
     else:
         title = f'Inter-Run: {events["inter_run"].iloc[0]}'
     ax.set_title(title)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
