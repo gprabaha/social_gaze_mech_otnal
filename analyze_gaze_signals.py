@@ -36,7 +36,7 @@ def main():
         'remake_combined_behav_m1': True,
         'remake_labelled_spiketimes': False,
         'remake_labelled_fixation_rasters': True,
-        'make_plots': False,
+        'make_plots': True,
         'recalculate_unit_ROI_responses': True,
         'replot_face/eye_vs_obj_violins': True,
         'remap_source_coord_from_inverted_to_standard_y_axis': True,

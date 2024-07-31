@@ -1,11 +1,11 @@
-2024-07-30 17:31:36,660 - data_manager - INFO - Loading variable(s): labelled_gaze_positions_m1
-2024-07-30 17:31:36,947 - data_manager - INFO - M1 remapped gaze pos data acquired!
-2024-07-30 17:31:36,947 - data_manager - INFO - Gaze data split into: self.gaze_positions and self.gaze_position_labels!
-2024-07-30 17:31:36,949 - data_manager - INFO - Frame of attention and plotting added to gaze data
-2024-07-30 17:31:36,949 - data_manager - INFO - Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1
-2024-07-30 17:31:36,952 - root - INFO - Job commands in the job list: 31
-2024-07-30 17:31:37,760 - root - INFO - Successfully generated the dSQ job script
-2024-07-30 17:31:37,760 - root - INFO - Using dSQ job script: ./job_scripts/dsq-joblist_fixations.sh
-2024-07-30 17:31:37,781 - root - INFO - Successfully submitted jobs using sbatch for script ./job_scripts/dsq-joblist_fixations.sh
-2024-07-30 17:31:37,782 - root - INFO - Submitted job array with ID: 27552178
-2024-07-30 17:31:37,782 - root - INFO - Tracking progress of job array with ID: 27552178
+2024-07-31 10:26:13,069 - data_manager - INFO - Loading variable(s): labelled_gaze_positions_m1
+2024-07-31 10:26:13,349 - data_manager - INFO - M1 remapped gaze pos data acquired!
+2024-07-31 10:26:13,350 - data_manager - INFO - Gaze data split into: self.gaze_positions and self.gaze_position_labels!
+2024-07-31 10:26:13,351 - data_manager - INFO - Frame of attention and plotting added to gaze data
+2024-07-31 10:26:13,351 - data_manager - INFO - Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1
+2024-07-31 10:26:13,354 - root - INFO - Job commands in the job list: 31
+2024-07-31 10:26:14,174 - root - INFO - Successfully generated the dSQ job script
+2024-07-31 10:26:14,174 - root - INFO - Using dSQ job script: ./job_scripts/dsq-joblist_fixations.sh
+2024-07-31 10:26:14,195 - root - INFO - Successfully submitted jobs using sbatch for script ./job_scripts/dsq-joblist_fixations.sh
+2024-07-31 10:26:14,195 - root - INFO - Submitted job array with ID: 27552366
+2024-07-31 10:26:14,195 - root - INFO - Tracking progress of job array with ID: 27552366

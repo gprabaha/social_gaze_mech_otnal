@@ -194,7 +194,7 @@ def make_fixations_df(fix_stats, info):
     fix_timepos_df['partner'] = info.get('monkey_2', None)
     # Reorder columns
     fix_timepos_df = fix_timepos_df[[
-        'session_name', 'run', 'block', 'agent', 'partner', 
+        'session_name', 'run', 'inter_run', 'block', 'agent', 'partner', 
         'start_index', 'end_index', 'start_time', 'end_time', 
         'duration', 'points_in_event', 'mean_position', 
         'std_spread', 'start_roi', 'end_roi', 'category']]
@@ -249,7 +249,7 @@ def make_saccades_df(saccade_stats, info):
     saccade_timepos_df['partner'] = info.get('monkey_2', None)
     # Reorder columns
     saccade_timepos_df = saccade_timepos_df[[
-        'session_name', 'run', 'block', 'agent', 'partner', 
+        'session_name', 'run', 'inter_run', 'block', 'agent', 'partner', 
         'start_index', 'end_index', 'start_time', 'end_time', 
         'duration', 'points_in_event', 'mean_position', 
         'std_spread', 'start_roi', 'end_roi', 'category'

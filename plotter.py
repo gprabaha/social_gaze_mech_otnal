@@ -82,12 +82,9 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     logger.info(f'Starting to process session: {session}')
     session_events = events_df[(events_df['session_name'] == session) & (events_df['block'] != 'discard')]
     session_label = next(item for item in gaze_labels if item['session_name'] == session)
-
-    pdb.set_trace()
-
     plotting_frame = session_label['plotting_frame']
     roi_bb_corners = session_label['roi_bb_corners']
-
+    pdb.set_trace()
     runs, inter_runs = [], []
     current_run, current_inter_run = [], []
 
