@@ -292,7 +292,6 @@ def determine_roi_of_coord(position, bbox_corners):
     return 'out_of_roi'
 
 
-
 def save_fixation_and_saccade_results(processed_data_dir, fix_timepos_df, saccades, params):
     """
     Saves fixation and saccade results to files.
