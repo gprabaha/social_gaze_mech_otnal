@@ -45,44 +45,51 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     frame_of_attention = session_label['frame_of_attention']
     roi_bb_corners = session_label['roi_bb_corners']
     agent = session_label.get('agent', 'Unknown')
-    runs = session_events['run'].unique()
-    inter_runs = session_events['inter_run'].unique()
+    # Filter out None and NaN values from runs and inter_runs
+    runs = session_events['run'].dropna().unique()
+    inter_runs = session_events['inter_run'].dropna().unique()
+    logger.info(f'Runs: {runs}; Inter-runs: {inter_runs}')
+    if len(runs) == 0:
+        logger.warning(f'No valid runs found for session: {session}')
+    if len(inter_runs) == 0:
+        logger.warning(f'No valid inter-runs found for session: {session}')
     num_plots = max(len(runs), len(inter_runs))
+    if num_plots == 0:
+        logger.warning(f'No valid runs or inter-runs found for session: {session}')
+        return
     fig, axs = plt.subplots(num_plots, 2, figsize=(20, 5 * num_plots))
     if num_plots == 1:
-        axs = [axs]
-    elif num_plots > 1:
-        axs = np.array(axs).reshape(num_plots, 2)
+        axs = axs[np.newaxis, :]  # Ensure axs is a 2D array with shape (1, 2)
     # Plot runs
     for i, run in enumerate(runs):
-        if num_plots == 1:
-            ax = axs[0]
-        else:
-            ax = axs[i, 0]
-        print([i, run])
+        ax = axs[i, 0]
         run_events = session_events[session_events['run'] == run]
-        logger.info(f'Processing run {run} with {len(run_events)} events')
+        # logger.info(f'Processing run {run} with {len(run_events)} events')
         plot_behavior_in_epoch(run_events, plotting_frame,
                                frame_of_attention, roi_bb_corners, ax, event_type='run')
     # Plot inter-runs
-    for i, inter_run in enumerate(inter_runs):
-        if num_plots == 1:
-            ax = axs[1]
-        else:
+    if len(inter_runs) > 0:
+        for i, inter_run in enumerate(inter_runs):
             ax = axs[i, 1]
-        inter_run_events = session_events[session_events['inter_run'] == inter_run]
-        logger.info(f'Processing inter-run {inter_run} with {len(inter_run_events)} events')
-        plot_behavior_in_epoch(inter_run_events, plotting_frame,
-                               frame_of_attention, roi_bb_corners, ax, event_type='inter_run')
+            inter_run_events = session_events[session_events['inter_run'] == inter_run]
+            # logger.info(f'Processing inter-run {inter_run} with {len(inter_run_events)} events')
+            plot_behavior_in_epoch(inter_run_events, plotting_frame,
+                                   frame_of_attention, roi_bb_corners, ax, event_type='inter_run')
+    else:
+        logger.warning(f'No inter-runs for session: {session}')
     # Calculate averages
-    avg_fixations_run = session_events[
-        session_events['event_type'] == 'fixation'].groupby('run').size().mean()
-    avg_saccades_run = session_events[
-        session_events['event_type'] == 'saccade'].groupby('run').size().mean()
-    avg_fixations_inter_run = session_events[
-        session_events['event_type'] == 'fixation'].groupby('inter_run').size().mean()
-    avg_saccades_inter_run = session_events[
-        session_events['event_type'] == 'saccade'].groupby('inter_run').size().mean()
+    if len(runs) > 0:
+        avg_fixations_run = session_events[session_events['event_type'] == 'fixation'].groupby('run').size().mean()
+        avg_saccades_run = session_events[session_events['event_type'] == 'saccade'].groupby('run').size().mean()
+    else:
+        avg_fixations_run = 0
+        avg_saccades_run = 0
+    if len(inter_runs) > 0:
+        avg_fixations_inter_run = session_events[session_events['event_type'] == 'fixation'].groupby('inter_run').size().mean()
+        avg_saccades_inter_run = session_events[session_events['event_type'] == 'saccade'].groupby('inter_run').size().mean()
+    else:
+        avg_fixations_inter_run = 0
+        avg_saccades_inter_run = 0
     # Set the main title
     fig.suptitle(f'Session: {session}, Agent: {agent}\n'
                  f'Number of Runs: {len(runs)}, Number of Inter-Runs: {len(inter_runs)}\n'
@@ -95,6 +102,7 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     logger.info(f'Saved plot to {plt_path}')
     plt.close(fig)
     logger.info(f'Completed processing for session: {session}')
+
 
 
 def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_corners, ax, event_type='run'):
@@ -111,7 +119,7 @@ def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_co
     all_start_times = events['start_time'].values
     fixations = events[events['event_type'] == 'fixation']
     saccades = events[events['event_type'] == 'saccade']
-    logger.info(f'Processing {event_type} with {len(fixations)} fixations and {len(saccades)} saccades')
+    # logger.info(f'Processing {event_type} with {len(fixations)} fixations and {len(saccades)} saccades')
     # Plot fixations
     all_points = []
     mean_positions = []
@@ -134,16 +142,24 @@ def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_co
     saccade_start_points = []
     saccade_end_points = []
     saccade_start_times = []
-    for _, saccade in saccades.iterrows():
-        points = util.convert_to_array(saccade['points_in_event'])
-        start_point = points[0]
-        end_point = points[-1]
-        start_time = saccade['start_time']
-        saccade_start_points.append(start_point)
-        saccade_end_points.append(end_point)
-        saccade_start_times.append(start_time)
-    saccade_start_points = np.array(saccade_start_points)
-    saccade_end_points = np.array(saccade_end_points)
+    for i, saccade in saccades.iterrows():
+        try:
+            points = util.convert_to_array(saccade['points_in_event'])
+            print(points.shape[1]==2)
+            if len(points) == 1:
+                start_point = end_point = points
+            else:
+                start_point = points[0]
+                end_point = points[-1]
+            start_time = saccade['start_time']
+            saccade_start_points.append(start_point)
+            saccade_end_points.append(end_point)
+            saccade_start_times.append(start_time)
+        except Exception as e:
+            print(f"Error processing row {i}: {e}")
+            print(saccade)
+    saccade_start_points = np.vstack(saccade_start_points)
+    saccade_end_points = np.vstack(saccade_end_points)
     saccade_start_times = np.array(saccade_start_times)
     saccade_colors = cm.Greens(norm(saccade_start_times))
     # Plot all saccade arrows at once

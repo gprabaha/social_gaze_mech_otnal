@@ -265,7 +265,7 @@ def determine_time_period_of_event(start_time, end_time, startS, stopS, mode):
                 return run_number
         return None
     elif mode == 'inter_run':
-        for inter_run_number, (prev_stop, next_start) in enumerate(zip(stopS[:-1], startS[1:]), start=0):
+        for inter_run_number, (prev_stop, next_start) in enumerate(zip(stopS[:-1], startS[1:]), start=1):
             if prev_stop < start_time and next_start > end_time:
                 return inter_run_number
         return None

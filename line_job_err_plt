@@ -1,0 +1,8 @@
+2024-08-01 16:28:41,832 - data_manager - INFO - Loading variable(s): labelled_gaze_positions_m1
+2024-08-01 16:28:42,697 - data_manager - INFO - M1 remapped gaze pos data acquired!
+2024-08-01 16:28:42,697 - data_manager - INFO - Gaze data split into: self.gaze_positions and self.gaze_position_labels!
+2024-08-01 16:28:42,699 - data_manager - INFO - Frame of attention and plotting added to gaze data
+2024-08-01 16:28:42,699 - data_manager - INFO - Loading variable(s): labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1
+2024-08-01 16:28:42,699 - load_data - INFO - Loading fixations and saccades from: /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/all_fixations_and_saccades.pkl
+2024-08-01 16:28:42,699 - load_data - INFO - Loading combined gaze and behavioral data from: /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/combined_gaze_behav_m1.csv
+2024-08-01 16:28:54,586 - data_manager - INFO - M1 fixations and saccades acquired

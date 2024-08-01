@@ -3,6 +3,3 @@ multiprocessing detected 48 CPUs
 NumExpr set to use 48 threads
 Batch script generated. To submit your jobs, run:
  sbatch ./job_scripts/dsq-joblist_fixations.sh
-> /gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/plotter.py(88)plot_behavior_for_session()
--> # Set the main title
-(Pdb) 

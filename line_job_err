@@ -1,140 +1,22 @@
-2024-07-31 10:26:13,069 - data_manager - INFO - Loading variable(s): labelled_gaze_positions_m1
-2024-07-31 10:26:13,349 - data_manager - INFO - M1 remapped gaze pos data acquired!
-2024-07-31 10:26:13,350 - data_manager - INFO - Gaze data split into: self.gaze_positions and self.gaze_position_labels!
-2024-07-31 10:26:13,351 - data_manager - INFO - Frame of attention and plotting added to gaze data
-2024-07-31 10:26:13,351 - data_manager - INFO - Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1
-2024-07-31 10:26:13,354 - root - INFO - Job commands in the job list: 31
-2024-07-31 10:26:14,174 - root - INFO - Successfully generated the dSQ job script
-2024-07-31 10:26:14,174 - root - INFO - Using dSQ job script: ./job_scripts/dsq-joblist_fixations.sh
-2024-07-31 10:26:14,195 - root - INFO - Successfully submitted jobs using sbatch for script ./job_scripts/dsq-joblist_fixations.sh
-2024-07-31 10:26:14,195 - root - INFO - Submitted job array with ID: 27552366
-2024-07-31 10:26:14,195 - root - INFO - Tracking progress of job array with ID: 27552366
-2024-07-31 10:31:14,727 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 10:36:15,142 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 10:41:15,657 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 10:46:16,142 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 10:51:16,649 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 10:56:17,139 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 11:01:17,639 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 11:06:18,139 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 11:11:18,545 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 11:16:19,021 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 11:21:19,503 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 11:26:20,009 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 11:31:20,497 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 11:36:21,003 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 11:41:21,497 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 11:46:22,004 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 11:51:22,490 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 11:56:22,998 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 12:01:23,496 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 12:06:24,003 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 12:11:24,468 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 12:16:24,976 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 12:21:25,445 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 12:26:25,953 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 12:31:26,445 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 12:36:26,917 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 12:41:27,395 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 12:46:27,904 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 12:51:28,345 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 12:56:28,840 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 13:01:29,282 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 13:06:29,784 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 13:11:30,239 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 13:16:30,726 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 13:21:31,188 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 13:26:31,694 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 13:31:32,189 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 13:36:32,695 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 13:41:33,188 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 13:46:33,693 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 13:51:34,188 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 13:56:34,679 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 14:01:35,298 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 14:06:35,929 - root - INFO - Job array 27552366 is still running. Checking again in 30 seconds...
-2024-07-31 14:11:06,337 - root - INFO - Job array 27552366 has completed.
-2024-07-31 14:11:14,503 - root - INFO - Saving: /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/all_fixations_and_saccades.pkl
-2024-07-31 14:11:20,640 - curate_data - INFO - Starting sorting of sessions.
-Sorting session behav dfs:   0%|          | 0/31 [00:00<?, ?it/s]Sorting session behav dfs:   3%|▎         | 1/31 [00:01<00:45,  1.52s/it]Sorting session behav dfs:  10%|▉         | 3/31 [00:02<00:33,  1.19s/it]Sorting session behav dfs:  13%|█▎        | 4/31 [00:02<00:26,  1.00it/s]Sorting session behav dfs:  16%|█▌        | 5/31 [00:04<00:28,  1.11s/it]Sorting session behav dfs:  19%|█▉        | 6/31 [00:05<00:27,  1.12s/it]Sorting session behav dfs:  23%|██▎       | 7/31 [00:05<00:20,  1.18it/s]Sorting session behav dfs:  26%|██▌       | 8/31 [00:06<00:16,  1.36it/s]Sorting session behav dfs:  29%|██▉       | 9/31 [00:06<00:16,  1.33it/s]Sorting session behav dfs:  32%|███▏      | 10/31 [00:08<00:18,  1.15it/s]Sorting session behav dfs:  35%|███▌      | 11/31 [00:08<00:16,  1.22it/s]Sorting session behav dfs:  39%|███▊      | 12/31 [00:08<00:12,  1.54it/s]Sorting session behav dfs:  42%|████▏     | 13/31 [00:09<00:11,  1.59it/s]Sorting session behav dfs:  45%|████▌     | 14/31 [00:09<00:08,  2.06it/s]Sorting session behav dfs:  48%|████▊     | 15/31 [00:10<00:08,  1.89it/s]Sorting session behav dfs:  52%|█████▏    | 16/31 [00:11<00:10,  1.44it/s]Sorting session behav dfs:  55%|█████▍    | 17/31 [00:12<00:09,  1.48it/s]Sorting session behav dfs:  58%|█████▊    | 18/31 [00:12<00:09,  1.44it/s]Sorting session behav dfs:  61%|██████▏   | 19/31 [00:12<00:06,  1.84it/s]Sorting session behav dfs:  65%|██████▍   | 20/31 [00:13<00:05,  1.98it/s]Sorting session behav dfs:  68%|██████▊   | 21/31 [00:14<00:07,  1.28it/s]Sorting session behav dfs:  71%|███████   | 22/31 [00:15<00:06,  1.39it/s]Sorting session behav dfs:  74%|███████▍  | 23/31 [00:15<00:04,  1.77it/s]Sorting session behav dfs:  77%|███████▋  | 24/31 [00:16<00:03,  1.75it/s]Sorting session behav dfs:  81%|████████  | 25/31 [00:16<00:03,  1.72it/s]Sorting session behav dfs:  84%|████████▍ | 26/31 [00:17<00:03,  1.62it/s]Sorting session behav dfs:  87%|████████▋ | 27/31 [00:18<00:02,  1.54it/s]Sorting session behav dfs:  90%|█████████ | 28/31 [00:18<00:01,  1.50it/s]Sorting session behav dfs:  94%|█████████▎| 29/31 [00:19<00:01,  1.56it/s]Sorting session behav dfs:  97%|█████████▋| 30/31 [00:20<00:00,  1.60it/s]Sorting session behav dfs: 100%|██████████| 31/31 [00:20<00:00,  2.07it/s]Sorting session behav dfs: 100%|██████████| 31/31 [00:20<00:00,  1.53it/s]
-2024-07-31 14:11:43,877 - curate_data - INFO - Finished sorting sessions. Checking for time window clashes.
-Checking time window clashes within events:   0%|          | 0/31 [00:00<?, ?it/s]Checking time window clashes within events:   3%|▎         | 1/31 [00:39<19:41, 39.38s/it]Checking time window clashes within events:  10%|▉         | 3/31 [00:42<13:06, 28.08s/it]Checking time window clashes within events:  16%|█▌        | 5/31 [01:04<09:54, 22.85s/it]Checking time window clashes within events:  32%|███▏      | 10/31 [01:11<05:44, 16.41s/it]Checking time window clashes within events:  48%|████▊     | 15/31 [01:17<03:10, 11.89s/it]Checking time window clashes within events:  52%|█████▏    | 16/31 [01:19<02:11,  8.76s/it]Checking time window clashes within events:  55%|█████▍    | 17/31 [01:20<01:31,  6.52s/it]Checking time window clashes within events:  61%|██████▏   | 19/31 [01:21<00:56,  4.69s/it]Checking time window clashes within events:  65%|██████▍   | 20/31 [01:23<00:42,  3.86s/it]Checking time window clashes within events:  68%|██████▊   | 21/31 [01:36<01:07,  6.80s/it]Checking time window clashes within events:  74%|███████▍  | 23/31 [01:37<00:38,  4.82s/it]Checking time window clashes within events:  87%|████████▋ | 27/31 [01:38<00:13,  3.47s/it]Checking time window clashes within events:  90%|█████████ | 28/31 [01:40<00:09,  3.07s/it]Checking time window clashes within events: 100%|██████████| 31/31 [01:40<00:00,  3.25s/it]
-2024-07-31 14:13:27,824 - curate_data - INFO - No time window clashes found.
-2024-07-31 14:13:28,182 - curate_data - INFO - First 50 events in the 'mon_down' condition:
-        session_name  run inter_run  ...         end_roi category event_type
-118  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0   fixation
-119  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0   fixation
-120  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
-121  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-122  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
-123  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0   fixation
-124  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0    saccade
-125  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-126  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
-127  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-128  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
-129  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-130  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
-131  OTNAL_FV_121021  1.0       NaN  ...       face_bbox      3.0   fixation
-132  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-133  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-134  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-135  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
-136  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0   fixation
-137  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0    saccade
-138  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-139  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0   fixation
-140  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-141  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
-142  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-143  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
-144  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-145  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
-146  OTNAL_FV_121021  1.0       NaN  ...  right_obj_bbox      3.0   fixation
-147  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-148  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-149  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-150  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
-151  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-152  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-153  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
-154  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0   fixation
-155  OTNAL_FV_121021  1.0       NaN  ...   left_obj_bbox      3.0    saccade
-156  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-157  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-158  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
-159  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-160  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-161  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-162  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
-163  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-164  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-165  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-166  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
-167  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
 
-[50 rows x 18 columns]
-2024-07-31 14:17:49,760 - curate_data - INFO - DataFrame saved to: /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/combined_gaze_behav_m1.csv
-2024-07-31 14:17:49,848 - data_manager - INFO - M1 fixations and saccades acquired
-Isolating events within frame of attention:   0%|          | 0/31 [00:00<?, ?it/s]Isolating events within frame of attention: 100%|██████████| 31/31 [00:00<00:00, 371495.50it/s]
-2024-07-31 14:23:31,216 - data_manager - INFO - Events within attention frame isolated
-  0%|          | 0/31 [00:00<?, ?it/s]2024-07-31 14:23:31,229 - plotter - INFO - Starting to process session: OTNAL_FV_121021
-  0%|          | 0/31 [00:00<?, ?it/s]
-Traceback (most recent call last):
-  File "analyze_gaze_signals.py", line 62, in <module>
-    main()
-  File "analyze_gaze_signals.py", line 58, in main
-    data_manager.run()
-  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/data_manager.py", line 192, in run
-    self.logger.info(f"Events within attention frame isolated")
-  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/data_manager.py", line 152, in plot_all_behavior_in_all_sessions
-    for session in tqdm(sessions, total=len(sessions),
-  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/plotter.py", line 88, in plot_behavior_for_session
-    # Set the main title
-  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/plotter.py", line 88, in plot_behavior_for_session
-    # Set the main title
-  File "/gpfs/milgram/project/chang/pg496/conda_envs/gaze_processing/lib/python3.8/bdb.py", line 88, in trace_dispatch
-    return self.dispatch_line(frame)
-  File "/gpfs/milgram/project/chang/pg496/conda_envs/gaze_processing/lib/python3.8/bdb.py", line 113, in dispatch_line
-    if self.quitting: raise BdbQuit
-bdb.BdbQuit
+CondaError: Run 'conda init' before 'conda deactivate'
+
+2024-08-01 15:49:08,452 - data_manager - INFO - Loading variable(s): labelled_gaze_positions_m1
+2024-08-01 15:49:08,881 - data_manager - INFO - M1 remapped gaze pos data acquired!
+2024-08-01 15:49:08,882 - data_manager - INFO - Gaze data split into: self.gaze_positions and self.gaze_position_labels!
+2024-08-01 15:49:08,883 - data_manager - INFO - Frame of attention and plotting added to gaze data
+2024-08-01 15:49:08,883 - data_manager - INFO - Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1
+2024-08-01 15:49:08,941 - root - INFO - Job commands in the job list: 31
+2024-08-01 15:49:10,044 - root - INFO - Successfully generated the dSQ job script
+2024-08-01 15:49:10,044 - root - INFO - Using dSQ job script: ./job_scripts/dsq-joblist_fixations.sh
+2024-08-01 15:49:10,063 - root - INFO - Successfully submitted jobs using sbatch for script ./job_scripts/dsq-joblist_fixations.sh
+2024-08-01 15:49:10,063 - root - INFO - Submitted job array with ID: 27552964
+2024-08-01 15:49:10,063 - root - INFO - Tracking progress of job array with ID: 27552964
+2024-08-01 15:54:10,575 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 15:59:11,027 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 16:04:11,458 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 16:09:11,956 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 16:14:12,386 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 16:19:12,885 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 16:24:13,354 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 16:29:13,849 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...

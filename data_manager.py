@@ -137,6 +137,13 @@ class DataManager:
             os.path.join(root_data_dir, 'plots', 'fix_and_saccades_all_sessions'))
         os.makedirs(plots_dir, exist_ok=True)
         sessions = list(self.events_within_attention_frame_m1['session_name'].unique())
+
+
+        # !!!!!!!!!!!!!!!!!!
+        # sessions = sessions[1:]
+
+
+
         if use_parallel:
             with Pool() as pool:
                 for _ in tqdm(pool.starmap(
@@ -191,7 +198,7 @@ class DataManager:
         self.events_within_attention_frame_m1.head()
         self.logger.info(f"Events within attention frame isolated")
         if self.params['make_plots']:
-            self.plot_all_behavior_in_all_sessions()
+            self.plot_all_behavior_in_all_sessions(use_parallel=False)
             self.logger.info(f"Plots generated successfully")
 
         # plotter.plot_fixation_proportions_for_diff_conditions(self.labelled_fixations_m1, self.params)

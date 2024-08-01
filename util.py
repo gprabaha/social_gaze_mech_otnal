@@ -501,8 +501,8 @@ def convert_to_array(position_str):
         position_list = re.findall(r'-?\d+\.?\d*(?:[eE][+-]?\d+)?', position_str)
         # Convert to numpy array of floats
         array = np.array(position_list, dtype=float)
-        # Check if the array length is even and greater than 2, indicating a 2D array
-        if array.size > 2 and array.size % 2 == 0 and ' ' in position_str:
+        # Check if the array length is greater than 2, indicating a 2D array
+        if array.size > 2 and array.size % 2 == 0:
             array = array.reshape(-1, 2)
         return array
     except Exception as e:

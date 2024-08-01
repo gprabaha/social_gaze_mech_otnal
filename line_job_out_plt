@@ -1,0 +1,3 @@
+SLURM detected 1 CPUs
+multiprocessing detected 48 CPUs
+NumExpr set to use 48 threads
