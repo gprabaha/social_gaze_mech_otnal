@@ -29,7 +29,6 @@ import pdb
 
 logger = logging.getLogger(__name__)
 
-
 def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     """
     Generates a single figure with subplots for all events (fixations and saccades) within the frame of attention for a given session.
@@ -40,10 +39,11 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     - plots_dir (str): Directory to save the plots.
     """
     logger.info(f'Starting to process session: {session}')
-    session_events = events_df[( events_df['session_name'] == session) & (events_df['block'] != 'discard')]
-    session_label = next(
-        item for item in gaze_labels if item['session_name'] == session)
+    session_events = events_df[(events_df['session_name'] == session) & (events_df['block'] != 'discard')]
+    session_label = next(item for item in gaze_labels if item['session_name'] == session)
     plotting_frame = session_label['plotting_frame']
+    frame_of_attention = session_label['frame_of_attention']
+    roi_bb_corners = session_label['roi_bb_corners']
     agent = session_label.get('agent', 'Unknown')
     runs = session_events['run'].unique()
     inter_runs = session_events['inter_run'].unique()
@@ -62,7 +62,8 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
         print([i, run])
         run_events = session_events[session_events['run'] == run]
         logger.info(f'Processing run {run} with {len(run_events)} events')
-        plot_behavior_in_epoch(run_events, plotting_frame, ax, event_type='run')
+        plot_behavior_in_epoch(run_events, plotting_frame,
+                               frame_of_attention, roi_bb_corners, ax, event_type='run')
     # Plot inter-runs
     for i, inter_run in enumerate(inter_runs):
         if num_plots == 1:
@@ -71,7 +72,8 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
             ax = axs[i, 1]
         inter_run_events = session_events[session_events['inter_run'] == inter_run]
         logger.info(f'Processing inter-run {inter_run} with {len(inter_run_events)} events')
-        plot_behavior_in_epoch(inter_run_events, plotting_frame, ax, event_type='inter_run')
+        plot_behavior_in_epoch(inter_run_events, plotting_frame,
+                               frame_of_attention, roi_bb_corners, ax, event_type='inter_run')
     # Calculate averages
     avg_fixations_run = session_events[
         session_events['event_type'] == 'fixation'].groupby('run').size().mean()
@@ -95,12 +97,14 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     logger.info(f'Completed processing for session: {session}')
 
 
-def plot_behavior_in_epoch(events, plotting_frame, ax, event_type='run'):
+def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_corners, ax, event_type='run'):
     """
     Generates plots for fixation points and saccade arrows within a given set of events.
     Args:
     - events (pd.DataFrame): DataFrame containing events (fixations and saccades).
-    - roi_bb_corners (list): List containing bounding box corners for region of interest.
+    - plotting_frame (dict): Dictionary with 'topRight' and 'bottomLeft' keys for plotting frame coordinates.
+    - frame_of_attention (dict): Dictionary with 'topRight' and 'bottomLeft' keys for frame of attention coordinates.
+    - roi_bb_corners (dict): Dictionary containing rects of various ROIs.
     - ax (matplotlib.axes.Axes): Axes object to plot the events.
     - event_type (str): Type of event ('run' or 'inter_run').
     """
@@ -114,25 +118,11 @@ def plot_behavior_in_epoch(events, plotting_frame, ax, event_type='run'):
     start_times = []
     for index, fixation in fixations.iterrows():
         points = util.convert_to_array(fixation['points_in_event'])
-        # Print points to check their contents
         mean_position = util.convert_to_array(fixation['mean_position'])
         start_time = fixation['start_time']
-        # Check if points is a NumPy array
-        if not isinstance(points, np.ndarray):
-            print(f"Index: {index}, Points: {points}, Type: {type(points)}")
-        else:
-            # Check if points has the correct shape (should be (N, 2) where N is the number of points or (2,) for a single point)
-            if len(points.shape) == 1 and points.shape[0] != 2:
-                print(f"Index: {index}, Points: {points}, Points shape: {points.shape}")
-            elif len(points.shape) == 2 and points.shape[1] != 2:
-                print(f"Index: {index}, Points: {points}, Points shape: {points.shape}")
         all_points.extend(points if points.ndim == 2 else [points])
         mean_positions.append(mean_position)
         start_times.append(start_time)
-    # Check shapes of all points
-    for i, pt in enumerate(all_points):
-        if pt.shape != (2,):
-            print(f"Index: {i}, Point shape: {pt.shape}, Point: {pt}")
     all_points = np.vstack(all_points)
     mean_positions = np.vstack(mean_positions)
     start_times = np.array(start_times)
@@ -158,14 +148,34 @@ def plot_behavior_in_epoch(events, plotting_frame, ax, event_type='run'):
     saccade_colors = cm.Greens(norm(saccade_start_times))
     # Plot all saccade arrows at once
     for start_point, end_point, color in zip(saccade_start_points, saccade_end_points, saccade_colors):
-        ax.arrow(start_point[0], start_point[1], end_point[0] - start_point[0], end_point[1] - start_point[1], head_width=0.05, head_length=0.1, fc=color, ec=color, alpha=0.8)
-    ax.set_xlim(plotting_frame[0], plotting_frame[2])
-    ax.set_ylim(plotting_frame[1], plotting_frame[3])
+        ax.arrow(start_point[0], start_point[1],
+                 end_point[0] - start_point[0],
+                 end_point[1] - start_point[1],
+                 head_width=0.05, head_length=0.1,
+                 fc=color, ec=color, alpha=0.8)
+    # Set axis limits based on plotting_frame
+    ax.set_xlim(plotting_frame['bottomLeft'][0], plotting_frame['topRight'][0])
+    ax.set_ylim(plotting_frame['bottomLeft'][1], plotting_frame['topRight'][1])
+    # Draw gray bounding box for frame_of_attention
+    foa_rect = Rectangle((frame_of_attention['bottomLeft'][0], frame_of_attention['bottomLeft'][1]),
+                         frame_of_attention['topRight'][0] - frame_of_attention['bottomLeft'][0],
+                         frame_of_attention['topRight'][1] - frame_of_attention['bottomLeft'][1],
+                         linewidth=2, edgecolor='gray', linestyle='--', facecolor='none', label='Frame of Attention')
+    ax.add_patch(foa_rect)
+    # Draw black rectangles for each ROI
+    for roi, corners in roi_bb_corners.items():
+        roi_rect = Rectangle((corners['bottomLeft'][0], corners['bottomLeft'][1]),
+                             corners['topRight'][0] - corners['bottomLeft'][0],
+                             corners['topRight'][1] - corners['bottomLeft'][1],
+                             linewidth=1, edgecolor='black', facecolor='none', label=roi)
+        ax.add_patch(roi_rect)
     if event_type == 'run':
         title = f'Run: {events["run"].iloc[0]}'
     else:
         title = f'Inter-Run: {events["inter_run"].iloc[0]}'
     ax.set_title(title)
+    ax.legend()
+
 
 
 
