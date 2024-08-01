@@ -140,7 +140,7 @@ class DataManager:
 
 
         # !!!!!!!!!!!!!!!!!!
-        # sessions = sessions[1:]
+        sessions = sessions[1:]
 
 
 

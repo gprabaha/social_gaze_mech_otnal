@@ -145,12 +145,11 @@ def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_co
     for i, saccade in saccades.iterrows():
         try:
             points = util.convert_to_array(saccade['points_in_event'])
-            print(points.shape[1]==2)
-            if len(points) == 1:
+            if len(points.shape) < 2:
                 start_point = end_point = points
             else:
-                start_point = points[0]
-                end_point = points[-1]
+                start_point = points[0,:]
+                end_point = points[-1,:]
             start_time = saccade['start_time']
             saccade_start_points.append(start_point)
             saccade_end_points.append(end_point)
@@ -158,6 +157,9 @@ def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_co
         except Exception as e:
             print(f"Error processing row {i}: {e}")
             print(saccade)
+            print(points)
+            print(points.shape)
+    pdb.set_trace()
     saccade_start_points = np.vstack(saccade_start_points)
     saccade_end_points = np.vstack(saccade_end_points)
     saccade_start_times = np.array(saccade_start_times)

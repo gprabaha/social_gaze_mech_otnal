@@ -6,3 +6,5 @@
 2024-08-01 16:28:42,699 - load_data - INFO - Loading fixations and saccades from: /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/all_fixations_and_saccades.pkl
 2024-08-01 16:28:42,699 - load_data - INFO - Loading combined gaze and behavioral data from: /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/combined_gaze_behav_m1.csv
 2024-08-01 16:28:54,586 - data_manager - INFO - M1 fixations and saccades acquired
+./run_gaze_analysis.sh: line 5: 2758212 Killed                  python analyze_gaze_signals.py
+slurmstepd: error: Detected 1 oom_kill event in StepId=27553574.batch. Some of the step tasks have been OOM Killed.
