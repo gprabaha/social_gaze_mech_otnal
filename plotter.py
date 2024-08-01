@@ -159,7 +159,6 @@ def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_co
             print(saccade)
             print(points)
             print(points.shape)
-    pdb.set_trace()
     saccade_start_points = np.vstack(saccade_start_points)
     saccade_end_points = np.vstack(saccade_end_points)
     saccade_start_times = np.array(saccade_start_times)
