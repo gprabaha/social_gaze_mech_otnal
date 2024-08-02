@@ -130,13 +130,6 @@ class DataManager:
             os.path.join(root_data_dir, 'plots', 'fix_and_saccades_all_sessions'))
         os.makedirs(plots_dir, exist_ok=True)
         sessions = list(self.events_within_attention_frame_m1['session_name'].unique())
-
-
-        # !!!!!!!!!!!!!!!!!!
-        # sessions = sessions[1:]
-
-
-
         if use_parallel:
             with Pool() as pool:
                 for _ in tqdm(pool.starmap(
@@ -186,6 +179,7 @@ class DataManager:
             load_data.load_m1_labelled_fixations_saccades_and_combined,
             lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p))
         self.logger.info(f"M1 fixations and saccades acquired")
+        pdb.set_trace()
         self.events_within_attention_frame_m1 = curate_data.isolate_events_within_attention_frame(
             self.combined_behav_m1, self.labelled_gaze_positions_m1, use_parallel=True)
         self.events_within_attention_frame_m1.head()

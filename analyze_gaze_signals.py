@@ -19,6 +19,13 @@ single coordinate or 2D array containing sets of coordinates are exported and im
 uniform manner
 '''
 
+
+'''
+Currently only the start-to-end vector is being plotted for saccades. Plot out a bunch of
+random saccades and teh underlying points to verify that they are indeed saccades
+'''
+
+
 def main():
     # Configure the root logger
     logging.basicConfig(

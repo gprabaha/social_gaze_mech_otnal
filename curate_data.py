@@ -311,6 +311,7 @@ def isolate_events_for_session(dataframe, session_data):
     for index, row in session_events.iterrows():
         start_index = row['start_index']
         end_index = row['end_index']
+        event_type = row['event_type']
         mean_position_str = row['mean_position']
         # Convert mean_position to numpy array
         mean_position = util.convert_to_array(mean_position_str)
@@ -320,7 +321,7 @@ def isolate_events_for_session(dataframe, session_data):
         try:
             if (util.is_within_frame(start_position, frame) or 
                 util.is_within_frame(end_position, frame) or 
-                util.is_within_frame(mean_position, frame)):
+                (event_type == 'fixation' and util.is_within_frame(mean_position, frame))):
                 events_within_frame.append(row)
         except Exception as e:
             print(f"Error processing row {index}: {row}")

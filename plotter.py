@@ -46,7 +46,7 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     plotting_frame = session_label['plotting_frame']
     frame_of_attention = session_label['frame_of_attention']
     roi_bb_corners = session_label['roi_bb_corners']
-    agent = session_label.get('agent', 'Unknown')
+    agent = session_label.get('monkey_1', 'Unknown')
     # Filter out None and NaN values from runs and inter_runs
     runs = session_events['run'].dropna().unique()
     inter_runs = session_events['inter_run'].dropna().unique()
@@ -104,7 +104,7 @@ def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_co
     fixations = events[events['event_type'] == 'fixation']
     saccades = events[events['event_type'] == 'saccade']
     # Create custom colormap
-    colors = [(0.678, 0.847, 0.902), (1, 0, 0)]  # Pale blue to bright red
+    colors = [(0, 0, 1), (1, 0, 0)]  # Blue to red
     cmap = LinearSegmentedColormap.from_list('custom_cmap', colors, N=256)
     # Plot fixations
     all_points = []
