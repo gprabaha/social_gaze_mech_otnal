@@ -6,20 +6,12 @@ Created on Wed May 22 11:35:03 2024
 @author: pg496
 """
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
-import matplotlib.cm as cm
-import os
 from scipy.stats import ttest_ind
 import seaborn as sns
 from datetime import datetime
 import logging
 from matplotlib_venn import venn3
-from itertools import zip_longest
 from tqdm import tqdm
-import concurrent.futures
 
 import util
 import load_data
@@ -30,11 +22,14 @@ import pdb
 import os
 import logging
 import matplotlib.pyplot as plt
-import numpy as np
+import numpy as np 
 import matplotlib.cm as cm
 from matplotlib.patches import Rectangle
+from matplotlib.colors import LinearSegmentedColormap
+
 
 logger = logging.getLogger(__name__)
+
 
 def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     """
@@ -108,6 +103,9 @@ def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_co
     all_start_times = events['start_time'].values
     fixations = events[events['event_type'] == 'fixation']
     saccades = events[events['event_type'] == 'saccade']
+    # Create custom colormap
+    colors = [(0.678, 0.847, 0.902), (1, 0, 0)]  # Pale blue to bright red
+    cmap = LinearSegmentedColormap.from_list('custom_cmap', colors, N=256)
     # Plot fixations
     all_points = []
     mean_positions = []
@@ -123,7 +121,7 @@ def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_co
     mean_positions = np.vstack(mean_positions)
     start_times = np.array(start_times)
     norm = plt.Normalize(all_start_times.min(), all_start_times.max())
-    fixation_colors = cm.viridis(norm(start_times))
+    fixation_colors = cmap(norm(start_times))
     ax.scatter(all_points[:, 0], all_points[:, 1], c='gray', alpha=0.5)
     ax.scatter(mean_positions[:, 0], mean_positions[:, 1], c=fixation_colors, edgecolor='black')
     # Collect saccades start and end points
@@ -180,6 +178,7 @@ def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_co
         title = f'Inter-Run: {events["inter_run"].iloc[0]}'
     ax.set_title(title)
     ax.legend()
+
 
 
 
