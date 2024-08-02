@@ -27,6 +27,13 @@ import load_data
 import pdb
 
 
+import os
+import logging
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.cm as cm
+from matplotlib.patches import Rectangle
+
 logger = logging.getLogger(__name__)
 
 def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
@@ -173,6 +180,7 @@ def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_co
         title = f'Inter-Run: {events["inter_run"].iloc[0]}'
     ax.set_title(title)
     ax.legend()
+
 
 
 
