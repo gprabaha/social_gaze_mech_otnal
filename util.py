@@ -467,12 +467,12 @@ def define_frame_of_attention(bboxes):
     center_point = (left_bbox_center + right_bbox_center) / 2
     bbox_distance = np.linalg.norm(left_bbox_center - right_bbox_center)
     # Calculate the frame boundaries
-    left_boundary = center_point[0] - 1.5 * bbox_distance
-    right_boundary = center_point[0] + 1.5 * bbox_distance
+    left_boundary = center_point[0] - 1.2 * bbox_distance
+    right_boundary = center_point[0] + 1.2 * bbox_distance
     mean_height = np.mean([bboxes['left_obj_bbox']['topRight'][1] - bboxes['left_obj_bbox']['bottomLeft'][1],
                            bboxes['right_obj_bbox']['topRight'][1] - bboxes['right_obj_bbox']['bottomLeft'][1]])
-    top_boundary = center_point[1] + 1.5 * mean_height
-    bottom_boundary = center_point[1] - 3.5 * mean_height
+    top_boundary = center_point[1] + 1.2 * mean_height
+    bottom_boundary = center_point[1] - 2.5 * mean_height
     return {'bottomLeft': (left_boundary, bottom_boundary), 'topRight': (right_boundary, top_boundary)}
 
 

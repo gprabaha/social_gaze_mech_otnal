@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     """
-    Generates a single figure with subplots for all events (fixations and saccades) within the frame of attention for a given session.
+    Generates separate figures for all events (fixations and saccades) within the frame of attention for a given session.
     Args:
     - session (str): The session name.
     - events_df (pd.DataFrame): DataFrame containing events within the frame of attention.
@@ -48,61 +48,43 @@ def plot_behavior_for_session(session, events_df, gaze_labels, plots_dir):
     # Filter out None and NaN values from runs and inter_runs
     runs = session_events['run'].dropna().unique()
     inter_runs = session_events['inter_run'].dropna().unique()
-    logger.info(f'Runs: {runs}; Inter-runs: {inter_runs}')
-    if len(runs) == 0:
-        logger.warning(f'No valid runs found for session: {session}')
-    if len(inter_runs) == 0:
-        logger.warning(f'No valid inter-runs found for session: {session}')
-    num_plots = max(len(runs), len(inter_runs))
-    if num_plots == 0:
+    if len(runs) == 0 and len(inter_runs) == 0:
         logger.warning(f'No valid runs or inter-runs found for session: {session}')
         return
-    fig, axs = plt.subplots(num_plots, 2, figsize=(20, 5 * num_plots))
-    if num_plots == 1:
-        axs = axs[np.newaxis, :]  # Ensure axs is a 2D array with shape (1, 2)
+    # Create directory for session plots
+    session_dir = os.path.join(plots_dir, session)
+    os.makedirs(session_dir, exist_ok=True)
     # Plot runs
-    for i, run in enumerate(runs):
-        ax = axs[i, 0]
+    for run in runs:
         run_events = session_events[session_events['run'] == run]
-        # logger.info(f'Processing run {run} with {len(run_events)} events')
+        fig, ax = plt.subplots(figsize=(10, 5))
         plot_behavior_in_epoch(run_events, plotting_frame,
                                frame_of_attention, roi_bb_corners, ax, event_type='run')
+        plt_path = os.path.join(session_dir, f'{session}_run_{run}_behavior.png')
+        fig.suptitle(f'Session: {session}, Agent: {agent}, Run: {run}\n'
+                     f'Average Fixations: {run_events[run_events["event_type"] == "fixation"].shape[0]:.2f}, '
+                     f'Average Saccades: {run_events[run_events["event_type"] == "saccade"].shape[0]:.2f}',
+                     fontsize=16)
+        plt.tight_layout(rect=[0, 0, 1, 0.95])
+        plt.savefig(plt_path)
+        logger.info(f'Saved plot to {plt_path}')
+        plt.close(fig)
     # Plot inter-runs
-    if len(inter_runs) > 0:
-        for i, inter_run in enumerate(inter_runs):
-            ax = axs[i, 1]
-            inter_run_events = session_events[session_events['inter_run'] == inter_run]
-            # logger.info(f'Processing inter-run {inter_run} with {len(inter_run_events)} events')
-            plot_behavior_in_epoch(inter_run_events, plotting_frame,
-                                   frame_of_attention, roi_bb_corners, ax, event_type='inter_run')
-    else:
-        logger.warning(f'No inter-runs for session: {session}')
-    # Calculate averages
-    if len(runs) > 0:
-        avg_fixations_run = session_events[session_events['event_type'] == 'fixation'].groupby('run').size().mean()
-        avg_saccades_run = session_events[session_events['event_type'] == 'saccade'].groupby('run').size().mean()
-    else:
-        avg_fixations_run = 0
-        avg_saccades_run = 0
-    if len(inter_runs) > 0:
-        avg_fixations_inter_run = session_events[session_events['event_type'] == 'fixation'].groupby('inter_run').size().mean()
-        avg_saccades_inter_run = session_events[session_events['event_type'] == 'saccade'].groupby('inter_run').size().mean()
-    else:
-        avg_fixations_inter_run = 0
-        avg_saccades_inter_run = 0
-    # Set the main title
-    fig.suptitle(f'Session: {session}, Agent: {agent}\n'
-                 f'Number of Runs: {len(runs)}, Number of Inter-Runs: {len(inter_runs)}\n'
-                 f'Average Fixations per Run: {avg_fixations_run:.2f}, Average Saccades per Run: {avg_saccades_run:.2f}\n'
-                 f'Average Fixations per Inter-Run: {avg_fixations_inter_run:.2f}, Average Saccades per Inter-Run: {avg_saccades_inter_run:.2f}',
-                 fontsize=16)
-    plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt_path = os.path.join(plots_dir, f'{session}_behavior.png')
-    plt.savefig(plt_path)
-    logger.info(f'Saved plot to {plt_path}')
-    plt.close(fig)
+    for inter_run in inter_runs:
+        inter_run_events = session_events[session_events['inter_run'] == inter_run]
+        fig, ax = plt.subplots(figsize=(10, 5))
+        plot_behavior_in_epoch(inter_run_events, plotting_frame,
+                               frame_of_attention, roi_bb_corners, ax, event_type='inter_run')
+        plt_path = os.path.join(session_dir, f'{session}_inter_run_{inter_run}_behavior.png')
+        fig.suptitle(f'Session: {session}, Agent: {agent}, Inter-Run: {inter_run}\n'
+                     f'Average Fixations: {inter_run_events[inter_run_events["event_type"] == "fixation"].shape[0]:.2f}, '
+                     f'Average Saccades: {inter_run_events[inter_run_events["event_type"] == "saccade"].shape[0]:.2f}',
+                     fontsize=16)
+        plt.tight_layout(rect=[0, 0, 1, 0.95])
+        plt.savefig(plt_path)
+        logger.info(f'Saved plot to {plt_path}')
+        plt.close(fig)
     logger.info(f'Completed processing for session: {session}')
-
 
 
 def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_corners, ax, event_type='run'):
@@ -119,7 +101,6 @@ def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_co
     all_start_times = events['start_time'].values
     fixations = events[events['event_type'] == 'fixation']
     saccades = events[events['event_type'] == 'saccade']
-    # logger.info(f'Processing {event_type} with {len(fixations)} fixations and {len(saccades)} saccades')
     # Plot fixations
     all_points = []
     mean_positions = []

@@ -22,13 +22,6 @@ import fix_and_saccades
 
 import pdb
 
-
-"""
-Big changes needed in session plotter. currently it is appending each row as a separate event which is true
-but we have to collect each event in a run and then plot them out. This is too complicated for chatgpt 
-so write manually
-"""
-
 class DataManager:
     def __init__(self, params):
         self.params = params
@@ -140,7 +133,7 @@ class DataManager:
 
 
         # !!!!!!!!!!!!!!!!!!
-        sessions = sessions[1:]
+        # sessions = sessions[1:]
 
 
 
@@ -198,7 +191,7 @@ class DataManager:
         self.events_within_attention_frame_m1.head()
         self.logger.info(f"Events within attention frame isolated")
         if self.params['make_plots']:
-            self.plot_all_behavior_in_all_sessions(use_parallel=False)
+            self.plot_all_behavior_in_all_sessions(use_parallel=True)
             self.logger.info(f"Plots generated successfully")
 
         # plotter.plot_fixation_proportions_for_diff_conditions(self.labelled_fixations_m1, self.params)

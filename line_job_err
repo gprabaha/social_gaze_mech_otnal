@@ -55,3 +55,228 @@ CondaError: Run 'conda init' before 'conda deactivate'
 2024-08-01 19:14:29,181 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
 2024-08-01 19:19:29,671 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
 2024-08-01 19:24:30,123 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 19:29:30,598 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 19:34:31,076 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 19:39:31,584 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 19:44:32,584 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 19:49:33,073 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 19:54:33,589 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 19:59:34,026 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 20:04:34,530 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 20:09:35,002 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 20:14:35,490 - root - INFO - Job array 27552964 is still running. Checking again in 30 seconds...
+2024-08-01 20:15:05,559 - root - INFO - Job array 27552964 has completed.
+2024-08-01 20:15:14,517 - root - INFO - Saving: /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/all_fixations_and_saccades.pkl
+2024-08-01 20:15:20,873 - curate_data - INFO - Starting sorting of sessions.
+Sorting session behav dfs:   0%|          | 0/31 [00:00<?, ?it/s]Sorting session behav dfs:   3%|▎         | 1/31 [00:01<00:45,  1.50s/it]Sorting session behav dfs:  10%|▉         | 3/31 [00:02<00:33,  1.19s/it]Sorting session behav dfs:  13%|█▎        | 4/31 [00:03<00:27,  1.02s/it]Sorting session behav dfs:  16%|█▌        | 5/31 [00:04<00:29,  1.14s/it]Sorting session behav dfs:  19%|█▉        | 6/31 [00:05<00:24,  1.02it/s]Sorting session behav dfs:  23%|██▎       | 7/31 [00:05<00:21,  1.10it/s]Sorting session behav dfs:  26%|██▌       | 8/31 [00:06<00:18,  1.22it/s]Sorting session behav dfs:  29%|██▉       | 9/31 [00:06<00:13,  1.59it/s]Sorting session behav dfs:  32%|███▏      | 10/31 [00:07<00:13,  1.51it/s]Sorting session behav dfs:  35%|███▌      | 11/31 [00:08<00:13,  1.51it/s]Sorting session behav dfs:  39%|███▊      | 12/31 [00:09<00:15,  1.20it/s]Sorting session behav dfs:  42%|████▏     | 13/31 [00:09<00:13,  1.37it/s]Sorting session behav dfs:  45%|████▌     | 14/31 [00:10<00:11,  1.42it/s]Sorting session behav dfs:  48%|████▊     | 15/31 [00:11<00:11,  1.39it/s]Sorting session behav dfs:  52%|█████▏    | 16/31 [00:11<00:10,  1.50it/s]Sorting session behav dfs:  55%|█████▍    | 17/31 [00:12<00:09,  1.48it/s]Sorting session behav dfs:  58%|█████▊    | 18/31 [00:12<00:06,  1.92it/s]Sorting session behav dfs:  61%|██████▏   | 19/31 [00:13<00:07,  1.70it/s]Sorting session behav dfs:  65%|██████▍   | 20/31 [00:13<00:06,  1.75it/s]Sorting session behav dfs:  68%|██████▊   | 21/31 [00:15<00:08,  1.21it/s]Sorting session behav dfs:  71%|███████   | 22/31 [00:15<00:06,  1.29it/s]Sorting session behav dfs:  74%|███████▍  | 23/31 [00:16<00:06,  1.31it/s]Sorting session behav dfs:  77%|███████▋  | 24/31 [00:17<00:04,  1.41it/s]Sorting session behav dfs:  81%|████████  | 25/31 [00:17<00:04,  1.41it/s]Sorting session behav dfs:  84%|████████▍ | 26/31 [00:18<00:03,  1.48it/s]Sorting session behav dfs:  87%|████████▋ | 27/31 [00:19<00:02,  1.46it/s]Sorting session behav dfs:  90%|█████████ | 28/31 [00:20<00:02,  1.38it/s]Sorting session behav dfs:  94%|█████████▎| 29/31 [00:20<00:01,  1.66it/s]Sorting session behav dfs:  97%|█████████▋| 30/31 [00:20<00:00,  1.94it/s]Sorting session behav dfs: 100%|██████████| 31/31 [00:20<00:00,  2.41it/s]Sorting session behav dfs: 100%|██████████| 31/31 [00:20<00:00,  1.49it/s]
+2024-08-01 20:15:44,768 - curate_data - INFO - Finished sorting sessions. Checking for time window clashes.
+Checking time window clashes within events:   0%|          | 0/31 [00:00<?, ?it/s]Checking time window clashes within events:   3%|▎         | 1/31 [00:39<19:51, 39.71s/it]Checking time window clashes within events:  10%|▉         | 3/31 [00:43<13:12, 28.30s/it]Checking time window clashes within events:  16%|█▌        | 5/31 [01:05<10:01, 23.13s/it]Checking time window clashes within events:  32%|███▏      | 10/31 [01:08<05:44, 16.40s/it]Checking time window clashes within events:  39%|███▊      | 12/31 [01:11<03:46, 11.93s/it]Checking time window clashes within events:  48%|████▊     | 15/31 [01:18<02:24,  9.06s/it]Checking time window clashes within events:  55%|█████▍    | 17/31 [01:21<01:35,  6.83s/it]Checking time window clashes within events:  61%|██████▏   | 19/31 [01:22<00:58,  4.84s/it]Checking time window clashes within events:  65%|██████▍   | 20/31 [01:24<00:44,  4.06s/it]Checking time window clashes within events:  68%|██████▊   | 21/31 [01:38<01:08,  6.89s/it]Checking time window clashes within events:  74%|███████▍  | 23/31 [01:38<00:39,  4.88s/it]Checking time window clashes within events:  87%|████████▋ | 27/31 [01:39<00:14,  3.51s/it]Checking time window clashes within events:  90%|█████████ | 28/31 [01:41<00:09,  3.07s/it]Checking time window clashes within events: 100%|██████████| 31/31 [01:41<00:00,  3.29s/it]
+2024-08-01 20:17:29,589 - curate_data - INFO - No time window clashes found.
+2024-08-01 20:17:29,960 - curate_data - INFO - First 50 events in the 'mon_down' condition:
+        session_name  run inter_run  ...         end_roi category event_type
+118  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0   fixation
+119  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0   fixation
+120  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
+121  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+122  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
+123  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0   fixation
+124  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0    saccade
+125  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+126  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
+127  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+128  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
+129  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+130  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
+131  OTNAL_FV_121021  1.0       NaN  ...       face_bbox      3.0   fixation
+132  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+133  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+134  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+135  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
+136  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0   fixation
+137  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0    saccade
+138  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+139  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0   fixation
+140  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+141  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
+142  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+143  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
+144  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+145  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
+146  OTNAL_FV_121021  1.0       NaN  ...  right_obj_bbox      3.0   fixation
+147  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+148  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+149  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+150  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
+151  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+152  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+153  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
+154  OTNAL_FV_121021  1.0       NaN  ...        eye_bbox      3.0   fixation
+155  OTNAL_FV_121021  1.0       NaN  ...   left_obj_bbox      3.0    saccade
+156  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+157  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+158  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
+159  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+160  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+161  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+162  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0    saccade
+163  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+164  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+165  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+166  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+167  OTNAL_FV_121021  1.0       NaN  ...      out_of_roi      3.0   fixation
+
+[50 rows x 18 columns]
+2024-08-01 20:21:48,506 - curate_data - INFO - DataFrame saved to: /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/combined_gaze_behav_m1.csv
+2024-08-01 20:21:48,591 - data_manager - INFO - M1 fixations and saccades acquired
+Isolating events within frame of attention:   0%|          | 0/31 [00:00<?, ?it/s]Isolating events within frame of attention: 100%|██████████| 31/31 [00:00<00:00, 513926.58it/s]
+2024-08-01 20:27:27,586 - data_manager - INFO - Events within attention frame isolated
+Plotting behavior for session in serial:   0%|          | 0/31 [00:00<?, ?it/s]2024-08-01 20:27:27,613 - plotter - INFO - Starting to process session: OTNAL_FV_121021
+2024-08-01 20:27:27,714 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:28:15,609 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_121021_behavior.png
+2024-08-01 20:28:15,610 - plotter - INFO - Completed processing for session: OTNAL_FV_121021
+Plotting behavior for session in serial:   3%|▎         | 1/31 [00:47<23:59, 48.00s/it]2024-08-01 20:28:15,611 - plotter - INFO - Starting to process session: OTNAL_FV_030921
+2024-08-01 20:28:15,633 - plotter - INFO - Runs: [1.]; Inter-runs: []
+2024-08-01 20:28:15,633 - plotter - WARNING - No valid inter-runs found for session: OTNAL_FV_030921
+2024-08-01 20:28:16,272 - plotter - WARNING - No inter-runs for session: OTNAL_FV_030921
+/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/plotter.py:99: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  plt.tight_layout(rect=[0, 0, 1, 0.95])
+/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/plotter.py:101: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  plt.savefig(plt_path)
+2024-08-01 20:28:25,314 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_030921_behavior.png
+2024-08-01 20:28:25,314 - plotter - INFO - Completed processing for session: OTNAL_FV_030921
+Plotting behavior for session in serial:   6%|▋         | 2/31 [00:57<17:38, 36.51s/it]2024-08-01 20:28:25,314 - plotter - INFO - Starting to process session: OTNAL_FV_031521
+2024-08-01 20:28:25,339 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:29:28,086 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_031521_behavior.png
+2024-08-01 20:29:28,087 - plotter - INFO - Completed processing for session: OTNAL_FV_031521
+Plotting behavior for session in serial:  10%|▉         | 3/31 [02:00<20:42, 44.39s/it]2024-08-01 20:29:28,088 - plotter - INFO - Starting to process session: OTNAL_FV_062322
+2024-08-01 20:29:28,112 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:30:13,343 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_062322_behavior.png
+2024-08-01 20:30:13,343 - plotter - INFO - Completed processing for session: OTNAL_FV_062322
+Plotting behavior for session in serial:  13%|█▎        | 4/31 [02:45<20:05, 44.65s/it]2024-08-01 20:30:13,344 - plotter - INFO - Starting to process session: OTNAL_FV_060221
+2024-08-01 20:30:13,369 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:30:46,897 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_060221_behavior.png
+2024-08-01 20:30:46,897 - plotter - INFO - Completed processing for session: OTNAL_FV_060221
+Plotting behavior for session in serial:  16%|█▌        | 5/31 [03:19<17:54, 41.32s/it]2024-08-01 20:30:46,898 - plotter - INFO - Starting to process session: OTNAL_FV_062921
+2024-08-01 20:30:46,923 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:31:47,464 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_062921_behavior.png
+2024-08-01 20:31:47,465 - plotter - INFO - Completed processing for session: OTNAL_FV_062921
+Plotting behavior for session in serial:  19%|█▉        | 6/31 [04:19<19:37, 47.09s/it]2024-08-01 20:31:47,465 - plotter - INFO - Starting to process session: OTNAL_FV_061721
+2024-08-01 20:31:47,490 - plotter - INFO - Runs: [1.]; Inter-runs: []
+2024-08-01 20:31:47,490 - plotter - WARNING - No valid inter-runs found for session: OTNAL_FV_061721
+2024-08-01 20:31:52,285 - plotter - WARNING - No inter-runs for session: OTNAL_FV_061721
+/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/plotter.py:99: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  plt.tight_layout(rect=[0, 0, 1, 0.95])
+/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/plotter.py:101: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  plt.savefig(plt_path)
+2024-08-01 20:32:40,253 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_061721_behavior.png
+2024-08-01 20:32:40,254 - plotter - INFO - Completed processing for session: OTNAL_FV_061721
+Plotting behavior for session in serial:  23%|██▎       | 7/31 [05:12<19:31, 48.80s/it]2024-08-01 20:32:40,255 - plotter - INFO - Starting to process session: OTNAL_FV_062722
+2024-08-01 20:32:40,279 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:33:37,011 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_062722_behavior.png
+2024-08-01 20:33:37,011 - plotter - INFO - Completed processing for session: OTNAL_FV_062722
+Plotting behavior for session in serial:  26%|██▌       | 8/31 [06:09<19:37, 51.19s/it]2024-08-01 20:33:37,012 - plotter - INFO - Starting to process session: OTNAL_FV_032421
+2024-08-01 20:33:37,036 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:34:34,408 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_032421_behavior.png
+2024-08-01 20:34:34,409 - plotter - INFO - Completed processing for session: OTNAL_FV_032421
+Plotting behavior for session in serial:  29%|██▉       | 9/31 [07:06<19:27, 53.05s/it]2024-08-01 20:34:34,409 - plotter - INFO - Starting to process session: OTNAL_FV_070121
+2024-08-01 20:34:34,434 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:35:35,765 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_070121_behavior.png
+2024-08-01 20:35:35,766 - plotter - INFO - Completed processing for session: OTNAL_FV_070121
+Plotting behavior for session in serial:  32%|███▏      | 10/31 [08:08<19:26, 55.54s/it]2024-08-01 20:35:35,767 - plotter - INFO - Starting to process session: OTNAL_FV_070822
+2024-08-01 20:35:35,791 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:36:21,629 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_070822_behavior.png
+2024-08-01 20:36:21,629 - plotter - INFO - Completed processing for session: OTNAL_FV_070822
+Plotting behavior for session in serial:  35%|███▌      | 11/31 [08:54<17:32, 52.64s/it]2024-08-01 20:36:21,630 - plotter - INFO - Starting to process session: OTNAL_FV_070622
+2024-08-01 20:36:21,655 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:37:20,174 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_070622_behavior.png
+2024-08-01 20:37:20,174 - plotter - INFO - Completed processing for session: OTNAL_FV_070622
+Plotting behavior for session in serial:  39%|███▊      | 12/31 [09:52<17:13, 54.41s/it]2024-08-01 20:37:20,175 - plotter - INFO - Starting to process session: OTNAL_FV_062222
+2024-08-01 20:37:20,198 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:37:59,261 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_062222_behavior.png
+2024-08-01 20:37:59,262 - plotter - INFO - Completed processing for session: OTNAL_FV_062222
+Plotting behavior for session in serial:  42%|████▏     | 13/31 [10:31<14:56, 49.81s/it]2024-08-01 20:37:59,263 - plotter - INFO - Starting to process session: OTNAL_FV_062822
+2024-08-01 20:37:59,287 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:38:46,130 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_062822_behavior.png
+2024-08-01 20:38:46,131 - plotter - INFO - Completed processing for session: OTNAL_FV_062822
+Plotting behavior for session in serial:  45%|████▌     | 14/31 [11:18<13:51, 48.93s/it]2024-08-01 20:38:46,131 - plotter - INFO - Starting to process session: OTNAL_FV_070122
+2024-08-01 20:38:46,155 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:39:28,979 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_070122_behavior.png
+2024-08-01 20:39:28,979 - plotter - INFO - Completed processing for session: OTNAL_FV_070122
+Plotting behavior for session in serial:  48%|████▊     | 15/31 [12:01<12:33, 47.11s/it]2024-08-01 20:39:28,980 - plotter - INFO - Starting to process session: OTNAL_FV_061521
+2024-08-01 20:39:29,005 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:40:47,082 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_061521_behavior.png
+2024-08-01 20:40:47,082 - plotter - INFO - Completed processing for session: OTNAL_FV_061521
+Plotting behavior for session in serial:  52%|█████▏    | 16/31 [13:19<14:06, 56.41s/it]2024-08-01 20:40:47,083 - plotter - INFO - Starting to process session: OTNAL_FV_070722
+2024-08-01 20:40:47,107 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:41:34,700 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_070722_behavior.png
+2024-08-01 20:41:34,701 - plotter - INFO - Completed processing for session: OTNAL_FV_070722
+Plotting behavior for session in serial:  55%|█████▍    | 17/31 [14:07<12:32, 53.77s/it]2024-08-01 20:41:34,702 - plotter - INFO - Starting to process session: OTNAL_FV_070522
+2024-08-01 20:41:34,726 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:42:40,218 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_070522_behavior.png
+2024-08-01 20:42:40,218 - plotter - INFO - Completed processing for session: OTNAL_FV_070522
+Plotting behavior for session in serial:  58%|█████▊    | 18/31 [15:12<12:24, 57.29s/it]2024-08-01 20:42:40,219 - plotter - INFO - Starting to process session: OTNAL_FV_030321
+2024-08-01 20:42:40,243 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:43:40,152 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_030321_behavior.png
+2024-08-01 20:43:40,152 - plotter - INFO - Completed processing for session: OTNAL_FV_030321
+Plotting behavior for session in serial:  61%|██████▏   | 19/31 [16:12<11:37, 58.09s/it]2024-08-01 20:43:40,153 - plotter - INFO - Starting to process session: OTNAL_FV_062422
+2024-08-01 20:43:40,177 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:44:41,779 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_062422_behavior.png
+2024-08-01 20:44:41,794 - plotter - INFO - Completed processing for session: OTNAL_FV_062422
+Plotting behavior for session in serial:  65%|██████▍   | 20/31 [17:14<10:50, 59.15s/it]2024-08-01 20:44:41,794 - plotter - INFO - Starting to process session: OTNAL_FV_032221
+2024-08-01 20:44:41,819 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:45:43,907 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_032221_behavior.png
+2024-08-01 20:45:43,907 - plotter - INFO - Completed processing for session: OTNAL_FV_032221
+Plotting behavior for session in serial:  68%|██████▊   | 21/31 [18:16<10:00, 60.04s/it]2024-08-01 20:45:43,908 - plotter - INFO - Starting to process session: OTNAL_FV_062922
+2024-08-01 20:45:43,932 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:46:36,471 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_062922_behavior.png
+2024-08-01 20:46:36,472 - plotter - INFO - Completed processing for session: OTNAL_FV_062922
+Plotting behavior for session in serial:  71%|███████   | 22/31 [19:08<08:40, 57.80s/it]2024-08-01 20:46:36,472 - plotter - INFO - Starting to process session: OTNAL_FV_073021
+2024-08-01 20:46:36,497 - plotter - INFO - Runs: [1.]; Inter-runs: []
+2024-08-01 20:46:36,497 - plotter - WARNING - No valid inter-runs found for session: OTNAL_FV_073021
+2024-08-01 20:46:41,862 - plotter - WARNING - No inter-runs for session: OTNAL_FV_073021
+/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/plotter.py:99: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  plt.tight_layout(rect=[0, 0, 1, 0.95])
+/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/plotter.py:101: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  plt.savefig(plt_path)
+2024-08-01 20:47:30,882 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_073021_behavior.png
+2024-08-01 20:47:30,882 - plotter - INFO - Completed processing for session: OTNAL_FV_073021
+Plotting behavior for session in serial:  74%|███████▍  | 23/31 [20:03<07:34, 56.78s/it]2024-08-01 20:47:30,884 - plotter - INFO - Starting to process session: OTNAL_FV_062421
+2024-08-01 20:47:30,908 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:48:28,378 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_062421_behavior.png
+2024-08-01 20:48:28,378 - plotter - INFO - Completed processing for session: OTNAL_FV_062421
+Plotting behavior for session in serial:  77%|███████▋  | 24/31 [21:00<06:38, 57.00s/it]2024-08-01 20:48:28,379 - plotter - INFO - Starting to process session: OTNAL_FV_063022
+2024-08-01 20:48:28,403 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:49:17,496 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_063022_behavior.png
+2024-08-01 20:49:17,496 - plotter - INFO - Completed processing for session: OTNAL_FV_063022
+Plotting behavior for session in serial:  81%|████████  | 25/31 [21:49<05:27, 54.63s/it]2024-08-01 20:49:17,497 - plotter - INFO - Starting to process session: OTNAL_FV_120221
+2024-08-01 20:49:17,521 - plotter - INFO - Runs: [1.]; Inter-runs: []
+2024-08-01 20:49:17,521 - plotter - WARNING - No valid inter-runs found for session: OTNAL_FV_120221
+2024-08-01 20:49:22,379 - plotter - WARNING - No inter-runs for session: OTNAL_FV_120221
+/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/plotter.py:99: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  plt.tight_layout(rect=[0, 0, 1, 0.95])
+/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/plotter.py:101: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  plt.savefig(plt_path)
+2024-08-01 20:50:13,443 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_120221_behavior.png
+2024-08-01 20:50:13,444 - plotter - INFO - Completed processing for session: OTNAL_FV_120221
+Plotting behavior for session in serial:  84%|████████▍ | 26/31 [22:45<04:35, 55.03s/it]2024-08-01 20:50:13,445 - plotter - INFO - Starting to process session: OTNAL_FV_062221
+2024-08-01 20:50:13,470 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:51:26,339 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_062221_behavior.png
+2024-08-01 20:51:26,339 - plotter - INFO - Completed processing for session: OTNAL_FV_062221
+Plotting behavior for session in serial:  87%|████████▋ | 27/31 [23:58<04:01, 60.39s/it]2024-08-01 20:51:26,340 - plotter - INFO - Starting to process session: OTNAL_FV_112320
+2024-08-01 20:51:26,365 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:52:42,316 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_112320_behavior.png
+2024-08-01 20:52:42,316 - plotter - INFO - Completed processing for session: OTNAL_FV_112320
+Plotting behavior for session in serial:  90%|█████████ | 28/31 [25:14<03:15, 65.06s/it]2024-08-01 20:52:42,317 - plotter - INFO - Starting to process session: OTNAL_FV_120220
+2024-08-01 20:52:42,342 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:53:43,030 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_120220_behavior.png
+2024-08-01 20:53:43,031 - plotter - INFO - Completed processing for session: OTNAL_FV_120220
+Plotting behavior for session in serial:  94%|█████████▎| 29/31 [26:15<02:07, 63.76s/it]2024-08-01 20:53:43,032 - plotter - INFO - Starting to process session: OTNAL_FV_121621
+2024-08-01 20:53:43,056 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:54:48,929 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_121621_behavior.png
+2024-08-01 20:54:48,929 - plotter - INFO - Completed processing for session: OTNAL_FV_121621
+Plotting behavior for session in serial:  97%|█████████▋| 30/31 [27:21<01:04, 64.40s/it]2024-08-01 20:54:48,930 - plotter - INFO - Starting to process session: OTNAL_FV_061821
+2024-08-01 20:54:48,955 - plotter - INFO - Runs: [1. 2. 3. 4. 5. 6. 7. 8.]; Inter-runs: [1.0 2.0 3.0 4.0 5.0 6.0 7.0]
+2024-08-01 20:56:11,476 - plotter - INFO - Saved plot to /gpfs/milgram/project/chang/pg496/data_dir/otnal/plots/fix_and_saccades_all_sessions/20240801/OTNAL_FV_061821_behavior.png
+2024-08-01 20:56:11,477 - plotter - INFO - Completed processing for session: OTNAL_FV_061821
+Plotting behavior for session in serial: 100%|██████████| 31/31 [28:43<00:00, 69.85s/it]Plotting behavior for session in serial: 100%|██████████| 31/31 [28:43<00:00, 55.61s/it]
+2024-08-01 20:56:11,478 - data_manager - INFO - Plots generated successfully

@@ -10,6 +10,15 @@ import logging
 import util
 from data_manager import DataManager
 
+
+'''
+Numpy arrays being exported as a single cell in a dataframe are often being stored as strings
+After retreiving them we are currently doing operations to convert the recovered string to the
+expected array using util.convert_to_array. But this is very unstable. Ensure that all
+single coordinate or 2D array containing sets of coordinates are exported and imported in a
+uniform manner
+'''
+
 def main():
     # Configure the root logger
     logging.basicConfig(
