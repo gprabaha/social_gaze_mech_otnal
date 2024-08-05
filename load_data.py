@@ -311,7 +311,11 @@ def get_spiketimes_and_labels_for_one_session(params, session_path):
         chan = spikeTs_struct['chan']
         chan_label = spikeTs_struct['chanStr']
         unit_no_in_channel = spikeTs_struct['unit']
-        unit_validity = spikeTs_struct.get('valid', [1] * len(spikeS) if accept_units_with_missing_labels else [0] * len(spikeS))
+        if 'valid' in spikeTs_struct:
+            unit_validity = spikeTs_struct['valid']
+        else:
+            unit_validity = [1] * len(spikeS) if accept_units_with_missing_labels else [0] * len(spikeS)
+            print(f"Warning: No 'valid' field found in {file_path}. Marking all units as {'valid' if accept_units_with_missing_labels else 'invalid'}.")
         unit_label = spikeTs_struct['unitStr']
         uuid = spikeTs_struct['UUID']
         n_spikes = spikeTs_struct['spikeN']
@@ -327,7 +331,11 @@ def get_spiketimes_and_labels_for_one_session(params, session_path):
             chan = spikeTs_struct['chan'][0]
             chan_label = spikeTs_struct['chanStr'][0]
             unit_no_in_channel = spikeTs_struct['unit'][0]
-            unit_validity = spikeTs_struct.get('valid', [[1]] * len(spikeS) if accept_units_with_missing_labels else [[0]] * len(spikeS))[0]
+            if 'valid' in spikeTs_struct:
+                unit_validity = spikeTs_struct['valid'][0]
+            else:
+                unit_validity = [[1]] * len(spikeS) if accept_units_with_missing_labels else [[0]] * len(spikeS)
+                print(f"Warning: No 'valid' field found in {file_path}. Marking all units as {'valid' if accept_units_with_missing_labels else 'invalid'}.")
             unit_label = spikeTs_struct['unitStr'][0]
             uuid = spikeTs_struct['UUID'][0]
             n_spikes = spikeTs_struct['spikeN'][0]
