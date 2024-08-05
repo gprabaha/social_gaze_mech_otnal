@@ -490,7 +490,6 @@ def is_within_frame(mean_position, frame):
         raise  # Re-raise the exception to maintain the original error behavior
 
 
-
 def convert_to_array(position_str):
     try:
         if isinstance(position_str, np.ndarray):
