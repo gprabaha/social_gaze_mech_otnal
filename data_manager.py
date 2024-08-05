@@ -156,6 +156,7 @@ class DataManager:
         _, self.params = util.fetch_session_subfolder_paths_from_source(self.params)
         _, self.params = util.fetch_processed_data_dir(self.params)
         self.params['num_cpus'] = self.num_cpus
+        
         self.labelled_gaze_positions_m1 = self.get_or_load_variable(
             'labelled_gaze_positions_m1',
             load_data.load_labelled_gaze_positions,
@@ -165,6 +166,7 @@ class DataManager:
         self.logger.info(f"Gaze data split into: self.gaze_positions and self.gaze_position_labels!")
         self.add_frame_of_attention_and_plotting_frame_to_gaze_labels()
         self.logger.info(f"Frame of attention and plotting added to gaze data")
+
         if self.params['use_toy_data']:
             self.logger.info(f"!! USING TOY DATA !!")
             self.toy_data = self.get_or_load_variable(
@@ -174,39 +176,34 @@ class DataManager:
             input_data = self.toy_data
         else:
             input_data = self.labelled_gaze_positions_m1
+        
         self.labelled_fixations_m1, self.labelled_saccades_m1, self.combined_behav_m1 = self.get_or_load_variable(
             'labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1',
             load_data.load_m1_labelled_fixations_saccades_and_combined,
             lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p))
         self.logger.info(f"M1 fixations and saccades acquired")
-        pdb.set_trace()
         self.events_within_attention_frame_m1 = curate_data.isolate_events_within_attention_frame(
             self.combined_behav_m1, self.labelled_gaze_positions_m1, use_parallel=True)
         self.events_within_attention_frame_m1.head()
         self.logger.info(f"Events within attention frame isolated")
+
+        self.labelled_spiketimes = self.get_or_load_variable(
+            'labelled_spiketimes',
+            load_data.load_processed_spiketimes,
+            lambda p: curate_data.extract_spiketimes_for_all_sessions(p)
+        )
+        
+        pdb.set_trace()
+
         if self.params['make_plots']:
             self.plot_all_behavior_in_all_sessions(use_parallel=True)
             self.logger.info(f"Plots generated successfully")
 
-        # plotter.plot_fixation_proportions_for_diff_conditions(self.labelled_fixations_m1, self.params)
-        # plotter.plot_fixation_heatmaps(self.labelled_fixations_m1, self.params)
-           
-        # self.labelled_saccades_m1 = self.get_or_load_variable(
-        #     'labelled_saccades_m1',
-        #     load_data.load_saccade_labels,
-        #     lambda p: curate_data.extract_saccades_with_labels(self.labelled_gaze_positions_m1, p)
-        # )
-        
-        # self.labelled_spiketimes = self.get_or_load_variable(
-        #     'labelled_spiketimes',
-        #     load_data.load_processed_spiketimes,
-        #     lambda p: curate_data.extract_spiketimes_for_all_sessions(p)
-        # )
-        
+
         # self.labelled_fixation_rasters = self.get_or_load_variable(
         #     'labelled_fixation_rasters',
         #     load_data.load_labelled_fixation_rasters,
-        #     lambda p: curate_data.extract_fixation_raster(session_paths, self.labelled_fixations, self.labelled_spiketimes, p)
+        #     lambda p: curate_data.extract_fixation_raster(self.params['data_source_dir'], self.labelled_fixations_m1, self.labelled_spiketimes, p)
         # )
 
 

@@ -293,15 +293,13 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
     - labelled_spiketimes (DataFrame): DataFrame containing spike times and labels for each unit.
     """
     label_cols = ['spikeS', 'spikeMs', 'session_name', 'channel', 'channel_label',
-                  'unit_no_within_channel', 'unit_label', 'uuid', 'n_spikes', 'region']
+                  'unit_no_within_channel', 'unit_validity', 'unit_label', 'uuid', 'n_spikes', 'region']
     session_name = os.path.basename(os.path.normpath(session_path))
     file_list_spikeTs = glob.glob(f"{session_path}/*spikeTs.mat")
     if len(file_list_spikeTs) != 1:
         print(f"\nWarning: No spikeTs or more than one spikeTs found in folder: {session_path}.")
         return pd.DataFrame(columns=label_cols)
-    
     file_path = file_list_spikeTs[0]
-    
     try:
         # Try loading with mat73 first
         data_spikeTs = mat73.loadmat(file_path)
@@ -311,6 +309,8 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
         chan = spikeTs_struct['chan']
         chan_label = spikeTs_struct['chanStr']
         unit_no_in_channel = spikeTs_struct['unit']
+        pdb.set_trace()
+        unit_validity = spikeTs_struct['valid']
         unit_label = spikeTs_struct['unitStr']
         uuid = spikeTs_struct['UUID']
         n_spikes = spikeTs_struct['spikeN']
@@ -326,7 +326,8 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
             chan = spikeTs_struct['chan'][0]
             chan_label = spikeTs_struct['chanStr'][0]
             unit_no_in_channel = spikeTs_struct['unit'][0]
-            unit_label = spikeTs_struct['unitStr'][0]
+            unit_no_in_channel = spikeTs_struct['unit'][0]
+            unit_label = spikeTs_struct['valid'][0]
             uuid = spikeTs_struct['UUID'][0]
             n_spikes = spikeTs_struct['spikeN'][0]
             region = spikeTs_struct['region'][0]
@@ -335,7 +336,7 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
             return pd.DataFrame(columns=label_cols)
     # Combine all lists into a single DataFrame
     session_spikeTs_labels = list(zip(spikeS, spikeMs, [session_name]*len(spikeS), chan, chan_label,
-                                      unit_no_in_channel, unit_label, uuid, n_spikes, region))
+                                      unit_no_in_channel, unit_validity, unit_label, uuid, n_spikes, region))
     labelled_spiketimes = pd.DataFrame(session_spikeTs_labels, columns=label_cols)
     return labelled_spiketimes
 

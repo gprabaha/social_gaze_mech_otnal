@@ -37,6 +37,7 @@ def main():
     )
     params = util.get_params()
     params.update({
+        'accept_units_with_missing_labels': False,
         'num_cpus': None,
         'parallelize_local_reclustering_over_n_fixations': False,
         'do_local_reclustering_in_parallel': False,
@@ -44,15 +45,15 @@ def main():
         'use_toy_data': False,
         'remake_toy_data': False,
         'is_cluster': True,
-        'use_parallel': True,
+        'use_parallel': False,
         'remake_labelled_gaze_positions_m1': False,
         'fixation_detection_method': 'cluster_fix',
         'remake_labelled_fixations_m1': False,
         'remake_labelled_saccades_m1': False,
         'remake_combined_behav_m1': False,
-        'remake_labelled_spiketimes': False,
+        'remake_labelled_spiketimes': True,
         'remake_labelled_fixation_rasters': True,
-        'make_plots': True,
+        'make_plots': False,
         'recalculate_unit_ROI_responses': True,
         'replot_face/eye_vs_obj_violins': True,
         'remap_source_coord_from_inverted_to_standard_y_axis': True,
