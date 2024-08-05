@@ -343,9 +343,9 @@ def extract_spiketimes_for_all_sessions(params):
             # Submit tasks and collect futures
             futures = {
                 executor.submit(
-                    load_data.get_spiketimes_and_labels_for_one_session, 
-                    session_path, 
-                    processed_data_dir
+                    load_data.get_spiketimes_and_labels_for_one_session,
+                    params,
+                    session_path
                 ): session_path for session_path in session_paths
             }
             # Process futures as they complete with tqdm progress bar
@@ -359,7 +359,7 @@ def extract_spiketimes_for_all_sessions(params):
         # Process sessions sequentially
         for session_path in session_paths:
             labelled_spiketimes = load_data.get_spiketimes_and_labels_for_one_session(
-                session_path, processed_data_dir)
+                params, session_path)
             spikeTs_labels.append(labelled_spiketimes)
     # Concatenate label dataframes
     if spikeTs_labels:
@@ -376,7 +376,6 @@ def extract_spiketimes_for_all_sessions(params):
     return all_labels
 
 
-
 def save_spiketimes_to_hdf5(labelled_spiketimes, file_path):
     with h5py.File(file_path, 'w') as hf:
         spikeS_group = hf.create_group('spikeS')
@@ -391,6 +390,9 @@ def save_spiketimes_to_hdf5(labelled_spiketimes, file_path):
             # Convert strings to bytes
             data_as_bytes = [str(item).encode('utf-8') for item in labelled_spiketimes[label]]
             labels_group.create_dataset(label, data=np.array(data_as_bytes))
+        # Store unit_validity as boolean
+        unit_validity = labelled_spiketimes['unit_validity'].astype(bool)
+        labels_group.create_dataset('unit_validity', data=unit_validity)
 
 
 

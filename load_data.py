@@ -284,7 +284,7 @@ def load_saccade_labels(params):
         return None
 
 
-def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
+def get_spiketimes_and_labels_for_one_session(params, session_path):
     """
     Extracts spike times and labels from a session.
     Parameters:
@@ -292,6 +292,8 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
     Returns:
     - labelled_spiketimes (DataFrame): DataFrame containing spike times and labels for each unit.
     """
+    processed_data_dir = params['processed_data_dir']
+    accept_units_with_missing_labels = params['accept_units_with_missing_labels']
     label_cols = ['spikeS', 'spikeMs', 'session_name', 'channel', 'channel_label',
                   'unit_no_within_channel', 'unit_validity', 'unit_label', 'uuid', 'n_spikes', 'region']
     session_name = os.path.basename(os.path.normpath(session_path))
@@ -309,8 +311,7 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
         chan = spikeTs_struct['chan']
         chan_label = spikeTs_struct['chanStr']
         unit_no_in_channel = spikeTs_struct['unit']
-        pdb.set_trace()
-        unit_validity = spikeTs_struct['valid']
+        unit_validity = spikeTs_struct.get('valid', [1] * len(spikeS) if accept_units_with_missing_labels else [0] * len(spikeS))
         unit_label = spikeTs_struct['unitStr']
         uuid = spikeTs_struct['UUID']
         n_spikes = spikeTs_struct['spikeN']
@@ -326,14 +327,16 @@ def get_spiketimes_and_labels_for_one_session(session_path, processed_data_dir):
             chan = spikeTs_struct['chan'][0]
             chan_label = spikeTs_struct['chanStr'][0]
             unit_no_in_channel = spikeTs_struct['unit'][0]
-            unit_no_in_channel = spikeTs_struct['unit'][0]
-            unit_label = spikeTs_struct['valid'][0]
+            unit_validity = spikeTs_struct.get('valid', [[1]] * len(spikeS) if accept_units_with_missing_labels else [[0]] * len(spikeS))[0]
+            unit_label = spikeTs_struct['unitStr'][0]
             uuid = spikeTs_struct['UUID'][0]
             n_spikes = spikeTs_struct['spikeN'][0]
             region = spikeTs_struct['region'][0]
         except Exception as e:
             print(f"Both mat73 and scipy.io.loadmat failed to load {file_path}. Error: {e}")
             return pd.DataFrame(columns=label_cols)
+    # Convert unit_validity to True/False
+    unit_validity = [bool(valid) for valid in unit_validity]
     # Combine all lists into a single DataFrame
     session_spikeTs_labels = list(zip(spikeS, spikeMs, [session_name]*len(spikeS), chan, chan_label,
                                       unit_no_in_channel, unit_validity, unit_label, uuid, n_spikes, region))
