@@ -313,6 +313,7 @@ def get_spiketimes_and_labels_for_one_session(params, session_path):
         unit_no_in_channel = spikeTs_struct['unit']
         if 'valid' in spikeTs_struct:
             unit_validity = spikeTs_struct['valid']
+            print(f"'valid' field found in {file_path}.")
         else:
             unit_validity = [1] * len(spikeS) if accept_units_with_missing_labels else [0] * len(spikeS)
             print(f"Warning: No 'valid' field found in {file_path}. Marking all units as {'valid' if accept_units_with_missing_labels else 'invalid'}.")
@@ -333,6 +334,7 @@ def get_spiketimes_and_labels_for_one_session(params, session_path):
             unit_no_in_channel = spikeTs_struct['unit'][0]
             if 'valid' in spikeTs_struct:
                 unit_validity = spikeTs_struct['valid'][0]
+                print(f"'valid' field found in {file_path}.")
             else:
                 unit_validity = [[1]] * len(spikeS) if accept_units_with_missing_labels else [[0]] * len(spikeS)
                 print(f"Warning: No 'valid' field found in {file_path}. Marking all units as {'valid' if accept_units_with_missing_labels else 'invalid'}.")
