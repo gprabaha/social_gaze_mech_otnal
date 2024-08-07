@@ -261,8 +261,6 @@ def extract_landmarks(landmarks_array):
     return landmark_dict
 
 
-
-
 def construct_eye_bounding_box(m1_landmarks, params):
     """
     Constructs the bounding box for the eyes.
@@ -274,10 +272,6 @@ def construct_eye_bounding_box(m1_landmarks, params):
     - eye_bb_corners (dict): Dictionary containing eye bounding box coordinates.
     """
     # Extract and remap coordinates for left and right eyes
-
-    ## Set  the conditions in here to do the inversion from inveted to standard
-    ## axis. or to eyelink space or not.
-
     left_eye = remap_source_coords(m1_landmarks['eyeOnLeft'][0][0][0],
                                    params, 'inverted_to_standard_y_axis')
     if params.get('map_roi_coord_to_eyelink_space', False):

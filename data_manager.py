@@ -163,6 +163,8 @@ class DataManager:
             lambda p: curate_data.extract_labelled_gaze_positions_m1(p))
         self.logger.info(f"M1 remapped gaze pos data acquired!")
 
+        pdb.set_trace()
+
         ## get positions of M2 here
 
 

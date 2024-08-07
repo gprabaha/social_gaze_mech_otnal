@@ -16,36 +16,38 @@ import pickle
 import util
 
 
-def process_gaze_positions(dose_index_pairs, use_parallel, process_index):
+def process_gaze_positions(dose_index_pairs, use_parallel, process_index, params):
     """
     Processes gaze positions either in parallel or serially.
     Parameters:
     - dose_index_pairs (list): List of dose and index pairs.
     - use_parallel (bool): Flag to determine if parallel processing should be used.
     - process_index (function): Function to process each index.
+    - params (dict): Dictionary of parameters.
     Returns:
     - labelled_gaze_positions_m1 (list): List of processed gaze positions.
     """
     if use_parallel:
         return process_gaze_positions_parallel(
-            dose_index_pairs, process_index)
+            dose_index_pairs, process_index, params)
     else:
         return process_gaze_positions_serial(
-            dose_index_pairs, process_index)
+            dose_index_pairs, process_index, params)
 
 
-def process_gaze_positions_parallel(dose_index_pairs, process_index):
+def process_gaze_positions_parallel(dose_index_pairs, process_index, params):
     """
     Processes gaze positions in parallel.
     Parameters:
     - dose_index_pairs (list): List of dose and index pairs.
     - process_index (function): Function to process each index.
+    - params (dict): Dictionary of parameters.
     Returns:
     - labelled_gaze_positions_m1 (list): List of processed gaze positions.
     """
     num_workers = min(multiprocessing.cpu_count(), len(dose_index_pairs))
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
-        futures = {executor.submit(process_index, idx):
+        futures = {executor.submit(process_index, idx, params):
                    idx for _, idx in dose_index_pairs}
         results = []
         for future in tqdm(as_completed(futures),
@@ -59,12 +61,13 @@ def process_gaze_positions_parallel(dose_index_pairs, process_index):
         return [gaze_data for _, gaze_data in results]
 
 
-def process_gaze_positions_serial(dose_index_pairs, process_index):
+def process_gaze_positions_serial(dose_index_pairs, process_index, params):
     """
     Processes gaze positions serially.
     Parameters:
     - dose_index_pairs (list): List of dose and index pairs.
     - process_index (function): Function to process each index.
+    - params (dict): Dictionary of parameters.
     Returns:
     - labelled_gaze_positions_m1 (list): List of processed gaze positions.
     """
@@ -72,10 +75,11 @@ def process_gaze_positions_serial(dose_index_pairs, process_index):
     for _, idx in tqdm(dose_index_pairs,
                        desc="Processing gaze position for session",
                        unit="index"):
-        gaze_data = process_index(idx)
+        gaze_data = process_index(idx, params)
         if gaze_data is not None:
             labelled_gaze_positions_m1.append(gaze_data)
     return labelled_gaze_positions_m1
+
 
 
 def save_labelled_gaze_positions(processed_data_dir, labelled_gaze_positions_m1, params):
