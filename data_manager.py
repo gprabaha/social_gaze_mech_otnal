@@ -157,8 +157,8 @@ class DataManager:
         _, self.params = util.fetch_processed_data_dir(self.params)
         self.params['num_cpus'] = self.num_cpus
         
-        self.labelled_gaze_positions_m1 = self.get_or_load_variable(
-            'labelled_gaze_positions_m1',
+        self.labelled_gaze_positions_m1, self.params = self.get_or_load_variable(
+            'labelled_gaze_positions_m1, params',
             load_data.load_labelled_gaze_positions,
             lambda p: curate_data.extract_labelled_gaze_positions_m1(p))
         self.logger.info(f"M1 remapped gaze pos data acquired!")

@@ -45,7 +45,7 @@ def main():
         'use_toy_data': False,
         'remake_toy_data': False,
         'is_cluster': True,
-        'use_parallel': False,
+        'use_parallel': True,
         'remake_labelled_gaze_positions_m1': True,
         'fixation_detection_method': 'cluster_fix',
         'remake_labelled_fixations_m1': False,

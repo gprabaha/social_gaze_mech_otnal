@@ -7,8 +7,7 @@ Created on Mon Jun 17 11:24:18 2024
 """
 
 import multiprocessing
-import concurrent.futures
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
 import os
 import pickle
@@ -49,12 +48,12 @@ def process_gaze_positions_parallel(dose_index_pairs, process_index, params):
     - params (dict): Updated dictionary of parameters.
     """
     num_workers = min(multiprocessing.cpu_count(), len(dose_index_pairs))
-    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+    with ProcessPoolExecutor(max_workers=num_workers) as executor:
         futures = {executor.submit(process_index, idx, params):
                    idx for _, idx in dose_index_pairs}
         results = []
         for future in tqdm(as_completed(futures),
-                           desc="Processing gaze position for session",
+                           desc="Processing gaze position in parallel",
                            unit="index", total=len(dose_index_pairs)):
             idx = futures[future]
             gaze_data = future.result()
@@ -78,7 +77,7 @@ def process_gaze_positions_serial(dose_index_pairs, process_index, params):
     """
     labelled_gaze_positions_m1 = []
     for _, idx in tqdm(dose_index_pairs,
-                       desc="Processing gaze position for session",
+                       desc="Processing gaze position in serial",
                        unit="index"):
         gaze_data = process_index(idx, params)
         if gaze_data is not None:
