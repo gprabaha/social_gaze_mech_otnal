@@ -102,6 +102,9 @@ def extract_labelled_gaze_positions_m1(params):
     dose_inds = params.get('dose_inds')
     use_parallel = params.get('use_parallel', True)
 
+    params = extract_and_update_meta_info(params)
+    params = get_unique_doses(params)
+
     def process_index(idx):
         return load_data.get_labelled_gaze_positions_dict_m1(idx, params)
     
