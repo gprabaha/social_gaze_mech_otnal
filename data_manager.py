@@ -162,6 +162,10 @@ class DataManager:
             load_data.load_labelled_gaze_positions,
             lambda p: curate_data.extract_labelled_gaze_positions_m1(p))
         self.logger.info(f"M1 remapped gaze pos data acquired!")
+
+        ## get positions of M2 here
+
+
         self.split_gaze_data()
         self.logger.info(f"Gaze data split into: self.gaze_positions and self.gaze_position_labels!")
         self.add_frame_of_attention_and_plotting_frame_to_gaze_labels()

@@ -226,18 +226,41 @@ def get_bl_and_tr_roi_coords_m1(m1_landmarks, params):
     - bbox_corners (dict): Dictionary with keys 'eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox'
       containing bounding box corners for respective regions.
     """
-    pdb.set_trace()
     # Calculate bounding box corners for each ROI
     eye_bbox = construct_eye_bounding_box(m1_landmarks, params)
     face_bbox = construct_face_bounding_box(m1_landmarks, params)
     left_obj_bbox = construct_object_bounding_box(m1_landmarks, params, 'leftObject')
     right_obj_bbox = construct_object_bounding_box(m1_landmarks, params, 'rightObject')
+    m1_landmarks_dict = extract_landmarks(m1_landmarks)
     return {
         'eye_bbox': eye_bbox,
         'face_bbox': face_bbox,
         'left_obj_bbox': left_obj_bbox,
-        'right_obj_bbox': right_obj_bbox
+        'right_obj_bbox': right_obj_bbox,
+        'landmarks_dict': m1_landmarks_dict
     }
+
+
+def extract_landmarks(landmarks_array):
+    # Predefined list of expected labels
+    expected_labels = ['topLeft', 'bottomLeft', 'topRight', 'bottomRight', 'eyeOnLeft', 'eyeOnRight', 'mouth', 'leftObject', 'rightObject']
+    # Fetch the available keys from the dtype of the array
+    keys = landmarks_array.dtype.names
+    # Check if the keys match the expected labels
+    if set(keys) != set(expected_labels):
+        raise ValueError(f"Mismatch in labels. Expected: {expected_labels}, Found: {keys}")
+    # Initialize the result dictionary
+    landmark_dict = {}
+    # Loop over each key and extract the corresponding coordinates
+    for key in keys:
+        try:
+            # Fetch the coordinates, assuming the same structure
+            landmark_dict[key] = landmarks_array[key][0][0][0]
+        except IndexError:
+            landmark_dict[key] = []
+    return landmark_dict
+
+
 
 
 def construct_eye_bounding_box(m1_landmarks, params):
@@ -257,10 +280,12 @@ def construct_eye_bounding_box(m1_landmarks, params):
 
     left_eye = remap_source_coords(m1_landmarks['eyeOnLeft'][0][0][0],
                                    params, 'inverted_to_standard_y_axis')
-    left_eye = remap_source_coords(left_eye, params, 'to_eyelink_space')
+    if params.get('map_roi_coord_to_eyelink_space', False):
+        left_eye = remap_source_coords(left_eye, params, 'to_eyelink_space')
     right_eye = remap_source_coords(m1_landmarks['eyeOnRight'][0][0][0],
                                     params, 'inverted_to_standard_y_axis')
-    right_eye = remap_source_coords(right_eye, params, 'to_eyelink_space')
+    if params.get('map_roi_coord_to_eyelink_space', False):
+        right_eye = remap_source_coords(right_eye, params, 'to_eyelink_space')
     # Validate left_eye and right_eye coordinates
     if not (len(left_eye) == len(right_eye) == 2):
         raise ValueError("Left eye and right eye coordinates should be 2-element tuples, lists, or arrays.")
@@ -296,8 +321,9 @@ def construct_face_bounding_box(m1_landmarks, params):
                    in ['topLeft', 'topRight', 'bottomLeft', 'bottomRight']}
     face_coords = remap_source_coords(face_coords, 
                                       params, 'inverted_to_standard_y_axis')
-    face_coords = remap_source_coords(face_coords,
-                                      params, 'to_eyelink_space')
+    if params.get('map_roi_coord_to_eyelink_space', False):
+        face_coords = remap_source_coords(face_coords,
+                                        params, 'to_eyelink_space')
     # Find pairs of corners and calculate distances
     max_distance = 0
     max_distance_corners = None
@@ -335,10 +361,12 @@ def construct_object_bounding_box(m1_landmarks, params, which_object):
         coord = m1_landmarks[which_object][0][0][0]
         bottom_left = remap_source_coords(coord['bottomLeft'][0][0],
                                           params, 'inverted_to_standard_y_axis')
-        bottom_left = remap_source_coords(bottom_left, params, 'to_eyelink_space')
+        if params.get('map_roi_coord_to_eyelink_space', False):
+            bottom_left = remap_source_coords(bottom_left, params, 'to_eyelink_space')
         top_right = remap_source_coords(coord['topRight'][0][0],
                                           params, 'inverted_to_standard_y_axis')
-        top_right = remap_source_coords(top_right, params, 'to_eyelink_space')
+        if params.get('map_roi_coord_to_eyelink_space', False):
+            top_right = remap_source_coords(top_right, params, 'to_eyelink_space')
         bbox_dict = {'bottomLeft': bottom_left, 'topRight': top_right}
     else:
         raise ValueError("Input 'which_object' must be a leftObject or rightObject.")

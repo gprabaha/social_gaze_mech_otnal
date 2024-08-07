@@ -91,7 +91,8 @@ def load_farplane_cal_and_get_bl_and_tr_roi_coords_m1(session_path, params):
         return {'eye_bbox': None,
                 'face_bbox': None,
                 'left_obj_bbox': None,
-                'right_obj_bbox': None}
+                'right_obj_bbox': None,
+                'landmarks_dict': None}
     try:
         data_m1_landmarks = scipy.io.loadmat(file_list_m1_landmarks[0])
         m1_landmarks = data_m1_landmarks.get('farPlaneCal', None)
@@ -102,7 +103,8 @@ def load_farplane_cal_and_get_bl_and_tr_roi_coords_m1(session_path, params):
     return {'eye_bbox': None,
             'face_bbox': None,
             'left_obj_bbox': None,
-            'right_obj_bbox': None}
+            'right_obj_bbox': None,
+            'landmarks_dict': None}
 
 
 def get_labelled_gaze_positions_dict_m1(idx, params):
@@ -129,14 +131,11 @@ def get_labelled_gaze_positions_dict_m1(idx, params):
         M1Xpx = mat_data['M1Xpx'].squeeze()
         M1Ypx = mat_data['M1Ypx'].squeeze()
         coordinates = np.column_stack((M1Xpx, M1Ypx))
-
-        ## Set conditions for inversion of coordinates here
-        ## Set conditions for remapping to eyelink coord here
-
         coordinates_inverted_y = util.remap_source_coords(
             coordinates, params, 'inverted_to_standard_y_axis')
-        gaze_positions = util.remap_source_coords(
-            coordinates_inverted_y, params, 'to_eyelink_space')
+        if params.get('map_gaze_pos_coord_to_eyelink_space', False):
+            gaze_positions = util.remap_source_coords(
+                coordinates_inverted_y, params, 'to_eyelink_space')
         meta_info = meta_info_list[idx]
         meta_info.update({'sampling_rate': sampling_rate,
                           'category': session_categories[idx]})
