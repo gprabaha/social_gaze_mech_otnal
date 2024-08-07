@@ -117,7 +117,6 @@ def get_labelled_gaze_positions_dict_m1(idx, params):
     session_paths = params['session_paths']
     meta_info_list = params['meta_info_list']
     session_categories = params['session_categories']
-    map_gaze_pos_coord_to_eyelink_space = params.get('map_gaze_pos_coord_to_eyelink_space', False)
     folder_path = session_paths[idx]
     mat_files = [f for f in os.listdir(folder_path) if 'M1_gaze.mat' in f]
     if len(mat_files) != 1:
@@ -130,6 +129,10 @@ def get_labelled_gaze_positions_dict_m1(idx, params):
         M1Xpx = mat_data['M1Xpx'].squeeze()
         M1Ypx = mat_data['M1Ypx'].squeeze()
         coordinates = np.column_stack((M1Xpx, M1Ypx))
+
+        ## Set conditions for inversion of coordinates here
+        ## Set conditions for remapping to eyelink coord here
+
         coordinates_inverted_y = util.remap_source_coords(
             coordinates, params, 'inverted_to_standard_y_axis')
         gaze_positions = util.remap_source_coords(

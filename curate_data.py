@@ -29,6 +29,38 @@ import pdb
 
 logger = logging.getLogger(__name__)
 
+
+###
+def extract_labelled_gaze_positions_m1(params):
+    """
+    Extracts labelled gaze positions from files associated with unique doses.
+    Parameters:
+    - params (dict): Dictionary of parameters.
+    Returns:
+    - labelled_gaze_positions_m1 (list): List of tuples containing gaze
+    positions and associated metadata.
+    """
+    processed_data_dir = params['processed_data_dir']
+    unique_doses = params.get('unique_doses')
+    dose_inds = params.get('dose_inds')
+    use_parallel = params.get('use_parallel', True)
+
+    params = extract_and_update_meta_info(params)
+    params = get_unique_doses(params)
+
+    def process_index(idx):
+        return load_data.get_labelled_gaze_positions_dict_m1(idx, params)
+    
+    dose_index_pairs = [(dose, idx) for dose, indices_list
+                        in zip(unique_doses, dose_inds)
+                        for idx in indices_list]
+    labelled_gaze_positions_m1 = eyelink.process_gaze_positions(
+        dose_index_pairs, use_parallel, process_index)
+    eyelink.save_labelled_gaze_positions(
+        processed_data_dir, labelled_gaze_positions_m1, params)
+    return labelled_gaze_positions_m1
+
+
 ### Function to extract meta-information and update params
 def extract_and_update_meta_info(params):
     """
@@ -87,37 +119,6 @@ def get_unique_doses(params):
     return params
 
 
-###
-def extract_labelled_gaze_positions_m1(params):
-    """
-    Extracts labelled gaze positions from files associated with unique doses.
-    Parameters:
-    - params (dict): Dictionary of parameters.
-    Returns:
-    - labelled_gaze_positions_m1 (list): List of tuples containing gaze
-    positions and associated metadata.
-    """
-    processed_data_dir = params['processed_data_dir']
-    unique_doses = params.get('unique_doses')
-    dose_inds = params.get('dose_inds')
-    use_parallel = params.get('use_parallel', True)
-
-    params = extract_and_update_meta_info(params)
-    params = get_unique_doses(params)
-
-    def process_index(idx):
-        return load_data.get_labelled_gaze_positions_dict_m1(idx, params)
-    
-    dose_index_pairs = [(dose, idx) for dose, indices_list
-                        in zip(unique_doses, dose_inds)
-                        for idx in indices_list]
-    labelled_gaze_positions_m1 = eyelink.process_gaze_positions(
-        dose_index_pairs, use_parallel, process_index)
-    eyelink.save_labelled_gaze_positions(
-        processed_data_dir, labelled_gaze_positions_m1, params)
-    return labelled_gaze_positions_m1
-
-
 def generate_toy_gazepos_data(labelled_gaze_positions, params):
     third_session_data = labelled_gaze_positions[2]
     # Ensure third_session_data[0] is a NumPy array with shape (N, 2)
@@ -139,7 +140,6 @@ def generate_toy_gazepos_data(labelled_gaze_positions, params):
     with open(toy_data_path, 'wb') as f:
         pickle.dump(toy_data, f)
     return [toy_data]
-
 
 
 ###

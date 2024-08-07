@@ -46,7 +46,7 @@ def main():
         'remake_toy_data': False,
         'is_cluster': True,
         'use_parallel': False,
-        'remake_labelled_gaze_positions_m1': False,
+        'remake_labelled_gaze_positions_m1': True,
         'fixation_detection_method': 'cluster_fix',
         'remake_labelled_fixations_m1': False,
         'remake_labelled_saccades_m1': False,

@@ -133,9 +133,6 @@ def remap_source_coords(coord, params, remapping_type, scale=None):
             # Convert coordinate to numpy array and invert the y-axis
             coord = np.array(coord, dtype=np.int16)
             return (coord[0], -coord[1])
-        if not params.get('remap_source_coord_from_inverted_to_standard_y_axis', False):
-            # Return original coordinate if remapping is not required
-            return coord
         # Handle different input types (tuple, list, numpy array, dictionary)
         if isinstance(coord, (list, tuple)):
             if len(coord) == 2 and all(isinstance(i, (int, float)) for i in coord):
@@ -175,9 +172,6 @@ def remap_source_coords(coord, params, remapping_type, scale=None):
                 span(x_px_range) * (coord[0] / span(x_px_range)) + min(x_px_range),
                 span(y_px_range) * (coord[1] / span(y_px_range)) + min(y_px_range)
             ]
-        if not params.get('map_roi_coord_to_eyelink_space', False):
-            # Return original coordinate if remapping is not required
-            return coord
         # Handle different input types (tuple, list, numpy array, dictionary)
         if (isinstance(coord, (tuple, list)) and len(coord) == 2) or (isinstance(coord, np.ndarray) and coord.ndim == 1):
             remapped_coord = remap_single_coord_to_eyelink_space(coord)
@@ -232,6 +226,7 @@ def get_bl_and_tr_roi_coords_m1(m1_landmarks, params):
     - bbox_corners (dict): Dictionary with keys 'eye_bbox', 'face_bbox', 'left_obj_bbox', 'right_obj_bbox'
       containing bounding box corners for respective regions.
     """
+    pdb.set_trace()
     # Calculate bounding box corners for each ROI
     eye_bbox = construct_eye_bounding_box(m1_landmarks, params)
     face_bbox = construct_face_bounding_box(m1_landmarks, params)
@@ -256,6 +251,10 @@ def construct_eye_bounding_box(m1_landmarks, params):
     - eye_bb_corners (dict): Dictionary containing eye bounding box coordinates.
     """
     # Extract and remap coordinates for left and right eyes
+
+    ## Set  the conditions in here to do the inversion from inveted to standard
+    ## axis. or to eyelink space or not.
+
     left_eye = remap_source_coords(m1_landmarks['eyeOnLeft'][0][0][0],
                                    params, 'inverted_to_standard_y_axis')
     left_eye = remap_source_coords(left_eye, params, 'to_eyelink_space')
