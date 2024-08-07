@@ -46,18 +46,18 @@ def extract_labelled_gaze_positions_m1(params):
     params = get_unique_doses(params)
     unique_doses = params.get('unique_doses')
     dose_inds = params.get('dose_inds')
-    
-    def process_index(idx, params):
-        return load_data.get_labelled_gaze_positions_dict_m1(idx, params)
-    
     dose_index_pairs = [(dose, idx) for dose, indices_list
                         in zip(unique_doses, dose_inds)
                         for idx in indices_list]
     labelled_gaze_positions_m1, params = eyelink.process_gaze_positions(
-        dose_index_pairs, use_parallel, process_index, params)
+        dose_index_pairs, use_parallel, process_index_for_gazefile, params)
     eyelink.save_labelled_gaze_positions(
         processed_data_dir, labelled_gaze_positions_m1, params)
     return labelled_gaze_positions_m1, params
+
+
+def process_index_for_gazefile(idx, params):
+        return load_data.get_labelled_gaze_positions_dict_m1(idx, params)
 
 
 ### Function to extract meta-information and update params

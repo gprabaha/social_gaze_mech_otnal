@@ -7,7 +7,6 @@ Created on Mon Jun 17 11:24:18 2024
 """
 
 import multiprocessing
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
 import os
 import pickle
@@ -15,7 +14,7 @@ import pickle
 import util
 
 
-def process_gaze_positions(dose_index_pairs, use_parallel, process_index, params):
+def process_gaze_positions(dose_index_pairs, use_parallel, process_index_func, params):
     """
     Processes gaze positions either in parallel or serially.
     Parameters:
@@ -29,14 +28,14 @@ def process_gaze_positions(dose_index_pairs, use_parallel, process_index, params
     """
     if use_parallel:
         labelled_gaze_positions_m1 = process_gaze_positions_parallel(
-            dose_index_pairs, process_index, params)
+            dose_index_pairs, process_index_func, params)
     else:
         labelled_gaze_positions_m1 = process_gaze_positions_serial(
-            dose_index_pairs, process_index, params)
+            dose_index_pairs, process_index_func, params)
     return labelled_gaze_positions_m1, params
 
 
-def process_gaze_positions_parallel(dose_index_pairs, process_index, params):
+def process_gaze_positions_parallel(dose_index_pairs, process_index_func, params):
     """
     Processes gaze positions in parallel.
     Parameters:
@@ -47,24 +46,20 @@ def process_gaze_positions_parallel(dose_index_pairs, process_index, params):
     - labelled_gaze_positions_m1 (list): List of processed gaze positions.
     - params (dict): Updated dictionary of parameters.
     """
-    num_workers = min(multiprocessing.cpu_count(), len(dose_index_pairs))
-    with ProcessPoolExecutor(max_workers=num_workers) as executor:
-        futures = {executor.submit(process_index, idx, params):
-                   idx for _, idx in dose_index_pairs}
+    with multiprocessing.Pool(processes=min(multiprocessing.cpu_count(), len(dose_index_pairs))) as pool:
         results = []
-        for future in tqdm(as_completed(futures),
-                           desc="Processing gaze position in parallel",
-                           unit="index", total=len(dose_index_pairs)):
-            idx = futures[future]
-            gaze_data = future.result()
+        for gaze_data in tqdm(pool.imap_unordered(process_index_func, [(idx, params) for _, idx in dose_index_pairs]), 
+                              desc="Processing gaze position for session", 
+                              unit="index", 
+                              total=len(dose_index_pairs)):
             if gaze_data is not None:
-                results.append((idx, gaze_data))
+                results.append(gaze_data)
         results.sort(key=lambda x: x[0])
         labelled_gaze_positions_m1 = [gaze_data for _, gaze_data in results]
     return labelled_gaze_positions_m1, params
 
 
-def process_gaze_positions_serial(dose_index_pairs, process_index, params):
+def process_gaze_positions_serial(dose_index_pairs, process_index_func, params):
     """
     Processes gaze positions serially.
     Parameters:
@@ -79,7 +74,7 @@ def process_gaze_positions_serial(dose_index_pairs, process_index, params):
     for _, idx in tqdm(dose_index_pairs,
                        desc="Processing gaze position in serial",
                        unit="index"):
-        gaze_data = process_index(idx, params)
+        gaze_data = process_index_func(idx, params)
         if gaze_data is not None:
             labelled_gaze_positions_m1.append(gaze_data)
     return labelled_gaze_positions_m1, params
