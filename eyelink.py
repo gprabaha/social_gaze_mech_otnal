@@ -12,15 +12,17 @@ import os
 import pickle
 
 import util
+import load_data
+
+import pdb
 
 
-def process_gaze_positions(dose_index_pairs, use_parallel, process_index_func, params):
+def process_gaze_positions(dose_index_pairs, use_parallel, params):
     """
     Processes gaze positions either in parallel or serially.
     Parameters:
     - dose_index_pairs (list): List of dose and index pairs.
     - use_parallel (bool): Flag to determine if parallel processing should be used.
-    - process_index (function): Function to process each index.
     - params (dict): Dictionary of parameters.
     Returns:
     - labelled_gaze_positions_m1 (list): List of processed gaze positions.
@@ -28,43 +30,43 @@ def process_gaze_positions(dose_index_pairs, use_parallel, process_index_func, p
     """
     if use_parallel:
         labelled_gaze_positions_m1 = process_gaze_positions_parallel(
-            dose_index_pairs, process_index_func, params)
+            dose_index_pairs, params)
     else:
         labelled_gaze_positions_m1 = process_gaze_positions_serial(
-            dose_index_pairs, process_index_func, params)
+            dose_index_pairs, params)
     return labelled_gaze_positions_m1, params
 
 
-def process_gaze_positions_parallel(dose_index_pairs, process_index_func, params):
+def process_gaze_positions_parallel(dose_index_pairs, params):
     """
     Processes gaze positions in parallel.
     Parameters:
     - dose_index_pairs (list): List of dose and index pairs.
-    - process_index (function): Function to process each index.
     - params (dict): Dictionary of parameters.
     Returns:
     - labelled_gaze_positions_m1 (list): List of processed gaze positions.
     - params (dict): Updated dictionary of parameters.
     """
-    with multiprocessing.Pool(processes=min(multiprocessing.cpu_count(), len(dose_index_pairs))) as pool:
-        results = []
-        for gaze_data in tqdm(pool.imap_unordered(process_index_func, [(idx, params) for _, idx in dose_index_pairs]), 
-                              desc="Processing gaze position for session", 
-                              unit="index", 
-                              total=len(dose_index_pairs)):
+    num_processes = min(multiprocessing.cpu_count(), len(dose_index_pairs))
+    print(f'Gaze sig num processes: {num_processes}')
+    with multiprocessing.Pool(processes=num_processes) as pool:
+        results = {}
+        for idx, gaze_data in tqdm(pool.imap_unordered(process_index_func_wrapper, [(idx, params) for _, idx in dose_index_pairs]), 
+                                   desc="Processing gaze position in parallel", 
+                                   unit="index", 
+                                   total=len(dose_index_pairs)):
             if gaze_data is not None:
-                results.append(gaze_data)
-        results.sort(key=lambda x: x[0])
-        labelled_gaze_positions_m1 = [gaze_data for _, gaze_data in results]
+                results[idx] = gaze_data
+    # Reconstruct the list in the desired order
+    labelled_gaze_positions_m1 = [results[idx] for _, idx in dose_index_pairs if idx in results]
     return labelled_gaze_positions_m1, params
 
 
-def process_gaze_positions_serial(dose_index_pairs, process_index_func, params):
+def process_gaze_positions_serial(dose_index_pairs, params):
     """
     Processes gaze positions serially.
     Parameters:
     - dose_index_pairs (list): List of dose and index pairs.
-    - process_index (function): Function to process each index.
     - params (dict): Dictionary of parameters.
     Returns:
     - labelled_gaze_positions_m1 (list): List of processed gaze positions.
@@ -74,10 +76,16 @@ def process_gaze_positions_serial(dose_index_pairs, process_index_func, params):
     for _, idx in tqdm(dose_index_pairs,
                        desc="Processing gaze position in serial",
                        unit="index"):
-        gaze_data = process_index_func(idx, params)
+        gaze_data = process_index_func_wrapper((idx, params))
+        pdb.set_trace()
         if gaze_data is not None:
             labelled_gaze_positions_m1.append(gaze_data)
     return labelled_gaze_positions_m1, params
+
+
+def process_index_func_wrapper(args):
+    idx, params = args
+    return load_data.get_labelled_gaze_positions_dict_m1(idx, params)
 
 
 
