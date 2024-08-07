@@ -38,6 +38,7 @@ def extract_labelled_gaze_positions_m1(params):
     Returns:
     - labelled_gaze_positions_m1 (list): List of tuples containing gaze
     positions and associated metadata.
+    - params (dict): Updated dictionary of parameters.
     """
     processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', True)
@@ -52,11 +53,11 @@ def extract_labelled_gaze_positions_m1(params):
     dose_index_pairs = [(dose, idx) for dose, indices_list
                         in zip(unique_doses, dose_inds)
                         for idx in indices_list]
-    labelled_gaze_positions_m1 = eyelink.process_gaze_positions(
+    labelled_gaze_positions_m1, params = eyelink.process_gaze_positions(
         dose_index_pairs, use_parallel, process_index, params)
     eyelink.save_labelled_gaze_positions(
         processed_data_dir, labelled_gaze_positions_m1, params)
-    return labelled_gaze_positions_m1
+    return labelled_gaze_positions_m1, params
 
 
 ### Function to extract meta-information and update params

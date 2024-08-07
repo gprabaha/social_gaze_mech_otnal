@@ -26,13 +26,15 @@ def process_gaze_positions(dose_index_pairs, use_parallel, process_index, params
     - params (dict): Dictionary of parameters.
     Returns:
     - labelled_gaze_positions_m1 (list): List of processed gaze positions.
+    - params (dict): Updated dictionary of parameters.
     """
     if use_parallel:
-        return process_gaze_positions_parallel(
+        labelled_gaze_positions_m1 = process_gaze_positions_parallel(
             dose_index_pairs, process_index, params)
     else:
-        return process_gaze_positions_serial(
+        labelled_gaze_positions_m1 = process_gaze_positions_serial(
             dose_index_pairs, process_index, params)
+    return labelled_gaze_positions_m1, params
 
 
 def process_gaze_positions_parallel(dose_index_pairs, process_index, params):
@@ -44,6 +46,7 @@ def process_gaze_positions_parallel(dose_index_pairs, process_index, params):
     - params (dict): Dictionary of parameters.
     Returns:
     - labelled_gaze_positions_m1 (list): List of processed gaze positions.
+    - params (dict): Updated dictionary of parameters.
     """
     num_workers = min(multiprocessing.cpu_count(), len(dose_index_pairs))
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
@@ -58,7 +61,8 @@ def process_gaze_positions_parallel(dose_index_pairs, process_index, params):
             if gaze_data is not None:
                 results.append((idx, gaze_data))
         results.sort(key=lambda x: x[0])
-        return [gaze_data for _, gaze_data in results]
+        labelled_gaze_positions_m1 = [gaze_data for _, gaze_data in results]
+    return labelled_gaze_positions_m1, params
 
 
 def process_gaze_positions_serial(dose_index_pairs, process_index, params):
@@ -70,6 +74,7 @@ def process_gaze_positions_serial(dose_index_pairs, process_index, params):
     - params (dict): Dictionary of parameters.
     Returns:
     - labelled_gaze_positions_m1 (list): List of processed gaze positions.
+    - params (dict): Updated dictionary of parameters.
     """
     labelled_gaze_positions_m1 = []
     for _, idx in tqdm(dose_index_pairs,
@@ -78,7 +83,7 @@ def process_gaze_positions_serial(dose_index_pairs, process_index, params):
         gaze_data = process_index(idx, params)
         if gaze_data is not None:
             labelled_gaze_positions_m1.append(gaze_data)
-    return labelled_gaze_positions_m1
+    return labelled_gaze_positions_m1, params
 
 
 
