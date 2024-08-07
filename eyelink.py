@@ -50,17 +50,12 @@ def process_gaze_positions_parallel(dose_index_pairs, params):
     num_processes = min(multiprocessing.cpu_count(), len(dose_index_pairs))
     print(f'Gaze sig num processes: {num_processes}')
     with multiprocessing.Pool(processes=num_processes) as pool:
-        labelled_gaze_positions_m1 = [
-            result for result in tqdm(
-                pool.imap_unordered(
-                    process_index_func_wrapper, 
-                    [(idx, params) for _, idx in dose_index_pairs]
-                ),
-                desc="Processing gaze position in parallel", 
-                unit="index", 
-                total=len(dose_index_pairs)
-            ) if result is not None
-        ]
+        labelled_gaze_positions_m1 = list(tqdm(
+            pool.map(process_index_func_wrapper, [(idx, params) for _, idx in dose_index_pairs]),
+            desc="Processing gaze position in parallel",
+            unit="index",
+            total=len(dose_index_pairs)
+        ))
     return labelled_gaze_positions_m1, params
 
 
