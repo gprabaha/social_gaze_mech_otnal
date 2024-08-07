@@ -126,7 +126,7 @@ def get_labelled_gaze_positions_dict_m1(idx, params):
     if len(mat_files) != 1:
         print(f"\nError: Multiple or no '*_M1_gaze.mat' files found in folder: {folder_path}")
         params['discarded_paths'].append(folder_path)
-        return None, None
+        return None, None, None
     mat_file_path = os.path.join(folder_path, mat_files[0])
     try:
         mat_data = scipy.io.loadmat(mat_file_path)
@@ -142,11 +142,11 @@ def get_labelled_gaze_positions_dict_m1(idx, params):
         meta_info = meta_info_list[idx]
         meta_info.update({'sampling_rate': sampling_rate,
                           'category': session_categories[idx]})
-        return gaze_positions, meta_info
+        return gaze_positions, meta_info, params
     except Exception as e:
         print(f"\nError loading file '{mat_files[0]}': {e}")
         params['discarded_paths'].append(folder_path)
-        return None, None
+        return None, None, None
 
 
 

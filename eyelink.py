@@ -29,10 +29,10 @@ def process_gaze_positions(dose_index_pairs, use_parallel, params):
     - params (dict): Updated dictionary of parameters.
     """
     if use_parallel:
-        labelled_gaze_positions_m1 = process_gaze_positions_parallel(
+        labelled_gaze_positions_m1, params = process_gaze_positions_parallel(
             dose_index_pairs, params)
     else:
-        labelled_gaze_positions_m1 = process_gaze_positions_serial(
+        labelled_gaze_positions_m1, params = process_gaze_positions_serial(
             dose_index_pairs, params)
     return labelled_gaze_positions_m1, params
 
@@ -44,18 +44,18 @@ def process_gaze_positions_parallel(dose_index_pairs, params):
     - dose_index_pairs (list): List of dose and index pairs.
     - params (dict): Dictionary of parameters.
     Returns:
-    - labelled_gaze_positions_m1 (list): List of processed gaze positions.
+    - labelled_gaze_positions_m1 (list): List of tuples (gaze_positions, meta_info).
     - params (dict): Updated dictionary of parameters.
     """
     num_processes = min(multiprocessing.cpu_count(), len(dose_index_pairs))
     print(f'Gaze sig num processes: {num_processes}')
+    labelled_gaze_positions_m1 = []
     with multiprocessing.Pool(processes=num_processes) as pool:
-        labelled_gaze_positions_m1 = list(tqdm(
-            pool.map(process_index_func_wrapper, [(idx, params) for _, idx in dose_index_pairs]),
-            desc="Processing gaze position in parallel",
-            unit="index",
-            total=len(dose_index_pairs)
-        ))
+        results = pool.map(process_index_func_wrapper, [(idx, params) for _, idx in dose_index_pairs])
+        for result in tqdm(results, desc="Processing gaze position in parallel", unit="index", total=len(dose_index_pairs)):
+            if result is not None:
+                labelled_gaze_positions_m1.append(result[:2])
+    params = results[-1][2]
     return labelled_gaze_positions_m1, params
 
 
