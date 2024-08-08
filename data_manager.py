@@ -170,7 +170,9 @@ class DataManager:
         self.logger.info(f"Frame of attention and plotting added to gaze data")
 
         plotter.plot_calib_coordinates_and_bboxes(self.gaze_position_labels_m1, self.params['root_data_dir'])
-
+        
+        pdb.set_trace()
+        
         if self.params['use_toy_data']:
             self.logger.info(f"!! USING TOY DATA !!")
             self.toy_data = self.get_or_load_variable(

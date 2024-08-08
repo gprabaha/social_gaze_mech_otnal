@@ -253,11 +253,20 @@ def extract_landmarks(landmarks_array):
     landmark_dict = {}
     # Loop over each key and extract the corresponding coordinates
     for key in keys:
-        try:
-            # Fetch the coordinates, assuming the same structure
-            landmark_dict[key] = landmarks_array[key][0][0][0]
-        except IndexError:
-            landmark_dict[key] = []
+        if key in ['leftObject', 'rightObject']:
+            # For leftObject and rightObject, extract all four corners
+            landmark_dict[key] = {
+                'topLeft': landmarks_array[key]['topLeft'][0][0][0],
+                'topRight': landmarks_array[key]['topRight'][0][0][0],
+                'bottomLeft': landmarks_array[key]['bottomLeft'][0][0][0],
+                'bottomRight': landmarks_array[key]['bottomRight'][0][0][0]
+            }
+        else:
+            try:
+                # Fetch the coordinates, assuming the same structure
+                landmark_dict[key] = landmarks_array[key][0][0][0]
+            except IndexError:
+                landmark_dict[key] = []
     return landmark_dict
 
 

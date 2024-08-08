@@ -184,25 +184,38 @@ def plot_behavior_in_epoch(events, plotting_frame, frame_of_attention, roi_bb_co
 def plot_calib_coordinates_and_bboxes(gaze_position_labels, root_data_dir):
     """
     Plots gaze position labels with landmarks and bounding boxes for each session.
+
     Parameters:
     gaze_position_labels (list): A list of dictionaries containing gaze position labels.
     root_data_dir (str): The root directory where plots should be saved.
     """
+    
     # Get the plots directory
     plots_dir = util.add_date_dir_to_path(
         os.path.join(root_data_dir, 'plots', 'rois')
     )
+    
     # Ensure the plots directory exists
     os.makedirs(plots_dir, exist_ok=True)
+    
     for label in gaze_position_labels:
         session_name = label.get('session_name', 'unknown_session')
         roi_bb_corners = label.get('roi_bb_corners', {})
         landmarks_dict = roi_bb_corners.get('landmarks_dict', {})
+        
         # Create a new figure and axis for each session
         fig, ax = plt.subplots()
+
         # Plot the landmarks
         for landmark, coords in landmarks_dict.items():
-            ax.plot(coords[0], coords[1], 'o', label=landmark)
+            if landmark in ['leftObject', 'rightObject']:
+                # Plot each corner for leftObject and rightObject
+                for corner, corner_coords in coords.items():
+                    ax.plot(corner_coords[0], corner_coords[1], 'o', label=f'{landmark}_{corner}')
+            else:
+                logger.info(f'Landmark: {landmark}; Coordinate: {coords}')
+                ax.plot(coords[0], coords[1], 'o', label=landmark)
+        
         # Overlay the bounding boxes
         for key, bbox in roi_bb_corners.items():
             if '_bbox' in key:
@@ -213,11 +226,13 @@ def plot_calib_coordinates_and_bboxes(gaze_position_labels, root_data_dir):
                 rect = patches.Rectangle(bottom_left, width, height, linewidth=1, edgecolor='r', facecolor='none')
                 ax.add_patch(rect)
                 ax.text(bottom_left[0], bottom_left[1], key, fontsize=8, color='red', verticalalignment='bottom')
+        pdb.set_trace()
         # Set title and labels
         ax.set_title(f'Gaze Position Labels - Session: {session_name}')
         ax.set_xlabel('X Coordinate')
         ax.set_ylabel('Y Coordinate')
         ax.legend()
+
         # Save the plot to the specified plots directory
         plot_file_path = os.path.join(plots_dir, f'gaze_position_labels_{session_name}.png')
         plt.savefig(plot_file_path)

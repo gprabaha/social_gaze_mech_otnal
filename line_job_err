@@ -18,3 +18,107 @@ CondaError: Run 'conda init' before 'conda deactivate'
 2024-08-08 14:23:03,186 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
 2024-08-08 14:28:03,689 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
 2024-08-08 14:33:04,837 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 14:38:05,640 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 14:43:06,363 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 14:48:07,040 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 14:53:08,690 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 14:58:09,633 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 15:03:10,499 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 15:08:11,448 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 15:13:12,399 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 15:18:13,124 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 15:23:15,438 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 15:28:16,947 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 15:33:17,478 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 15:38:19,030 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 15:43:20,169 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 15:48:21,891 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 15:53:23,625 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 15:58:25,377 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 16:03:26,113 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 16:08:26,842 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 16:13:27,367 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 16:18:29,131 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 16:23:30,680 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 16:28:31,994 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 16:33:33,540 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 16:38:33,988 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 16:43:35,932 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 16:48:36,860 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 16:53:38,173 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 16:58:38,859 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 17:03:39,703 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 17:08:40,344 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 17:13:42,058 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 17:18:42,731 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 17:23:45,208 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 17:28:45,694 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 17:33:46,153 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 17:38:48,256 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 17:40:48,864 - hpc_fixation_detection - INFO - Job array 27585525 has completed.
+2024-08-08 17:46:02,886 - fix_and_saccades - INFO - Processing detection results.
+2024-08-08 17:46:06,757 - fix_and_saccades - INFO - Saving fixation and saccade results.
+2024-08-08 17:46:06,757 - fix_and_saccades - INFO - Saving: /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/all_fixations_and_saccades.pkl
+2024-08-08 17:46:14,117 - curate_data - INFO - Starting sorting of sessions.
+Sorting session behav dfs:   0%|          | 0/31 [00:00<?, ?it/s]Sorting session behav dfs:   3%|▎         | 1/31 [00:01<00:32,  1.08s/it]Sorting session behav dfs:   6%|▋         | 2/31 [00:02<00:32,  1.13s/it]Sorting session behav dfs:  10%|▉         | 3/31 [00:03<00:35,  1.25s/it]Sorting session behav dfs:  13%|█▎        | 4/31 [00:05<00:33,  1.25s/it]Sorting session behav dfs:  16%|█▌        | 5/31 [00:06<00:30,  1.16s/it]Sorting session behav dfs:  19%|█▉        | 6/31 [00:07<00:27,  1.12s/it]Sorting session behav dfs:  23%|██▎       | 7/31 [00:08<00:31,  1.33s/it]Sorting session behav dfs:  26%|██▌       | 8/31 [00:09<00:24,  1.06s/it]Sorting session behav dfs:  29%|██▉       | 9/31 [00:11<00:27,  1.26s/it]Sorting session behav dfs:  32%|███▏      | 10/31 [00:12<00:24,  1.18s/it]Sorting session behav dfs:  35%|███▌      | 11/31 [00:12<00:21,  1.06s/it]Sorting session behav dfs:  39%|███▊      | 12/31 [00:13<00:19,  1.02s/it]Sorting session behav dfs:  42%|████▏     | 13/31 [00:18<00:36,  2.04s/it]Sorting session behav dfs:  52%|█████▏    | 16/31 [00:19<00:23,  1.53s/it]Sorting session behav dfs:  55%|█████▍    | 17/31 [00:20<00:19,  1.41s/it]Sorting session behav dfs:  58%|█████▊    | 18/31 [00:21<00:16,  1.30s/it]Sorting session behav dfs:  61%|██████▏   | 19/31 [00:22<00:14,  1.19s/it]Sorting session behav dfs:  65%|██████▍   | 20/31 [00:23<00:13,  1.18s/it]Sorting session behav dfs:  68%|██████▊   | 21/31 [00:24<00:11,  1.13s/it]Sorting session behav dfs:  71%|███████   | 22/31 [00:25<00:09,  1.09s/it]Sorting session behav dfs:  74%|███████▍  | 23/31 [00:26<00:08,  1.08s/it]Sorting session behav dfs:  77%|███████▋  | 24/31 [00:27<00:07,  1.11s/it]Sorting session behav dfs:  81%|████████  | 25/31 [00:28<00:06,  1.12s/it]Sorting session behav dfs:  84%|████████▍ | 26/31 [00:29<00:05,  1.07s/it]Sorting session behav dfs:  87%|████████▋ | 27/31 [00:30<00:03,  1.13it/s]Sorting session behav dfs:  90%|█████████ | 28/31 [00:30<00:02,  1.35it/s]Sorting session behav dfs:  94%|█████████▎| 29/31 [00:31<00:01,  1.58it/s]Sorting session behav dfs:  97%|█████████▋| 30/31 [00:31<00:00,  1.63it/s]Sorting session behav dfs: 100%|██████████| 31/31 [00:31<00:00,  2.00it/s]Sorting session behav dfs: 100%|██████████| 31/31 [00:31<00:00,  1.03s/it]
+2024-08-08 17:46:50,741 - curate_data - INFO - Finished sorting sessions. Checking for time window clashes.
+Checking time window clashes within events:   0%|          | 0/31 [00:00<?, ?it/s]Checking time window clashes within events:   3%|▎         | 1/31 [00:03<01:44,  3.49s/it]Checking time window clashes within events:   6%|▋         | 2/31 [00:22<03:58,  8.23s/it]Checking time window clashes within events:  10%|▉         | 3/31 [00:26<03:11,  6.83s/it]Checking time window clashes within events:  13%|█▎        | 4/31 [00:36<03:27,  7.69s/it]Checking time window clashes within events:  16%|█▌        | 5/31 [00:42<03:13,  7.46s/it]Checking time window clashes within events:  29%|██▉       | 9/31 [00:56<02:17,  6.24s/it]Checking time window clashes within events:  35%|███▌      | 11/31 [01:16<02:27,  7.38s/it]Checking time window clashes within events:  52%|█████▏    | 16/31 [01:20<01:20,  5.37s/it]Checking time window clashes within events:  55%|█████▍    | 17/31 [01:22<01:01,  4.38s/it]Checking time window clashes within events:  61%|██████▏   | 19/31 [01:31<00:54,  4.54s/it]Checking time window clashes within events:  71%|███████   | 22/31 [01:38<00:34,  3.84s/it]Checking time window clashes within events:  74%|███████▍  | 23/31 [01:40<00:25,  3.21s/it]Checking time window clashes within events:  81%|████████  | 25/31 [01:43<00:16,  2.68s/it]Checking time window clashes within events:  94%|█████████▎| 29/31 [01:43<00:03,  1.90s/it]Checking time window clashes within events:  97%|█████████▋| 30/31 [01:45<00:02,  2.03s/it]Checking time window clashes within events: 100%|██████████| 31/31 [01:45<00:00,  3.41s/it]
+2024-08-08 17:48:41,885 - curate_data - INFO - No time window clashes found.
+2024-08-08 17:48:45,585 - curate_data - INFO - First 50 events in the 'mon_down' condition:
+         session_name  run inter_run  ...        end_roi category event_type
+1616  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1617  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1618  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1619  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1620  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1621  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1622  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1623  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1624  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1625  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1626  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1627  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1628  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1629  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1630  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1631  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1632  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1633  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1634  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1635  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1636  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1637  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1638  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1639  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1640  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1641  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1642  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1643  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1644  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1645  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1646  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1647  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1648  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1649  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1650  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1651  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1652  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1653  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1654  OTNAL_FV_030921  1.0      None  ...       eye_bbox      0.0   fixation
+1655  OTNAL_FV_030921  1.0      None  ...       eye_bbox      0.0   fixation
+1656  OTNAL_FV_030921  1.0      None  ...       eye_bbox      0.0    saccade
+1657  OTNAL_FV_030921  1.0      None  ...       eye_bbox      0.0   fixation
+1658  OTNAL_FV_030921  1.0      None  ...       eye_bbox      0.0    saccade
+1659  OTNAL_FV_030921  1.0      None  ...       eye_bbox      0.0   fixation
+1660  OTNAL_FV_030921  1.0      None  ...  left_obj_bbox      0.0    saccade
+1661  OTNAL_FV_030921  1.0      None  ...  left_obj_bbox      0.0   fixation
+1662  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1663  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+1664  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0    saccade
+1665  OTNAL_FV_030921  1.0      None  ...     out_of_roi      0.0   fixation
+
+[50 rows x 18 columns]
+2024-08-08 18:00:45,975 - curate_data - INFO - DataFrame saved to: /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/combined_gaze_behav_m1.csv
+2024-08-08 18:00:46,062 - data_manager - INFO - M1 fixations and saccades acquired
+./run_gaze_analysis.sh: line 5: 3875649 Killed                  python analyze_gaze_signals.py
+slurmstepd: error: Detected 1 oom_kill event in StepId=27585523.batch. Some of the step tasks have been OOM Killed.
