@@ -256,10 +256,10 @@ def extract_landmarks(landmarks_array):
         if key in ['leftObject', 'rightObject']:
             # For leftObject and rightObject, extract all four corners
             landmark_dict[key] = {
-                'topLeft': landmarks_array[key]['topLeft'][0][0][0],
-                'topRight': landmarks_array[key]['topRight'][0][0][0],
-                'bottomLeft': landmarks_array[key]['bottomLeft'][0][0][0],
-                'bottomRight': landmarks_array[key]['bottomRight'][0][0][0]
+                'topLeft': landmarks_array[key][0][0][0]['topLeft'][0][0],
+                'topRight': landmarks_array[key][0][0][0]['topRight'][0][0],
+                'bottomLeft': landmarks_array[key][0][0][0]['bottomLeft'][0][0],
+                'bottomRight': landmarks_array[key][0][0][0]['bottomRight'][0][0]
             }
         else:
             try:
