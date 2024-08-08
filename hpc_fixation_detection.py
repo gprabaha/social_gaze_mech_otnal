@@ -10,6 +10,7 @@ import os
 import subprocess
 import logging
 import time
+import numpy as np
 import pickle
 import json
 
@@ -20,7 +21,7 @@ class HPCFixationDetection:
         self.job_script_out_dir = './job_scripts/'
 
 
-    def convert_to_serializable(obj):
+    def convert_to_serializable(self, obj):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         if isinstance(obj, dict):
@@ -30,7 +31,7 @@ class HPCFixationDetection:
         return obj
 
 
-    def serialize_params(params, filename):
+    def serialize_params(self, params, filename):
         serializable_params = self.convert_to_serializable(params)
         with open(filename, 'w') as f:
             json.dump(serializable_params, f, indent=4)
