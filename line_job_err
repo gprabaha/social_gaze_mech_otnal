@@ -2,3 +2,17 @@
 CondaError: Run 'conda init' before 'conda deactivate'
 
 2024-08-08 14:05:35,287 - data_manager - INFO - Loading variable(s): labelled_gaze_positions_m1, params
+2024-08-08 14:07:52,516 - data_manager - INFO - M1 remapped gaze pos data acquired!
+2024-08-08 14:07:52,518 - data_manager - INFO - Gaze data split into: self.gaze_positions and self.gaze_position_labels!
+2024-08-08 14:07:52,520 - data_manager - INFO - Frame of attention and plotting added to gaze data
+2024-08-08 14:07:52,520 - data_manager - INFO - Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1
+2024-08-08 14:07:52,520 - fix_and_saccades - INFO - Extracting all fixations and saccades from labelled gaze positions.
+2024-08-08 14:07:52,523 - hpc_fixation_detection - INFO - Job commands in the job list: 31
+2024-08-08 14:07:59,303 - hpc_fixation_detection - INFO - Successfully generated the dSQ job script
+2024-08-08 14:07:59,303 - hpc_fixation_detection - INFO - Using dSQ job script: ./job_scripts/dsq-joblist_fixations.sh
+2024-08-08 14:07:59,325 - hpc_fixation_detection - INFO - Successfully submitted jobs using sbatch for script ./job_scripts/dsq-joblist_fixations.sh
+2024-08-08 14:07:59,325 - hpc_fixation_detection - INFO - Submitted job array with ID: 27585525
+2024-08-08 14:07:59,325 - hpc_fixation_detection - INFO - Tracking progress of job array with ID: 27585525
+2024-08-08 14:13:00,259 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 14:18:01,818 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...
+2024-08-08 14:23:03,186 - hpc_fixation_detection - INFO - Job array 27585525 is still running. Checking again in 30 seconds...

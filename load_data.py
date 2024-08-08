@@ -136,7 +136,7 @@ def get_labelled_gaze_positions_dict_m1(idx, params):
         coordinates = np.column_stack((M1Xpx, M1Ypx))
         coordinates_inverted_y = util.remap_source_coords(
             coordinates, params, 'inverted_to_standard_y_axis')
-        if params.get('map_gaze_pos_coord_to_eyelink_space', False):
+        if params.get('map_gaze_pos_coord_to_eyelink_space', True):
             gaze_positions = util.remap_source_coords(
                 coordinates_inverted_y, params, 'to_eyelink_space')
         meta_info = meta_info_list[idx]

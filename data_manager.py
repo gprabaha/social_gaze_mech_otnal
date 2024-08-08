@@ -149,6 +149,44 @@ class DataManager:
                     self.gaze_position_labels_m1, plots_dir)
 
 
+    def plot_calib_coordinates_and_bboxes(self):
+        # Get the root data directory and the plots directory
+        root_data_dir = self.params['root_data_dir']
+        plots_dir = util.add_date_dir_to_path(
+            os.path.join(root_data_dir, 'plots', 'rois')
+        )
+        # Ensure the plots directory exists
+        os.makedirs(plots_dir, exist_ok=True)
+        # Create a new figure and axis for the combined plot
+        fig, ax = plt.subplots()
+        for label in self.gaze_position_labels_m1:
+            session_name = label.get('session_name', 'unknown_session')
+            roi_bb_corners = label.get('roi_bb_corners', {})
+            landmarks_dict = roi_bb_corners.get('landmarks_dict', {})
+            # Plot the landmarks
+            for landmark, coords in landmarks_dict.items():
+                ax.plot(coords[0], coords[1], 'o', label=landmark)
+            # Overlay the bounding boxes
+            for key, bbox in roi_bb_corners.items():
+                if '_bbox' in key:
+                    top_right = bbox['topRight']
+                    bottom_left = bbox['bottomLeft']
+                    width = top_right[0] - bottom_left[0]
+                    height = top_right[1] - bottom_left[1]
+                    rect = patches.Rectangle(bottom_left, width, height, linewidth=1, edgecolor='r', facecolor='none')
+                    ax.add_patch(rect)
+                    ax.text(bottom_left[0], bottom_left[1], key, fontsize=8, color='red', verticalalignment='bottom')
+        # Set title and labels
+        ax.set_title('Gaze Position Labels')
+        ax.set_xlabel('X Coordinate')
+        ax.set_ylabel('Y Coordinate')
+        ax.legend()
+        # Save the combined plot to the specified plots directory
+        plot_file_path = os.path.join(plots_dir, 'combined_gaze_position_labels.png')
+        plt.savefig(plot_file_path)
+        plt.close(fig)
+
+
     def run(self):
         """Run the DataManager to fetch, process, and plot gaze and behavioral data."""
         _, self.params = util.fetch_root_data_dir(self.params)
@@ -167,6 +205,8 @@ class DataManager:
         self.logger.info(f"Gaze data split into: self.gaze_positions and self.gaze_position_labels!")
         self.add_frame_of_attention_and_plotting_frame_to_gaze_labels()
         self.logger.info(f"Frame of attention and plotting added to gaze data")
+
+        self.plot_calib_coordinates_and_bboxes()
 
         if self.params['use_toy_data']:
             self.logger.info(f"!! USING TOY DATA !!")

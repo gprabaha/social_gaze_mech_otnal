@@ -1,0 +1,2 @@
+Batch script generated. To submit your jobs, run:
+ sbatch ./job_scripts/dsq-joblist_fixations.sh
