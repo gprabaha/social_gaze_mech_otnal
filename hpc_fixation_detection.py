@@ -20,9 +20,20 @@ class HPCFixationDetection:
         self.job_script_out_dir = './job_scripts/'
 
 
-    def serialize_params(self, filepath):
-        with open(filepath, 'w') as f:
-            json.dump(self.params, f)
+    def convert_to_serializable(obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, dict):
+            return {k: self.convert_to_serializable(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [self.convert_to_serializable(v) for v in obj]
+        return obj
+
+
+    def serialize_params(params, filename):
+        serializable_params = self.convert_to_serializable(params)
+        with open(filename, 'w') as f:
+            json.dump(serializable_params, f, indent=4)
 
 
     def generate_fixation_job_file(self, labelled_gaze_positions):

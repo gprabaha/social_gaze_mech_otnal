@@ -163,10 +163,8 @@ class DataManager:
             lambda p: curate_data.extract_labelled_gaze_positions_m1(p))
         self.logger.info(f"M1 remapped gaze pos data acquired!")
 
-        pdb.set_trace()
-
         ## get positions of M2 here
-
+        # pdb.set_trace()
 
         self.split_gaze_data()
         self.logger.info(f"Gaze data split into: self.gaze_positions and self.gaze_position_labels!")
@@ -183,6 +181,8 @@ class DataManager:
         else:
             input_data = self.labelled_gaze_positions_m1
         
+        pdb.set_trace()
+
         self.labelled_fixations_m1, self.labelled_saccades_m1, self.combined_behav_m1 = self.get_or_load_variable(
             'labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1',
             load_data.load_m1_labelled_fixations_saccades_and_combined,
@@ -199,7 +199,7 @@ class DataManager:
             lambda p: curate_data.extract_spiketimes_for_all_sessions(p)
         )
         
-        pdb.set_trace()
+        # pdb.set_trace()
 
         if self.params['make_plots']:
             self.plot_all_behavior_in_all_sessions(use_parallel=True)
