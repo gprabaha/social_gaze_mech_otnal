@@ -14,34 +14,25 @@ import numpy as np
 import pickle
 import json
 
+import pdb
+
 
 class HPCFixationDetection:
     def __init__(self, params):
         self.params = params
         self.job_script_out_dir = './job_scripts/'
+        # Initialize logger
+        self.logger = logging.getLogger(__name__)
 
-
-    def convert_to_serializable(self, obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        if isinstance(obj, dict):
-            return {k: self.convert_to_serializable(v) for k, v in obj.items()}
-        if isinstance(obj, list):
-            return [self.convert_to_serializable(v) for v in obj]
-        return obj
-
-
-    def serialize_params(self, params, filename):
-        serializable_params = self.convert_to_serializable(params)
-        with open(filename, 'w') as f:
-            json.dump(serializable_params, f, indent=4)
-
+    def serialize_params(self, filename):
+        with open(filename, 'wb') as f:
+            pickle.dump(self.params, f)
 
     def generate_fixation_job_file(self, labelled_gaze_positions):
         job_file_path = os.path.join(self.job_script_out_dir, 'fixation_joblist.txt')
         os.makedirs(self.job_script_out_dir, exist_ok=True)
         # Use params['processed_data_dir'] for saving the parameters
-        params_file_path = os.path.join(self.params['processed_data_dir'], 'params.json')
+        params_file_path = os.path.join(self.params['processed_data_dir'], 'params.pkl')
         self.serialize_params(params_file_path)
         with open(job_file_path, 'w') as file:
             for idx in range(len(labelled_gaze_positions)):
@@ -56,11 +47,10 @@ class HPCFixationDetection:
         # Check the contents of the job file for debugging
         with open(job_file_path, 'r') as file:
             job_commands = file.readlines()
-            logging.info(f"Job commands in the job list: {len(job_commands)}")
+            self.logger.info(f"Job commands in the job list: {len(job_commands)}")
             for command in job_commands:
-                logging.debug(command.strip())  
+                self.logger.debug(command.strip())
         return job_file_path
-
 
     def submit_job_array(self, job_file_path):
         try:
@@ -69,26 +59,25 @@ class HPCFixationDetection:
                 f'module load dSQ; dsq --job-file {job_file_path} --batch-file {job_script_path} -o {self.job_script_out_dir} --status-dir {self.job_script_out_dir} --partition psych_day --cpus-per-task 8 --mem-per-cpu 4096 -t 6:00:00 --mail-type FAIL',
                 shell=True, check=True, executable='/bin/bash'
             )
-            logging.info("Successfully generated the dSQ job script")
+            self.logger.info("Successfully generated the dSQ job script")
             if not os.path.isfile(job_script_path):
-                logging.error(f"No job script found at {job_script_path}.")
+                self.logger.error(f"No job script found at {job_script_path}.")
                 return
-            logging.info(f"Using dSQ job script: {job_script_path}")
+            self.logger.info(f"Using dSQ job script: {job_script_path}")
             result = subprocess.run(
-                f'sbatch --job-name=fixation_jobs_dsq --output={self.job_script_out_dir}/fixation_session_%a.out --error={self.job_script_out_dir}/fixation_session_%a.err {job_script_path}',
+                f'sbatch --job-name=fix_dsq --output={self.job_script_out_dir}/fixation_session_%a.out --error={self.job_script_out_dir}/fixation_session_%a.err {job_script_path}',
                 shell=True, check=True, capture_output=True, text=True, executable='/bin/bash'
             )
-            logging.info(f"Successfully submitted jobs using sbatch for script {job_script_path}")
+            self.logger.info(f"Successfully submitted jobs using sbatch for script {job_script_path}")
             job_id = result.stdout.strip().split()[-1]
-            logging.info(f"Submitted job array with ID: {job_id}")
+            self.logger.info(f"Submitted job array with ID: {job_id}")
             self.track_job_progress(job_id)
         except subprocess.CalledProcessError as e:
-            logging.error(f"Error during job submission process: {e}")
+            self.logger.error(f"Error during job submission process: {e}")
             raise
 
-
     def track_job_progress(self, job_id):
-        logging.info(f"Tracking progress of job array with ID: {job_id}")
+        self.logger.info(f"Tracking progress of job array with ID: {job_id}")
         start_time = time.time()
         check_interval = 30  # seconds
         print_interval = 5 * 60  # 5 minutes
@@ -99,19 +88,19 @@ class HPCFixationDetection:
                 shell=True, capture_output=True, text=True, executable='/bin/bash'
             )
             if result.returncode != 0:
-                logging.error(f"Error checking job status for job ID {job_id}: {result.stderr.strip()}")
+                self.logger.error(f"Error checking job status for job ID {job_id}: {result.stderr.strip()}")
                 break
             job_statuses = result.stdout.strip().split()
             if not job_statuses:
-                logging.info(f"Job array {job_id} has completed.")
+                self.logger.info(f"Job array {job_id} has completed.")
                 break
             running_jobs = [status for status in ('PENDING', 'RUNNING', 'CONFIGURING') if status in job_statuses]
             current_time = time.time()
             if not running_jobs:
-                logging.info(f"Job array {job_id} has completed.")
+                self.logger.info(f"Job array {job_id} has completed.")
                 break
             elif current_time - last_print_time >= print_interval:
-                logging.info(f"Job array {job_id} is still running. Checking again in 30 seconds...")
+                self.logger.info(f"Job array {job_id} is still running. Checking again in 30 seconds...")
                 last_print_time = current_time
             time.sleep(check_interval)
 

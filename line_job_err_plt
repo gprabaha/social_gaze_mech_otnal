@@ -1,44 +1,2 @@
-2024-08-07 16:59:01,944 - data_manager - INFO - Recomputing variable(s): labelled_gaze_positions_m1, params
-Processing gaze position in parallel:   0%|          | 0/31 [00:00<?, ?index/s]Processing gaze position in parallel: 100%|██████████| 31/31 [00:00<00:00, 593714.26index/s]
-2024-08-07 17:24:43,061 - data_manager - INFO - M1 remapped gaze pos data acquired!
-2024-08-07 17:24:43,061 - data_manager - INFO - Gaze data split into: self.gaze_positions and self.gaze_position_labels!
-2024-08-07 17:24:43,063 - data_manager - INFO - Frame of attention and plotting added to gaze data
-2024-08-07 17:24:43,063 - data_manager - INFO - Recomputing variable(s): labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1
-Traceback (most recent call last):
-  File "analyze_gaze_signals.py", line 79, in <module>
-    main()
-  File "analyze_gaze_signals.py", line 75, in main
-    data_manager.run()
-  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/data_manager.py", line 184, in run
-    self.labelled_fixations_m1, self.labelled_saccades_m1, self.combined_behav_m1 = self.get_or_load_variable(
-  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/data_manager.py", line 88, in get_or_load_variable
-    result = compute_function(self.params)
-  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/data_manager.py", line 187, in <lambda>
-    lambda p: curate_data.extract_fixations_and_saccades_with_labels(input_data, p))
-  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/curate_data.py", line 153, in extract_fixations_and_saccades_with_labels
-    all_fix_df, all_saccades_df = fix_and_saccades.extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaze_positions, params)
-  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/fix_and_saccades.py", line 43, in extract_all_fixations_and_saccades_from_labelled_gaze_positions
-    job_file_path = hpc_fixation_detection.generate_fixation_job_file(labelled_gaze_positions)
-  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/hpc_fixation_detection.py", line 33, in generate_fixation_job_file
-    self.serialize_params(params_file_path)
-  File "/gpfs/milgram/pi/chang/pg496/repositories/social_gaze_mech_otnal/hpc_fixation_detection.py", line 25, in serialize_params
-    json.dump(self.params, f)
-  File "/gpfs/milgram/project/chang/pg496/conda_envs/gaze_processing/lib/python3.8/json/__init__.py", line 179, in dump
-    for chunk in iterable:
-  File "/gpfs/milgram/project/chang/pg496/conda_envs/gaze_processing/lib/python3.8/json/encoder.py", line 431, in _iterencode
-    yield from _iterencode_dict(o, _current_indent_level)
-  File "/gpfs/milgram/project/chang/pg496/conda_envs/gaze_processing/lib/python3.8/json/encoder.py", line 405, in _iterencode_dict
-    yield from chunks
-  File "/gpfs/milgram/project/chang/pg496/conda_envs/gaze_processing/lib/python3.8/json/encoder.py", line 325, in _iterencode_list
-    yield from chunks
-  File "/gpfs/milgram/project/chang/pg496/conda_envs/gaze_processing/lib/python3.8/json/encoder.py", line 405, in _iterencode_dict
-    yield from chunks
-  File "/gpfs/milgram/project/chang/pg496/conda_envs/gaze_processing/lib/python3.8/json/encoder.py", line 405, in _iterencode_dict
-    yield from chunks
-  File "/gpfs/milgram/project/chang/pg496/conda_envs/gaze_processing/lib/python3.8/json/encoder.py", line 405, in _iterencode_dict
-    yield from chunks
-  File "/gpfs/milgram/project/chang/pg496/conda_envs/gaze_processing/lib/python3.8/json/encoder.py", line 438, in _iterencode
-    o = _default(o)
-  File "/gpfs/milgram/project/chang/pg496/conda_envs/gaze_processing/lib/python3.8/json/encoder.py", line 179, in default
-    raise TypeError(f'Object of type {o.__class__.__name__} '
-TypeError: Object of type ndarray is not JSON serializable
+2024-08-08 10:39:26,141 - data_manager - INFO - Recomputing variable(s): labelled_gaze_positions_m1, params
+slurmstepd: error: *** JOB 27583459 ON r812u31n02 CANCELLED AT 2024-08-08T10:39:48 ***

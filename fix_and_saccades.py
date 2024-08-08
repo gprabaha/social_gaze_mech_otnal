@@ -25,16 +25,16 @@ from hpc_fixation_detection import HPCFixationDetection  # Import the new HPCFix
 import pdb
 
 
+import os
+import pickle
+import logging
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
+# Initialize the logger
+logger = logging.getLogger(__name__)
+
 def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaze_positions, params):
-    """
-    Extracts fixations and saccades from labelled gaze positions.
-    Parameters:
-    - labelled_gaze_positions (list): List of labelled gaze positions.
-    - params (dict): Dictionary of parameters.
-    Returns:
-    - all_fix_df (pd.DataFrame): DataFrame of all fixation time positions.
-    - all_saccades_df (pd.DataFrame): DataFrame of all saccades.
-    """
+    logger.info("Extracting all fixations and saccades from labelled gaze positions.")
     processed_data_dir = params['processed_data_dir']
     use_parallel = params.get('use_parallel', True)
     submit_separate_jobs = params.get('submit_separate_jobs_for_sessions', True)
@@ -50,10 +50,10 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
                     session_data = pickle.load(f)
                 results.append(session_data)
             except FileNotFoundError as e:
-                logging.error(e)
+                logger.error(f"File not found: {session_file}")
                 continue
         if not results:
-            logging.error("No results to concatenate.")
+            logger.error("No results to concatenate.")
             raise ValueError("No objects to concatenate")
         all_fix_df, all_info, all_saccades_df = zip(*results)
     else:
@@ -67,15 +67,7 @@ def extract_all_fixations_and_saccades_from_labelled_gaze_positions(labelled_gaz
 
 
 def process_detection_results(fix_detection_results, saccade_detection_results):
-    """
-    Processes the results from fixation and saccade detection.
-    Parameters:
-    - fix_detection_results (list): List of fixation detection results.
-    - saccade_detection_results (list): List of saccade detection results.
-    Returns:
-    - all_fix_timepos (pd.DataFrame): DataFrame of all fixation time positions.
-    - all_saccades (pd.DataFrame): DataFrame of all saccades.
-    """
+    logger.info("Processing detection results.")
     all_fix_timepos = pd.DataFrame()
     all_saccades = pd.DataFrame()
     for fix_df, saccade_df in zip(fix_detection_results, saccade_detection_results):
@@ -85,18 +77,9 @@ def process_detection_results(fix_detection_results, saccade_detection_results):
 
 
 def extract_fixations_and_saccades(sessions_data, use_session_parallelization_for_local_runs, num_cpus):
-    """
-    Extracts fixations and saccades from session data.
-    Parameters:
-    - sessions_data (list): List of session data tuples.
-    - use_parallel (bool): Flag to determine if parallel processing should be used.
-    - num_cpus (int): Number of CPUs to use for parallel processing.
-    Returns:
-    - fix_detection_results (list): List of fixation detection results.
-    - saccade_detection_results (list): List of saccade detection results.
-    """
+    logger.info("Extracting fixations and saccades.")
     if use_session_parallelization_for_local_runs:
-        print("\nExtracting fixations and saccades in parallel over sessions")
+        logger.info("Extracting fixations and saccades in parallel over sessions.")
         num_processes = min(num_cpus, len(sessions_data))
         with ProcessPoolExecutor(max_workers=num_processes) as executor:
             futures = {executor.submit(get_session_fixations_and_saccades, session_data, num_cpus): session_data for session_data in sessions_data}
@@ -105,7 +88,7 @@ def extract_fixations_and_saccades(sessions_data, use_session_parallelization_fo
                 result = future.result()
                 results.append(result)
     else:
-        print("\nExtracting fixations and saccades serially over sessions")
+        logger.info("Extracting fixations and saccades serially over sessions.")
         results = [get_session_fixations_and_saccades(session_data, num_cpus) for session_data in sessions_data]
     # Unpack the results into separate lists for fixations and saccades
     fix_detection_results = []
@@ -117,17 +100,8 @@ def extract_fixations_and_saccades(sessions_data, use_session_parallelization_fo
     return fix_detection_results, saccade_detection_results
 
 
-
 def get_session_fixations_and_saccades(session_data, num_cpus):
-    """
-    Extracts fixations and saccades for a session.
-    Parameters:
-    - session_data (tuple): Tuple containing session identifier, positions, and metadata.
-    Returns:
-    - fix_timepos_df (pd.DataFrame): DataFrame of fixation time positions.
-    - info (dict): Metadata information for the session.
-    - saccades_df (pd.DataFrame): DataFrame of saccades for the session.
-    """
+    logger.info("Extracting fixations and saccades for a session.")
     positions, info, params = session_data
     session_name = info['session_name']
     sampling_rate = info['sampling_rate']
@@ -142,21 +116,13 @@ def get_session_fixations_and_saccades(session_data, num_cpus):
     fix_stats = detector.detect_fixations(eyedat)
     fixations_df = make_fixations_df(fix_stats, info)
     saccades_df = make_saccades_df(fix_stats, info)
-    print(fixations_df.head())
-    print(saccades_df.head())
+    logger.debug(f"Fixations DataFrame head:\n{fixations_df.head()}")
+    logger.debug(f"Saccades DataFrame head:\n{saccades_df.head()}")
     return fixations_df, info, saccades_df
 
 
-
 def make_fixations_df(fix_stats, info):
-    """
-    Creates a DataFrame for fixations.
-    Parameters:
-    - fix_stats (dict): Dictionary containing fixation statistics.
-    - info (dict): Dictionary of session information.
-    Returns:
-    - fix_timepos_df (pd.DataFrame): DataFrame of fixation time positions.
-    """
+    logger.info("Creating DataFrame for fixations.")
     fixationindices = fix_stats['fixationindices']
     fixationtimes = fix_stats['fixationtimes']
     positions = fix_stats['XY'].T
@@ -202,14 +168,7 @@ def make_fixations_df(fix_stats, info):
 
 
 def make_saccades_df(saccade_stats, info):
-    """
-    Creates a DataFrame for saccades.
-    Parameters:
-    - saccade_stats (dict): Dictionary containing saccade statistics.
-    - info (dict): Dictionary of session information.
-    Returns:
-    - saccade_timepos_df (pd.DataFrame): DataFrame of saccade time positions.
-    """
+    logger.info("Creating DataFrame for saccades.")
     saccadeindices = saccade_stats['saccadeindices']
     saccadetimes = saccade_stats['saccadetimes']
     positions = saccade_stats['XY'].T
@@ -293,18 +252,10 @@ def determine_roi_of_coord(position, bbox_corners):
 
 
 def save_fixation_and_saccade_results(processed_data_dir, fix_timepos_df, saccades, params):
-    """
-    Saves fixation and saccade results to files.
-    Parameters:
-    - processed_data_dir (str): Directory to save processed data.
-    - all_fix_timepos (pd.DataFrame): DataFrame of fixation time positions.
-    - fix_detection_results (list): List of fixation detection results.
-    - saccade_detection_results (list): List of saccade detection results.
-    - params (dict): Dictionary of parameters.
-    """
+    logger.info("Saving fixation and saccade results.")
     output_dir = processed_data_dir
     fixations_file = os.path.join(output_dir, f"all_fixations_and_saccades.pkl")
-    logging.info("Saving: " + fixations_file)
+    logger.info("Saving: " + fixations_file)
     with open(fixations_file, 'wb') as f:
         pickle.dump((fix_timepos_df, saccades), f)
 

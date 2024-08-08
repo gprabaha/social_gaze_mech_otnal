@@ -163,9 +163,6 @@ class DataManager:
             lambda p: curate_data.extract_labelled_gaze_positions_m1(p))
         self.logger.info(f"M1 remapped gaze pos data acquired!")
 
-        ## get positions of M2 here
-        # pdb.set_trace()
-
         self.split_gaze_data()
         self.logger.info(f"Gaze data split into: self.gaze_positions and self.gaze_position_labels!")
         self.add_frame_of_attention_and_plotting_frame_to_gaze_labels()
@@ -180,8 +177,6 @@ class DataManager:
             input_data = self.toy_data
         else:
             input_data = self.labelled_gaze_positions_m1
-        
-        pdb.set_trace()
 
         self.labelled_fixations_m1, self.labelled_saccades_m1, self.combined_behav_m1 = self.get_or_load_variable(
             'labelled_fixations_m1, labelled_saccades_m1, combined_behav_m1',

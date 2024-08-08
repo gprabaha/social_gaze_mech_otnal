@@ -32,11 +32,11 @@ def main(session_index, params_file, num_cpus):
     ne.set_num_threads(num_cpus)
     logger.info(f"NumExpr set to use {num_cpus} threads")
     # Load parameters from the JSON file
-    with open(params_file, 'r') as f:
-        params = json.load(f)
+    with open(params_file, 'rb') as f:
+        params = pickle.load(f)
     logger.info(f"Starting fixation detection for session index: {session_index}")
     # Load labelled gaze positions
-    labelled_gaze_positions = load_data.load_labelled_gaze_positions(params)
+    labelled_gaze_positions, _ = load_data.load_labelled_gaze_positions(params)
     # Prepare session data for the specific index
     session_data = labelled_gaze_positions[session_index]
     session_data = (session_data[0], session_data[1], params)  # Prepare session data as needed by the function

@@ -163,7 +163,7 @@ def load_labelled_gaze_positions(params):
     flag_info = util.get_filename_flag_info(params)
     file_name = f'labelled_gaze_positions_m1{flag_info}.pkl'
     with open(os.path.join(processed_data_dir, file_name), 'rb') as f:
-        return pickle.load(f)
+        return pickle.load(f), params
 
 
 def load_toy_data(params):
