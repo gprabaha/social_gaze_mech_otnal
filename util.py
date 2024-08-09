@@ -231,7 +231,7 @@ def get_bl_and_tr_roi_coords_m1(m1_landmarks, params):
     face_bbox = construct_face_bounding_box(m1_landmarks, params)
     left_obj_bbox = construct_object_bounding_box(m1_landmarks, params, 'leftObject')
     right_obj_bbox = construct_object_bounding_box(m1_landmarks, params, 'rightObject')
-    m1_landmarks_dict = extract_landmarks(m1_landmarks)
+    m1_landmarks_dict = extract_landmarks(m1_landmarks, params)
     return {
         'eye_bbox': eye_bbox,
         'face_bbox': face_bbox,
@@ -241,7 +241,7 @@ def get_bl_and_tr_roi_coords_m1(m1_landmarks, params):
     }
 
 
-def extract_landmarks(landmarks_array):
+def extract_landmarks(landmarks_array, params):
     # Predefined list of expected labels
     expected_labels = ['topLeft', 'bottomLeft', 'topRight', 'bottomRight', 'eyeOnLeft', 'eyeOnRight', 'mouth', 'leftObject', 'rightObject']
     # Fetch the available keys from the dtype of the array
@@ -267,6 +267,11 @@ def extract_landmarks(landmarks_array):
                 landmark_dict[key] = landmarks_array[key][0][0][0]
             except IndexError:
                 landmark_dict[key] = []
+    pdb.set_trace()
+    landmark_dict = remap_source_coords(landmark_dict, params, 'inverted_to_standard_y_axis')
+    if params.get('map_roi_coord_to_eyelink_space', False):
+        landmark_dict = remap_source_coords(landmark_dict, params, 'to_eyelink_space')
+    pdb.set_trace()
     return landmark_dict
 
 

@@ -1,5 +1,40 @@
-Batch script generated. To submit your jobs, run:
- sbatch ./job_scripts/dsq-joblist_fixations.sh
 SLURM detected 1 CPUs
 multiprocessing detected 48 CPUs
 NumExpr set to use 48 threads
+
+Warning: No spikeTs or more than one spikeTs found in folder: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_060321.
+mat73 failed to load /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_073021/OTNAL_FV_073021_spikeTs.mat, falling back to scipy.io.loadmat. Error: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_073021/OTNAL_FV_073021_spikeTs.mat is not a MATLAB 7.3 file. Load with scipy.io.loadmat() instead.
+mat73 failed to load /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_120221/OTNAL_FV_120221_spikeTs.mat, falling back to scipy.io.loadmat. Error: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_120221/OTNAL_FV_120221_spikeTs.mat is not a MATLAB 7.3 file. Load with scipy.io.loadmat() instead.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_120221/OTNAL_FV_120221_spikeTs.mat. Marking all units as invalid.
+mat73 failed to load /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061721/OTNAL_FV_061721_spikeTs.mat, falling back to scipy.io.loadmat. Error: /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061721/OTNAL_FV_061721_spikeTs.mat is not a MATLAB 7.3 file. Load with scipy.io.loadmat() instead.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_121021/OTNAL_FV_121021_spikeTs.mat. Marking all units as invalid.Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_073021/OTNAL_FV_073021_spikeTs.mat. Marking all units as invalid.
+
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061521/OTNAL_FV_061521_spikeTs.mat. Marking all units as invalid.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061721/OTNAL_FV_061721_spikeTs.mat. Marking all units as invalid.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_120220/OTNAL_FV_120220_spikeTs.mat. Marking all units as invalid.
+'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062922/OTNAL_FV_062922_spikeTs.mat.
+'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070522/OTNAL_FV_070522_spikeTs.mat.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_030321/OTNAL_FV_030321_spikeTs.mat. Marking all units as invalid.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_112320/OTNAL_FV_112320_spikeTs.mat. Marking all units as invalid.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070121/OTNAL_FV_070121_spikeTs.mat. Marking all units as invalid.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062921/OTNAL_FV_062921_spikeTs.mat. Marking all units as invalid.
+'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062222/OTNAL_FV_062222_spikeTs.mat.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_121621/OTNAL_FV_121621_spikeTs.mat. Marking all units as invalid.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062421/OTNAL_FV_062421_spikeTs.mat. Marking all units as invalid.
+'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062722/OTNAL_FV_062722_spikeTs.mat.
+'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062322/OTNAL_FV_062322_spikeTs.mat.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_060221/OTNAL_FV_060221_spikeTs.mat. Marking all units as invalid.
+'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062822/OTNAL_FV_062822_spikeTs.mat.
+'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062422/OTNAL_FV_062422_spikeTs.mat.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_031521/OTNAL_FV_031521_spikeTs.mat. Marking all units as invalid.
+'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_063022/OTNAL_FV_063022_spikeTs.mat.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_030921/OTNAL_FV_030921_spikeTs.mat. Marking all units as invalid.
+'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070622/OTNAL_FV_070622_spikeTs.mat.
+'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070722/OTNAL_FV_070722_spikeTs.mat.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_061821/OTNAL_FV_061821_spikeTs.mat. Marking all units as invalid.
+'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070822/OTNAL_FV_070822_spikeTs.mat.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_062221/OTNAL_FV_062221_spikeTs.mat. Marking all units as invalid.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_032221/OTNAL_FV_032221_spikeTs.mat. Marking all units as invalid.
+Warning: No 'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_032421/OTNAL_FV_032421_spikeTs.mat. Marking all units as invalid.
+'valid' field found in /gpfs/milgram/project/chang/pg496/data_dir/otnal/data_source_7point3/OTNAL_FV_070122/OTNAL_FV_070122_spikeTs.mat.
+All labelled spiketimes saved to /gpfs/milgram/project/chang/pg496/data_dir/otnal/processed_data/labelled_spiketimes_remapped_gaze.h5

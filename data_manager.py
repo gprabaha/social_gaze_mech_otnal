@@ -171,8 +171,6 @@ class DataManager:
 
         plotter.plot_calib_coordinates_and_bboxes(self.gaze_position_labels_m1, self.params['root_data_dir'])
         
-        pdb.set_trace()
-        
         if self.params['use_toy_data']:
             self.logger.info(f"!! USING TOY DATA !!")
             self.toy_data = self.get_or_load_variable(
@@ -198,8 +196,6 @@ class DataManager:
             load_data.load_processed_spiketimes,
             lambda p: curate_data.extract_spiketimes_for_all_sessions(p)
         )
-        
-        # pdb.set_trace()
 
         if self.params['make_plots']:
             self.plot_all_behavior_in_all_sessions(use_parallel=True)
