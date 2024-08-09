@@ -267,11 +267,9 @@ def extract_landmarks(landmarks_array, params):
                 landmark_dict[key] = landmarks_array[key][0][0][0]
             except IndexError:
                 landmark_dict[key] = []
-    pdb.set_trace()
     landmark_dict = remap_source_coords(landmark_dict, params, 'inverted_to_standard_y_axis')
     if params.get('map_roi_coord_to_eyelink_space', False):
         landmark_dict = remap_source_coords(landmark_dict, params, 'to_eyelink_space')
-    pdb.set_trace()
     return landmark_dict
 
 

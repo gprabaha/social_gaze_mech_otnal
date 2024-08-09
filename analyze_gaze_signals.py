@@ -50,7 +50,7 @@ def main():
         'fixation_detection_method': 'cluster_fix',
         'remake_labelled_fixations_m1': False,
         'remake_labelled_saccades_m1': False,
-        'remake_combined_behav_m1': False,
+        'remake_combined_behav_m1': True,
         'remake_labelled_spiketimes': True,
         'remake_labelled_fixation_rasters': True,
         'make_plots': False,

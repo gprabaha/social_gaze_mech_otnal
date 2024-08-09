@@ -21,6 +21,7 @@ import util
 
 import pdb
 
+logger = logging.getLogger(__name__)
 
 def get_monkey_and_dose_data(session_path):
     """
@@ -179,6 +180,30 @@ def load_toy_data(params):
     return [toy_data]
 
 
+def load_m1_labelled_fixations_and_saccades(params):
+    """
+    Loads and returns the labelled fixation and saccade results for m1 from files.
+    Parameters:
+    - params (dict): Dictionary containing configuration parameters including 'processed_data_dir'.
+    Returns:
+    - labelled_fixations (pd.DataFrame): DataFrame of labelled fixation time positions.
+    - labelled_saccades (list): List of labelled saccade detection results.
+    """
+    processed_data_dir = params.get('processed_data_dir')
+    # File path
+    fixations_saccades_file = os.path.join(processed_data_dir, "all_fixations_and_saccades.pkl")
+    # Logging
+    logger.info("Loading fixations and saccades from: " + fixations_saccades_file) 
+    # Check if file exists
+    if not os.path.exists(fixations_saccades_file):
+        logger.error("File not found: " + fixations_saccades_file)
+        return None, None
+    # Load fixations and saccades
+    with open(fixations_saccades_file, 'rb') as f:
+        labelled_fixations, labelled_saccades = pickle.load(f)
+    return labelled_fixations, labelled_saccades
+
+
 def load_m1_labelled_fixations_saccades_and_combined(params):
     """
     Loads and returns the labelled fixation, saccade results, and combined gaze and behavioral data for m1 from files.
@@ -193,8 +218,6 @@ def load_m1_labelled_fixations_saccades_and_combined(params):
     # File paths
     fixations_saccades_file = os.path.join(processed_data_dir, "all_fixations_and_saccades.pkl")
     combined_gaze_behav_file = os.path.join(processed_data_dir, "combined_gaze_behav_m1.csv")
-    # Logging
-    logger = logging.getLogger(__name__)
     logger.info("Loading fixations and saccades from: " + fixations_saccades_file) 
     logger.info("Loading combined gaze and behavioral data from: " + combined_gaze_behav_file)
     # Check if files exist
